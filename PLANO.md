@@ -28,7 +28,7 @@ Aplicativo web instalável (PWA) para registrar treinos de academia, acompanhar 
 - **FR-10 — Fichas de treino**: CRUD de fichas com lista **ordenada** de exercícios; cada exercício da ficha tem **nº de séries**, **reps de cada série** (podem variar, ex.: 12-10-8) e **observação da professora**. É a ficha que você seleciona ao registrar o treino.
 - **FR-11 — Editar/excluir treino**: qualquer treino registrado pode ser aberto para edição ou exclusão.
 - **FR-12 — Aquecimento por exercício**: cada exercício no registro do treino tem sua própria linha de aquecimento, onde o aluno anota **reps, peso e RIR**.
-- **FR-13 — Exportar treino em texto**: gerar uma mensagem legível de um treino específico (data, ficha, aquecimento, séries com reps/carga/RIR/obs, cardio e observações) para **copiar** ou **compartilhar** com a professora.
+- **FR-13 — Exportar treino em texto**: gerar uma mensagem legível de um treino específico (data, ficha, **aquecimento dentro de cada exercício**, séries com reps/carga/RIR/obs, cardio e observações) para **copiar** ou **compartilhar** com a professora.
 
 ## 4. Regras de negócio
 - **Semana**: janela de 7 dias `[início, início + 6]` a partir da data marcada. Treinos são sempre atribuídos a uma semana **pela data**. Ao passar 7 dias, o app mostra um aviso "semana encerrada" com o resultado final da semana; o usuário confirma para avançar para a próxima janela. Treinos com data fora da janela atual **nunca se perdem** (ficam salvos por data). É possível redefinir o início a qualquer momento em Ajustes.
@@ -117,3 +117,4 @@ PLANO.md
 - **Revisão 13** (`dec-23116a57a6ed6e0c`): aba "Exercícios" renomeada para **"Biblioteca"**, com **filtro por grupo muscular**, busca e indicação de **em quais fichas** cada exercício é usado.
 - **Revisão 14**: item do menu "Registrar" renomeado para **"Treinar"**; cada treino pode ser **exportado como texto** legível (aquecimento, séries, cargas, RIR, observações, cardio) para copiar/compartilhar com a professora.
 - **Revisão 15**: exercícios escolhidos do catálogo passam a ser **salvos na Biblioteca**; **tratamento de erro visível** nas ações (sem falhas silenciosas); treino com apenas aquecimento também salva; importação sem download automático, com **"Desfazer importação"**.
+- **Revisão 16**: no texto exportado, o **aquecimento aparece dentro de cada exercício** (e exercícios só com aquecimento também são listados).

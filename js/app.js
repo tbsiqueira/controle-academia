@@ -1461,18 +1461,10 @@ function workoutAsText(workout) {
   if (sheetName) lines.push('Ficha: ' + sheetName);
   lines.push('');
 
-  const warmups = workout.warmups || [];
-  if (warmups.length) {
-    lines.push('Aquecimento');
-    warmups.forEach(function (w) {
-      const parts = [];
-      if (w.reps !== null && w.reps !== undefined) parts.push(w.reps + ' reps');
-      if (w.load !== null && w.load !== undefined) parts.push(w.load + ' kg');
-      if (w.rir !== null && w.rir !== undefined) parts.push('RIR ' + w.rir);
-      lines.push('- ' + w.exerciseName + (parts.length ? ': ' + parts.join(' · ') : ''));
-    });
-    lines.push('');
-  }
+  const warmupByName = {};
+  (workout.warmups || []).forEach(function (w) {
+    warmupByName[w.exerciseName || '(sem nome)'] = w;
+  });
 
   const groups = [];
   const index = {};
@@ -1486,8 +1478,26 @@ function workoutAsText(workout) {
     groups[index[key]].sets.push(s);
   });
 
+  // Exercises that only have a warm-up (no working sets) still show up.
+  (workout.warmups || []).forEach(function (w) {
+    const key = w.exerciseName || '(sem nome)';
+    if (Object.prototype.hasOwnProperty.call(index, key)) return;
+    index[key] = groups.length;
+    groups.push({ name: key, note: '', sets: [] });
+  });
+
   groups.forEach(function (g, i) {
     lines.push((i + 1) + '. ' + g.name + (g.note ? ' (obs.: ' + g.note + ')' : ''));
+
+    const warm = warmupByName[g.name];
+    if (warm) {
+      const warmParts = [];
+      if (warm.reps !== null && warm.reps !== undefined) warmParts.push(warm.reps + ' reps');
+      if (warm.load !== null && warm.load !== undefined) warmParts.push(warm.load + ' kg');
+      if (warm.rir !== null && warm.rir !== undefined) warmParts.push('RIR ' + warm.rir);
+      if (warmParts.length) lines.push('   Aquecimento: ' + warmParts.join(' · '));
+    }
+
     g.sets.slice().sort(function (a, b) { return toNum(a.number) - toNum(b.number); }).forEach(function (s) {
       const parts = [];
       parts.push((s.reps === null || s.reps === undefined) ? '—' : s.reps + ' reps');
@@ -1497,6 +1507,7 @@ function workoutAsText(workout) {
       if (s.note) line += ' (' + s.note + ')';
       lines.push(line);
     });
+
     lines.push('');
   });
 

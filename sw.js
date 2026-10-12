@@ -4,18 +4,18 @@
    Online = always the freshest files; offline = last cached version.
    No user data ever leaves the device. */
 
-const CACHE_NAME = 'meu-treino-v16';
+const CACHE_NAME = 'meu-treino-v17';
 
 const ASSETS = [
   './',
   './index.html',
   './reset.html',
-  './css/styles.css?v=16',
-  './vendor/bootstrap/bootstrap.min.css?v=16',
-  './vendor/bootstrap/bootstrap.bundle.min.js?v=16',
-  './vendor/bootstrap-icons/bootstrap-icons.min.css?v=16',
-  './js/db.js?v=16',
-  './js/app.js?v=16',
+  './css/styles.css?v=17',
+  './vendor/bootstrap/bootstrap.min.css?v=17',
+  './vendor/bootstrap/bootstrap.bundle.min.js?v=17',
+  './vendor/bootstrap-icons/bootstrap-icons.min.css?v=17',
+  './js/db.js?v=17',
+  './js/app.js?v=17',
   './manifest.webmanifest',
   './data/exercises.json',
   './icons/icon-192.png',
