@@ -1,0 +1,64 @@
+{
+  "app": "meu-treino",
+  "version": 1,
+  "exportedAt": "2026-08-31T10:00:00.000Z",
+  "data": {
+    "workouts": [
+      {
+        "id": "w1",
+        "date": "2026-08-30",
+        "typeId": "t1",
+        "typeName": "TREINO A - inferiores",
+        "cardioMinutes": 30,
+        "notes": "treino leve",
+        "sets": [
+          { "exerciseId": "e1", "exerciseName": "Elevação pélvica", "number": 1, "reps": 12, "load": 27, "rir": 2, "note": "" },
+          { "exerciseId": "e1", "exerciseName": "Elevação pélvica", "number": 2, "reps": 10, "load": 32, "rir": 1, "note": "caiu a força" }
+        ],
+        "createdAt": "2026-08-30T12:00:00.000Z",
+        "updatedAt": "2026-08-30T12:40:00.000Z"
+      },
+      {
+        "id": "w2",
+        "date": "2026-08-25",
+        "typeId": "t2",
+        "typeName": "TREINO B - superiores",
+        "cardioMinutes": 0,
+        "notes": "",
+        "sets": [
+          { "exerciseId": null, "exerciseName": "Puxada frente supinada", "number": 1, "reps": 10, "load": 45, "rir": 3, "note": "" }
+        ],
+        "createdAt": "2026-08-25T12:00:00.000Z",
+        "updatedAt": "2026-08-25T12:40:00.000Z"
+      }
+    ],
+    "exercises": [
+      {
+        "id": "e1",
+        "name": "Elevação pélvica",
+        "group": "Glúteos",
+        "defaultSets": 3,
+        "defaultReps": 10,
+        "defaultLoad": 20,
+        "defaultRir": 2,
+        "correction": "pausa de 1s no topo",
+        "active": true,
+        "createdAt": "2026-08-20T10:00:00.000Z",
+        "updatedAt": "2026-08-20T10:00:00.000Z"
+      }
+    ],
+    "workoutTypes": [
+      { "id": "t1", "name": "TREINO A - inferiores", "active": true },
+      { "id": "t2", "name": "TREINO B - superiores", "active": true }
+    ],
+    "settings": {
+      "id": "app",
+      "weekAnchor": "2026-08-24",
+      "weeklyWorkoutTarget": 4,
+      "weeklyCardioTarget": 90
+    },
+    "colinha": [
+      { "id": "c1", "title": "RIR", "content": "RIR 2 = ainda daria 2 repetições boas.", "order": 1 }
+    ]
+  }
+}

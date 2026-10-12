@@ -72,7 +72,10 @@ Stores:
 ```
 index.html
 css/styles.css
+js/core.js (lógica pura, coberta por testes)
 js/app.js + js/db.js
+tests/core.test.js + tests/fixtures/ (testes de unidade e de compatibilidade de dados)
+test.ps1 (roda os testes localmente)
 vendor/bootstrap/ (Bootstrap 5 local)
 vendor/bootstrap-icons/ (ícones locais)
 manifest.webmanifest
@@ -84,7 +87,8 @@ data/exercises.json (catálogo embutido de exercícios, pt-BR, CC0)
 README.md (como rodar, publicar no GitHub Pages, estrutura, versionamento)
 MANUAL.md (documentação de uso: exemplos, FAQ, problemas comuns, glossário)
 .gitattributes / .nojekyll (higiene do repositório e do GitHub Pages)
-.github/workflows/deploy.yml (deploy no Pages ao enviar uma tag v*)
+.github/workflows/deploy.yml (testes + verificação e deploy no Pages ao enviar uma tag v*)
+.github/workflows/tests.yml (testes unitários e verificações a cada push na main / PR)
 PLANO.md
 ```
 - Service worker: cache-first para o "shell" do app; **nenhum dado é enviado a servidor**.
@@ -130,6 +134,7 @@ PLANO.md
 - **Revisão 19**: textos explicativos curtos na tela **Fichas** (o que é uma ficha, o que é a Biblioteca) e dica dentro do editor de ficha.
 - **Revisão 20**: a **Biblioteca** passa a listar apenas os exercícios **criados pelo usuário** (os do catálogo não são mais copiados para lá nem aparecem na lista).
 - **Revisão 21**: padronização das barras de botões (ações na **mesma linha**, botões de ícone com largura fixa `.btn-icon`) em todas as telas.
+- **Revisão 26**: extração da lógica pura para `js/core.js` (datas, semana, agrupamento de séries, aquecimento, histórico, exportação de texto e `normalizeBackup`) com **testes de unidade em Node** (`tests/core.test.js`, fixtures de backups v1/v2) e **pipelines** de testes (`tests.yml` a cada push/PR) e de deploy por tag (que só publica se os testes passarem).
 - **Revisão 25**: fluxo de publicação seguro — apenas a branch `main` + **tags** de versão; o Pages é publicado por **GitHub Actions** quando uma tag `v*` é enviada (com `check.ps1` como portão antes do deploy).
 - **Revisão 24**: `MANUAL.md` — documentação para usuários (primeiros passos, exemplo de ficha e de treino, evolução, metas, backup, FAQ, problemas comuns e glossário).
 - **Revisão 23**: revisão geral de boas práticas — `README.md` completo (com passo a passo do GitHub Pages), `check.ps1` (verificações estáticas), `.gitattributes`, `.nojekyll`, `Content-Security-Policy` e `aria-label` nos botões de ícone.

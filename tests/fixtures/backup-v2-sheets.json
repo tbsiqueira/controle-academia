@@ -1,0 +1,43 @@
+{
+  "app": "meu-treino",
+  "version": 2,
+  "exportedAt": "2026-09-15T10:00:00.000Z",
+  "data": {
+    "workouts": [
+      {
+        "id": "w3",
+        "date": "2026-09-14",
+        "sheetId": "s1",
+        "sheetName": "TREINO A - inferiores",
+        "cardioMinutes": 20,
+        "notes": "",
+        "sets": [
+          { "exerciseId": null, "exerciseName": "Elevação pélvica", "number": 1, "reps": 12, "load": 30, "rir": 2, "note": "" }
+        ],
+        "createdAt": "2026-09-14T12:00:00.000Z",
+        "updatedAt": "2026-09-14T12:40:00.000Z"
+      }
+    ],
+    "sheets": [
+      {
+        "id": "s1",
+        "name": "TREINO A - inferiores",
+        "active": true,
+        "exercises": [
+          { "exerciseId": null, "name": "Elevação pélvica", "sets": 3, "reps": 12, "load": 20, "rir": 2, "note": "pausa de 1s" },
+          { "exerciseId": null, "name": "Leg press 45", "sets": 3, "reps": [12, 10, 8], "note": "" }
+        ],
+        "createdAt": "2026-09-01T10:00:00.000Z",
+        "updatedAt": "2026-09-01T10:00:00.000Z"
+      }
+    ],
+    "exercises": [],
+    "settings": {
+      "id": "app",
+      "weekAnchor": "2026-09-08",
+      "weeklyWorkoutTarget": 3,
+      "weeklyCardioTarget": 120
+    },
+    "colinha": []
+  }
+}

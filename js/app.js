@@ -28,78 +28,18 @@ const state = {
   calendarCursor: null
 };
 
-/* ---------- helpers ---------- */
-
-function pad2(n) {
-  return String(n).padStart(2, '0');
-}
-
-function fmtDate(d) {
-  return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate());
-}
-
-function parseDate(s) {
-  const p = String(s).split('-').map(Number);
-  return new Date(p[0], p[1] - 1, p[2]);
-}
-
-function todayISO() {
-  return fmtDate(new Date());
-}
-
-function addDaysISO(iso, n) {
-  const d = parseDate(iso);
-  d.setDate(d.getDate() + n);
-  return fmtDate(d);
-}
-
-function fmtBR(iso) {
-  if (!iso) return '—';
-  const p = String(iso).split('-');
-  return p[2] + '/' + p[1] + '/' + p[0];
-}
+/* ---------- helpers ----------
+   As funções puras (datas, esc/toNum, semana, agrupamento, exportação) vivem em js/core.js,
+   carregado antes deste arquivo. Aqui ficam só as que dependem do estado do app. */
 
 function uid() {
   if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
   return 'id-' + Date.now() + '-' + Math.random().toString(16).slice(2);
 }
 
-function normalizeText(value) {
-  return String(value === null || value === undefined ? '' : value)
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-    .trim();
+function weekRange() {
+  return weekWindow(state.settings.weekAnchor || todayISO());
 }
-
-function esc(value) {
-  if (value === null || value === undefined) return '';
-  return String(value).replace(/[&<>"']/g, function (ch) {
-    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch];
-  });
-}
-
-function toNum(value) {
-  const n = parseFloat(value);
-  return isNaN(n) ? 0 : n;
-}
-
-function toNumOrNull(value) {
-  if (value === '' || value === null || value === undefined) return null;
-  const n = parseFloat(value);
-  return isNaN(n) ? null : n;
-}
-
-function defaultSettings() {
-  return {
-    id: APP_SETTINGS_ID,
-    weekAnchor: todayISO(),
-    weeklyWorkoutTarget: 3,
-    weeklyCardioTarget: 120,
-    tonnageVisible: false
-  };
-}
-
 /* ---------- data loading ---------- */
 
 async function loadState() {
@@ -156,17 +96,6 @@ function navigate() {
 
 /* ---------- week logic ---------- */
 
-function weekRange() {
-  const anchor = state.settings.weekAnchor || todayISO();
-  return { anchor: anchor, end: addDaysISO(anchor, 6) };
-}
-
-function isValidWorkout(w) {
-  const hasSet = (w.sets || []).some(function (s) {
-    return toNum(s.reps) > 0 || toNum(s.load) > 0;
-  });
-  return hasSet || toNum(w.cardioMinutes) > 0;
-}
 
 function weekStats() {
   const range = weekRange();
@@ -232,10 +161,6 @@ function renderWeek() {
     '</div></div>';
 }
 
-function warmupSummary(warmups) {
-  if (!warmups || !warmups.length) return '';
-  return warmups.length === 1 ? '1 aquecimento' : warmups.length + ' aquecimentos';
-}
 
 function renderRecent() {
   const el = document.getElementById('recentWorkouts');
@@ -277,32 +202,8 @@ function renderRecent() {
   });
 }
 
-function warmupHasData(warm) {
-  if (!warm) return false;
-  return [warm.reps, warm.load, warm.rir].some(function (v) {
-    return v !== null && v !== undefined && v !== '';
-  });
-}
 
-function warmupLine(warm) {
-  if (!warm) return '';
-  const parts = [];
-  if (warm.reps !== null && warm.reps !== undefined && warm.reps !== '') parts.push(warm.reps + ' reps');
-  if (warm.load !== null && warm.load !== undefined && warm.load !== '') parts.push(warm.load + ' kg');
-  if (warm.rir !== null && warm.rir !== undefined && warm.rir !== '') parts.push('RIR ' + warm.rir);
-  return parts.join(' · ');
-}
 
-function setsSummaryLines(sets) {
-  return sets.slice().sort(function (a, b) { return toNum(a.number) - toNum(b.number); }).map(function (s) {
-    const parts = [];
-    parts.push((s.reps === null || s.reps === undefined) ? '—' : s.reps + ' reps');
-    if (s.load !== null && s.load !== undefined) parts.push(s.load + ' kg');
-    if (s.rir !== null && s.rir !== undefined) parts.push('RIR ' + s.rir);
-    return '<div class="small mt-1">Série ' + (s.number || '?') + ': ' + esc(parts.join(' · ')) +
-      (s.note ? ' <span class="text-muted">(' + esc(s.note) + ')</span>' : '') + '</div>';
-  }).join('');
-}
 
 /* ---------- read-only workout detail ---------- */
 
@@ -357,30 +258,14 @@ function renderWorkoutDetail() {
 
 /* ---------- exercise history ---------- */
 
-function sessionsForExercise(name) {
-  return state.workouts.filter(function (w) {
-    return (w.sets || []).some(function (s) { return s.exerciseName === name; }) ||
-      (w.warmups || []).some(function (x) { return x.exerciseName === name; });
-  }).sort(function (a, b) { return a.date < b.date ? 1 : -1; });
-}
 
-function bestSetForExercise(workout, name) {
-  let best = null;
-  (workout.sets || []).forEach(function (s) {
-    if (s.exerciseName !== name) return;
-    const load = toNum(s.load);
-    const reps = toNum(s.reps);
-    if (!best || load > best.load || (load === best.load && reps > best.reps)) best = { load: load, reps: reps };
-  });
-  return best;
-}
 
 function renderExerciseHistory() {
   const name = state.viewingExerciseName || '';
   document.getElementById('exerciseHistoryTitle').innerHTML = '<i class="bi bi-graph-up text-primary"></i> ' + esc(name);
 
   const el = document.getElementById('exerciseHistory');
-  const sessions = sessionsForExercise(name);
+  const sessions = sessionsForExercise(state.workouts, name);
 
   if (!sessions.length) {
     el.innerHTML = '<p class="text-muted">Nenhum registro deste exercício ainda.</p>';
@@ -479,7 +364,7 @@ function loadSheetIntoForm(sheet) {
     const repsArray = Array.isArray(rawReps) ? rawReps : [];
     const fallbackRep = Array.isArray(rawReps) ? '' : ((rawReps === undefined || rawReps === null) ? '' : rawReps);
     const setCount = Math.max(1, parseInt(item.sets, 10) || repsArray.length || 3);
-    const lastLoads = lastLoadsByName(item.name);
+    const lastLoads = lastLoadsForExercise(state.workouts, item.name);
     const sets = [];
 
     for (let i = 1; i <= setCount; i++) {
@@ -498,7 +383,7 @@ function loadSheetIntoForm(sheet) {
       exerciseId: item.exerciseId || null,
       exerciseName: item.name,
       note: item.note || '',
-      warmup: previousWarmupFields(item.name),
+      warmup: previousWarmupFields(state.workouts, item.name),
       sets: sets
     });
   });
@@ -520,35 +405,6 @@ function onSheetChange() {
   loadSheetIntoForm(sheet);
 }
 
-function groupSets(flatSets, warmups) {
-  const groups = [];
-  const index = {};
-  const warmupByName = {};
-
-  (warmups || []).forEach(function (w) {
-    warmupByName[w.exerciseName || '(sem nome)'] = w;
-  });
-
-  (flatSets || []).forEach(function (s) {
-    const key = s.exerciseName || '(sem nome)';
-    if (!Object.prototype.hasOwnProperty.call(index, key)) {
-      index[key] = groups.length;
-      const saved = warmupByName[key];
-      groups.push({
-        exerciseId: s.exerciseId || null,
-        exerciseName: key,
-        note: s.exerciseNote || '',
-        warmup: saved
-          ? { reps: saved.reps, load: saved.load, rir: saved.rir }
-          : { reps: '', load: '', rir: '' },
-        sets: []
-      });
-    }
-    groups[index[key]].sets.push({ number: s.number, reps: s.reps, load: s.load, rir: s.rir, note: s.note || '' });
-  });
-
-  return groups;
-}
 
 function renderWorkoutForm() {
   const editing = state.editingWorkoutId
@@ -639,46 +495,12 @@ function removeFormExercise(exIdx) {
   renderFormSets();
 }
 
-function lastLoadsByName(name) {
-  const sorted = state.workouts
-    .filter(function (w) {
-      return (w.sets || []).some(function (s) { return s.exerciseName === name; });
-    })
-    .sort(function (a, b) { return a.date < b.date ? 1 : -1; });
 
-  if (!sorted.length) return {};
-  const last = sorted[0];
-  const map = {};
-  last.sets.forEach(function (s) {
-    if (s.exerciseName === name && toNum(s.load) > 0) map[s.number] = s.load;
-  });
-  return map;
-}
 
-function lastWarmupByName(name) {
-  const sorted = state.workouts
-    .filter(function (w) {
-      return (w.warmups || []).some(function (x) { return x.exerciseName === name; });
-    })
-    .sort(function (a, b) { return a.date < b.date ? 1 : -1; });
-
-  if (!sorted.length) return null;
-  const last = sorted[0];
-  return last.warmups.find(function (x) { return x.exerciseName === name; }) || null;
-}
-
-function previousWarmupFields(name) {
-  const last = lastWarmupByName(name);
-  return {
-    reps: (last && last.reps !== null && last.reps !== undefined) ? last.reps : '',
-    load: (last && last.load !== null && last.load !== undefined) ? last.load : '',
-    rir: ''
-  };
-}
 
 function addExerciseToForm(opts) {
   const name = opts.exerciseName || 'Exercício';
-  const lastLoads = lastLoadsByName(name);
+  const lastLoads = lastLoadsForExercise(state.workouts, name);
   const setCount = Math.max(1, parseInt(opts.sets, 10) || 3);
   const sets = [];
 
@@ -691,7 +513,7 @@ function addExerciseToForm(opts) {
     exerciseId: opts.exerciseId || null,
     exerciseName: name,
     note: opts.note || '',
-    warmup: previousWarmupFields(name),
+    warmup: previousWarmupFields(state.workouts, name),
     sets: sets
   });
   renderFormSets();
@@ -1621,70 +1443,6 @@ async function eraseAllData() {
 }
 /* ---------- share a single workout as human-readable text ---------- */
 
-function workoutAsText(workout) {
-  const lines = [];
-  lines.push('MEU TREINO — ' + fmtBR(workout.date));
-
-  const sheetName = workout.sheetName || workout.typeName;
-  if (sheetName) lines.push('Ficha: ' + sheetName);
-  lines.push('');
-
-  const warmupByName = {};
-  (workout.warmups || []).forEach(function (w) {
-    warmupByName[w.exerciseName || '(sem nome)'] = w;
-  });
-
-  const groups = [];
-  const index = {};
-  (workout.sets || []).forEach(function (s) {
-    const key = s.exerciseName || '(sem nome)';
-    if (!Object.prototype.hasOwnProperty.call(index, key)) {
-      index[key] = groups.length;
-      groups.push({ name: key, note: s.exerciseNote || '', sets: [] });
-    }
-    if (!groups[index[key]].note && s.exerciseNote) groups[index[key]].note = s.exerciseNote;
-    groups[index[key]].sets.push(s);
-  });
-
-  // Exercises that only have a warm-up (no working sets) still show up.
-  (workout.warmups || []).forEach(function (w) {
-    const key = w.exerciseName || '(sem nome)';
-    if (Object.prototype.hasOwnProperty.call(index, key)) return;
-    index[key] = groups.length;
-    groups.push({ name: key, note: '', sets: [] });
-  });
-
-  groups.forEach(function (g, i) {
-    lines.push((i + 1) + '. ' + g.name + (g.note ? ' (obs.: ' + g.note + ')' : ''));
-
-    const warm = warmupByName[g.name];
-    if (warm) {
-      const warmParts = [];
-      if (warm.reps !== null && warm.reps !== undefined) warmParts.push(warm.reps + ' reps');
-      if (warm.load !== null && warm.load !== undefined) warmParts.push(warm.load + ' kg');
-      if (warm.rir !== null && warm.rir !== undefined) warmParts.push('RIR ' + warm.rir);
-      if (warmParts.length) lines.push('   Aquecimento: ' + warmParts.join(' · '));
-    }
-
-    g.sets.slice().sort(function (a, b) { return toNum(a.number) - toNum(b.number); }).forEach(function (s) {
-      const parts = [];
-      parts.push((s.reps === null || s.reps === undefined) ? '—' : s.reps + ' reps');
-      if (s.load !== null && s.load !== undefined) parts.push(s.load + ' kg');
-      if (s.rir !== null && s.rir !== undefined) parts.push('RIR ' + s.rir);
-      let line = '   Série ' + (s.number || '?') + ': ' + parts.join(' · ');
-      if (s.note) line += ' (' + s.note + ')';
-      lines.push(line);
-    });
-
-    lines.push('');
-  });
-
-  const cardio = toNum(workout.cardioMinutes);
-  if (cardio > 0) lines.push('Cardio: ' + cardio + ' min');
-  if (workout.notes) lines.push('Observações: ' + workout.notes);
-
-  return lines.join('\n').trim();
-}
 
 function exportWorkoutText(id) {
   const workout = id ? state.workouts.find(function (w) { return w.id === id; }) : null;
@@ -1804,6 +1562,9 @@ async function importData(file) {
 }
 
 async function restoreAll(data) {
+  // normalizeBackup converte backups antigos (v1) para o formato atual sem perder dados.
+  const normalized = normalizeBackup(data);
+
   await dbClear('workouts');
   await dbClear('exercises');
   await dbClear('sheets');
@@ -1815,26 +1576,11 @@ async function restoreAll(data) {
   const stores = {};
   STORES.forEach(function (name) { stores[name] = tx.objectStore(name); });
 
-  (data.workouts || []).forEach(function (v) { if (v && v.id) stores.workouts.put(v); });
-  (data.exercises || []).forEach(function (v) { if (v && v.id) stores.exercises.put(v); });
-
-  const sheets = data.sheets || (data.workoutTypes || []).map(function (t) {
-    return {
-      id: t.id,
-      name: t.name,
-      active: t.active !== false,
-      exercises: [],
-      createdAt: t.createdAt || new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
-  });
-  sheets.forEach(function (v) { if (v && v.id) stores.sheets.put(v); });
-
-  const settings = data.settings || defaultSettings();
-  settings.id = APP_SETTINGS_ID;
-  stores.settings.put(settings);
-
-  (data.colinha || []).forEach(function (v) { if (v && v.id) stores.colinha.put(v); });
+  normalized.workouts.forEach(function (v) { stores.workouts.put(v); });
+  normalized.exercises.forEach(function (v) { stores.exercises.put(v); });
+  normalized.sheets.forEach(function (v) { stores.sheets.put(v); });
+  normalized.colinha.forEach(function (v) { stores.colinha.put(v); });
+  stores.settings.put(Object.assign({}, normalized.settings, { id: APP_SETTINGS_ID }));
 
   await new Promise(function (resolve, reject) {
     tx.oncomplete = resolve;

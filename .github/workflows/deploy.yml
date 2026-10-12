@@ -21,13 +21,21 @@ concurrency:
 
 jobs:
   verificar:
-    name: Verificações estáticas
+    name: Testes e verificações
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Rodar check.ps1
+      - name: Configurar Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Testes unitários
+        run: node --test tests/
+
+      - name: Verificações estáticas
         shell: pwsh
         run: ./check.ps1
 

@@ -1,0 +1,43 @@
+name: Testes
+
+# Roda os testes de unidade e as verificações estáticas a cada push na main e em pull requests.
+# (O deploy publica somente em tags — veja deploy.yml)
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  unit:
+    name: Testes unitários
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configurar Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Rodar testes (node --test)
+        run: node --test tests/
+
+      - name: Cobertura de js/core.js (informativa)
+        run: node --test --experimental-test-coverage tests/ || true
+
+  estatico:
+    name: Verificações estáticas
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Rodar check.ps1
+        shell: pwsh
+        run: ./check.ps1

@@ -95,6 +95,28 @@ if ($htmlVersion -and $htmlVersion -eq $swVersion -and $queryVersions.Count -eq 
   Bad "versao inconsistente: footer=v$htmlVersion, sw=v$swVersion, ?v=($($queryVersions -join ','))"
 }
 
+# 8) núcleo de lógica + testes
+if ($js -match "js/core\.js" -and $html -match "js/core\.js\?v=") {
+  Ok "js/core.js ligado no index.html"
+} else {
+  Bad "js/core.js nao esta referenciado no index.html"
+}
+if ($swAssets -contains "js/core.js?v=$htmlVersion") {
+  Ok "js/core.js no cache do service worker"
+} else {
+  Bad "js/core.js?v=$htmlVersion ausente da lista ASSETS do service worker"
+}
+if (Test-Path (Join-Path $root 'tests/core.test.js')) {
+  $testSource = Read-Text 'tests/core.test.js'
+  if ($testSource -match "require\('\.\./js/core\.js'\)") {
+    Ok "testes cobrindo js/core.js"
+  } else {
+    Bad "tests/core.test.js nao importa js/core.js"
+  }
+} else {
+  Bad "tests/core.test.js nao encontrado"
+}
+
 Write-Host ""
 if ($script:fail -eq 0) {
   Write-Host "Tudo certo." -ForegroundColor Green

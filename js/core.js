@@ -1,0 +1,452 @@
+'use strict';
+
+/* Meu Treino — lógica pura, compartilhada entre o app e os testes.
+   Nada aqui acessa o DOM nem o estado global: são funções puras.
+   No navegador os nomes viram globais (usados pelo app.js); no Node são exportados
+   para os testes (tests/core.test.js). */
+
+(function (root, factory) {
+  const api = factory();
+  if (typeof module === 'object' && module.exports) {
+    module.exports = api;      // Node (testes)
+  } else {
+    Object.assign(root, api);  // Navegador
+  }
+})(typeof self !== 'undefined' ? self : this, function () {
+
+  /* ---------- datas ---------- */
+
+  function pad2(n) {
+    return String(n).padStart(2, '0');
+  }
+
+  function fmtDate(d) {
+    return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate());
+  }
+
+  function parseDate(s) {
+    const p = String(s).split('-').map(Number);
+    return new Date(p[0], p[1] - 1, p[2]);
+  }
+
+  function todayISO() {
+    return fmtDate(new Date());
+  }
+
+  function addDaysISO(iso, n) {
+    const d = parseDate(iso);
+    d.setDate(d.getDate() + n);
+    return fmtDate(d);
+  }
+
+  function fmtBR(iso) {
+    if (!iso) return '—';
+    const p = String(iso).split('-');
+    return p[2] + '/' + p[1] + '/' + p[0];
+  }
+
+  /* ---------- texto e números ---------- */
+
+  function esc(value) {
+    if (value === null || value === undefined) return '';
+    return String(value).replace(/[&<>"']/g, function (ch) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch];
+    });
+  }
+
+  function toNum(value) {
+    const n = parseFloat(value);
+    return isNaN(n) ? 0 : n;
+  }
+
+  function toNumOrNull(value) {
+    if (value === '' || value === null || value === undefined) return null;
+    const n = parseFloat(value);
+    return isNaN(n) ? null : n;
+  }
+
+  // Busca sem acentos (ex.: "puxada maquina" encontra "Puxada máquina").
+  function normalizeText(value) {
+    return String(value === null || value === undefined ? '' : value)
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .trim();
+  }
+
+  /* ---------- configurações e semana ---------- */
+
+  function defaultSettings() {
+    return {
+      id: 'app',
+      weekAnchor: todayISO(),
+      weeklyWorkoutTarget: 3,
+      weeklyCardioTarget: 120,
+      tonnageVisible: false
+    };
+  }
+
+  // Janela de 7 dias a partir da data marcada (inclusive).
+  function weekWindow(anchorISO) {
+    const anchor = anchorISO || todayISO();
+    return { anchor: anchor, end: addDaysISO(anchor, 6) };
+  }
+
+  function isValidWorkout(w) {
+    const hasSet = (w.sets || []).some(function (s) {
+      return toNum(s.reps) > 0 || toNum(s.load) > 0;
+    });
+    return hasSet || toNum(w.cardioMinutes) > 0;
+  }
+
+  /* ---------- aquecimento ---------- */
+
+  function warmupHasData(warm) {
+    if (!warm) return false;
+    return [warm.reps, warm.load, warm.rir].some(function (v) {
+      return v !== null && v !== undefined && v !== '';
+    });
+  }
+
+  function warmupLine(warm) {
+    if (!warm) return '';
+    const parts = [];
+    if (warm.reps !== null && warm.reps !== undefined && warm.reps !== '') parts.push(warm.reps + ' reps');
+    if (warm.load !== null && warm.load !== undefined && warm.load !== '') parts.push(warm.load + ' kg');
+    if (warm.rir !== null && warm.rir !== undefined && warm.rir !== '') parts.push('RIR ' + warm.rir);
+    return parts.join(' · ');
+  }
+
+  function warmupSummary(warmups) {
+    if (!warmups || !warmups.length) return '';
+    return warmups.length === 1 ? '1 aquecimento' : warmups.length + ' aquecimentos';
+  }
+
+  /* ---------- séries ---------- */
+
+  function setLine(s) {
+    const parts = [];
+    parts.push((s.reps === null || s.reps === undefined) ? '—' : s.reps + ' reps');
+    if (s.load !== null && s.load !== undefined) parts.push(s.load + ' kg');
+    if (s.rir !== null && s.rir !== undefined) parts.push('RIR ' + s.rir);
+    return parts.join(' · ');
+  }
+
+  function setsSummaryLines(sets) {
+    return sets.slice().sort(function (a, b) { return toNum(a.number) - toNum(b.number); }).map(function (s) {
+      return '<div class="small mt-1">Série ' + (s.number || '?') + ': ' + esc(setLine(s)) +
+        (s.note ? ' <span class="text-muted">(' + esc(s.note) + ')</span>' : '') + '</div>';
+    }).join('');
+  }
+
+  // Agrupa as séries planas do treino por exercício (na ordem em que aparecem),
+  // juntando a observação do exercício e o aquecimento salvo.
+  function groupSets(flatSets, warmups) {
+    const groups = [];
+    const index = {};
+    const warmupByName = {};
+
+    (warmups || []).forEach(function (w) {
+      warmupByName[w.exerciseName || '(sem nome)'] = w;
+    });
+
+    (flatSets || []).forEach(function (s) {
+      const key = s.exerciseName || '(sem nome)';
+      if (!Object.prototype.hasOwnProperty.call(index, key)) {
+        index[key] = groups.length;
+        const saved = warmupByName[key];
+        groups.push({
+          exerciseId: s.exerciseId || null,
+          exerciseName: key,
+          note: s.exerciseNote || '',
+          warmup: saved
+            ? { reps: saved.reps, load: saved.load, rir: saved.rir }
+            : { reps: '', load: '', rir: '' },
+          sets: []
+        });
+      }
+      const group = groups[index[key]];
+      if (!group.note && s.exerciseNote) group.note = s.exerciseNote;
+      group.sets.push({ number: s.number, reps: s.reps, load: s.load, rir: s.rir, note: s.note || '' });
+    });
+
+    return groups;
+  }
+
+  /* ---------- histórico por exercício ---------- */
+
+  function lastLoadsForExercise(workouts, name) {
+    const sorted = (workouts || []).filter(function (w) {
+      return (w.sets || []).some(function (s) { return s.exerciseName === name; });
+    }).sort(function (a, b) { return a.date < b.date ? 1 : -1; });
+
+    if (!sorted.length) return {};
+    const last = sorted[0];
+    const map = {};
+    last.sets.forEach(function (s) {
+      if (s.exerciseName === name && toNum(s.load) > 0) map[s.number] = s.load;
+    });
+    return map;
+  }
+
+  function lastWarmupForExercise(workouts, name) {
+    const sorted = (workouts || []).filter(function (w) {
+      return (w.warmups || []).some(function (x) { return x.exerciseName === name; });
+    }).sort(function (a, b) { return a.date < b.date ? 1 : -1; });
+
+    if (!sorted.length) return null;
+    const last = sorted[0];
+    return (last.warmups || []).find(function (x) { return x.exerciseName === name; }) || null;
+  }
+
+  function previousWarmupFields(workouts, name) {
+    const last = lastWarmupForExercise(workouts, name);
+    return {
+      reps: (last && last.reps !== null && last.reps !== undefined) ? last.reps : '',
+      load: (last && last.load !== null && last.load !== undefined) ? last.load : '',
+      rir: ''
+    };
+  }
+
+  function sessionsForExercise(workouts, name) {
+    return (workouts || []).filter(function (w) {
+      return (w.sets || []).some(function (s) { return s.exerciseName === name; }) ||
+        (w.warmups || []).some(function (x) { return x.exerciseName === name; });
+    }).sort(function (a, b) { return a.date < b.date ? 1 : -1; });
+  }
+
+  function bestSetForExercise(workout, name) {
+    let best = null;
+    (workout.sets || []).forEach(function (s) {
+      if (s.exerciseName !== name) return;
+      const load = toNum(s.load);
+      const reps = toNum(s.reps);
+      if (!best || load > best.load || (load === best.load && reps > best.reps)) {
+        best = { load: load, reps: reps };
+      }
+    });
+    return best;
+  }
+
+  /* ---------- exportar treino como texto ---------- */
+
+  function workoutAsText(workout) {
+    const lines = [];
+    lines.push('MEU TREINO — ' + fmtBR(workout.date));
+
+    const sheetName = workout.sheetName || workout.typeName;
+    if (sheetName) lines.push('Ficha: ' + sheetName);
+    lines.push('');
+
+    const warmupByName = {};
+    (workout.warmups || []).forEach(function (w) {
+      warmupByName[w.exerciseName || '(sem nome)'] = w;
+    });
+
+    const groups = [];
+    const index = {};
+    (workout.sets || []).forEach(function (s) {
+      const key = s.exerciseName || '(sem nome)';
+      if (!Object.prototype.hasOwnProperty.call(index, key)) {
+        index[key] = groups.length;
+        groups.push({ name: key, note: s.exerciseNote || '', sets: [] });
+      }
+      if (!groups[index[key]].note && s.exerciseNote) groups[index[key]].note = s.exerciseNote;
+      groups[index[key]].sets.push(s);
+    });
+
+    // Exercícios só com aquecimento também aparecem.
+    (workout.warmups || []).forEach(function (w) {
+      const key = w.exerciseName || '(sem nome)';
+      if (Object.prototype.hasOwnProperty.call(index, key)) return;
+      index[key] = groups.length;
+      groups.push({ name: key, note: '', sets: [] });
+    });
+
+    groups.forEach(function (g, i) {
+      lines.push((i + 1) + '. ' + g.name + (g.note ? ' (obs.: ' + g.note + ')' : ''));
+
+      const warm = warmupByName[g.name];
+      if (warm) {
+        const warmParts = [];
+        if (warm.reps !== null && warm.reps !== undefined) warmParts.push(warm.reps + ' reps');
+        if (warm.load !== null && warm.load !== undefined) warmParts.push(warm.load + ' kg');
+        if (warm.rir !== null && warm.rir !== undefined) warmParts.push('RIR ' + warm.rir);
+        if (warmParts.length) lines.push('   Aquecimento: ' + warmParts.join(' · '));
+      }
+
+      g.sets.slice().sort(function (a, b) { return toNum(a.number) - toNum(b.number); }).forEach(function (s) {
+        let line = '   Série ' + (s.number || '?') + ': ' + setLine(s);
+        if (s.note) line += ' (' + s.note + ')';
+        lines.push(line);
+      });
+
+      lines.push('');
+    });
+
+    const cardio = toNum(workout.cardioMinutes);
+    if (cardio > 0) lines.push('Cardio: ' + cardio + ' min');
+    if (workout.notes) lines.push('Observações: ' + workout.notes);
+
+    return lines.join('\n').trim();
+  }
+
+  /* ---------- compatibilidade de backup entre versões ---------- */
+
+  function normalizeSet(s, fallbackNumber) {
+    if (!s) return null;
+    return {
+      exerciseId: s.exerciseId || null,
+      exerciseName: s.exerciseName || '(sem nome)',
+      number: toNum(s.number) || fallbackNumber,
+      reps: toNumOrNull(s.reps),
+      load: toNumOrNull(s.load),
+      rir: toNumOrNull(s.rir),
+      note: s.note || '',
+      exerciseNote: s.exerciseNote || ''
+    };
+  }
+
+  function normalizeWarmup(w) {
+    if (!w) return null;
+    return {
+      exerciseId: w.exerciseId || null,
+      exerciseName: w.exerciseName || '(sem nome)',
+      reps: toNumOrNull(w.reps),
+      load: toNumOrNull(w.load),
+      rir: toNumOrNull(w.rir)
+    };
+  }
+
+  function normalizeSheetItem(item) {
+    const raw = item || {};
+    const legacySingle = !Array.isArray(raw.reps) && raw.reps !== undefined && raw.reps !== null && raw.reps !== '';
+    let reps = Array.isArray(raw.reps) ? raw.reps.slice() : [];
+
+    const sets = Math.max(1, parseInt(raw.sets, 10) || reps.length || 3);
+
+    if (legacySingle) {
+      // v2: a ficha guardava um único valor de reps (ex.: 3x12) -> vale para todas as séries.
+      reps = new Array(sets).fill(raw.reps);
+    } else {
+      while (reps.length < sets) reps.push(null);
+    }
+
+    return {
+      exerciseId: raw.exerciseId || null,
+      name: raw.name || '',
+      sets: sets,
+      reps: reps.map(toNumOrNull),
+      note: raw.note || ''
+    };
+  }
+
+  function normalizeSheet(s) {
+    const raw = s || {};
+    return {
+      id: raw.id,
+      name: raw.name || '',
+      active: raw.active !== false,
+      exercises: (raw.exercises || []).map(normalizeSheetItem),
+      createdAt: raw.createdAt,
+      updatedAt: raw.updatedAt
+    };
+  }
+
+  function normalizeWorkout(w) {
+    const workout = Object.assign({}, w);
+
+    // v1: as fichas eram "tipos de treino" (typeId/typeName).
+    workout.sheetId = (w.sheetId === undefined || w.sheetId === null) ? (w.typeId || null) : w.sheetId;
+    workout.sheetName = w.sheetName || w.typeName || '';
+    delete workout.typeId;
+    delete workout.typeName;
+
+    workout.cardioMinutes = toNum(w.cardioMinutes);
+    workout.notes = w.notes || '';
+    workout.warmups = (w.warmups || []).map(normalizeWarmup).filter(Boolean);
+    workout.sets = (w.sets || []).map(function (s, i) { return normalizeSet(s, i + 1); }).filter(Boolean);
+
+    return workout;
+  }
+
+  function normalizeExercise(e) {
+    const exercise = Object.assign({}, e);
+    exercise.name = e.name || '';
+    exercise.group = e.group || 'Outros';
+    exercise.correction = e.correction || '';
+    exercise.active = e.active !== false;
+    return exercise;
+  }
+
+  function normalizeSettings(s) {
+    const settings = Object.assign({ id: 'app' }, s || {});
+    settings.weekAnchor = settings.weekAnchor || todayISO();
+    settings.weeklyWorkoutTarget = toNum(settings.weeklyWorkoutTarget) || 3;
+    settings.weeklyCardioTarget = (settings.weeklyCardioTarget === undefined || settings.weeklyCardioTarget === null)
+      ? 120
+      : toNum(settings.weeklyCardioTarget);
+    return settings;
+  }
+
+  // Converte qualquer backup (v1 ou atual) para o formato atual, sem perder dados.
+  function normalizeBackup(data) {
+    const source = data || {};
+
+    // v1: as fichas eram "tipos de treino" (só nome, sem exercícios).
+    const rawSheets = source.sheets || (source.workoutTypes || []).map(function (t) {
+      return {
+        id: t.id,
+        name: t.name,
+        active: t.active !== false,
+        exercises: [],
+        createdAt: t.createdAt,
+        updatedAt: t.updatedAt
+      };
+    });
+
+    return {
+      workouts: (source.workouts || []).filter(function (w) { return w && w.id; }).map(normalizeWorkout),
+      sheets: (rawSheets || []).filter(function (s) { return s && s.id; }).map(normalizeSheet),
+      exercises: (source.exercises || []).filter(function (e) { return e && e.id; }).map(normalizeExercise),
+      settings: normalizeSettings(source.settings),
+      colinha: (source.colinha || []).filter(function (c) { return c && c.id; })
+    };
+  }
+
+  return {
+    // datas
+    pad2: pad2,
+    fmtDate: fmtDate,
+    parseDate: parseDate,
+    todayISO: todayISO,
+    addDaysISO: addDaysISO,
+    fmtBR: fmtBR,
+    // texto e números
+    esc: esc,
+    toNum: toNum,
+    toNumOrNull: toNumOrNull,
+    normalizeText: normalizeText,
+    // configurações e semana
+    defaultSettings: defaultSettings,
+    weekWindow: weekWindow,
+    isValidWorkout: isValidWorkout,
+    // aquecimento e séries
+    warmupHasData: warmupHasData,
+    warmupLine: warmupLine,
+    warmupSummary: warmupSummary,
+    setLine: setLine,
+    setsSummaryLines: setsSummaryLines,
+    groupSets: groupSets,
+    // histórico
+    lastLoadsForExercise: lastLoadsForExercise,
+    lastWarmupForExercise: lastWarmupForExercise,
+    previousWarmupFields: previousWarmupFields,
+    sessionsForExercise: sessionsForExercise,
+    bestSetForExercise: bestSetForExercise,
+    // exportação
+    workoutAsText: workoutAsText,
+    // compatibilidade de dados
+    normalizeBackup: normalizeBackup
+  };
+});

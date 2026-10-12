@@ -25,13 +25,30 @@ e a instalação como app funcionam.)
 > Abrir o `index.html` direto pelo explorador de arquivos (`file://`) **não** funciona: o navegador bloqueia
 > o `fetch` do catálogo e o registro do service worker. Use o `serve.ps1`.
 
-### Verificações automáticas
+### Testes e verificações
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\check.ps1
+powershell -ExecutionPolicy Bypass -File .\test.ps1    # testes unitários (Node 18+, sem dependências)
+powershell -ExecutionPolicy Bypass -File .\check.ps1   # verificações estáticas
 ```
 
-Confere JSONs, referências de `id`, handlers `onclick`, arquivos de asset e o catálogo (ids únicos).
+- **`test.ps1`** roda `node --test tests/`. Se o Node não estiver instalado, ele apenas avisa (os testes
+  rodam no GitHub Actions de qualquer forma).
+- **`check.ps1`** confere JSONs, referências de `id`, handlers `onclick`, assets do HTML e do service
+  worker, o catálogo (ids únicos/contíguos/estáveis), o versionamento e se o `core.js` está ligado.
+
+Os dois rodam automaticamente no GitHub Actions:
+
+| Workflow | Quando roda |
+|---|---|
+| `.github/workflows/tests.yml` | a cada push na `main` e em pull requests |
+| `.github/workflows/deploy.yml` | antes de publicar — **uma tag só publica se os testes passarem** |
+
+**O que os testes cobrem:** toda a lógica pura (`js/core.js`) — datas, janela da semana, busca sem acentos,
+agrupamento de séries, aquecimento, histórico/PR, geração do texto exportado e, principalmente,
+**compatibilidade de dados entre versões**: backups antigos (v1 com "tipos de treino", v2 com ficha de
+reps único) são normalizados sem perder nada, e a normalização é idempotente.
+Os arquivos de referência ficam em `tests/fixtures/`.
 
 ---
 
@@ -102,7 +119,10 @@ selecionada). Use só quando precisar.
 ```
 index.html                  app shell (telas, modais)
 css/styles.css              estilos (tema, navegação inferior, calendário, botões)
+js/core.js                  lógica pura (datas, semana, agrupamento, exportação, compatibilidade de backups)
 js/db.js                    camada IndexedDB (workouts, exercises, sheets, settings, colinha)
+tests/core.test.js          testes de unidade e de compatibilidade de dados
+tests/fixtures/             backups de versões antigas usados nos testes
 js/app.js                   lógica do app (busca, fichas, treinos, histórico, backup)
 data/exercises.json         catálogo embutido com 927 exercícios em pt-BR
 vendor/                     Bootstrap 5 + Bootstrap Icons (locais, sem CDN)
@@ -110,6 +130,7 @@ manifest.webmanifest        manifest do PWA
 sw.js                       service worker (network-first, com fallback offline)
 reset.html                  página de escape: desregistra o service worker e limpa o cache
 serve.ps1                   servidor local de desenvolvimento
+test.ps1                    roda os testes unitários (Node)
 check.ps1                   verificações estáticas
 MANUAL.md                   manual do usuário (como usar, exemplos, FAQ)
 PLANO.md                    plano/requisitos e histórico de revisões
