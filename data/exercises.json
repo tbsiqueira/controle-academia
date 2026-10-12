@@ -1,0 +1,4355 @@
+{
+    "meta":  {
+                 "source":  "https://github.com/gugeldev/exercicios-bd-ptbr",
+                 "license":  "CC0-1.0",
+                 "language":  "pt-BR",
+                 "count":  869
+             },
+    "exercises":  [
+                      {
+                          "id":  "Crunches",
+                          "name":  "Abdominais",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "Weighted_Crunches",
+                          "name":  "Abdominais com Peso",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "Weighted_Sit-Ups_-_With_Bands",
+                          "name":  "Abdominais com Peso e Faixas",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "Frog_Sit-Ups",
+                          "name":  "Abdominais de Sapo",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "Oblique_Crunches",
+                          "name":  "Abdominais Oblíquos",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "Oblique_Crunches_-_On_The_Floor",
+                          "name":  "Abdominais Oblíquos no Chão",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "Sit-Up",
+                          "name":  "Abdominal",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "3_4_Sit-Up",
+                          "name":  "Abdominal 3/4",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "Tuck_Crunch",
+                          "name":  "Abdominal Agrupado",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "Jackknife_Sit-Up",
+                          "name":  "Abdominal Canivete",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "Cocoons",
+                          "name":  "Abdominal Casulo",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "Rope_Crunch",
+                          "name":  "Abdominal com Corda no Pulley",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "Press_Sit-Up",
+                          "name":  "Abdominal com Desenvolvimento",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "Crunch_-_Hands_Overhead",
+                          "name":  "Abdominal com Mãos Acima da Cabeça",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "Crunch_-_Legs_On_Exercise_Ball",
+                          "name":  "Abdominal com Pernas na Bola",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "Barbell_Ab_Rollout",
+                          "name":  "Abdominal com Roda de Abdominais usando Barra",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "Barbell_Ab_Rollout_-_On_Knees",
+                          "name":  "Abdominal com Roda de Abdominais usando Barra - Ajoelhado",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "Cross-Body_Crunch",
+                          "name":  "Abdominal Cruzado",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "Decline_Crunch",
+                          "name":  "Abdominal Declinado",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "Cable_Reverse_Crunch",
+                          "name":  "Abdominal Infra na Polia",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "Reverse_Crunch",
+                          "name":  "Abdominal Inverso",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "Suspended_Reverse_Crunch",
+                          "name":  "Abdominal Invertido Suspenso",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "Janda_Sit-Up",
+                          "name":  "Abdominal Janda",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "Side_Jackknife",
+                          "name":  "Abdominal Lateral (Jackknife)",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "Exercise_Ball_Crunch",
+                          "name":  "Abdominal na Bola Suíça",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "Cable_Crunch",
+                          "name":  "Abdominal na Polia",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "Seated_Flat_Bench_Leg_Pull-In",
+                          "name":  "Abdominal no Banco Sentado",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "Seated_Leg_Tucks",
+                          "name":  "Abdominal Sentado com Flexão de Joelhos",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "Cable_Seated_Crunch",
+                          "name":  "Abdominal Sentado na Polia",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "Standing_Lateral_Stretch",
+                          "name":  "Alongamento Lateral em Pé",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "Overhead_Stretch",
+                          "name":  "Alongamento por Cima da Cabeça",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "Seated_Overhead_Stretch",
+                          "name":  "Alongamento Sentado com Braço sobre a Cabeça",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "One-Arm_Medicine_Ball_Slam",
+                          "name":  "Arremesso de Medicine Ball com Um Braço",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "Supine_Two-Arm_Overhead_Throw",
+                          "name":  "Arremesso Supino com Dois Braços Acima da Cabeça",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "Supine_One-Arm_Overhead_Throw",
+                          "name":  "Arremesso Supino com Um Braço Acima da Cabeça",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "Gorilla_Chin_Crunch",
+                          "name":  "Barra Fixa com Abdominal Gorila",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "Bent_Press",
+                          "name":  "Bent Press com Kettlebell",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "Air_Bike",
+                          "name":  "Bicicleta no Ar",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "Bottoms_Up",
+                          "name":  "Bottoms-Up",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "Scissor_Kick",
+                          "name":  "Chute Tesoura",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "Elbow_to_Knee",
+                          "name":  "Cotovelo no Joelho",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "Kneeling_Cable_Crunch_With_Alternating_Oblique_Twists",
+                          "name":  "Crunch com Cabo Ajoelhado e Torções Oblíquas Alternadas",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "Bosu_Ball_Cable_Crunch_With_Side_Bends",
+                          "name":  "Crunch com Cabo e Bosu Ball com Flexões Laterais",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "Standing_Rope_Crunch",
+                          "name":  "Crunch com Corda em Pé",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "Decline_Reverse_Crunch",
+                          "name":  "Crunch Inverso no Banco Declinado",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "Decline_Oblique_Crunch",
+                          "name":  "Crunch Oblíquo no Banco Declinado",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "Lower_Back_Curl",
+                          "name":  "Curl para Lombar",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "Standing_Cable_Lift",
+                          "name":  "Elevação com Cabo em Pé",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "Knee_Hip_Raise_On_Parallel_Bars",
+                          "name":  "Elevação de Joelhos/Quadril nas Barras Paralelas",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "Hanging_Leg_Raise",
+                          "name":  "Elevação de Pernas na Barra",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "Flat_Bench_Lying_Leg_Raise",
+                          "name":  "Elevação de Pernas no Banco Plano",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "Butt-Ups",
+                          "name":  "Elevação de Quadril",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "Bent-Knee_Hip_Raise",
+                          "name":  "Elevação de Quadril com Joelhos Flexionados",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "Smith_Machine_Hip_Raise",
+                          "name":  "Elevação de Quadril no Smith Machine",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "Suspended_Fallout",
+                          "name":  "Fallout Suspenso",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "Kettlebell_Figure_8",
+                          "name":  "Figura 8 com Kettlebell",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "Exercise_Ball_Pull-In",
+                          "name":  "Flexão de Joelhos na Bola Suíça",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "One-Arm_High-Pulley_Cable_Side_Bends",
+                          "name":  "Flexão Lateral com Cabo na Polia Alta Unilateral",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "Plate_Twist",
+                          "name":  "Giro com Peso",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "Cable_Judo_Flip",
+                          "name":  "Giro de Judô na Polia",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "Sledgehammer_Swings",
+                          "name":  "Golpes de Marreta",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "Barbell_Side_Bend",
+                          "name":  "Inclinação Lateral com Barra",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "Weighted_Ball_Side_Bend",
+                          "name":  "Inclinação Lateral com Bola e Peso",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "Dumbbell_Side_Bend",
+                          "name":  "Inclinação Lateral com Halteres",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "Dead_Bug",
+                          "name":  "Inseto Morto",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "Spell_Caster",
+                          "name":  "Lançador de Feitiço",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "Landmine_180s",
+                          "name":  "Landmine 180\u0027s",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "Ab_Crunch_Machine",
+                          "name":  "Máquina de Abdominal",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "Otis-Up",
+                          "name":  "Otis-Up",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "Pallof_Press",
+                          "name":  "Pallof Press",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "Pallof_Press_With_Rotation",
+                          "name":  "Pallof Press com Rotação",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "Kettlebell_Pass_Between_The_Legs",
+                          "name":  "Passe com Kettlebell Entre as Pernas",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "Hanging_Pike",
+                          "name":  "Pike Suspenso",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "Plank",
+                          "name":  "Prancha",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "Side_Bridge",
+                          "name":  "Prancha Lateral",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "Flat_Bench_Leg_Pull-In",
+                          "name":  "Puxada de Joelho no Banco Plano",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "Leg_Pull-In",
+                          "name":  "Puxada de Pernas",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "Spider_Crawl",
+                          "name":  "Rastejamento de Aranha",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "Ab_Roller",
+                          "name":  "Roda Abdominal",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "Barbell_Rollout_from_Bench",
+                          "name":  "Rollout com Barra a Partir do Banco",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "Standing_Cable_Wood_Chop",
+                          "name":  "Rotação com Cabo em Pé",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "Torso_Rotation",
+                          "name":  "Rotação do Tronco",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "Cable_Russian_Twists",
+                          "name":  "Rotação Russa na Polia",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "Wind_Sprints",
+                          "name":  "Sprints Suspensos",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "Alternate_Heel_Touchers",
+                          "name":  "Toque Alternado nos Calcanhares",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "Toe_Touchers",
+                          "name":  "Toque nos Dedos dos Pés",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "Seated_Barbell_Twist",
+                          "name":  "Torção com Barra Sentado",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "Medicine_Ball_Full_Twist",
+                          "name":  "Torção Completa com Medicine Ball",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "Russian_Twist",
+                          "name":  "Twist Russo",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "Stomach_Vacuum",
+                          "name":  "Vacuo Abdominal",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "Advanced_Kettlebell_Windmill",
+                          "name":  "Windmill Avançado com Kettlebell",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "Double_Kettlebell_Windmill",
+                          "name":  "Windmill com Duas Kettlebells",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "Kettlebell_Windmill",
+                          "name":  "Windmill com Kettlebell",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  "Kneeling_Forearm_Stretch",
+                          "name":  "Alongamento de Antebraço Ajoelhado",
+                          "group":  "Antebraços"
+                      },
+                      {
+                          "id":  "Standing_Olympic_Plate_Hand_Squeeze",
+                          "name":  "Aperto de Mão com Anilha Olímpica em Pé",
+                          "group":  "Antebraços"
+                      },
+                      {
+                          "id":  "Farmers_Walk",
+                          "name":  "Caminhada do Fazendeiro",
+                          "group":  "Antebraços"
+                      },
+                      {
+                          "id":  "Rickshaw_Carry",
+                          "name":  "Carregamento de Rickshaw",
+                          "group":  "Antebraços"
+                      },
+                      {
+                          "id":  "Wrist_Circles",
+                          "name":  "Círculos com os Punhos",
+                          "group":  "Antebraços"
+                      },
+                      {
+                          "id":  "Bottoms-Up_Clean_From_The_Hang_Position",
+                          "name":  "Clean de Kettlebell Bottoms-Up da Posição Suspensa",
+                          "group":  "Antebraços"
+                      },
+                      {
+                          "id":  "Standing_Palms-Up_Barbell_Behind_The_Back_Wrist_Curl",
+                          "name":  "Flexão de Punho com Barra Atrás das Costas em Pé",
+                          "group":  "Antebraços"
+                      },
+                      {
+                          "id":  "Seated_Palm-Up_Barbell_Wrist_Curl",
+                          "name":  "Flexão de Punho com Barra Sentado, Palma para Cima",
+                          "group":  "Antebraços"
+                      },
+                      {
+                          "id":  "Seated_Dumbbell_Palms-Down_Wrist_Curl",
+                          "name":  "Flexão de Punho com Halter Sentado (Palmas para Baixo)",
+                          "group":  "Antebraços"
+                      },
+                      {
+                          "id":  "Seated_Dumbbell_Palms-Up_Wrist_Curl",
+                          "name":  "Flexão de Punho com Halter Sentado (Palmas para Cima)",
+                          "group":  "Antebraços"
+                      },
+                      {
+                          "id":  "Seated_One-Arm_Dumbbell_Palms-Down_Wrist_Curl",
+                          "name":  "Flexão de Punho com Halter Sentado, Palma para Baixo",
+                          "group":  "Antebraços"
+                      },
+                      {
+                          "id":  "Seated_One-Arm_Dumbbell_Palms-Up_Wrist_Curl",
+                          "name":  "Flexão de Punho com Halter Sentado, Palma para Cima",
+                          "group":  "Antebraços"
+                      },
+                      {
+                          "id":  "Cable_Wrist_Curl",
+                          "name":  "Flexão de Punho no Pulley",
+                          "group":  "Antebraços"
+                      },
+                      {
+                          "id":  "Plate_Pinch",
+                          "name":  "Pinça com Anilhas",
+                          "group":  "Antebraços"
+                      },
+                      {
+                          "id":  "Dumbbell_Lying_Pronation",
+                          "name":  "Pronação com Halter Deitado",
+                          "group":  "Antebraços"
+                      },
+                      {
+                          "id":  "Wrist_Roller",
+                          "name":  "Rolo de Punho",
+                          "group":  "Antebraços"
+                      },
+                      {
+                          "id":  "Finger_Curls",
+                          "name":  "Rosca de Dedos",
+                          "group":  "Antebraços"
+                      },
+                      {
+                          "id":  "Palms-Down_Wrist_Curl_Over_A_Bench",
+                          "name":  "Rosca de Punho com Barra em Pronação sobre Banco",
+                          "group":  "Antebraços"
+                      },
+                      {
+                          "id":  "Palms-Up_Barbell_Wrist_Curl_Over_A_Bench",
+                          "name":  "Rosca de Punho com Barra em Supinação sobre Banco",
+                          "group":  "Antebraços"
+                      },
+                      {
+                          "id":  "Seated_Palms-Down_Barbell_Wrist_Curl",
+                          "name":  "Rosca de Punho com Barra Sentado e Palmas para Baixo",
+                          "group":  "Antebraços"
+                      },
+                      {
+                          "id":  "Palms-Down_Dumbbell_Wrist_Curl_Over_A_Bench",
+                          "name":  "Rosca de Punho com Halteres em Pronação sobre Banco",
+                          "group":  "Antebraços"
+                      },
+                      {
+                          "id":  "Palms-Up_Dumbbell_Wrist_Curl_Over_A_Bench",
+                          "name":  "Rosca de Punho com Halteres em Supinação sobre o Banco",
+                          "group":  "Antebraços"
+                      },
+                      {
+                          "id":  "Seated_Two-Arm_Palms-Up_Low-Pulley_Wrist_Curl",
+                          "name":  "Rosca de Punho com Polia Baixa Sentado e Duas Mãos com Palmas para Cima",
+                          "group":  "Antebraços"
+                      },
+                      {
+                          "id":  "Wrist_Rotations_with_Straight_Bar",
+                          "name":  "Rotação de Punhos com Barra Reta",
+                          "group":  "Antebraços"
+                      },
+                      {
+                          "id":  "Dumbbell_Lying_Supination",
+                          "name":  "Supinação com Halter Deitado Lateral",
+                          "group":  "Antebraços"
+                      },
+                      {
+                          "id":  "Standing_Biceps_Stretch",
+                          "name":  "Alongamento de Bíceps em Pé",
+                          "group":  "Bíceps"
+                      },
+                      {
+                          "id":  "Seated_Biceps",
+                          "name":  "Alongamento de Bíceps Sentado",
+                          "group":  "Bíceps"
+                      },
+                      {
+                          "id":  "Brachialis-SMR",
+                          "name":  "Liberação Miofascial do Braquial",
+                          "group":  "Bíceps"
+                      },
+                      {
+                          "id":  "Dumbbell_Alternate_Bicep_Curl",
+                          "name":  "Rosca Alternada com Halteres",
+                          "group":  "Bíceps"
+                      },
+                      {
+                          "id":  "Alternate_Incline_Dumbbell_Curl",
+                          "name":  "Rosca Alternada com Halteres no Banco Inclinado",
+                          "group":  "Bíceps"
+                      },
+                      {
+                          "id":  "Dumbbell_Bicep_Curl",
+                          "name":  "Rosca Bíceps com Halteres",
+                          "group":  "Bíceps"
+                      },
+                      {
+                          "id":  "Close-Grip_Standing_Barbell_Curl",
+                          "name":  "Rosca com Barra em Pé em Pegada Fechada",
+                          "group":  "Bíceps"
+                      },
+                      {
+                          "id":  "Lying_Close-Grip_Bar_Curl_On_High_Pulley",
+                          "name":  "Rosca com Barra em Pegada Fechada na Polia Alta Deitado",
+                          "group":  "Bíceps"
+                      },
+                      {
+                          "id":  "Barbell_Curls_Lying_Against_An_Incline",
+                          "name":  "Rosca com Barra no Banco Inclinado",
+                          "group":  "Bíceps"
+                      },
+                      {
+                          "id":  "EZ-Bar_Curl",
+                          "name":  "Rosca com Barra W",
+                          "group":  "Bíceps"
+                      },
+                      {
+                          "id":  "Close-Grip_EZ_Bar_Curl",
+                          "name":  "Rosca com Barra W em Pegada Fechada",
+                          "group":  "Bíceps"
+                      },
+                      {
+                          "id":  "Close-Grip_EZ-Bar_Curl_with_Band",
+                          "name":  "Rosca com Barra W em Pegada Fechada com Banda",
+                          "group":  "Bíceps"
+                      },
+                      {
+                          "id":  "Lying_Cable_Curl",
+                          "name":  "Rosca com Cabo Deitado",
+                          "group":  "Bíceps"
+                      },
+                      {
+                          "id":  "Overhead_Cable_Curl",
+                          "name":  "Rosca com Cabo por Cima",
+                          "group":  "Bíceps"
+                      },
+                      {
+                          "id":  "Standing_One-Arm_Cable_Curl",
+                          "name":  "Rosca com Cabo Unilateral em Pé",
+                          "group":  "Bíceps"
+                      },
+                      {
+                          "id":  "High_Cable_Curls",
+                          "name":  "Rosca com Cabos Altos",
+                          "group":  "Bíceps"
+                      },
+                      {
+                          "id":  "Concentration_Curls",
+                          "name":  "Rosca Concentrada",
+                          "group":  "Bíceps"
+                      },
+                      {
+                          "id":  "Seated_Close-Grip_Concentration_Barbell_Curl",
+                          "name":  "Rosca Concentrada com Barra em Pegada Fechada Sentado",
+                          "group":  "Bíceps"
+                      },
+                      {
+                          "id":  "Standing_Concentration_Curl",
+                          "name":  "Rosca Concentrada em Pé",
+                          "group":  "Bíceps"
+                      },
+                      {
+                          "id":  "Barbell_Curl",
+                          "name":  "Rosca Direta com Barra",
+                          "group":  "Bíceps"
+                      },
+                      {
+                          "id":  "Wide-Grip_Standing_Barbell_Curl",
+                          "name":  "Rosca Direta com Barra em Pegada Aberta",
+                          "group":  "Bíceps"
+                      },
+                      {
+                          "id":  "Standing_Biceps_Cable_Curl",
+                          "name":  "Rosca Direta com Barra na Polia em Pé",
+                          "group":  "Bíceps"
+                      },
+                      {
+                          "id":  "Machine_Bicep_Curl",
+                          "name":  "Rosca Direta Máquina",
+                          "group":  "Bíceps"
+                      },
+                      {
+                          "id":  "Drag_Curl",
+                          "name":  "Rosca Drag",
+                          "group":  "Bíceps"
+                      },
+                      {
+                          "id":  "Incline_Dumbbell_Curl",
+                          "name":  "Rosca Inclinada com Halteres",
+                          "group":  "Bíceps"
+                      },
+                      {
+                          "id":  "Dumbbell_Prone_Incline_Curl",
+                          "name":  "Rosca Inclinada com Halteres Deitado",
+                          "group":  "Bíceps"
+                      },
+                      {
+                          "id":  "Incline_Inner_Biceps_Curl",
+                          "name":  "Rosca Inclinada para Bíceps Interno",
+                          "group":  "Bíceps"
+                      },
+                      {
+                          "id":  "Reverse_Barbell_Curl",
+                          "name":  "Rosca Inversa com Barra",
+                          "group":  "Bíceps"
+                      },
+                      {
+                          "id":  "Standing_Dumbbell_Reverse_Curl",
+                          "name":  "Rosca Inversa com Halteres em Pé",
+                          "group":  "Bíceps"
+                      },
+                      {
+                          "id":  "Reverse_Cable_Curl",
+                          "name":  "Rosca Inversa no Cabo",
+                          "group":  "Bíceps"
+                      },
+                      {
+                          "id":  "Reverse_Plate_Curls",
+                          "name":  "Rosca Invertida com Anilha",
+                          "group":  "Bíceps"
+                      },
+                      {
+                          "id":  "Hammer_Curls",
+                          "name":  "Rosca Martelo",
+                          "group":  "Bíceps"
+                      },
+                      {
+                          "id":  "Alternate_Hammer_Curl",
+                          "name":  "Rosca Martelo Alternada",
+                          "group":  "Bíceps"
+                      },
+                      {
+                          "id":  "Seated_Dumbbell_Inner_Biceps_Curl",
+                          "name":  "Rosca Martelo com Halter Sentado",
+                          "group":  "Bíceps"
+                      },
+                      {
+                          "id":  "Cross_Body_Hammer_Curl",
+                          "name":  "Rosca Martelo Cruzada",
+                          "group":  "Bíceps"
+                      },
+                      {
+                          "id":  "Standing_Inner-Biceps_Curl",
+                          "name":  "Rosca Martelo em Pé",
+                          "group":  "Bíceps"
+                      },
+                      {
+                          "id":  "Incline_Hammer_Curls",
+                          "name":  "Rosca Martelo Inclinada",
+                          "group":  "Bíceps"
+                      },
+                      {
+                          "id":  "Cable_Hammer_Curls_-_Rope_Attachment",
+                          "name":  "Rosca Martelo na Polia com Corda",
+                          "group":  "Bíceps"
+                      },
+                      {
+                          "id":  "Preacher_Hammer_Dumbbell_Curl",
+                          "name":  "Rosca Martelo no Banco Scott",
+                          "group":  "Bíceps"
+                      },
+                      {
+                          "id":  "Preacher_Curl",
+                          "name":  "Rosca Scott",
+                          "group":  "Bíceps"
+                      },
+                      {
+                          "id":  "Lying_High_Bench_Barbell_Curl",
+                          "name":  "Rosca Scott com Barra Deitado",
+                          "group":  "Bíceps"
+                      },
+                      {
+                          "id":  "One_Arm_Dumbbell_Preacher_Curl",
+                          "name":  "Rosca Scott com Halter e uma Mão",
+                          "group":  "Bíceps"
+                      },
+                      {
+                          "id":  "Seated_Dumbbell_Curl",
+                          "name":  "Rosca Scott com Halter Sentado",
+                          "group":  "Bíceps"
+                      },
+                      {
+                          "id":  "Standing_One-Arm_Dumbbell_Curl_Over_Incline_Bench",
+                          "name":  "Rosca Scott com Halter Unilateral em Pé",
+                          "group":  "Bíceps"
+                      },
+                      {
+                          "id":  "Two-Arm_Dumbbell_Preacher_Curl",
+                          "name":  "Rosca Scott com Halteres",
+                          "group":  "Bíceps"
+                      },
+                      {
+                          "id":  "Flexor_Incline_Dumbbell_Curls",
+                          "name":  "Rosca Scott com Halteres no Banco Inclinado",
+                          "group":  "Bíceps"
+                      },
+                      {
+                          "id":  "Lying_Supine_Dumbbell_Curl",
+                          "name":  "Rosca Scott Deitado com Halteres",
+                          "group":  "Bíceps"
+                      },
+                      {
+                          "id":  "Reverse_Barbell_Preacher_Curls",
+                          "name":  "Rosca Scott Inversa com Barra",
+                          "group":  "Bíceps"
+                      },
+                      {
+                          "id":  "Machine_Preacher_Curls",
+                          "name":  "Rosca Scott Máquina",
+                          "group":  "Bíceps"
+                      },
+                      {
+                          "id":  "Cable_Preacher_Curl",
+                          "name":  "Rosca Scott na Polia",
+                          "group":  "Bíceps"
+                      },
+                      {
+                          "id":  "Spider_Curl",
+                          "name":  "Rosca Spider",
+                          "group":  "Bíceps"
+                      },
+                      {
+                          "id":  "Zottman_Curl",
+                          "name":  "Rosca Zottman",
+                          "group":  "Bíceps"
+                      },
+                      {
+                          "id":  "Zottman_Preacher_Curl",
+                          "name":  "Rosca Zottman no Banco Scott",
+                          "group":  "Bíceps"
+                      },
+                      {
+                          "id":  "Hug_A_Ball",
+                          "name":  "Abraçar a Bola",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Hug_Knees_To_Chest",
+                          "name":  "Abraçar Joelhos no Peito",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Crossover_Reverse_Lunge",
+                          "name":  "Afundo Reverso Cruzado",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Spinal_Stretch",
+                          "name":  "Alongamento da Coluna",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Upper_Back_Stretch",
+                          "name":  "Alongamento da Parte Superior das Costas",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Middle_Back_Stretch",
+                          "name":  "Alongamento de Costas Médias",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Overhead_Lat",
+                          "name":  "Alongamento de Lat com Braço Elevado",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Dynamic_Back_Stretch",
+                          "name":  "Alongamento Dinâmico das Costas",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Dancers_Stretch",
+                          "name":  "Alongamento do Dançarino",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Cat_Stretch",
+                          "name":  "Alongamento do Gato",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Side-Lying_Floor_Stretch",
+                          "name":  "Alongamento Lateral no Chão",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Chair_Lower_Back_Stretch",
+                          "name":  "Alongamento Lombar na Cadeira",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Overhead_Slam",
+                          "name":  "Arremesso de Medicine Ball por Cima da Cabeça",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Catch_and_Overhead_Throw",
+                          "name":  "Arremesso por Cima com Recepção",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Latissimus_Dorsi-SMR",
+                          "name":  "Auto-Liberação Miofascial do Latíssimo do Dorso",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Lower_Back-SMR",
+                          "name":  "Auto-Massagem para Lombar",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Pullups",
+                          "name":  "Barra Fixa",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Band_Assisted_Pull-Up",
+                          "name":  "Barra Fixa Assistida com Banda",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Wide-Grip_Rear_Pull-Up",
+                          "name":  "Barra Fixa Atrás da Nuca com Pegada Larga",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "V-Bar_Pullup",
+                          "name":  "Barra Fixa com Barra V",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Mixed_Grip_Chin",
+                          "name":  "Barra Fixa com Pegada Mista",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Weighted_Pull_Ups",
+                          "name":  "Barra Fixa com Peso",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "One_Arm_Chin-Up",
+                          "name":  "Barra Fixa com uma Mão",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Side_To_Side_Chins",
+                          "name":  "Barra Fixa Lateral",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Gironda_Sternum_Chins",
+                          "name":  "Barra Fixa no Esterno (Gironda)",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Rocky_Pull-Ups_Pulldowns",
+                          "name":  "Barra Fixa/Pulldown Rocky",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Stiff_Leg_Barbell_Good_Morning",
+                          "name":  "Bom Dia com Barra Pernas Estendidas",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Seated_Good_Mornings",
+                          "name":  "Bom Dia Sentado",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Keg_Load",
+                          "name":  "Carregamento de Barril",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Chin-Up",
+                          "name":  "Chin-Up",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Leverage_Shrug",
+                          "name":  "Encolhimento com Alavanca",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Barbell_Shrug_Behind_The_Back",
+                          "name":  "Encolhimento com Barra Atrás das Costas",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Snatch_Shrug",
+                          "name":  "Encolhimento de Arranco",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Middle_Back_Shrug",
+                          "name":  "Encolhimento de Costas Médias",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Smith_Machine_Behind_the_Back_Shrug",
+                          "name":  "Encolhimento de Ombros Atrás das Costas no Smith",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Barbell_Shrug",
+                          "name":  "Encolhimento de Ombros com Barra",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Dumbbell_Shrug",
+                          "name":  "Encolhimento de Ombros com Halteres",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Calf-Machine_Shoulder_Shrug",
+                          "name":  "Encolhimento de Ombros na Máquina de Panturrilha",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Cable_Shrugs",
+                          "name":  "Encolhimento no Pulley",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Clean_Shrug",
+                          "name":  "Encolhimento para Clean",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Rope_Climb",
+                          "name":  "Escalada de Corda",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Weighted_Ball_Hyperextension",
+                          "name":  "Hiperextensão com Bola e Peso",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Hyperextensions_Back_Extensions",
+                          "name":  "Hiperextensões (Extensões Lombares)",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Hyperextensions_With_No_Hyperextension_Bench",
+                          "name":  "Hiperextensões Sem Banco de Hiperextensão",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Standing_Pelvic_Tilt",
+                          "name":  "Inclinação Pélvica em Pé",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Pelvic_Tilt_Into_Bridge",
+                          "name":  "Inclinação Pélvica para Ponte",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Reverse_Band_Deadlift",
+                          "name":  "Levantamento Terra com Banda Reversa",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Barbell_Deadlift",
+                          "name":  "Levantamento Terra com Barra",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Deadlift_with_Chains",
+                          "name":  "Levantamento Terra com Correntes",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Deficit_Deadlift",
+                          "name":  "Levantamento Terra com Déficit",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Axle_Deadlift",
+                          "name":  "Levantamento Terra com Eixo",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Deadlift_with_Bands",
+                          "name":  "Levantamento Terra com Elásticos",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Rhomboids-SMR",
+                          "name":  "Liberação Miofascial para Romboides",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Muscle_Up",
+                          "name":  "Muscle Up",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Kipping_Muscle_Up",
+                          "name":  "Muscle Up com Kipping",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Atlas_Stones",
+                          "name":  "Pedras Atlas",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Pyramid",
+                          "name":  "Pirâmide",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "London_Bridges",
+                          "name":  "Pontes de Londres",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Childs_Pose",
+                          "name":  "Postura da Criança",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Wide-Grip_Pulldown_Behind_The_Neck",
+                          "name":  "Pulldown Atrás da Nuca com Pegada Larga",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Full_Range-Of-Motion_Lat_Pulldown",
+                          "name":  "Pulldown com Amplitude Completa",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Straight-Arm_Pulldown",
+                          "name":  "Pulldown com Braços Retos",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Rope_Straight-Arm_Pulldown",
+                          "name":  "Pulldown com Corda e Braços Estendidos",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Wide-Grip_Lat_Pulldown",
+                          "name":  "Pulldown com Pegada Larga",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Underhand_Cable_Pulldowns",
+                          "name":  "Pulldown com Pegada Supinada",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Close-Grip_Front_Lat_Pulldown",
+                          "name":  "Pulldown Frente em Pegada Fechada",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "One_Arm_Lat_Pulldown",
+                          "name":  "Pulldown Unilateral com Pegada Pronada",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Bent-Arm_Barbell_Pullover",
+                          "name":  "Pullover com Barra e Braços Flexionados",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Kettlebell_Sumo_High_Pull",
+                          "name":  "Puxada Alta Sumô com Kettlebell",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Incline_Bench_Pull",
+                          "name":  "Puxada em Banco Inclinado",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Scapular_Pull-Up",
+                          "name":  "Puxada Escapular",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "V-Bar_Pulldown",
+                          "name":  "Puxada no Pulley com Barra V",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Rack_Pull_with_Bands",
+                          "name":  "Puxada no Suporte com Faixas",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Rack_Pulls",
+                          "name":  "Puxadas no Suporte",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Upright_Row_-_With_Bands",
+                          "name":  "Remada Alta com Faixas Elásticas",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Standing_Dumbbell_Upright_Row",
+                          "name":  "Remada Alta com Halteres em Pé",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Kneeling_High_Pulley_Row",
+                          "name":  "Remada Alta com Polia Ajoelhado",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Leverage_High_Row",
+                          "name":  "Remada Alta na Máquina de Alavanca",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Upright_Cable_Row",
+                          "name":  "Remada Alta no Cabo",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Smith_Machine_Upright_Row",
+                          "name":  "Remada Alta no Smith",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Kneeling_Single-Arm_High_Pulley_Row",
+                          "name":  "Remada Alta Unilateral com Polia Ajoelhado",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Alternating_Kettlebell_Row",
+                          "name":  "Remada Alternada com Kettlebell",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Lying_Cambered_Barbell_Row",
+                          "name":  "Remada com Barra Camberada Deitado",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "One-Arm_Long_Bar_Row",
+                          "name":  "Remada com Barra Longa de Um Braço",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Two-Arm_Kettlebell_Row",
+                          "name":  "Remada com Kettlebell de Dois Braços",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "One-Arm_Kettlebell_Row",
+                          "name":  "Remada com Kettlebell de Um Braço",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Sled_Row",
+                          "name":  "Remada com Trenó",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Bent_Over_Barbell_Row",
+                          "name":  "Remada Curvada com Barra",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Bent_Over_Two-Arm_Long_Bar_Row",
+                          "name":  "Remada Curvada com Barra Longa e Dois Braços",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Bent_Over_One-Arm_Long_Bar_Row",
+                          "name":  "Remada Curvada com Barra Longa e Um Braço",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Straight_Bar_Bench_Mid_Rows",
+                          "name":  "Remada Curvada com Barra no Banco",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Bent_Over_Two-Dumbbell_Row",
+                          "name":  "Remada Curvada com Dois Halteres",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Bent_Over_Two-Dumbbell_Row_With_Palms_In",
+                          "name":  "Remada Curvada com Dois Halteres e Palmas para Dentro",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Smith_Machine_Bent_Over_Row",
+                          "name":  "Remada Curvada no Smith Machine",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "T-Bar_Row_with_Handle",
+                          "name":  "Remada em T com Pegador",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Dumbbell_Incline_Row",
+                          "name":  "Remada Inclinada com Halteres",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Inverted_Row",
+                          "name":  "Remada Invertida",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Inverted_Row_with_Straps",
+                          "name":  "Remada Invertida com Alças",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Reverse_Grip_Bent-Over_Rows",
+                          "name":  "Remada Invertida com Barra",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Leverage_Iso_Row",
+                          "name":  "Remada Isométrica na Máquina de Alavanca",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Bodyweight_Mid_Row",
+                          "name":  "Remada Média Corporal",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Elevated_Cable_Rows",
+                          "name":  "Remada no Pulley com Elevação",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Alternating_Renegade_Row",
+                          "name":  "Remada Renegada Alternada",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Seated_Cable_Rows",
+                          "name":  "Remada Sentada no Pulley",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Shotgun_Row",
+                          "name":  "Remada Shotgun",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Suspended_Row",
+                          "name":  "Remada Suspensa",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Lying_T-Bar_Row",
+                          "name":  "Remada T-Bar Deitado",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "One-Arm_Dumbbell_Row",
+                          "name":  "Remada Unilateral com Halter",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Seated_One-arm_Cable_Pulley_Rows",
+                          "name":  "Remada Unilateral no Pulley Sentado",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Superman",
+                          "name":  "Super-Homem",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "One_Handed_Hang",
+                          "name":  "Suspensão Unilateral",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Atlas_Stone_Trainer",
+                          "name":  "Treinador para Pedras Atlas",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Cable_Incline_Pushdown",
+                          "name":  "Tríceps Pulley Inclinado",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "One_Arm_Against_Wall",
+                          "name":  "Um Braço Contra a Parede",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  "Kneeling_Squat",
+                          "name":  "Agachamento Ajoelhado",
+                          "group":  "Glúteos"
+                      },
+                      {
+                          "id":  "Kneeling_Jump_Squat",
+                          "name":  "Agachamento com Salto Ajoelhado",
+                          "group":  "Glúteos"
+                      },
+                      {
+                          "id":  "Lying_Glute",
+                          "name":  "Alongamento de Glúteo Deitado",
+                          "group":  "Glúteos"
+                      },
+                      {
+                          "id":  "Seated_Glute",
+                          "name":  "Alongamento de Glúteo Sentado",
+                          "group":  "Glúteos"
+                      },
+                      {
+                          "id":  "Flutter_Kicks",
+                          "name":  "Chutes Alternados",
+                          "group":  "Glúteos"
+                      },
+                      {
+                          "id":  "One-Legged_Cable_Kickback",
+                          "name":  "Coice com Cabo e uma Perna",
+                          "group":  "Glúteos"
+                      },
+                      {
+                          "id":  "Glute_Kickback",
+                          "name":  "Coice de Glúteo",
+                          "group":  "Glúteos"
+                      },
+                      {
+                          "id":  "Leg_Lift",
+                          "name":  "Elevação de Perna",
+                          "group":  "Glúteos"
+                      },
+                      {
+                          "id":  "Butt_Lift_Bridge",
+                          "name":  "Elevação de Quadril (Ponte)",
+                          "group":  "Glúteos"
+                      },
+                      {
+                          "id":  "Hip_Lift_with_Band",
+                          "name":  "Elevação de Quadril com Banda",
+                          "group":  "Glúteos"
+                      },
+                      {
+                          "id":  "Barbell_Glute_Bridge",
+                          "name":  "Elevação de Quadril com Barra",
+                          "group":  "Glúteos"
+                      },
+                      {
+                          "id":  "Barbell_Hip_Thrust",
+                          "name":  "Elevação Pélvica com Barra",
+                          "group":  "Glúteos"
+                      },
+                      {
+                          "id":  "Downward_Facing_Balance",
+                          "name":  "Equilíbrio em Posição de Cachorro Olhando para Baixo",
+                          "group":  "Glúteos"
+                      },
+                      {
+                          "id":  "Hip_Extension_with_Bands",
+                          "name":  "Extensão de Quadril com Banda",
+                          "group":  "Glúteos"
+                      },
+                      {
+                          "id":  "One_Knee_To_Chest",
+                          "name":  "Joelho ao Peito Unilateral",
+                          "group":  "Glúteos"
+                      },
+                      {
+                          "id":  "Knee_Across_The_Body",
+                          "name":  "Joelho Cruzado no Corpo",
+                          "group":  "Glúteos"
+                      },
+                      {
+                          "id":  "Piriformis-SMR",
+                          "name":  "Liberação Miofascial do Piriforme",
+                          "group":  "Glúteos"
+                      },
+                      {
+                          "id":  "Single_Leg_Glute_Bridge",
+                          "name":  "Ponte de Glúteo Unilateral",
+                          "group":  "Glúteos"
+                      },
+                      {
+                          "id":  "Physioball_Hip_Bridge",
+                          "name":  "Ponte de Quadril com Bola Suíça",
+                          "group":  "Glúteos"
+                      },
+                      {
+                          "id":  "Pull_Through",
+                          "name":  "Pull Through",
+                          "group":  "Glúteos"
+                      },
+                      {
+                          "id":  "Step-up_with_Knee_Raise",
+                          "name":  "Subida no Step com Elevação de Joelho",
+                          "group":  "Glúteos"
+                      },
+                      {
+                          "id":  "Ankle_On_The_Knee",
+                          "name":  "Tornozelo no Joelho",
+                          "group":  "Glúteos"
+                      },
+                      {
+                          "id":  "Band_Pull_Apart",
+                          "name":  "Abertura de Banda",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Chair_Upper_Body_Stretch",
+                          "name":  "Alongamento da Parte Superior do Corpo na Cadeira",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Seated_Front_Deltoid",
+                          "name":  "Alongamento de Deltóide Anterior Sentado",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Shoulder_Stretch",
+                          "name":  "Alongamento de Ombros",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Round_The_World_Shoulder_Stretch",
+                          "name":  "Alongamento de Ombros Rotacional",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Upward_Stretch",
+                          "name":  "Alongamento para Cima",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "One-Arm_Kettlebell_Snatch",
+                          "name":  "Arranco com Kettlebell de Um Braço",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "One-Arm_Kettlebell_Split_Snatch",
+                          "name":  "Arranco em Afundo com Kettlebell de Um Braço",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Medicine_Ball_Scoop_Throw",
+                          "name":  "Arremesso de Concha com Medicine Ball",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Standing_Two-Arm_Overhead_Throw",
+                          "name":  "Arremesso de Medicine Ball com Duas Mãos Acima da Cabeça em Pé",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Backward_Medicine_Ball_Throw",
+                          "name":  "Arremesso de Medicine Ball para Trás",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "One-Arm_Kettlebell_Split_Jerk",
+                          "name":  "Arremesso em Afundo com Kettlebell de Um Braço",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Jerk_Balance",
+                          "name":  "Balanceamento no Arranco",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Sled_Overhead_Backward_Walk",
+                          "name":  "Caminhada para Trás com Halter por Cima",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Arm_Circles",
+                          "name":  "Círculos com os Braços",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Elbow_Circles",
+                          "name":  "Círculos com os Cotovelos",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Shoulder_Circles",
+                          "name":  "Círculos com os Ombros",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Circus_Bell",
+                          "name":  "Circus Bell",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "One-Arm_Kettlebell_Clean_and_Jerk",
+                          "name":  "Clean and Jerk Unilateral com Kettlebell",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Two-Arm_Kettlebell_Clean",
+                          "name":  "Clean com Kettlebell de Dois Braços",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Clean_and_Jerk",
+                          "name":  "Clean e Arranco",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Clean_and_Press",
+                          "name":  "Clean e Desenvolvimento",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Battling_Ropes",
+                          "name":  "Cordas de Batalha",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Crucifix",
+                          "name":  "Crucifixo",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Reverse_Flyes",
+                          "name":  "Crucifixo Inverso",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Reverse_Flyes_With_External_Rotation",
+                          "name":  "Crucifixo Inverso com Rotação Externa",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Cable_Rear_Delt_Fly",
+                          "name":  "Crucifixo Inverso na Polia",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Back_Flyes_-_With_Bands",
+                          "name":  "Crucifixo Invertido com Banda",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Sled_Reverse_Flye",
+                          "name":  "Crucifixo Invertido com Trenó",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Reverse_Machine_Flyes",
+                          "name":  "Crucifixo Invertido na Máquina",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Cuban_Press",
+                          "name":  "Cuban Press",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Alternating_Cable_Shoulder_Press",
+                          "name":  "Desenvolvimento Alternado com Cabos",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Standing_Alternating_Dumbbell_Press",
+                          "name":  "Desenvolvimento Alternado com Halteres em Pé",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Alternating_Kettlebell_Press",
+                          "name":  "Desenvolvimento Alternado com Kettlebell",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Standing_Barbell_Press_Behind_Neck",
+                          "name":  "Desenvolvimento com Barra Atrás do Pescoço em Pé",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Seated_Dumbbell_Press",
+                          "name":  "Desenvolvimento com Halter Sentado",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Standing_Palm-In_One-Arm_Dumbbell_Press",
+                          "name":  "Desenvolvimento com Halter Unilateral e Pegada Neutra em Pé",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Standing_Palms-In_Dumbbell_Press",
+                          "name":  "Desenvolvimento com Halteres e Pegada Neutra em Pé",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Standing_Dumbbell_Press",
+                          "name":  "Desenvolvimento com Halteres em Pé",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "One-Arm_Kettlebell_Push_Press",
+                          "name":  "Desenvolvimento com Impulso de Kettlebell de Um Braço",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Dumbbell_One-Arm_Shoulder_Press",
+                          "name":  "Desenvolvimento de Ombros com Halter Unilateral",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Dumbbell_Shoulder_Press",
+                          "name":  "Desenvolvimento de Ombros com Halteres",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Leverage_Shoulder_Press",
+                          "name":  "Desenvolvimento de Ombros na Máquina de Alavanca",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Seated_Cable_Shoulder_Press",
+                          "name":  "Desenvolvimento de Ombros no Pulley Sentado",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Barbell_Shoulder_Press",
+                          "name":  "Desenvolvimento Militar com Barra",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Two-Arm_Kettlebell_Military_Press",
+                          "name":  "Desenvolvimento Militar com Kettlebell de Dois Braços",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "One-Arm_Kettlebell_Military_Press_To_The_Side",
+                          "name":  "Desenvolvimento Militar com Kettlebell de Um Braço para o Lado",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Standing_Military_Press",
+                          "name":  "Desenvolvimento Militar em Pé",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Machine_Shoulder_Military_Press",
+                          "name":  "Desenvolvimento Militar Máquina",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Smith_Machine_Overhead_Shoulder_Press",
+                          "name":  "Desenvolvimento Militar no Smith Machine",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Seated_Barbell_Military_Press",
+                          "name":  "Desenvolvimento Militar Sentado com Barra",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Cable_Shoulder_Press",
+                          "name":  "Desenvolvimento no Pulley",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "One-Arm_Kettlebell_Para_Press",
+                          "name":  "Desenvolvimento Para com Kettlebell de Um Braço",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Kneeling_Arm_Drill",
+                          "name":  "Drill de Braços Ajoelhado",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Alternating_Deltoid_Raise",
+                          "name":  "Elevação Alternada do Deltóide",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Single_Dumbbell_Raise",
+                          "name":  "Elevação com Halter Único",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Shoulder_Raise",
+                          "name":  "Elevação de Ombros",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Barbell_Incline_Shoulder_Raise",
+                          "name":  "Elevação de Ombros Inclinada com Barra",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Dumbbell_Incline_Shoulder_Raise",
+                          "name":  "Elevação de Ombros Inclinada com Halteres",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Smith_Incline_Shoulder_Raise",
+                          "name":  "Elevação de Ombros no Smith em Banco Inclinado",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Front_Plate_Raise",
+                          "name":  "Elevação Frontal com Anilha",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Standing_Front_Barbell_Raise_Over_Head",
+                          "name":  "Elevação Frontal com Barra em Pé",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Front_Two-Dumbbell_Raise",
+                          "name":  "Elevação Frontal com Dois Halteres",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Front_Dumbbell_Raise",
+                          "name":  "Elevação Frontal com Halteres",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Dumbbell_Scaption",
+                          "name":  "Elevação Frontal com Halteres em 30 Graus",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Standing_Dumbbell_Straight-Arm_Front_Delt_Raise_Above_Head",
+                          "name":  "Elevação Frontal com Halteres em Pé",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Front_Incline_Dumbbell_Raise",
+                          "name":  "Elevação Frontal com Halteres no Banco Inclinado",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Front_Cable_Raise",
+                          "name":  "Elevação Frontal no Pulley",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Side_Lateral_Raise",
+                          "name":  "Elevação Lateral",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Lateral_Raise_-_With_Bands",
+                          "name":  "Elevação Lateral com Banda",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Lying_One-Arm_Lateral_Raise",
+                          "name":  "Elevação Lateral com Halter Deitado",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Dumbbell_Raise",
+                          "name":  "Elevação Lateral com Halteres",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Standing_Low-Pulley_Deltoid_Raise",
+                          "name":  "Elevação Lateral com Polia Baixa em Pé",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "One-Arm_Side_Laterals",
+                          "name":  "Elevação Lateral com uma Mão",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Bent_Over_Low-Pulley_Side_Lateral",
+                          "name":  "Elevação Lateral Inclinada com Polia Baixa",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "One-Arm_Incline_Lateral_Raise",
+                          "name":  "Elevação Lateral Inclinada Unilateral",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Side_Laterals_to_Front_Raise",
+                          "name":  "Elevação Lateral para Frontal",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Dumbbell_Lying_One-Arm_Rear_Lateral_Raise",
+                          "name":  "Elevação Lateral Posterior com Halter Deitado Unilateral",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Dumbbell_Lying_Rear_Lateral_Raise",
+                          "name":  "Elevação Lateral Posterior com Halteres Deitado",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Seated_Side_Lateral_Raise",
+                          "name":  "Elevação Lateral Sentado",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Cable_Seated_Lateral_Raise",
+                          "name":  "Elevação Lateral Sentado na Polia",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Bent_Over_Dumbbell_Rear_Delt_Raise_With_Head_On_Bench",
+                          "name":  "Elevação Posterior de Deltóide com Halteres Inclinado e Cabeça no Banco",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Lying_Rear_Delt_Raise",
+                          "name":  "Elevação Posterior Deitado",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Seated_Bent-Over_Rear_Delt_Raise",
+                          "name":  "Elevação Posterior para Deltóides Sentado e Inclinado",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Straight_Raises_on_Incline_Bench",
+                          "name":  "Elevações Frontais no Banco Inclinado",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Power_Partials",
+                          "name":  "Elevações Laterais Parciais",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Rack_Delivery",
+                          "name":  "Entrega no Suporte",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Face_Pull",
+                          "name":  "Face Pull",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Handstand_Push-Ups",
+                          "name":  "Flexões de Mão (Handstand Push-Ups)",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Iron_Cross",
+                          "name":  "Iron Cross",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Double_Kettlebell_Jerk",
+                          "name":  "Jerk com Duas Kettlebells",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Two-Arm_Kettlebell_Jerk",
+                          "name":  "Jerk com Kettlebell de Dois Braços",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "One-Arm_Kettlebell_Jerk",
+                          "name":  "Jerk Unilateral com Kettlebell",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Landmine_Linear_Jammer",
+                          "name":  "Landmine Linear Jammer",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Single-Arm_Linear_Jammer",
+                          "name":  "Levantamento com Barra em Landmine Unilateral",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Log_Lift",
+                          "name":  "Levantamento de Tronco",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Car_Drivers",
+                          "name":  "Motoristas de Carro",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Kettlebell_Pirate_Ships",
+                          "name":  "Navios Piratas com Kettlebell",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Kettlebell_Seesaw_Press",
+                          "name":  "Press Alternado com Kettlebell",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "See-Saw_Press_Alternating_Side_Press",
+                          "name":  "Press Alternado em Gangorra",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Anti-Gravity_Press",
+                          "name":  "Press Anti-Gravidade",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Arnold_Dumbbell_Press",
+                          "name":  "Press Arnold com Halteres",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Kettlebell_Arnold_Press",
+                          "name":  "Press Arnold com Kettlebell",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Standing_Bradford_Press",
+                          "name":  "Press Bradford em Pé",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Bradford_Rocky_Presses",
+                          "name":  "Press Bradford/Rocky",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Shoulder_Press_-_With_Bands",
+                          "name":  "Press de Ombros com Faixas Elásticas",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Kettlebell_Seated_Press",
+                          "name":  "Press Sentado com Kettlebell",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Push_Press",
+                          "name":  "Push Press",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Push_Press_-_Behind_the_Neck",
+                          "name":  "Push Press Atrás da Nuca",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Double_Kettlebell_Push_Press",
+                          "name":  "Push Press com Duas Kettlebells",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Side_Wrist_Pull",
+                          "name":  "Puxada Lateral de Pulso",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Upright_Barbell_Row",
+                          "name":  "Remada Alta com Barra",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Cable_Rope_Rear-Delt_Rows",
+                          "name":  "Remada Alta com Corda para Deltóides Posteriores",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Dumbbell_One-Arm_Upright_Row",
+                          "name":  "Remada Alta com Halter Unilateral",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Barbell_Rear_Delt_Row",
+                          "name":  "Remada Alta para Deltóides Posteriores com Barra",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Smith_Machine_One-Arm_Upright_Row",
+                          "name":  "Remada Alta Unilateral no Smith Machine",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Low_Pulley_Row_To_Neck",
+                          "name":  "Remada na Polia Baixa para o Pescoço",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Return_Push_from_Stance",
+                          "name":  "Retorno de Arremesso da Posição",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "External_Rotation_with_Band",
+                          "name":  "Rotação Externa com Banda",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "External_Rotation",
+                          "name":  "Rotação Externa com Halter",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "External_Rotation_with_Cable",
+                          "name":  "Rotação Externa no Cable",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Internal_Rotation_with_Band",
+                          "name":  "Rotação Interna com Faixa",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Cable_Internal_Rotation",
+                          "name":  "Rotação Interna na Polia",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Double_Kettlebell_Snatch",
+                          "name":  "Snatch com Duas Kettlebells",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Kettlebell_Thruster",
+                          "name":  "Thruster com Kettlebell",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Kettlebell_Turkish_Get-Up_Lunge_style",
+                          "name":  "Turkish Get-Up com Kettlebell (Estilo Afundo)",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Kettlebell_Turkish_Get-Up_Squat_style",
+                          "name":  "Turkish Get-Up com Kettlebell (Estilo Agachamento)",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  "Calf_Stretch_Elbows_Against_Wall",
+                          "name":  "Alongamento de Panturrilha com Cotovelos na Parede",
+                          "group":  "Panturrilhas"
+                      },
+                      {
+                          "id":  "Calf_Stretch_Hands_Against_Wall",
+                          "name":  "Alongamento de Panturrilha com Mãos na Parede",
+                          "group":  "Panturrilhas"
+                      },
+                      {
+                          "id":  "Standing_Gastrocnemius_Calf_Stretch",
+                          "name":  "Alongamento de Panturrilha Gastrocnêmio em Pé",
+                          "group":  "Panturrilhas"
+                      },
+                      {
+                          "id":  "Seated_Calf_Stretch",
+                          "name":  "Alongamento de Panturrilha Sentado",
+                          "group":  "Panturrilhas"
+                      },
+                      {
+                          "id":  "Standing_Soleus_And_Achilles_Stretch",
+                          "name":  "Alongamento de Sóleo e Aquiles em Pé",
+                          "group":  "Panturrilhas"
+                      },
+                      {
+                          "id":  "Posterior_Tibialis_Stretch",
+                          "name":  "Alongamento do Tibial Posterior",
+                          "group":  "Panturrilhas"
+                      },
+                      {
+                          "id":  "Peroneals_Stretch",
+                          "name":  "Alongamento dos Fibulares",
+                          "group":  "Panturrilhas"
+                      },
+                      {
+                          "id":  "Calves-SMR",
+                          "name":  "Auto-Massagem na Panturrilha",
+                          "group":  "Panturrilhas"
+                      },
+                      {
+                          "id":  "Knee_Circles",
+                          "name":  "Círculos com os Joelhos",
+                          "group":  "Panturrilhas"
+                      },
+                      {
+                          "id":  "Ankle_Circles",
+                          "name":  "Círculos de Tornozelo",
+                          "group":  "Panturrilhas"
+                      },
+                      {
+                          "id":  "Calf_Raises_-_With_Bands",
+                          "name":  "Elevação de Panturrilha com Banda",
+                          "group":  "Panturrilhas"
+                      },
+                      {
+                          "id":  "Standing_Barbell_Calf_Raise",
+                          "name":  "Elevação de Panturrilha com Barra em Pé",
+                          "group":  "Panturrilhas"
+                      },
+                      {
+                          "id":  "Calf_Raise_On_A_Dumbbell",
+                          "name":  "Elevação de Panturrilha com Halter",
+                          "group":  "Panturrilhas"
+                      },
+                      {
+                          "id":  "Standing_Dumbbell_Calf_Raise",
+                          "name":  "Elevação de Panturrilha com Halteres em Pé",
+                          "group":  "Panturrilhas"
+                      },
+                      {
+                          "id":  "Standing_Calf_Raises",
+                          "name":  "Elevação de Panturrilha em Pé",
+                          "group":  "Panturrilhas"
+                      },
+                      {
+                          "id":  "Rocking_Standing_Calf_Raise",
+                          "name":  "Elevação de Panturrilha em Pé com Balanço",
+                          "group":  "Panturrilhas"
+                      },
+                      {
+                          "id":  "Smith_Machine_Reverse_Calf_Raises",
+                          "name":  "Elevação de Panturrilha Invertida no Smith",
+                          "group":  "Panturrilhas"
+                      },
+                      {
+                          "id":  "Donkey_Calf_Raises",
+                          "name":  "Elevação de Panturrilha no Aparelho",
+                          "group":  "Panturrilhas"
+                      },
+                      {
+                          "id":  "Smith_Machine_Calf_Raise",
+                          "name":  "Elevação de Panturrilha no Smith Machine",
+                          "group":  "Panturrilhas"
+                      },
+                      {
+                          "id":  "Seated_Calf_Raise",
+                          "name":  "Elevação de Panturrilha Sentada",
+                          "group":  "Panturrilhas"
+                      },
+                      {
+                          "id":  "Barbell_Seated_Calf_Raise",
+                          "name":  "Elevação de Panturrilha Sentado com Barra",
+                          "group":  "Panturrilhas"
+                      },
+                      {
+                          "id":  "Foot-SMR",
+                          "name":  "Liberação Miofascial do Pé",
+                          "group":  "Panturrilhas"
+                      },
+                      {
+                          "id":  "Anterior_Tibialis-SMR",
+                          "name":  "Liberação Miofascial do Tibial Anterior",
+                          "group":  "Panturrilhas"
+                      },
+                      {
+                          "id":  "Peroneals-SMR",
+                          "name":  "Liberação Miofascial dos Fibulares",
+                          "group":  "Panturrilhas"
+                      },
+                      {
+                          "id":  "Dumbbell_Seated_One-Leg_Calf_Raise",
+                          "name":  "Panturrilha Sentado com Uma Perna e Halteres",
+                          "group":  "Panturrilhas"
+                      },
+                      {
+                          "id":  "Balance_Board",
+                          "name":  "Prancha de Equilíbrio",
+                          "group":  "Panturrilhas"
+                      },
+                      {
+                          "id":  "Calf_Press",
+                          "name":  "Press de Panturrilha",
+                          "group":  "Panturrilhas"
+                      },
+                      {
+                          "id":  "Calf_Press_On_The_Leg_Press_Machine",
+                          "name":  "Press de Panturrilha na Máquina de Leg Press",
+                          "group":  "Panturrilhas"
+                      },
+                      {
+                          "id":  "Behind_Head_Chest_Stretch",
+                          "name":  "Alongamento de Peito Atrás da Cabeça",
+                          "group":  "Peito"
+                      },
+                      {
+                          "id":  "Dynamic_Chest_Stretch",
+                          "name":  "Alongamento Dinâmico do Peito",
+                          "group":  "Peito"
+                      },
+                      {
+                          "id":  "Chest_And_Front_Of_Shoulder_Stretch",
+                          "name":  "Alongamento do Peito e Parte Dianteira do Ombro",
+                          "group":  "Peito"
+                      },
+                      {
+                          "id":  "Chest_Stretch_on_Stability_Ball",
+                          "name":  "Alongamento do Peito na Bola de Estabilidade",
+                          "group":  "Peito"
+                      },
+                      {
+                          "id":  "Around_The_Worlds",
+                          "name":  "Around The Worlds",
+                          "group":  "Peito"
+                      },
+                      {
+                          "id":  "Forward_Drag_with_Press",
+                          "name":  "Arrasto para Frente com Pressão",
+                          "group":  "Peito"
+                      },
+                      {
+                          "id":  "Medicine_Ball_Chest_Pass",
+                          "name":  "Arremesso de Medicine Ball no Peito",
+                          "group":  "Peito"
+                      },
+                      {
+                          "id":  "Chest_Push_multiple_response",
+                          "name":  "Arremesso de Peito (Resposta Múltipla)",
+                          "group":  "Peito"
+                      },
+                      {
+                          "id":  "Chest_Push_single_response",
+                          "name":  "Arremesso de Peito (Resposta Única)",
+                          "group":  "Peito"
+                      },
+                      {
+                          "id":  "Chest_Push_from_3_point_stance",
+                          "name":  "Arremesso de Peito com Base de Três Pontos",
+                          "group":  "Peito"
+                      },
+                      {
+                          "id":  "Chest_Push_with_Run_Release",
+                          "name":  "Arremesso de Peito com Corrida Após o Lançamento",
+                          "group":  "Peito"
+                      },
+                      {
+                          "id":  "Butterfly",
+                          "name":  "Butterfly",
+                          "group":  "Peito"
+                      },
+                      {
+                          "id":  "Isometric_Chest_Squeezes",
+                          "name":  "Compressões Isométricas do Peito",
+                          "group":  "Peito"
+                      },
+                      {
+                          "id":  "Elbows_Back",
+                          "name":  "Cotovelos para Trás",
+                          "group":  "Peito"
+                      },
+                      {
+                          "id":  "Single-Arm_Cable_Crossover",
+                          "name":  "Crossover com Cabo Unilateral",
+                          "group":  "Peito"
+                      },
+                      {
+                          "id":  "Cross_Over_-_With_Bands",
+                          "name":  "Crossover com Faixas Elásticas",
+                          "group":  "Peito"
+                      },
+                      {
+                          "id":  "Cable_Crossover",
+                          "name":  "Crossover na Polia",
+                          "group":  "Peito"
+                      },
+                      {
+                          "id":  "Low_Cable_Crossover",
+                          "name":  "Crossover na Polia Baixa",
+                          "group":  "Peito"
+                      },
+                      {
+                          "id":  "Dumbbell_Flyes",
+                          "name":  "Crucifixo com Halteres",
+                          "group":  "Peito"
+                      },
+                      {
+                          "id":  "Decline_Dumbbell_Flyes",
+                          "name":  "Crucifixo Declinado com Halteres",
+                          "group":  "Peito"
+                      },
+                      {
+                          "id":  "Incline_Dumbbell_Flyes",
+                          "name":  "Crucifixo Inclinado com Halteres",
+                          "group":  "Peito"
+                      },
+                      {
+                          "id":  "Incline_Dumbbell_Flyes_-_With_A_Twist",
+                          "name":  "Crucifixo Inclinado com Halteres - Com Torção",
+                          "group":  "Peito"
+                      },
+                      {
+                          "id":  "Cable_Iron_Cross",
+                          "name":  "Crucifixo na Polia (Iron Cross)",
+                          "group":  "Peito"
+                      },
+                      {
+                          "id":  "Flat_Bench_Cable_Flyes",
+                          "name":  "Crucifixo no Cabo com Banco Plano",
+                          "group":  "Peito"
+                      },
+                      {
+                          "id":  "One-Arm_Flat_Bench_Dumbbell_Flye",
+                          "name":  "Crucifixo Unilateral no Banco Plano com Halter",
+                          "group":  "Peito"
+                      },
+                      {
+                          "id":  "Front_Raise_And_Pullover",
+                          "name":  "Elevação Frontal e Pullover",
+                          "group":  "Peito"
+                      },
+                      {
+                          "id":  "Heavy_Bag_Thrust",
+                          "name":  "Empurrão no Saco Pesado",
+                          "group":  "Peito"
+                      },
+                      {
+                          "id":  "Push-Up_Wide",
+                          "name":  "Flexão com Apoio Ampla",
+                          "group":  "Peito"
+                      },
+                      {
+                          "id":  "Push-Ups_With_Feet_Elevated",
+                          "name":  "Flexão com Pés Elevados",
+                          "group":  "Peito"
+                      },
+                      {
+                          "id":  "Push-Ups_With_Feet_On_An_Exercise_Ball",
+                          "name":  "Flexão com Pés em Bola de Exercício",
+                          "group":  "Peito"
+                      },
+                      {
+                          "id":  "Drop_Push",
+                          "name":  "Flexão com Queda",
+                          "group":  "Peito"
+                      },
+                      {
+                          "id":  "Clock_Push-Up",
+                          "name":  "Flexão em Relógio",
+                          "group":  "Peito"
+                      },
+                      {
+                          "id":  "Incline_Push-Up",
+                          "name":  "Flexão Inclinada",
+                          "group":  "Peito"
+                      },
+                      {
+                          "id":  "Incline_Push-Up_Reverse_Grip",
+                          "name":  "Flexão Inclinada com Pegada Invertida",
+                          "group":  "Peito"
+                      },
+                      {
+                          "id":  "Incline_Push-Up_Wide",
+                          "name":  "Flexão Inclinada com Pegada Larga",
+                          "group":  "Peito"
+                      },
+                      {
+                          "id":  "Incline_Push-Up_Medium",
+                          "name":  "Flexão Inclinada com Pegada Média",
+                          "group":  "Peito"
+                      },
+                      {
+                          "id":  "Decline_Push-Up",
+                          "name":  "Flexão no Banco Declinado",
+                          "group":  "Peito"
+                      },
+                      {
+                          "id":  "Push_Up_to_Side_Plank",
+                          "name":  "Flexão para Prancha Lateral",
+                          "group":  "Peito"
+                      },
+                      {
+                          "id":  "Plyo_Push-up",
+                          "name":  "Flexão Plyométrica",
+                          "group":  "Peito"
+                      },
+                      {
+                          "id":  "Suspended_Push-Up",
+                          "name":  "Flexão Suspensa",
+                          "group":  "Peito"
+                      },
+                      {
+                          "id":  "Single-Arm_Push-Up",
+                          "name":  "Flexão Unilateral",
+                          "group":  "Peito"
+                      },
+                      {
+                          "id":  "Pushups",
+                          "name":  "Flexões",
+                          "group":  "Peito"
+                      },
+                      {
+                          "id":  "Pushups_Close_and_Wide_Hand_Positions",
+                          "name":  "Flexões (Posições de Mãos Fechada e Ampla)",
+                          "group":  "Peito"
+                      },
+                      {
+                          "id":  "Plyo_Kettlebell_Pushups",
+                          "name":  "Flexões Plyométricas com Kettlebell",
+                          "group":  "Peito"
+                      },
+                      {
+                          "id":  "Incline_Cable_Flye",
+                          "name":  "Fly com Cabos em Inclinação",
+                          "group":  "Peito"
+                      },
+                      {
+                          "id":  "Bodyweight_Flyes",
+                          "name":  "Flyes Corporal",
+                          "group":  "Peito"
+                      },
+                      {
+                          "id":  "Isometric_Wipers",
+                          "name":  "Isométrico Limpador de Para-brisa",
+                          "group":  "Peito"
+                      },
+                      {
+                          "id":  "Dips_-_Chest_Version",
+                          "name":  "Mergulho - Versão Peitoral",
+                          "group":  "Peito"
+                      },
+                      {
+                          "id":  "Standing_Cable_Chest_Press",
+                          "name":  "Press de Peito com Cabos em Pé",
+                          "group":  "Peito"
+                      },
+                      {
+                          "id":  "Svend_Press",
+                          "name":  "Press de Svend",
+                          "group":  "Peito"
+                      },
+                      {
+                          "id":  "Cable_Chest_Press",
+                          "name":  "Press no Cabo",
+                          "group":  "Peito"
+                      },
+                      {
+                          "id":  "Incline_Cable_Chest_Press",
+                          "name":  "Press no Peito com Cabos em Inclinação",
+                          "group":  "Peito"
+                      },
+                      {
+                          "id":  "Neck_Press",
+                          "name":  "Press no Pescoço",
+                          "group":  "Peito"
+                      },
+                      {
+                          "id":  "Extended_Range_One-Arm_Kettlebell_Floor_Press",
+                          "name":  "Pressão de Kettlebell no Chão com Amplitude Estendida Unilateral",
+                          "group":  "Peito"
+                      },
+                      {
+                          "id":  "Wide-Grip_Decline_Barbell_Pullover",
+                          "name":  "Pullover com Barra em Banco Declinado e Pegada Larga",
+                          "group":  "Peito"
+                      },
+                      {
+                          "id":  "Bent-Arm_Dumbbell_Pullover",
+                          "name":  "Pullover com Halter e Braços Flexionados",
+                          "group":  "Peito"
+                      },
+                      {
+                          "id":  "Straight-Arm_Dumbbell_Pullover",
+                          "name":  "Pullover com Halteres Braços Retos",
+                          "group":  "Peito"
+                      },
+                      {
+                          "id":  "Incline_Push-Up_Depth_Jump",
+                          "name":  "Salto em Profundidade com Flexão Inclinada",
+                          "group":  "Peito"
+                      },
+                      {
+                          "id":  "Alternating_Floor_Press",
+                          "name":  "Supino Alternado no Chão",
+                          "group":  "Peito"
+                      },
+                      {
+                          "id":  "Chain_Press",
+                          "name":  "Supino com Correntes",
+                          "group":  "Peito"
+                      },
+                      {
+                          "id":  "Bench_Press_-_With_Bands",
+                          "name":  "Supino com Elásticos",
+                          "group":  "Peito"
+                      },
+                      {
+                          "id":  "One_Arm_Dumbbell_Bench_Press",
+                          "name":  "Supino com Halter e uma Mão",
+                          "group":  "Peito"
+                      },
+                      {
+                          "id":  "Dumbbell_Bench_Press",
+                          "name":  "Supino com Halteres",
+                          "group":  "Peito"
+                      },
+                      {
+                          "id":  "Dumbbell_Bench_Press_with_Neutral_Grip",
+                          "name":  "Supino com Halteres e Pegada Neutra",
+                          "group":  "Peito"
+                      },
+                      {
+                          "id":  "Incline_Dumbbell_Bench_With_Palms_Facing_In",
+                          "name":  "Supino com Halteres em Inclinação e Palmas Voltadas para Dentro",
+                          "group":  "Peito"
+                      },
+                      {
+                          "id":  "Decline_Barbell_Bench_Press",
+                          "name":  "Supino Declinado com Barra",
+                          "group":  "Peito"
+                      },
+                      {
+                          "id":  "Wide-Grip_Decline_Barbell_Bench_Press",
+                          "name":  "Supino Declinado com Barra e Pegada Larga",
+                          "group":  "Peito"
+                      },
+                      {
+                          "id":  "Decline_Dumbbell_Bench_Press",
+                          "name":  "Supino Declinado com Halteres",
+                          "group":  "Peito"
+                      },
+                      {
+                          "id":  "Leverage_Decline_Chest_Press",
+                          "name":  "Supino Declinado na Máquina de Alavanca",
+                          "group":  "Peito"
+                      },
+                      {
+                          "id":  "Smith_Machine_Decline_Press",
+                          "name":  "Supino Declinado no Smith Machine",
+                          "group":  "Peito"
+                      },
+                      {
+                          "id":  "Barbell_Guillotine_Bench_Press",
+                          "name":  "Supino Guilhotina com Barra",
+                          "group":  "Peito"
+                      },
+                      {
+                          "id":  "Barbell_Incline_Bench_Press_-_Medium_Grip",
+                          "name":  "Supino Inclinado com Barra - Pegada Média",
+                          "group":  "Peito"
+                      },
+                      {
+                          "id":  "Incline_Dumbbell_Press",
+                          "name":  "Supino Inclinado com Halteres",
+                          "group":  "Peito"
+                      },
+                      {
+                          "id":  "Hammer_Grip_Incline_DB_Bench_Press",
+                          "name":  "Supino Inclinado com Halteres em Pegada Neutra",
+                          "group":  "Peito"
+                      },
+                      {
+                          "id":  "Leverage_Incline_Chest_Press",
+                          "name":  "Supino Inclinado na Máquina de Alavanca",
+                          "group":  "Peito"
+                      },
+                      {
+                          "id":  "Smith_Machine_Incline_Bench_Press",
+                          "name":  "Supino Inclinado no Smith Machine",
+                          "group":  "Peito"
+                      },
+                      {
+                          "id":  "Machine_Bench_Press",
+                          "name":  "Supino Máquina",
+                          "group":  "Peito"
+                      },
+                      {
+                          "id":  "Leverage_Chest_Press",
+                          "name":  "Supino na Máquina de Alavanca",
+                          "group":  "Peito"
+                      },
+                      {
+                          "id":  "Leg-Over_Floor_Press",
+                          "name":  "Supino no Chão com Perna Cruzada",
+                          "group":  "Peito"
+                      },
+                      {
+                          "id":  "One-Arm_Kettlebell_Floor_Press",
+                          "name":  "Supino no Chão Unilateral com Kettlebell",
+                          "group":  "Peito"
+                      },
+                      {
+                          "id":  "Decline_Smith_Press",
+                          "name":  "Supino no Smith com Banco Declinado",
+                          "group":  "Peito"
+                      },
+                      {
+                          "id":  "Smith_Machine_Bench_Press",
+                          "name":  "Supino no Smith Machine",
+                          "group":  "Peito"
+                      },
+                      {
+                          "id":  "Barbell_Bench_Press_-_Medium_Grip",
+                          "name":  "Supino Reto com Barra - Pegada Média",
+                          "group":  "Peito"
+                      },
+                      {
+                          "id":  "Wide-Grip_Barbell_Bench_Press",
+                          "name":  "Supino Reto com Barra e Pegada Larga",
+                          "group":  "Peito"
+                      },
+                      {
+                          "id":  "Thigh_Abductor",
+                          "name":  "Abdutor de Coxas",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Band_Hip_Adductions",
+                          "name":  "Adução de Quadril com Banda",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Cable_Hip_Adduction",
+                          "name":  "Adução de Quadril na Polia",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Adductor",
+                          "name":  "Adutor com Rolo de Espuma",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Thigh_Adductor",
+                          "name":  "Adutor de Coxas",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Adductor_Groin",
+                          "name":  "Adutor/Virilha com Parceiro",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Barbell_Walking_Lunge",
+                          "name":  "Afundo Caminhando com Barra",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Bodyweight_Walking_Lunge",
+                          "name":  "Afundo Caminhando Corporal",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Barbell_Lunge",
+                          "name":  "Afundo com Barra",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Dumbbell_Lunges",
+                          "name":  "Afundo com Halteres",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Lunge_Pass_Through",
+                          "name":  "Afundo com Passagem de Kettlebell",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Lunge_Sprint",
+                          "name":  "Afundo Explosivo no Smith",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Dumbbell_Rear_Lunge",
+                          "name":  "Afundo Posterior com Halteres",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Elevated_Back_Lunge",
+                          "name":  "Afundo Posterior Elevado",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Split_Squats",
+                          "name":  "Afundos com Salto",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Dumbbell_Squat_To_A_Bench",
+                          "name":  "Agachamento até o Banco com Halteres",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Smith_Single-Leg_Split_Squat",
+                          "name":  "Agachamento Búlgaro no Smith",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Suspended_Split_Squat",
+                          "name":  "Agachamento Búlgaro Suspenso",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Barbell_Squat",
+                          "name":  "Agachamento com Barra",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Barbell_Squat_To_A_Bench",
+                          "name":  "Agachamento com Barra até o Banco",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Wide_Stance_Barbell_Squat",
+                          "name":  "Agachamento com Barra em Pé Afastado",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Overhead_Squat",
+                          "name":  "Agachamento com Barra por Cima da Cabeça",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Squat_with_Chains",
+                          "name":  "Agachamento com Correntes",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Squat_with_Plate_Movers",
+                          "name":  "Agachamento com Deslocamento de Anilhas",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Squat_with_Bands",
+                          "name":  "Agachamento com Elásticos",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Dumbbell_Squat",
+                          "name":  "Agachamento com Halteres",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "One-Arm_Overhead_Kettlebell_Squats",
+                          "name":  "Agachamento com Kettlebell Acima da Cabeça e uma Mão",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Weighted_Squat",
+                          "name":  "Agachamento com Peso",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Narrow_Stance_Squats",
+                          "name":  "Agachamento com Postura Fechada",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Weighted_Jump_Squat",
+                          "name":  "Agachamento com Salto e Peso",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Freehand_Jump_Squat",
+                          "name":  "Agachamento com Salto Livre",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Bodyweight_Squat",
+                          "name":  "Agachamento Corporal",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Reverse_Band_Power_Squat",
+                          "name":  "Agachamento de Potência com Banda Reversa",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Single-Leg_High_Box_Squat",
+                          "name":  "Agachamento em Caixa Alta Unilateral",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Speed_Box_Squat",
+                          "name":  "Agachamento em Caixa de Velocidade",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Frankenstein_Squat",
+                          "name":  "Agachamento Frankenstein",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Front_Squat_Clean_Grip",
+                          "name":  "Agachamento Frontal (Pegada de Arranco)",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Front_Barbell_Squat",
+                          "name":  "Agachamento Frontal com Barra",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Front_Barbell_Squat_To_A_Bench",
+                          "name":  "Agachamento Frontal com Barra até um Banco",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Front_Squats_With_Two_Kettlebells",
+                          "name":  "Agachamento Frontal com Dois Kettlebells",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Goblet_Squat",
+                          "name":  "Agachamento Goblet",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Hack_Squat",
+                          "name":  "Agachamento Hack",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Barbell_Hack_Squat",
+                          "name":  "Agachamento Hack com Barra",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Narrow_Stance_Hack_Squats",
+                          "name":  "Agachamento Hack com Postura Fechada",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Jefferson_Squats",
+                          "name":  "Agachamento Jefferson",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Barbell_Side_Split_Squat",
+                          "name":  "Agachamento Lateral com Barra",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Barbell_Full_Squat",
+                          "name":  "Agachamento Livre com Barra",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Chair_Squat",
+                          "name":  "Agachamento na Cadeira",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Box_Squat",
+                          "name":  "Agachamento na Caixa",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Reverse_Band_Box_Squat",
+                          "name":  "Agachamento na Caixa com Banda Reversa",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Box_Squat_with_Chains",
+                          "name":  "Agachamento na Caixa com Correntes",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Box_Squat_with_Bands",
+                          "name":  "Agachamento na Caixa com Elásticos",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Lying_Machine_Squat",
+                          "name":  "Agachamento na Máquina Deitado",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Jerk_Dip_Squat",
+                          "name":  "Agachamento no Fundo do Arranco",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Smith_Machine_Squat",
+                          "name":  "Agachamento no Smith",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Olympic_Squat",
+                          "name":  "Agachamento Olímpico",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Kettlebell_Pistol_Squat",
+                          "name":  "Agachamento Pistol com Kettlebell",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Smith_Machine_Pistol_Squat",
+                          "name":  "Agachamento Pistol no Smith Machine",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Weighted_Sissy_Squat",
+                          "name":  "Agachamento Sissy com Peso",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Plie_Dumbbell_Squat",
+                          "name":  "Agachamento Sumô com Halter",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "One_Leg_Barbell_Squat",
+                          "name":  "Agachamento Unilateral com Barra",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Zercher_Squats",
+                          "name":  "Agachamento Zercher",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Squats_-_With_Bands",
+                          "name":  "Agachamentos com Elásticos",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Speed_Squats",
+                          "name":  "Agachamentos de Velocidade",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Sit_Squats",
+                          "name":  "Agachamentos Parciais",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "IT_Band_and_Glute_Stretch",
+                          "name":  "Alongamento de Banda Iliotibial e Glúteo",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Runners_Stretch",
+                          "name":  "Alongamento de Corredor",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Upper_Back-Leg_Grab",
+                          "name":  "Alongamento de Costas e Pernas",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Standing_Hip_Flexors",
+                          "name":  "Alongamento de Flexores do Quadril em Pé",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Hamstring_Stretch",
+                          "name":  "Alongamento de Isquiotibiais",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Leg-Up_Hamstring_Stretch",
+                          "name":  "Alongamento de Isquiotibiais com Perna Elevada",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Lying_Hamstring",
+                          "name":  "Alongamento de Isquiotibiais Deitado",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Seated_Hamstring_and_Calf_Stretch",
+                          "name":  "Alongamento de Isquiotibiais e Panturrilha Sentado",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Seated_Hamstring",
+                          "name":  "Alongamento de Isquiotibiais Sentado",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Seated_Floor_Hamstring_Stretch",
+                          "name":  "Alongamento de Isquiotibiais Sentado no Chão",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Chair_Leg_Extended_Stretch",
+                          "name":  "Alongamento de Perna Estendida na Cadeira",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Standing_Hamstring_and_Calf_Stretch",
+                          "name":  "Alongamento de Posterior de Coxa e Panturrilha em Pé",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Quad_Stretch",
+                          "name":  "Alongamento de Quadríceps",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "On-Your-Back_Quad_Stretch",
+                          "name":  "Alongamento de Quadríceps de Costas",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "On_Your_Side_Quad_Stretch",
+                          "name":  "Alongamento de Quadríceps de Lado",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Standing_Elevated_Quad_Stretch",
+                          "name":  "Alongamento de Quadríceps Elevado em Pé",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "All_Fours_Quad_Stretch",
+                          "name":  "Alongamento de Quadríceps em Quatro Apoios",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Lying_Bent_Leg_Groin",
+                          "name":  "Alongamento de Virilha com Pernas Dobradas Deitado",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Groin_and_Back_Stretch",
+                          "name":  "Alongamento de Virilha e Costas",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Side_Lying_Groin_Stretch",
+                          "name":  "Alongamento de Virilha em Decúbito Lateral",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Kneeling_Hip_Flexor",
+                          "name":  "Alongamento do Flexor do Quadril Ajoelhado",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "The_Straddle",
+                          "name":  "Alongamento em V",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Intermediate_Hip_Flexor_and_Quad_Stretch",
+                          "name":  "Alongamento Intermediário de Flexores do Quadril e Quadríceps",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Intermediate_Groin_Stretch",
+                          "name":  "Alongamento Intermediário de Virilha",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Worlds_Greatest_Stretch",
+                          "name":  "Alongamento Mais Completo do Mundo",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Power_Clean",
+                          "name":  "Arranco (Power Clean)",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Snatch",
+                          "name":  "Arranco (Snatch)",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Snatch_from_Blocks",
+                          "name":  "Arranco a Partir de Blocos",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Alternating_Hang_Clean",
+                          "name":  "Arranco Alternado a Partir da Suspensão",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Dumbbell_Clean",
+                          "name":  "Arranco com Halteres",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Power_Snatch",
+                          "name":  "Arranco de Força",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Power_Snatch_from_Blocks",
+                          "name":  "Arranco de Força a Partir de Blocos",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Split_Snatch",
+                          "name":  "Arranco em Afundo",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Muscle_Snatch",
+                          "name":  "Arranco Muscular",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Hang_Clean_-_Below_the_Knees",
+                          "name":  "Arranco Parado - Abaixo dos Joelhos",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Hang_Clean",
+                          "name":  "Arranco Parado (Hang Clean)",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Sled_Drag_-_Harness",
+                          "name":  "Arrasto de Trenó com Arnês",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Bear_Crawl_Sled_Drags",
+                          "name":  "Arrasto de Trenó em Posição de Urso",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Backward_Drag",
+                          "name":  "Arrasto para Trás",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Split_Jerk",
+                          "name":  "Arremesso com Divisão",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Split_Clean",
+                          "name":  "Arremesso com Divisão de Pernas",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Power_Jerk",
+                          "name":  "Arremesso de Força (Power Jerk)",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Squat_Jerk",
+                          "name":  "Arremesso em Agachamento",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Hang_Snatch_-_Below_Knees",
+                          "name":  "Arremesso Parado - Abaixo dos Joelhos",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Hang_Snatch",
+                          "name":  "Arremesso Parado (Hang Snatch)",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Hamstring-SMR",
+                          "name":  "Auto-Massagem de Isquiotibiais",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "One-Arm_Kettlebell_Swings",
+                          "name":  "Balancê com Kettlebell de Um Braço",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Vertical_Swing",
+                          "name":  "Balancê Vertical com Halter",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Recumbent_Bike",
+                          "name":  "Bicicleta Recumbente",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Good_Morning",
+                          "name":  "Bom Dia",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Good_Morning_off_Pins",
+                          "name":  "Bom Dia a Partir dos Pinos",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Band_Good_Morning",
+                          "name":  "Bom Dia com Banda",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Hanging_Bar_Good_Morning",
+                          "name":  "Bom Dia com Barra Suspensa",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Band_Good_Morning_Pull_Through",
+                          "name":  "Bom Dia com Puxada de Banda",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Lying_Leg_Curls",
+                          "name":  "Cadeira Flexora",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Seated_Leg_Curl",
+                          "name":  "Cadeira Flexora Sentada",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Yoke_Walk",
+                          "name":  "Caminhada com Yoke",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Monster_Walk",
+                          "name":  "Caminhada de Monstro",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Walking_Treadmill",
+                          "name":  "Caminhada na Esteira",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Sandbag_Load",
+                          "name":  "Carregamento de Saco de Areia",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Double_Leg_Butt_Kick",
+                          "name":  "Chute no Glúteo com Duas Pernas",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Single_Leg_Butt_Kick",
+                          "name":  "Chute no Glúteo Unilateral",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Bicycling",
+                          "name":  "Ciclismo",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Bicycling_Stationary",
+                          "name":  "Ciclismo Estacionário",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Hip_Circles_prone",
+                          "name":  "Círculos de Quadril (de quatro)",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Standing_Hip_Circles",
+                          "name":  "Círculos de Quadril em Pé",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Clean",
+                          "name":  "Clean",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Clean_from_Blocks",
+                          "name":  "Clean a Partir de Blocos",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Double_Kettlebell_Alternating_Hang_Clean",
+                          "name":  "Clean Alternado com Duas Kettlebells em Suspensão",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Open_Palm_Kettlebell_Clean",
+                          "name":  "Clean com Kettlebell e Palma Aberta",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Kettlebell_Dead_Clean",
+                          "name":  "Clean Morto com Kettlebell",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Kettlebell_Hang_Clean",
+                          "name":  "Clean Suspenso com Kettlebell",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "One-Arm_Kettlebell_Clean",
+                          "name":  "Clean Unilateral com Kettlebell",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Prowler_Sprint",
+                          "name":  "Corrida com Prowler",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Jogging_Treadmill",
+                          "name":  "Corrida na Esteira",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Bench_Sprint",
+                          "name":  "Corrida no Banco",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Trail_Running_Walking",
+                          "name":  "Corrida/Caminhada em Trilha",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Lying_Crossover",
+                          "name":  "Crossover Deitado",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Snatch_Deadlift",
+                          "name":  "Deadlift de Arranco",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Platform_Hamstring_Slides",
+                          "name":  "Deslizamento de Isquiotibiais no Chão",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Single-Cone_Sprint_Drill",
+                          "name":  "Drill de Sprint com Cone Único",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Natural_Glute_Ham_Raise",
+                          "name":  "Elevação de Glúteos e Isquiotibiais Natural",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Front_Leg_Raises",
+                          "name":  "Elevação de Perna Frontal",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Rear_Leg_Raises",
+                          "name":  "Elevação de Perna Traseira",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Floor_Glute-Ham_Raise",
+                          "name":  "Elevação Glúteo-Isquiostibial no Chão",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Side_Leg_Raises",
+                          "name":  "Elevação Lateral de Perna",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Elliptical_Trainer",
+                          "name":  "Elíptico",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Sled_Push",
+                          "name":  "Empurrão de Trenó",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Power_Stairs",
+                          "name":  "Escada de Força",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Stairmaster",
+                          "name":  "Escada Ergométrica",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Mountain_Climbers",
+                          "name":  "Escalador",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Linear_Acceleration_Wall_Drill",
+                          "name":  "Exercício de Aceleração Linear na Parede",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Leg_Extensions",
+                          "name":  "Extensão de Pernas",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Single-Leg_Leg_Extension",
+                          "name":  "Extensão de Pernas Unilateral",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Prone_Manual_Hamstring",
+                          "name":  "Flexão de Joelho em Decúbito Ventral com Resistência Manual",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Ball_Leg_Curl",
+                          "name":  "Flexão de Pernas com Bola",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Standing_Leg_Curl",
+                          "name":  "Flexão de Pernas em Pé",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Seated_Band_Hamstring_Curl",
+                          "name":  "Flexão de Pernas Sentado com Banda",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Hip_Flexion_with_Band",
+                          "name":  "Flexão de Quadril com Banda",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Glute_Ham_Raise",
+                          "name":  "Glute-Ham Raise",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Groiners",
+                          "name":  "Groiners",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Reverse_Hyperextension",
+                          "name":  "Hiperextensão Reversa",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Single_Leg_Push-off",
+                          "name":  "Impulso Unilateral",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Iron_Crosses_stretch",
+                          "name":  "Iron Crosses (alongamento)",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "90_90_Hamstring",
+                          "name":  "Isquiotibiais 90/90",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "One-Arm_Open_Palm_Kettlebell_Clean",
+                          "name":  "Kettlebell Clean com uma Mão e Palma Aberta",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Inchworm",
+                          "name":  "Lagarta",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Leg_Press",
+                          "name":  "Leg Press",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Narrow_Stance_Leg_Press",
+                          "name":  "Leg Press com Postura Fechada",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Smith_Machine_Leg_Press",
+                          "name":  "Leg Press no Smith Machine",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Trap_Bar_Deadlift",
+                          "name":  "Levantamento Terra com Barra Hexagonal",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Stiff-Legged_Dumbbell_Deadlift",
+                          "name":  "Levantamento Terra com Halteres Pernas Estendidas",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Stiff-Legged_Barbell_Deadlift",
+                          "name":  "Levantamento Terra com Pernas Rígidas",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Rickshaw_Deadlift",
+                          "name":  "Levantamento Terra com Rickshaw",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Car_Deadlift",
+                          "name":  "Levantamento Terra de Carro",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "One-Arm_Side_Deadlift",
+                          "name":  "Levantamento Terra Lateral com uma Mão",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Leverage_Deadlift",
+                          "name":  "Levantamento Terra na Máquina de Alavanca",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Cable_Deadlifts",
+                          "name":  "Levantamento Terra na Polia",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Clean_Deadlift",
+                          "name":  "Levantamento Terra para Clean",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Romanian_Deadlift",
+                          "name":  "Levantamento Terra Romeno",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Romanian_Deadlift_from_Deficit",
+                          "name":  "Levantamento Terra Romeno com Déficit",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Sumo_Deadlift",
+                          "name":  "Levantamento Terra Sumô",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Reverse_Band_Sumo_Deadlift",
+                          "name":  "Levantamento Terra Sumô com Banda Reversa",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Sumo_Deadlift_with_Chains",
+                          "name":  "Levantamento Terra Sumô com Correntes",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Sumo_Deadlift_with_Bands",
+                          "name":  "Levantamento Terra Sumô com Elásticos",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Iliotibial_Tract-SMR",
+                          "name":  "Liberação Miofascial da Banda Iliotibial",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Quadriceps-SMR",
+                          "name":  "Liberação Miofascial do Quadríceps",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "One_Half_Locust",
+                          "name":  "Meia-Locusta Unilateral",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Windmills",
+                          "name":  "Moinhos de Vento",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Looking_At_Ceiling",
+                          "name":  "Olhando para o Teto",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Carioca_Quick_Step",
+                          "name":  "Passo Rápido Carioca",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Skating",
+                          "name":  "Patinação",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Fast_Skipping",
+                          "name":  "Polichinelo Rápido",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Smith_Machine_Hang_Power_Clean",
+                          "name":  "Power Clean a Partir do Joelho no Smith Machine",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Single-Leg_Hop_Progression",
+                          "name":  "Progressão de Salto Unilateral",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Rope_Jumping",
+                          "name":  "Pular Corda",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Star_Jump",
+                          "name":  "Pulo Estrela",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Box_Skip",
+                          "name":  "Pulo na Caixa",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Snatch_Pull",
+                          "name":  "Puxada de Arranco",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Clean_Pull",
+                          "name":  "Puxada para Clean",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Lying_Prone_Quadriceps",
+                          "name":  "Quadríceps Deitado Prono",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Rowing_Stationary",
+                          "name":  "Remo Ergométrico",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Conans_Wheel",
+                          "name":  "Roda de Conan",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Stride_Jump_Crossover",
+                          "name":  "Salto com Crossover em Caixa",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Knee_Tuck_Jump",
+                          "name":  "Salto com Joelhos ao Peito",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Single-Leg_Stride_Jump",
+                          "name":  "Salto com Passada Unilateral",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Alternate_Leg_Diagonal_Bound",
+                          "name":  "Salto Diagonal Alternado com as Pernas",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Split_Jump",
+                          "name":  "Salto em Afundo",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Standing_Long_Jump",
+                          "name":  "Salto em Distância em Pé",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Side_Standing_Long_Jump",
+                          "name":  "Salto em Distância Lateral",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Depth_Jump_Leap",
+                          "name":  "Salto em Profundidade com Salto",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Linear_Depth_Jump",
+                          "name":  "Salto em Profundidade Linear",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Rocket_Jump",
+                          "name":  "Salto Foguete",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Lateral_Bound",
+                          "name":  "Salto Lateral",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Side_Hop-Sprint",
+                          "name":  "Salto Lateral com Sprint",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Lateral_Box_Jump",
+                          "name":  "Salto Lateral na Caixa",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Single-Leg_Lateral_Hop",
+                          "name":  "Salto Lateral Unilateral",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Box_Jump_Multiple_Response",
+                          "name":  "Salto na Caixa (Resposta Múltipla)",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Front_Box_Jump",
+                          "name":  "Salto na Caixa Frontal",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Dumbbell_Seated_Box_Jump",
+                          "name":  "Salto na Caixa Sentado com Halteres",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Bench_Jump",
+                          "name":  "Salto no Banco",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Quick_Leap",
+                          "name":  "Salto Rápido",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Scissors_Jump",
+                          "name":  "Salto Tesoura",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Frog_Hops",
+                          "name":  "Saltos de Sapo",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Front_Cone_Hops_or_hurdle_hops",
+                          "name":  "Saltos Frontais sobre Cones (ou obstáculos)",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Lateral_Cone_Hops",
+                          "name":  "Saltos Laterais com Cones",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Hurdle_Hops",
+                          "name":  "Saltos sobre Barreiras",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Moving_Claw_Series",
+                          "name":  "Série de Movimentos de Corrida Dinâmica",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Side_to_Side_Box_Shuffle",
+                          "name":  "Shuffle Lateral na Caixa",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Snatch_Balance",
+                          "name":  "Snatch Balance",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Heaving_Snatch_Balance",
+                          "name":  "Snatch Balance com Impulso",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Step_Mill",
+                          "name":  "Step Mill",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Barbell_Step_Ups",
+                          "name":  "Step Up com Barra",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Dumbbell_Step_Ups",
+                          "name":  "Step Up com Halteres",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Wide_Stance_Stiff_Legs",
+                          "name":  "Stiff-Leg com Base Larga",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Kettlebell_One-Legged_Deadlift",
+                          "name":  "Stiff-Legged com Kettlebell em Uma Perna",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Smith_Machine_Stiff-Legged_Deadlift",
+                          "name":  "Stiff-Legged Deadlift no Smith",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Linear_3-Part_Start_Technique",
+                          "name":  "Técnica de Partida Linear em 3 Partes",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Standing_Toe_Touches",
+                          "name":  "Toque nos Pés em Pé",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Tire_Flip",
+                          "name":  "Virada de Pneu",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  "Chin_To_Chest_Stretch",
+                          "name":  "Alongamento de Queixo ao Peito",
+                          "group":  "Pescoço"
+                      },
+                      {
+                          "id":  "Side_Neck_Stretch",
+                          "name":  "Alongamento Lateral do Pescoço",
+                          "group":  "Pescoço"
+                      },
+                      {
+                          "id":  "Isometric_Neck_Exercise_-_Front_And_Back",
+                          "name":  "Exercício Isométrico de Pescoço - Frente e Costas",
+                          "group":  "Pescoço"
+                      },
+                      {
+                          "id":  "Isometric_Neck_Exercise_-_Sides",
+                          "name":  "Exercício Isométrico de Pescoço - Laterais",
+                          "group":  "Pescoço"
+                      },
+                      {
+                          "id":  "Neck-SMR",
+                          "name":  "Liberação Miofascial do Pescoço",
+                          "group":  "Pescoço"
+                      },
+                      {
+                          "id":  "Lying_Face_Down_Plate_Neck_Resistance",
+                          "name":  "Resistência de Pescoço com Anilha Deitado de Bruços",
+                          "group":  "Pescoço"
+                      },
+                      {
+                          "id":  "Lying_Face_Up_Plate_Neck_Resistance",
+                          "name":  "Resistência de Pescoço com Anilha Deitado de Costas",
+                          "group":  "Pescoço"
+                      },
+                      {
+                          "id":  "Seated_Head_Harness_Neck_Resistance",
+                          "name":  "Resistência de Pescoço com Cinta Sentado",
+                          "group":  "Pescoço"
+                      },
+                      {
+                          "id":  "Triceps_Stretch",
+                          "name":  "Alongamento de Tríceps",
+                          "group":  "Tríceps"
+                      },
+                      {
+                          "id":  "Overhead_Triceps",
+                          "name":  "Alongamento de Tríceps com Braço Elevado",
+                          "group":  "Tríceps"
+                      },
+                      {
+                          "id":  "Tricep_Side_Stretch",
+                          "name":  "Alongamento Lateral de Tríceps",
+                          "group":  "Tríceps"
+                      },
+                      {
+                          "id":  "Supine_Chest_Throw",
+                          "name":  "Arremesso de Peito Supino",
+                          "group":  "Tríceps"
+                      },
+                      {
+                          "id":  "Body-Up",
+                          "name":  "Body-Up",
+                          "group":  "Tríceps"
+                      },
+                      {
+                          "id":  "Chain_Handle_Extension",
+                          "name":  "Extensão com Alças e Correntes",
+                          "group":  "Tríceps"
+                      },
+                      {
+                          "id":  "Triceps_Overhead_Extension_with_Rope",
+                          "name":  "Extensão de Tríceps Atrás da Cabeça com Corda",
+                          "group":  "Tríceps"
+                      },
+                      {
+                          "id":  "Incline_Barbell_Triceps_Extension",
+                          "name":  "Extensão de Tríceps com Barra em Inclinação",
+                          "group":  "Tríceps"
+                      },
+                      {
+                          "id":  "Lying_Close-Grip_Barbell_Triceps_Press_To_Chin",
+                          "name":  "Extensão de Tríceps com Barra em Pegada Fechada até o Queixo Deitado",
+                          "group":  "Tríceps"
+                      },
+                      {
+                          "id":  "Lying_Close-Grip_Barbell_Triceps_Extension_Behind_The_Head",
+                          "name":  "Extensão de Tríceps com Barra em Pegada Fechada Atrás da Cabeça Deitado",
+                          "group":  "Tríceps"
+                      },
+                      {
+                          "id":  "Kneeling_Cable_Triceps_Extension",
+                          "name":  "Extensão de Tríceps com Cabo Ajoelhado",
+                          "group":  "Tríceps"
+                      },
+                      {
+                          "id":  "Standing_Bent-Over_One-Arm_Dumbbell_Triceps_Extension",
+                          "name":  "Extensão de Tríceps com Halter em Pé, Inclinado e Unilateral",
+                          "group":  "Tríceps"
+                      },
+                      {
+                          "id":  "Seated_Bent-Over_One-Arm_Dumbbell_Triceps_Extension",
+                          "name":  "Extensão de Tríceps com Halter Sentado e Inclinado Unilateral",
+                          "group":  "Tríceps"
+                      },
+                      {
+                          "id":  "Dumbbell_One-Arm_Triceps_Extension",
+                          "name":  "Extensão de Tríceps com Halter Unilateral",
+                          "group":  "Tríceps"
+                      },
+                      {
+                          "id":  "Dumbbell_Tricep_Extension_-Pronated_Grip",
+                          "name":  "Extensão de Tríceps com Halteres - Pegada Pronada",
+                          "group":  "Tríceps"
+                      },
+                      {
+                          "id":  "Lying_Dumbbell_Tricep_Extension",
+                          "name":  "Extensão de Tríceps com Halteres Deitado",
+                          "group":  "Tríceps"
+                      },
+                      {
+                          "id":  "Standing_Dumbbell_Triceps_Extension",
+                          "name":  "Extensão de Tríceps com Halteres em Pé",
+                          "group":  "Tríceps"
+                      },
+                      {
+                          "id":  "Standing_Bent-Over_Two-Arm_Dumbbell_Triceps_Extension",
+                          "name":  "Extensão de Tríceps com Halteres em Pé, Inclinado e Bilateral",
+                          "group":  "Tríceps"
+                      },
+                      {
+                          "id":  "Seated_Bent-Over_Two-Arm_Dumbbell_Triceps_Extension",
+                          "name":  "Extensão de Tríceps com Halteres Sentado e Inclinado Bilateral",
+                          "group":  "Tríceps"
+                      },
+                      {
+                          "id":  "Standing_Towel_Triceps_Extension",
+                          "name":  "Extensão de Tríceps com Toalha em Pé",
+                          "group":  "Tríceps"
+                      },
+                      {
+                          "id":  "Decline_Dumbbell_Triceps_Extension",
+                          "name":  "Extensão de Tríceps Declinada com Halteres",
+                          "group":  "Tríceps"
+                      },
+                      {
+                          "id":  "Cable_Incline_Triceps_Extension",
+                          "name":  "Extensão de Tríceps Inclinada na Polia",
+                          "group":  "Tríceps"
+                      },
+                      {
+                          "id":  "Low_Cable_Triceps_Extension",
+                          "name":  "Extensão de Tríceps na Polia Baixa",
+                          "group":  "Tríceps"
+                      },
+                      {
+                          "id":  "Sled_Overhead_Triceps_Extension",
+                          "name":  "Extensão de Tríceps por Cima com Trenó",
+                          "group":  "Tríceps"
+                      },
+                      {
+                          "id":  "One_Arm_Pronated_Dumbbell_Triceps_Extension",
+                          "name":  "Extensão de Tríceps Unilateral com Halter em Pegada Pronada",
+                          "group":  "Tríceps"
+                      },
+                      {
+                          "id":  "One_Arm_Supinated_Dumbbell_Triceps_Extension",
+                          "name":  "Extensão de Tríceps Unilateral com Halter em Pegada Supinada",
+                          "group":  "Tríceps"
+                      },
+                      {
+                          "id":  "Push-Ups_-_Close_Triceps_Position",
+                          "name":  "Flexão com Apoio Fechada para Tríceps",
+                          "group":  "Tríceps"
+                      },
+                      {
+                          "id":  "Close-Grip_Push-Up_off_of_a_Dumbbell",
+                          "name":  "Flexão em Pegada Fechada com Halter",
+                          "group":  "Tríceps"
+                      },
+                      {
+                          "id":  "Incline_Push-Up_Close-Grip",
+                          "name":  "Flexão Inclinada com Pegada Fechada",
+                          "group":  "Tríceps"
+                      },
+                      {
+                          "id":  "JM_Press",
+                          "name":  "JM Press",
+                          "group":  "Tríceps"
+                      },
+                      {
+                          "id":  "Dip_Machine",
+                          "name":  "Máquina de Mergulho",
+                          "group":  "Tríceps"
+                      },
+                      {
+                          "id":  "Dips_-_Triceps_Version",
+                          "name":  "Mergulho - Versão Tríceps",
+                          "group":  "Tríceps"
+                      },
+                      {
+                          "id":  "Parallel_Bar_Dip",
+                          "name":  "Mergulho em Barras Paralelas",
+                          "group":  "Tríceps"
+                      },
+                      {
+                          "id":  "Ring_Dips",
+                          "name":  "Mergulho nas Argolas",
+                          "group":  "Tríceps"
+                      },
+                      {
+                          "id":  "Bench_Dips",
+                          "name":  "Mergulho no Banco",
+                          "group":  "Tríceps"
+                      },
+                      {
+                          "id":  "Weighted_Bench_Dip",
+                          "name":  "Mergulho no Banco com Peso",
+                          "group":  "Tríceps"
+                      },
+                      {
+                          "id":  "Pin_Presses",
+                          "name":  "Press com Pinos",
+                          "group":  "Tríceps"
+                      },
+                      {
+                          "id":  "Tate_Press",
+                          "name":  "Press Tate",
+                          "group":  "Tríceps"
+                      },
+                      {
+                          "id":  "Bench_Press_-_Powerlifting",
+                          "name":  "Supino - Powerlifting",
+                          "group":  "Tríceps"
+                      },
+                      {
+                          "id":  "Close-Grip_EZ-Bar_Press",
+                          "name":  "Supino com Barra W em Pegada Fechada",
+                          "group":  "Tríceps"
+                      },
+                      {
+                          "id":  "Reverse_Band_Bench_Press",
+                          "name":  "Supino com Faixas Invertidas",
+                          "group":  "Tríceps"
+                      },
+                      {
+                          "id":  "Close-Grip_Dumbbell_Press",
+                          "name":  "Supino com Halteres em Pegada Fechada",
+                          "group":  "Tríceps"
+                      },
+                      {
+                          "id":  "Board_Press",
+                          "name":  "Supino com Tábuas",
+                          "group":  "Tríceps"
+                      },
+                      {
+                          "id":  "Decline_Close-Grip_Bench_To_Skull_Crusher",
+                          "name":  "Supino Declinado com Pegada Fechada e Tríceps Testa",
+                          "group":  "Tríceps"
+                      },
+                      {
+                          "id":  "Smith_Machine_Close-Grip_Bench_Press",
+                          "name":  "Supino Fechado no Smith Machine",
+                          "group":  "Tríceps"
+                      },
+                      {
+                          "id":  "Reverse_Triceps_Bench_Press",
+                          "name":  "Supino Invertido para Tríceps",
+                          "group":  "Tríceps"
+                      },
+                      {
+                          "id":  "Floor_Press",
+                          "name":  "Supino no Chão",
+                          "group":  "Tríceps"
+                      },
+                      {
+                          "id":  "Floor_Press_with_Chains",
+                          "name":  "Supino no Chão com Correntes",
+                          "group":  "Tríceps"
+                      },
+                      {
+                          "id":  "Dumbbell_Floor_Press",
+                          "name":  "Supino no Chão com Halteres",
+                          "group":  "Tríceps"
+                      },
+                      {
+                          "id":  "One_Arm_Floor_Press",
+                          "name":  "Supino no Chão com uma Mão",
+                          "group":  "Tríceps"
+                      },
+                      {
+                          "id":  "Close-Grip_Barbell_Bench_Press",
+                          "name":  "Supino Reto com Barra em Pegada Fechada",
+                          "group":  "Tríceps"
+                      },
+                      {
+                          "id":  "Tricep_Dumbbell_Kickback",
+                          "name":  "Tríceps Coice com Halter",
+                          "group":  "Tríceps"
+                      },
+                      {
+                          "id":  "Cable_Rope_Overhead_Triceps_Extension",
+                          "name":  "Tríceps Corda Acima da Cabeça",
+                          "group":  "Tríceps"
+                      },
+                      {
+                          "id":  "Standing_Overhead_Barbell_Triceps_Extension",
+                          "name":  "Tríceps Francês com Barra em Pé",
+                          "group":  "Tríceps"
+                      },
+                      {
+                          "id":  "Standing_One-Arm_Dumbbell_Triceps_Extension",
+                          "name":  "Tríceps Francês com Halter Unilateral em Pé",
+                          "group":  "Tríceps"
+                      },
+                      {
+                          "id":  "Lying_Triceps_Press",
+                          "name":  "Tríceps Francês Deitado",
+                          "group":  "Tríceps"
+                      },
+                      {
+                          "id":  "Cable_Lying_Triceps_Extension",
+                          "name":  "Tríceps Francês na Polia Deitado",
+                          "group":  "Tríceps"
+                      },
+                      {
+                          "id":  "Decline_EZ_Bar_Triceps_Extension",
+                          "name":  "Tríceps Francês no Banco Declinado com Barra W",
+                          "group":  "Tríceps"
+                      },
+                      {
+                          "id":  "Seated_Triceps_Press",
+                          "name":  "Tríceps Francês Sentado",
+                          "group":  "Tríceps"
+                      },
+                      {
+                          "id":  "Speed_Band_Overhead_Triceps",
+                          "name":  "Tríceps Overhead com Banda de Velocidade",
+                          "group":  "Tríceps"
+                      },
+                      {
+                          "id":  "Body_Tricep_Press",
+                          "name":  "Tríceps Press Corporal",
+                          "group":  "Tríceps"
+                      },
+                      {
+                          "id":  "Triceps_Pushdown",
+                          "name":  "Tríceps Pulley",
+                          "group":  "Tríceps"
+                      },
+                      {
+                          "id":  "Standing_Low-Pulley_One-Arm_Triceps_Extension",
+                          "name":  "Tríceps Pulley Baixo Unilateral em Pé",
+                          "group":  "Tríceps"
+                      },
+                      {
+                          "id":  "Triceps_Pushdown_-_V-Bar_Attachment",
+                          "name":  "Tríceps Pulley com Barra V",
+                          "group":  "Tríceps"
+                      },
+                      {
+                          "id":  "Triceps_Pushdown_-_Rope_Attachment",
+                          "name":  "Tríceps Pulley com Corda",
+                          "group":  "Tríceps"
+                      },
+                      {
+                          "id":  "Reverse_Grip_Triceps_Pushdown",
+                          "name":  "Tríceps Pulley com Pegada Invertida",
+                          "group":  "Tríceps"
+                      },
+                      {
+                          "id":  "Machine_Triceps_Extension",
+                          "name":  "Tríceps Pulley Máquina",
+                          "group":  "Tríceps"
+                      },
+                      {
+                          "id":  "Cable_One_Arm_Tricep_Extension",
+                          "name":  "Tríceps Pulley Unilateral",
+                          "group":  "Tríceps"
+                      },
+                      {
+                          "id":  "Band_Skull_Crusher",
+                          "name":  "Tríceps Skull Crusher com Banda",
+                          "group":  "Tríceps"
+                      },
+                      {
+                          "id":  "EZ-Bar_Skullcrusher",
+                          "name":  "Tríceps Testa com Barra W",
+                          "group":  "Tríceps"
+                      }
+                  ]
+}

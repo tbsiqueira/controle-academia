@@ -9,6 +9,7 @@ Aplicativo web instalável (PWA) para registrar treinos de academia, acompanhar 
 - **Ciclo semanal**: aviso + confirmação ao fim dos 7 dias.
 - **Stack**: HTML + CSS + JavaScript puro, sem build e sem dependências.
 - **Idioma da interface**: pt-BR.
+- **Idioma do código**: inglês (identificadores e comentários).
 - **Tipo de treino**: lista gerenciável (CRUD de tipos; seleção ao registrar).
 - **Pré-preenchimento**: ao adicionar um exercício da ficha, as séries são criadas com os padrões e a carga da última execução.
 - **Desempenho**: progressão básica por exercício já no MVP.
@@ -18,7 +19,7 @@ Aplicativo web instalável (PWA) para registrar treinos de academia, acompanhar 
 - **FR-02 — Séries por exercício**: cada série guarda nº, reps feitas, carga (kg), RIR (repetição na reserva) e observação livre. As séries são **pré-preenchidas** a partir da ficha do exercício e editáveis.
 - **FR-03 — Dashboard**: contador da semana (ex.: `1/3 treinos`, `30/120 min cardio`), últimos treinos e desempenho por exercício (última sessão vs anterior + PR).
 - **FR-04 — Semana flexível**: o usuário marca "semana iniciada"; o app conta 7 dias a partir dessa data, sem fixar dias da semana.
-- **FR-05 — Exercícios**: CRUD de fichas por exercício (nome, grupo muscular, séries/reps/carga padrão, lembrete de correção).
+- **FR-05 — Exercícios**: CRUD de fichas por exercício (nome, grupo muscular, séries/reps/carga padrão, lembrete de correção); ao criar, é possível selecionar de um **catálogo embutido** de exercícios em pt-BR.
 - **FR-06 — Colinha**: seção de consulta rápida (RIR, tempo de descanso, lembretes) editável pelo usuário.
 - **FR-07 — Calendário de frequência**: visão mensal com os dias em que treinou e quantidade de treinos no mês.
 - **FR-08 — Backup**: exportar todos os dados em JSON (download); importar JSON restaurando os dados após confirmação, com **backup automático do estado atual antes de importar**.
@@ -32,6 +33,7 @@ Aplicativo web instalável (PWA) para registrar treinos de academia, acompanhar 
 - **Treino válido**: conta para a meta se tiver pelo menos 1 série registrada ou cardio > 0.
 - **Cardio**: minutos registrados dentro do treino (um treino pode ser "só cardio").
 - **Tipos de treino**: ao registrar, seleciona um tipo da lista; é possível criar um novo tipo na hora. O nome do tipo é copiado para o treino (snapshot) para preservar o histórico.
+- **Catálogo embutido**: o app traz `data/exercises.json` (869 exercícios em pt-BR, fonte `gugeldev/exercicios-bd-ptbr`, licença CC0-1.0). Ao criar uma ficha, o usuário pode escolher um exercício do catálogo (id, nome, grupo) ou criar um próprio.
 - **Pré-preenchimento**: ao adicionar um exercício da ficha, o app cria as séries conforme `defaultSets` e `defaultReps`, usando a **carga da última execução** do exercício (se houver). RIR e observações começam vazios.
 - **Desempenho**: por exercício, mostra a última sessão (carga × reps) vs a sessão anterior e o **PR** (maior carga já registrada em uma série; em empate, a série com mais reps).
 - **Tonelagem** (opcional, Fase 2): `Σ(reps × carga)` por exercício e por treino, com exibição por toggle.
@@ -67,6 +69,7 @@ manifest.webmanifest
 sw.js (service worker)
 icons/icon-192.png, icon-512.png
 serve.ps1 (servidor local para teste)
+data/exercises.json (catálogo embutido de exercícios, pt-BR, CC0)
 PLANO.md
 ```
 - Service worker: cache-first para o "shell" do app; **nenhum dado é enviado a servidor**.
@@ -80,7 +83,7 @@ PLANO.md
 4. Depois de instalado, o app abre pelo ícone e funciona offline.
 
 ## 9. Fases
-- **Fase 1 (MVP)**: registro completo de treino (séries pré-preenchidas, cardio), edição/exclusão de treinos, dashboard com metas e desempenho por exercício, semana com aviso + confirmação, CRUD de exercícios (correção em texto), tipos de treino, colinha, calendário, export/import JSON, PWA instalável.
+- **Fase 1 (MVP)**: registro completo de treino (séries pré-preenchidas, cardio), edição/exclusão de treinos, dashboard com metas e desempenho por exercício, semana com aviso + confirmação, CRUD de exercícios com catálogo embutido (correção em texto), tipos de treino, colinha, calendário, export/import JSON, PWA instalável.
 - **Fase 2 (extras)**: foto por exercício, tonelagem opcional, melhorias de UX.
 
 ## 10. Suposições a confirmar
@@ -93,3 +96,4 @@ PLANO.md
 ## 11. Histórico de revisões
 - **Revisão 1** (`dec-392110e34edd83a3`): distribuição via GitHub Pages, IndexedDB, semana com aviso + confirmação.
 - **Revisão 2** (`dec-93a822fbea27513a`): tipo de treino como lista gerenciável, pré-preenchimento de séries, desempenho por exercício no MVP; edição/exclusão de treinos e backup automático no import.
+- **Revisão 3**: catálogo embutido de exercícios (`data/exercises.json`, 869 itens pt-BR, CC0-1.0, fonte `gugeldev/exercicios-bd-ptbr`); idioma do código em inglês.
