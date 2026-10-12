@@ -19,6 +19,8 @@ const state = {
   pickerQuery: '',
   fichaQuery: '',
   sheetPickerQuery: '',
+  libraryGroup: '',
+  libraryQuery: '',
   calendarCursor: null
 };
 
@@ -707,7 +709,7 @@ function renderPickerResults(query) {
       '<i class="bi bi-plus-circle"></i> Criar "' + esc(q) + '"</button>';
   }
 
-  html += '<div class="px-2 py-1 small text-muted fw-semibold">Meus exercícios</div>';
+  html += '<div class="px-2 py-1 small text-muted fw-semibold">Biblioteca</div>';
   if (!fichas.length) html += '<div class="list-group-item small text-muted">Nenhum exercício cadastrado.</div>';
   html += fichas.map(function (e) {
     return '<button type="button" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" onclick="pickLibraryExercise(\'' + e.id + '\')">' +
@@ -846,20 +848,63 @@ async function createExerciseFromFichaSearch() {
 
 /* ---------- exercises (fichas) ---------- */
 
+function sheetsUsingExercise(exercise) {
+  const name = (exercise.name || '').toLowerCase();
+  return state.sheets.filter(function (s) {
+    return (s.exercises || []).some(function (item) {
+      if (item.exerciseId && item.exerciseId === exercise.id) return true;
+      return (item.name || '').toLowerCase() === name;
+    });
+  }).map(function (s) { return s.name; });
+}
+
+function fillLibraryGroupFilter() {
+  const sel = document.getElementById('libraryGroupFilter');
+  const groups = [];
+
+  state.exercises.forEach(function (e) {
+    if (e.active === false) return;
+    if (e.group && groups.indexOf(e.group) === -1) groups.push(e.group);
+  });
+  groups.sort(function (a, b) { return a.localeCompare(b, 'pt'); });
+
+  let html = '<option value="">Todos os grupos</option>';
+  groups.forEach(function (g) {
+    html += '<option value="' + esc(g) + '"' + (state.libraryGroup === g ? ' selected' : '') + '>' + esc(g) + '</option>';
+  });
+  sel.innerHTML = html;
+}
+
 function renderExercises() {
   const el = document.getElementById('exercisesList');
-  const list = state.exercises.filter(function (e) { return e.active !== false; });
+  fillLibraryGroupFilter();
+
+  const query = (state.libraryQuery || '').trim().toLowerCase();
+  const list = state.exercises.filter(function (e) {
+    if (e.active === false) return false;
+    if (state.libraryGroup && e.group !== state.libraryGroup) return false;
+    if (query && e.name.toLowerCase().indexOf(query) === -1) return false;
+    return true;
+  });
 
   if (!list.length) {
-    el.innerHTML = '<p class="text-muted"><i class="bi bi-search"></i> Nenhum exercício cadastrado. Crie um ou escolha do catálogo (927 exercícios em pt-BR).</p>';
+    el.innerHTML = '<p class="text-muted"><i class="bi bi-search"></i> Nenhum exercício encontrado. Crie um novo ou ajuste o filtro/busca.</p>';
     return;
   }
 
   el.innerHTML = list.map(function (e) {
     const note = (e.correction || '').trim();
-    return '<div class="card mb-2"><div class="card-body py-2 d-flex justify-content-between align-items-center">' +
-      '<div class="me-2"><strong>' + esc(e.name) + '</strong> <span class="badge text-bg-light">' + esc(e.group || '') + '</span><br>' +
-      '<small class="text-muted">' + (note ? '<i class="bi bi-info-circle"></i> ' + esc(note) : 'sem observação') + '</small></div>' +
+    const used = sheetsUsingExercise(e);
+    const usage = used.length
+      ? '<div class="small text-muted mt-1"><i class="bi bi-clipboard2-pulse"></i> usada em: ' +
+        used.slice(0, 3).map(esc).join(', ') + (used.length > 3 ? ' +' + (used.length - 3) : '') + '</div>'
+      : '<div class="small text-muted mt-1"><i class="bi bi-dash-circle"></i> não usada em nenhuma ficha</div>';
+
+    return '<div class="card mb-2"><div class="card-body py-2 d-flex justify-content-between align-items-start">' +
+      '<div class="me-2"><strong>' + esc(e.name) + '</strong> <span class="badge text-bg-light">' + esc(e.group || '') + '</span>' +
+      (note ? '<div class="small text-muted"><i class="bi bi-info-circle"></i> ' + esc(note) + '</div>' : '') +
+      usage +
+      '</div>' +
       '<div class="d-flex gap-1">' +
       '<button type="button" class="btn btn-sm btn-outline-primary" onclick="openExerciseForm(\'' + e.id + '\')"><i class="bi bi-pencil"></i></button>' +
       '<button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteExercise(\'' + e.id + '\')"><i class="bi bi-trash"></i></button>' +
@@ -1147,7 +1192,7 @@ function renderSheetPickerResults(query) {
   }
 
   if (library.length) {
-    html += '<div class="px-2 py-1 small text-muted fw-semibold">Meus exercícios</div>';
+    html += '<div class="px-2 py-1 small text-muted fw-semibold">Biblioteca</div>';
     html += library.map(function (e) {
       return '<button type="button" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" onclick="pickSheetLibraryExercise(\'' + e.id + '\')">' +
         '<span>' + esc(e.name) + '</span><span class="badge text-bg-light">' + esc(e.group || '') + '</span></button>';
@@ -1506,6 +1551,14 @@ function bindEvents() {
   });
 
   document.getElementById('btnNewExercise').addEventListener('click', function () { openExerciseForm(null); });
+  document.getElementById('libraryGroupFilter').addEventListener('change', function () {
+    state.libraryGroup = this.value;
+    renderExercises();
+  });
+  document.getElementById('librarySearch').addEventListener('input', function () {
+    state.libraryQuery = this.value;
+    renderExercises();
+  });
   document.getElementById('exerciseFormSave').addEventListener('click', saveExerciseForm);
   document.getElementById('btnFichaCatalog').addEventListener('click', toggleFichaCatalog);
   document.getElementById('fichaCatalogSearch').addEventListener('input', function () {

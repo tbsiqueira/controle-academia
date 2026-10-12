@@ -20,7 +20,7 @@ Aplicativo web instalável (PWA) para registrar treinos de academia, acompanhar 
 - **FR-02 — Séries por exercício**: cada série guarda nº, reps feitas, carga (kg), RIR (repetição na reserva) e observação livre. As séries são **pré-preenchidas** pelos padrões da ficha e editáveis.
 - **FR-03 — Dashboard**: contador da semana (ex.: `1/3 treinos`, `30/120 min cardio`), últimos treinos e desempenho por exercício (última sessão vs anterior + PR).
 - **FR-04 — Semana flexível**: o usuário marca "semana iniciada"; o app conta 7 dias a partir dessa data, sem fixar dias da semana.
-- **FR-05 — Exercícios (biblioteca)**: CRUD de exercícios (nome, grupo muscular, observação/lembrete); ao criar, é possível selecionar de um **catálogo embutido** de exercícios em pt-BR.
+- **FR-05 — Biblioteca de exercícios**: CRUD de exercícios (nome, grupo muscular, observação/lembrete), com **filtro por grupo** e **busca**; mostra **em quais fichas** cada exercício é usado. Ao criar, dá para selecionar de um **catálogo embutido** de exercícios em pt-BR.
 - **FR-06 — Colinha**: seção de consulta rápida (RIR, tempo de descanso, lembretes) editável pelo usuário.
 - **FR-07 — Calendário de frequência**: visão mensal com os dias em que treinou e quantidade de treinos no mês.
 - **FR-08 — Backup**: exportar todos os dados em JSON (download); importar JSON restaurando os dados após confirmação, com **backup automático do estado atual antes de importar**.
@@ -60,7 +60,7 @@ Stores:
 |---|---|
 | Dashboard | Meta da semana, aviso de semana encerrada, últimos treinos (editar/excluir), desempenho por exercício |
 | Registrar treino | Data, ficha (selecionar/criar; carrega os exercícios dela), **aquecimento por exercício (reps/peso/RIR)**, séries (reps/carga/RIR/obs), cardio |
-| Fichas e exercícios | Abas: **fichas** (grupo ordenado de exercícios) e **biblioteca de exercícios** + correção |
+| Fichas e exercícios | Abas: **fichas** (grupo ordenado de exercícios) e **biblioteca** (filtro por grupo, busca e uso em fichas) + correção |
 | Calendário | Frequência mensal |
 | Colinha | RIR, descanso, lembretes |
 | Ajustes | Meta semanal, início da semana, atalho para fichas, exportar/importar JSON |
@@ -113,3 +113,4 @@ PLANO.md
 - **Revisão 10**: o aquecimento passa a ser **por exercício** (cada exercício do treino tem sua própria linha de reps/peso/RIR), não um bloco único do treino.
 - **Revisão 11**: aquecimento pré-preenchido com **reps e peso do treino anterior**; item do menu inferior "Exercícios" renomeado para **"Fichas"**.
 - **Revisão 12**: acabamento visual — ícones em títulos/cards/botões, **barras de progresso** nas metas semanais, **seta de tendência** (↑/↓/=) no desempenho por exercício, badge de PR com troféu, numeração dos exercícios na ficha, destaque do **dia de hoje** no calendário e estados vazios com orientação.
+- **Revisão 13** (`dec-23116a57a6ed6e0c`): aba "Exercícios" renomeada para **"Biblioteca"**, com **filtro por grupo muscular**, busca e indicação de **em quais fichas** cada exercício é usado.

@@ -8,9 +8,9 @@
   <title>Meu Treino</title>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
-  <link rel="stylesheet" href="vendor/bootstrap/bootstrap.min.css?v=13">
-  <link rel="stylesheet" href="vendor/bootstrap-icons/bootstrap-icons.min.css?v=13">
-  <link rel="stylesheet" href="css/styles.css?v=13">
+  <link rel="stylesheet" href="vendor/bootstrap/bootstrap.min.css?v=14">
+  <link rel="stylesheet" href="vendor/bootstrap-icons/bootstrap-icons.min.css?v=14">
+  <link rel="stylesheet" href="css/styles.css?v=14">
 </head>
 <body>
   <main class="container pb-nav">
@@ -66,7 +66,7 @@
 
       <ul class="nav nav-pills nav-fill mb-3">
         <li class="nav-item"><button class="nav-link active" id="tabSheetsBtn" data-bs-toggle="pill" data-bs-target="#tabSheets" type="button">Fichas</button></li>
-        <li class="nav-item"><button class="nav-link" id="tabExercisesBtn" data-bs-toggle="pill" data-bs-target="#tabExercises" type="button">Exercícios</button></li>
+        <li class="nav-item"><button class="nav-link" id="tabExercisesBtn" data-bs-toggle="pill" data-bs-target="#tabExercises" type="button">Biblioteca</button></li>
       </ul>
 
       <div class="tab-content">
@@ -75,7 +75,15 @@
           <div id="sheetsList"></div>
         </div>
         <div class="tab-pane fade" id="tabExercises">
-          <button class="btn btn-primary w-100 mb-3" type="button" id="btnNewExercise"><i class="bi bi-plus-circle"></i> Novo exercício</button>
+          <button class="btn btn-primary w-100 mb-2" type="button" id="btnNewExercise"><i class="bi bi-plus-circle"></i> Novo exercício</button>
+          <div class="row g-1 mb-3">
+            <div class="col-6">
+              <select class="form-select form-select-sm" id="libraryGroupFilter" aria-label="Filtrar por grupo"></select>
+            </div>
+            <div class="col-6">
+              <input type="search" class="form-control form-control-sm" id="librarySearch" placeholder="Buscar exercício...">
+            </div>
+          </div>
           <div id="exercisesList"></div>
         </div>
       </div>
@@ -153,7 +161,7 @@
         </div>
       </div>
 
-      <p class="text-center text-muted small">Meu Treino <span id="appVersion">v13</span> · dados 100% locais · catálogo: gugeldev/exercicios-bd-ptbr (CC0)<br><a href="reset.html">limpar cache e atualizar</a></p>
+      <p class="text-center text-muted small">Meu Treino <span id="appVersion">v14</span> · dados 100% locais · catálogo: gugeldev/exercicios-bd-ptbr (CC0)<br><a href="reset.html">limpar cache e atualizar</a></p>
     </section>
   </main>
 
@@ -295,8 +303,8 @@
     </div>
   </div>
 
-  <script src="vendor/bootstrap/bootstrap.bundle.min.js?v=13"></script>
-  <script src="js/db.js?v=13"></script>
-  <script src="js/app.js?v=13"></script>
+  <script src="vendor/bootstrap/bootstrap.bundle.min.js?v=14"></script>
+  <script src="js/db.js?v=14"></script>
+  <script src="js/app.js?v=14"></script>
 </body>
 </html>
