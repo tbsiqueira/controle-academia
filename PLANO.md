@@ -91,7 +91,7 @@ PLANO.md
 - Teste local sem Node/Python: `serve.ps1` sobe um servidor HTTP local via PowerShell (`localhost` é contexto seguro, então o PWA pode ser testado antes de publicar).
 
 ## 8. Distribuição (GitHub Pages)
-1. Repositório: `https://github.com/tbsiqueira/controle-academia.git` (branch `main`).
+1. Repositório: `https://github.com/tbsiqueira/controle-academia.git`. Desenvolvimento na branch `main`; **publicação a partir da branch `release`** (com tags de versão: `v1`, `v2`, ...).
 2. Habilitar GitHub Pages no repositório (Settings → Pages → branch `main`, pasta `/`).
 3. No celular, abrir a URL e usar "Adicionar à tela inicial" (Chrome/Edge/Safari).
 4. Depois de instalado, o app abre pelo ícone e funciona offline.
@@ -129,6 +129,7 @@ PLANO.md
 - **Revisão 19**: textos explicativos curtos na tela **Fichas** (o que é uma ficha, o que é a Biblioteca) e dica dentro do editor de ficha.
 - **Revisão 20**: a **Biblioteca** passa a listar apenas os exercícios **criados pelo usuário** (os do catálogo não são mais copiados para lá nem aparecem na lista).
 - **Revisão 21**: padronização das barras de botões (ações na **mesma linha**, botões de ícone com largura fixa `.btn-icon`) em todas as telas.
+- **Revisão 25**: fluxo de publicação seguro — `main` para desenvolvimento, branch **`release`** publicada no GitHub Pages e **tags** por versão (`v1`).
 - **Revisão 24**: `MANUAL.md` — documentação para usuários (primeiros passos, exemplo de ficha e de treino, evolução, metas, backup, FAQ, problemas comuns e glossário).
 - **Revisão 23**: revisão geral de boas práticas — `README.md` completo (com passo a passo do GitHub Pages), `check.ps1` (verificações estáticas), `.gitattributes`, `.nojekyll`, `Content-Security-Policy` e `aria-label` nos botões de ícone.
 - **Revisão 22**: busca **sem acentos** (ex.: "puxada maquina" encontra "Puxada máquina") em todas as buscas; a tela **Treinar** não cria mais fichas (o aluno cria na aba Fichas); nova tela **Apagar dados** (confirmação por digitação, sem `alert`).

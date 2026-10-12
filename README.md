@@ -35,24 +35,71 @@ Confere JSONs, referências de `id`, handlers `onclick`, arquivos de asset e o c
 
 ---
 
-## Publicar no GitHub Pages (passo a passo)
+## Branches: desenvolvimento × publicado
 
-1. Confirme que o código está no GitHub:
-   ```powershell
-   git push
-   ```
-2. No repositório, abra **Settings** → **Pages**.
-3. Em **Build and deployment** → **Source**, escolha **Deploy from a branch**.
-4. Em **Branch**, selecione **`main`** e a pasta **`/ (root)`**. Clique em **Save**.
-5. Aguarde 1–2 minutos. O GitHub mostra a URL publicada:
+| Branch | Papel |
+|---|---|
+| **`main`** | desenvolvimento. Tudo que você mexe no dia a dia vai para cá — **não publica nada** |
+| **`release`** | **é o que está publicado no GitHub Pages**. Só recebe código quando você decide publicar |
+
+As versões publicadas são marcadas com **tags** (`v1`, `v2`, ...), então dá para saber exatamente o que está
+no ar e voltar atrás se precisar.
+
+### Publicar no GitHub Pages (uma vez só)
+
+1. No repositório, abra **Settings** → **Pages**.
+2. Em **Build and deployment** → **Source**, escolha **Deploy from a branch**.
+3. Em **Branch**, selecione **`release`** e a pasta **`/ (root)`**. Clique em **Save**.
+4. Aguarde 1–2 minutos. A URL publicada aparece ali:
    `https://<usuario>.github.io/<repositorio>/`
-6. Abra essa URL no celular e use **"Adicionar à tela inicial"**:
+5. Abra essa URL no celular e use **"Adicionar à tela inicial"**:
    - **Android/Chrome**: menu ⋮ → *Adicionar à tela inicial* / *Instalar app*.
    - **iPhone/Safari**: botão **Compartilhar** → *Adicionar à Tela de Início*.
-7. A partir daí o app abre pelo ícone e **funciona offline** (o service worker guarda os arquivos).
+6. A partir daí o app abre pelo ícone e **funciona offline** (o service worker guarda os arquivos).
 
-Para atualizar o app depois de mudar o código: `git push` e recarregue (no app instalado, feche e abra
-novamente, ou use **Mais → Forçar atualização do app**).
+> O repositório precisa ser **público** para o Pages no plano gratuito (em repositório privado, só com
+> GitHub Pro/Team).
+
+### Publicar uma versão nova (o dia a dia)
+
+Desenvolva normalmente na `main` e, quando quiser colocar no ar:
+
+```powershell
+# 1) salve o desenvolvimento (NÃO publica)
+git checkout main
+git add -A
+git commit -m "feat: ..."
+git push
+
+# 2) publique: leve a main para a release
+git checkout release
+git merge main
+git push
+
+# 3) marque a versão
+git tag -a v2 -m "v2: <resumo das mudancas>"
+git push --tags
+
+# 4) volte a desenvolver
+git checkout main
+```
+
+O Pages atualiza sozinho em ~1 minuto após o push na `release`.
+No aparelho, feche e abra o app (ou use **Mais → Atualizar app**) para pegar a versão nova.
+
+### Voltar atrás (rollback)
+
+```powershell
+git checkout release
+git reset --hard v1        # volta a release para a tag v1
+git push --force-with-lease
+```
+
+### Antes de publicar: confira
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\check.ps1
+```
 
 ---
 
