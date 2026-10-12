@@ -8,9 +8,9 @@
   <title>Meu Treino</title>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
-  <link rel="stylesheet" href="vendor/bootstrap/bootstrap.min.css?v=21">
-  <link rel="stylesheet" href="vendor/bootstrap-icons/bootstrap-icons.min.css?v=21">
-  <link rel="stylesheet" href="css/styles.css?v=21">
+  <link rel="stylesheet" href="vendor/bootstrap/bootstrap.min.css?v=22">
+  <link rel="stylesheet" href="vendor/bootstrap-icons/bootstrap-icons.min.css?v=22">
+  <link rel="stylesheet" href="css/styles.css?v=22">
 </head>
 <body>
   <main class="container pb-nav">
@@ -53,13 +53,11 @@
       <div id="workoutExercises"></div>
       <button class="btn btn-outline-primary w-100 mb-2" type="button" id="btnAddExercise"><i class="bi bi-plus-circle"></i> Adicionar exercício</button>
 
-      <div class="d-grid gap-2">
-        <button class="btn btn-primary" type="button" id="workoutSave"><i class="bi bi-check-lg"></i> Salvar treino</button>
-      </div>
       <div class="d-flex gap-2 mb-3">
-        <button class="btn btn-outline-secondary flex-grow-1" type="button" id="workoutCancel"><i class="bi bi-x-lg"></i> Cancelar</button>
-        <button class="btn btn-outline-primary d-none" type="button" id="workoutExport" title="Exportar como texto"><i class="bi bi-share"></i></button>
-        <button class="btn btn-outline-danger d-none" type="button" id="workoutDelete" title="Excluir"><i class="bi bi-trash"></i></button>
+        <button class="btn btn-outline-secondary flex-fill" type="button" id="workoutCancel"><i class="bi bi-x-lg"></i> Cancelar</button>
+        <button class="btn btn-outline-primary d-none btn-icon" type="button" id="workoutExport" title="Exportar como texto"><i class="bi bi-share"></i></button>
+        <button class="btn btn-outline-danger d-none btn-icon" type="button" id="workoutDelete" title="Excluir"><i class="bi bi-trash"></i></button>
+        <button class="btn btn-primary flex-fill" type="button" id="workoutSave"><i class="bi bi-check-lg"></i> Salvar</button>
       </div>
     </section>
 
@@ -71,9 +69,9 @@
       </div>
       <div id="detailBody"></div>
       <div class="d-flex gap-2 mb-3">
-        <button class="btn btn-primary flex-grow-1" type="button" id="detailEdit"><i class="bi bi-pencil"></i> Editar</button>
-        <button class="btn btn-outline-secondary" type="button" id="detailExport" title="Exportar como texto"><i class="bi bi-share"></i></button>
-        <button class="btn btn-outline-danger" type="button" id="detailDelete" title="Excluir"><i class="bi bi-trash"></i></button>
+        <button class="btn btn-primary flex-fill" type="button" id="detailEdit"><i class="bi bi-pencil"></i> Editar</button>
+        <button class="btn btn-outline-secondary btn-icon" type="button" id="detailExport" title="Exportar como texto"><i class="bi bi-share"></i></button>
+        <button class="btn btn-outline-danger btn-icon" type="button" id="detailDelete" title="Excluir"><i class="bi bi-trash"></i></button>
       </div>
     </section>
 
@@ -163,8 +161,8 @@
             </div>
           </div>
           <div class="d-flex gap-2 mt-2">
-            <button class="btn btn-primary" type="button" id="btnSaveSettings">Salvar metas</button>
-            <button class="btn btn-outline-primary" type="button" id="btnWeekToday">Iniciar semana hoje</button>
+            <button class="btn btn-primary flex-fill" type="button" id="btnSaveSettings">Salvar metas</button>
+            <button class="btn btn-outline-primary flex-fill" type="button" id="btnWeekToday">Iniciar semana</button>
           </div>
         </div>
       </div>
@@ -189,17 +187,19 @@
         <div class="card-header fw-semibold"><i class="bi bi-database"></i> Dados</div>
         <div class="card-body">
           <p class="text-muted small">Tudo fica salvo apenas neste aparelho (IndexedDB). Use o backup JSON para transferir ou restaurar.</p>
-          <div class="d-grid gap-2">
-            <button class="btn btn-outline-primary" type="button" id="btnExport"><i class="bi bi-download"></i> Exportar backup (JSON)</button>
-            <button class="btn btn-outline-secondary" type="button" id="btnImport"><i class="bi bi-upload"></i> Importar backup (JSON)</button>
-            <button class="btn btn-outline-warning d-none" type="button" id="btnUndoImport"><i class="bi bi-arrow-counterclockwise"></i> Desfazer importação</button>
-            <button class="btn btn-outline-danger" type="button" id="btnForceUpdate"><i class="bi bi-arrow-repeat"></i> Forçar atualização do app</button>
+          <div class="d-flex gap-2 mb-2">
+            <button class="btn btn-outline-primary flex-fill" type="button" id="btnExport"><i class="bi bi-download"></i> Exportar</button>
+            <button class="btn btn-outline-secondary flex-fill" type="button" id="btnImport"><i class="bi bi-upload"></i> Importar</button>
+          </div>
+          <div class="d-flex gap-2">
+            <button class="btn btn-outline-warning d-none flex-fill" type="button" id="btnUndoImport"><i class="bi bi-arrow-counterclockwise"></i> Desfazer</button>
+            <button class="btn btn-outline-danger flex-fill" type="button" id="btnForceUpdate"><i class="bi bi-arrow-repeat"></i> Atualizar app</button>
             <input type="file" id="importFile" accept="application/json,.json" class="d-none">
           </div>
         </div>
       </div>
 
-      <p class="text-center text-muted small">Meu Treino <span id="appVersion">v21</span> · dados 100% locais · catálogo: gugeldev/exercicios-bd-ptbr (CC0)<br><a href="reset.html">limpar cache e atualizar</a></p>
+      <p class="text-center text-muted small">Meu Treino <span id="appVersion">v22</span> · dados 100% locais · catálogo: gugeldev/exercicios-bd-ptbr (CC0)<br><a href="reset.html">limpar cache e atualizar</a></p>
     </section>
   </main>
 
@@ -355,15 +355,15 @@
           <textarea class="form-control" id="exportText" rows="14" readonly></textarea>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-outline-primary" id="exportCopy"><i class="bi bi-clipboard"></i> Copiar</button>
-          <button type="button" class="btn btn-primary" id="exportShare"><i class="bi bi-send"></i> Compartilhar</button>
+          <button type="button" class="btn btn-outline-primary flex-fill" id="exportCopy"><i class="bi bi-clipboard"></i> Copiar</button>
+          <button type="button" class="btn btn-primary flex-fill" id="exportShare"><i class="bi bi-send"></i> Compartilhar</button>
         </div>
       </div>
     </div>
   </div>
 
-  <script src="vendor/bootstrap/bootstrap.bundle.min.js?v=21"></script>
-  <script src="js/db.js?v=21"></script>
-  <script src="js/app.js?v=21"></script>
+  <script src="vendor/bootstrap/bootstrap.bundle.min.js?v=22"></script>
+  <script src="js/db.js?v=22"></script>
+  <script src="js/app.js?v=22"></script>
 </body>
 </html>

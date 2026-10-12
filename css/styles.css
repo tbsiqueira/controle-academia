@@ -191,6 +191,25 @@ body {
   font-weight: 700;
 }
 
+/* Button rows */
+.btn-icon {
+  flex: 0 0 auto;
+  width: 44px;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+@media (max-width: 380px) {
+  .btn-icon {
+    width: 38px;
+  }
+
+  .d-flex > .btn.flex-fill {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+}
+
 /* Warm-up block */
 .card-body .bg-light.border {
   background: #faf8ff !important;
