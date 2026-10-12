@@ -8,9 +8,9 @@
   <title>Meu Treino</title>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
-  <link rel="stylesheet" href="vendor/bootstrap/bootstrap.min.css?v=17">
-  <link rel="stylesheet" href="vendor/bootstrap-icons/bootstrap-icons.min.css?v=17">
-  <link rel="stylesheet" href="css/styles.css?v=17">
+  <link rel="stylesheet" href="vendor/bootstrap/bootstrap.min.css?v=18">
+  <link rel="stylesheet" href="vendor/bootstrap-icons/bootstrap-icons.min.css?v=18">
+  <link rel="stylesheet" href="css/styles.css?v=18">
 </head>
 <body>
   <main class="container pb-nav">
@@ -20,7 +20,6 @@
       <div id="weekBanner"></div>
       <div id="weekProgress"></div>
       <div id="recentWorkouts"></div>
-      <div id="performance"></div>
     </section>
 
     <!-- Workout form -->
@@ -61,6 +60,28 @@
       </div>
     </section>
 
+    <!-- Workout detail (read-only) -->
+    <section id="view-detail" class="view d-none">
+      <div class="d-flex justify-content-between align-items-center mt-3 mb-3">
+        <h1 class="h4 mb-0"><i class="bi bi-eye"></i> Como foi o treino</h1>
+        <button class="btn btn-sm btn-outline-secondary" type="button" id="detailBack"><i class="bi bi-arrow-left"></i> Voltar</button>
+      </div>
+      <div id="detailBody"></div>
+      <div class="d-flex gap-2 mb-3">
+        <button class="btn btn-primary flex-grow-1" type="button" id="detailEdit"><i class="bi bi-pencil"></i> Editar</button>
+        <button class="btn btn-outline-secondary" type="button" id="detailExport" title="Exportar como texto"><i class="bi bi-share"></i></button>
+        <button class="btn btn-outline-danger" type="button" id="detailDelete" title="Excluir"><i class="bi bi-trash"></i></button>
+      </div>
+    </section>
+
+    <!-- Exercise history -->
+    <section id="view-exercise" class="view d-none">
+      <div class="d-flex justify-content-between align-items-center mt-3 mb-3">
+        <h1 class="h4 mb-0" id="exerciseHistoryTitle"><i class="bi bi-graph-up"></i> Evolução</h1>
+        <button class="btn btn-sm btn-outline-secondary" type="button" id="exerciseBack"><i class="bi bi-arrow-left"></i> Voltar</button>
+      </div>
+      <div id="exerciseHistory"></div>
+    </section>
     <!-- Sheets & exercises -->
     <section id="view-exercises" class="view d-none">
       <h1 class="h4 mt-3 mb-3"><i class="bi bi-card-checklist"></i> Fichas e exercícios</h1>
@@ -163,7 +184,7 @@
         </div>
       </div>
 
-      <p class="text-center text-muted small">Meu Treino <span id="appVersion">v17</span> · dados 100% locais · catálogo: gugeldev/exercicios-bd-ptbr (CC0)<br><a href="reset.html">limpar cache e atualizar</a></p>
+      <p class="text-center text-muted small">Meu Treino <span id="appVersion">v18</span> · dados 100% locais · catálogo: gugeldev/exercicios-bd-ptbr (CC0)<br><a href="reset.html">limpar cache e atualizar</a></p>
     </section>
   </main>
 
@@ -325,8 +346,8 @@
     </div>
   </div>
 
-  <script src="vendor/bootstrap/bootstrap.bundle.min.js?v=17"></script>
-  <script src="js/db.js?v=17"></script>
-  <script src="js/app.js?v=17"></script>
+  <script src="vendor/bootstrap/bootstrap.bundle.min.js?v=18"></script>
+  <script src="js/db.js?v=18"></script>
+  <script src="js/app.js?v=18"></script>
 </body>
 </html>

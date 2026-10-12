@@ -59,7 +59,9 @@ Stores:
 ## 6. Telas
 | Tela | Função |
 |---|---|
-| Dashboard | Meta da semana, aviso de semana encerrada, últimos treinos (editar/excluir), desempenho por exercício |
+| Dashboard | Meta da semana, aviso de semana encerrada, últimos treinos (toque para **ver como foi**) |
+| Ver treino (somente leitura) | Resumo do treino com aquecimento, séries, cardio e observações; toque no exercício para ver a **evolução**; botões Editar / Exportar / Excluir |
+| Evolução do exercício | Melhor série por dia (barras), PR, tendência e histórico completo por data |
 | Treinar (registro) | Data, ficha (selecionar/criar; carrega os exercícios dela), **aquecimento por exercício (reps/peso/RIR)**, séries (reps/carga/RIR/obs), cardio, **exportar como texto** |
 | Fichas e exercícios | Abas: **fichas** (grupo ordenado de exercícios) e **biblioteca** (filtro por grupo, busca e uso em fichas) + correção |
 | Calendário | Frequência mensal |
@@ -118,3 +120,4 @@ PLANO.md
 - **Revisão 14**: item do menu "Registrar" renomeado para **"Treinar"**; cada treino pode ser **exportado como texto** legível (aquecimento, séries, cargas, RIR, observações, cardio) para copiar/compartilhar com a professora.
 - **Revisão 15**: exercícios escolhidos do catálogo passam a ser **salvos na Biblioteca**; **tratamento de erro visível** nas ações (sem falhas silenciosas); treino com apenas aquecimento também salva; importação sem download automático, com **"Desfazer importação"**.
 - **Revisão 16**: no texto exportado, o **aquecimento aparece dentro de cada exercício** (e exercícios só com aquecimento também são listados).
+- **Revisão 17**: "Desempenho por exercício" saiu do Dashboard; novo fluxo de consulta: tocar num treino abre a tela **"Como foi o treino"** (somente leitura) e tocar num exercício abre a **Evolução** (melhor série por dia, PR, tendência e histórico).

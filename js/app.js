@@ -21,6 +21,8 @@ const state = {
   sheetPickerQuery: '',
   libraryGroup: '',
   libraryQuery: '',
+  viewingWorkoutId: null,
+  viewingExerciseName: '',
   lastImportSnapshot: null,
   calendarCursor: null
 };
@@ -129,11 +131,14 @@ function navigate() {
   if (view) view.classList.remove('d-none');
 
   document.querySelectorAll('.bottom-nav a').forEach(function (a) {
-    a.classList.toggle('active', a.getAttribute('href') === hash);
+    const activeHash = (viewName === 'detail' || viewName === 'exercise') ? '#/dashboard' : hash;
+    a.classList.toggle('active', a.getAttribute('href') === activeHash);
   });
 
   if (viewName === 'dashboard') renderDashboard();
   if (viewName === 'workout') renderWorkoutForm();
+  if (viewName === 'detail') renderWorkoutDetail();
+  if (viewName === 'exercise') renderExerciseHistory();
   if (viewName === 'exercises') renderSheetsAndExercises();
   if (viewName === 'calendar') renderCalendar();
   if (viewName === 'more') renderMore();
@@ -177,7 +182,6 @@ async function confirmNextWeek() {
 function renderDashboard() {
   renderWeek();
   renderRecent();
-  renderPerformance();
 }
 
 function renderWeek() {
@@ -239,18 +243,20 @@ function renderRecent() {
     const name = w.sheetName || w.typeName || 'Treino';
     const warm = warmupSummary(w.warmups);
     return '<div class="card mb-2"><div class="card-body py-2 d-flex justify-content-between align-items-center">' +
-      '<div><strong>' + esc(name) + '</strong><br>' +
-      '<small class="text-muted">' + fmtBR(w.date) + ' · ' + setCount + ' exerc.' + (warm ? ' · ' + esc(warm) : '') + '</small></div>' +
+      '<button type="button" class="btn btn-link p-0 text-start text-decoration-none flex-grow-1" data-view-workout="' + esc(w.id) + '">' +
+      '<strong>' + esc(name) + '</strong><br>' +
+      '<small class="text-muted">' + fmtBR(w.date) + ' · ' + setCount + ' exerc.' + (warm ? ' · ' + esc(warm) : '') + '</small>' +
+      '</button>' +
       '<div class="d-flex gap-1">' +
       '<button type="button" class="btn btn-sm btn-outline-secondary" data-share-workout="' + esc(w.id) + '" title="Exportar como texto"><i class="bi bi-share"></i></button>' +
-      '<a href="#/workout" data-edit-workout="' + esc(w.id) + '" class="btn btn-sm btn-outline-primary" title="Editar"><i class="bi bi-pencil"></i></a>' +
       '</div>' +
       '</div></div>';
   }).join('');
 
-  el.querySelectorAll('[data-edit-workout]').forEach(function (a) {
-    a.addEventListener('click', function () {
-      state.editingWorkoutId = a.getAttribute('data-edit-workout');
+  el.querySelectorAll('[data-view-workout]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      state.viewingWorkoutId = b.getAttribute('data-view-workout');
+      location.hash = '#/detail';
     });
   });
 
@@ -261,75 +267,165 @@ function renderRecent() {
   });
 }
 
-function computePerformance() {
-  const byName = {};
-  const sorted = state.workouts.slice().sort(function (a, b) {
-    return a.date < b.date ? 1 : -1;
-  });
-
-  sorted.forEach(function (w) {
-    const perExercise = {};
-    (w.sets || []).forEach(function (s) {
-      const load = toNum(s.load);
-      const reps = toNum(s.reps);
-      if (!load && !reps) return;
-      const name = s.exerciseName || '(sem nome)';
-
-      if (!byName[name]) byName[name] = { name: name, last: null, prev: null, pr: { load: 0, reps: 0 } };
-      const entry = byName[name];
-
-      if (load > entry.pr.load || (load === entry.pr.load && reps > entry.pr.reps)) {
-        entry.pr = { load: load, reps: reps };
-      }
-
-      if (!perExercise[name] || load > perExercise[name].load || (load === perExercise[name].load && reps > perExercise[name].reps)) {
-        perExercise[name] = { load: load, reps: reps };
-      }
-    });
-
-    Object.keys(perExercise).forEach(function (name) {
-      const entry = byName[name];
-      const best = perExercise[name];
-      if (!entry.last) entry.last = { date: w.date, load: best.load, reps: best.reps };
-      else if (!entry.prev) entry.prev = { date: w.date, load: best.load, reps: best.reps };
-    });
-  });
-
-  return Object.keys(byName).map(function (k) {
-    return byName[k];
-  }).sort(function (a, b) {
-    return a.name.localeCompare(b.name, 'pt');
+function warmupHasData(warm) {
+  if (!warm) return false;
+  return [warm.reps, warm.load, warm.rir].some(function (v) {
+    return v !== null && v !== undefined && v !== '';
   });
 }
 
-function renderPerformance() {
-  const el = document.getElementById('performance');
-  const perf = computePerformance();
-  if (!perf.length) {
-    el.innerHTML = '';
-    return;
-  }
+function warmupLine(warm) {
+  if (!warm) return '';
+  const parts = [];
+  if (warm.reps !== null && warm.reps !== undefined && warm.reps !== '') parts.push(warm.reps + ' reps');
+  if (warm.load !== null && warm.load !== undefined && warm.load !== '') parts.push(warm.load + ' kg');
+  if (warm.rir !== null && warm.rir !== undefined && warm.rir !== '') parts.push('RIR ' + warm.rir);
+  return parts.join(' · ');
+}
 
-  el.innerHTML = '<h6 class="mt-3"><i class="bi bi-graph-up-arrow text-primary"></i> Desempenho por exercício</h6>' + perf.map(function (p) {
-    const last = p.last ? fmtBR(p.last.date) + ' — ' + p.last.load + 'kg × ' + p.last.reps : '—';
-    const prev = p.prev ? fmtBR(p.prev.date) + ' — ' + p.prev.load + 'kg × ' + p.prev.reps : '—';
-    const trend = (p.last && p.prev)
-      ? (p.last.load > p.prev.load ? 'up' : (p.last.load < p.prev.load ? 'down' : 'flat'))
-      : 'flat';
-    const trendIcon = trend === 'up'
-      ? '<i class="bi bi-arrow-up-right text-success"></i>'
-      : (trend === 'down' ? '<i class="bi bi-arrow-down-right text-danger"></i>' : '<i class="bi bi-dash text-muted"></i>');
-
-    return '<div class="card mb-2"><div class="card-body py-2">' +
-      '<div class="d-flex justify-content-between align-items-center">' +
-      '<strong>' + trendIcon + ' ' + esc(p.name) + '</strong>' +
-      '<span class="badge text-bg-warning"><i class="bi bi-trophy"></i> ' + p.pr.load + 'kg × ' + p.pr.reps + '</span>' +
-      '</div>' +
-      '<small class="text-muted">última: ' + last + ' · anterior: ' + prev + '</small>' +
-      '</div></div>';
+function setsSummaryLines(sets) {
+  return sets.slice().sort(function (a, b) { return toNum(a.number) - toNum(b.number); }).map(function (s) {
+    const parts = [];
+    parts.push((s.reps === null || s.reps === undefined) ? '—' : s.reps + ' reps');
+    if (s.load !== null && s.load !== undefined) parts.push(s.load + ' kg');
+    if (s.rir !== null && s.rir !== undefined) parts.push('RIR ' + s.rir);
+    return '<div class="small mt-1">Série ' + (s.number || '?') + ': ' + esc(parts.join(' · ')) +
+      (s.note ? ' <span class="text-muted">(' + esc(s.note) + ')</span>' : '') + '</div>';
   }).join('');
 }
 
+/* ---------- read-only workout detail ---------- */
+
+function renderWorkoutDetail() {
+  const el = document.getElementById('detailBody');
+  const workout = state.viewingWorkoutId
+    ? state.workouts.find(function (w) { return w.id === state.viewingWorkoutId; })
+    : null;
+
+  if (!workout) {
+    el.innerHTML = '<p class="text-muted">Treino não encontrado.</p>';
+    return;
+  }
+
+  const sheetName = workout.sheetName || workout.typeName || '';
+  let html = '<div class="card mb-3"><div class="card-body py-2">' +
+    '<div class="d-flex justify-content-between align-items-center">' +
+    '<strong><i class="bi bi-calendar-event text-primary"></i> ' + fmtBR(workout.date) + '</strong>' +
+    (sheetName ? '<span class="badge text-bg-light">' + esc(sheetName) + '</span>' : '') +
+    '</div>' +
+    (toNum(workout.cardioMinutes) > 0 ? '<div class="small text-muted mt-1"><i class="bi bi-heart-pulse"></i> Cardio: ' + toNum(workout.cardioMinutes) + ' min</div>' : '') +
+    (workout.notes ? '<div class="small text-muted mt-1"><i class="bi bi-journal-text"></i> ' + esc(workout.notes) + '</div>' : '') +
+    '</div></div>';
+
+  const groups = groupSets(workout.sets, workout.warmups);
+
+  if (!groups.length) {
+    html += '<p class="text-muted">Este treino não tem exercícios registrados.</p>';
+  }
+
+  html += groups.map(function (g, i) {
+    return '<div class="card mb-2"><div class="card-body p-2">' +
+      '<button type="button" class="btn btn-link p-0 text-decoration-none d-flex justify-content-between align-items-center w-100" data-open-exercise="' + esc(g.exerciseName) + '">' +
+      '<strong><span class="badge text-bg-primary me-1">' + (i + 1) + '</span> ' + esc(g.exerciseName) + '</strong>' +
+      '<i class="bi bi-chevron-right text-muted"></i>' +
+      '</button>' +
+      (g.note ? '<div class="small text-muted"><i class="bi bi-info-circle"></i> ' + esc(g.note) + '</div>' : '') +
+      (warmupHasData(g.warmup) ? '<div class="small text-muted"><i class="bi bi-fire"></i> Aquecimento: ' + esc(warmupLine(g.warmup)) + '</div>' : '') +
+      (g.sets.length ? setsSummaryLines(g.sets) : '<div class="small text-muted mt-1">Sem séries de trabalho.</div>') +
+      '</div></div>';
+  }).join('');
+
+  el.innerHTML = html;
+
+  el.querySelectorAll('[data-open-exercise]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      state.viewingExerciseName = b.getAttribute('data-open-exercise');
+      location.hash = '#/exercise';
+    });
+  });
+}
+
+/* ---------- exercise history ---------- */
+
+function sessionsForExercise(name) {
+  return state.workouts.filter(function (w) {
+    return (w.sets || []).some(function (s) { return s.exerciseName === name; }) ||
+      (w.warmups || []).some(function (x) { return x.exerciseName === name; });
+  }).sort(function (a, b) { return a.date < b.date ? 1 : -1; });
+}
+
+function bestSetForExercise(workout, name) {
+  let best = null;
+  (workout.sets || []).forEach(function (s) {
+    if (s.exerciseName !== name) return;
+    const load = toNum(s.load);
+    const reps = toNum(s.reps);
+    if (!best || load > best.load || (load === best.load && reps > best.reps)) best = { load: load, reps: reps };
+  });
+  return best;
+}
+
+function renderExerciseHistory() {
+  const name = state.viewingExerciseName || '';
+  document.getElementById('exerciseHistoryTitle').innerHTML = '<i class="bi bi-graph-up text-primary"></i> ' + esc(name);
+
+  const el = document.getElementById('exerciseHistory');
+  const sessions = sessionsForExercise(name);
+
+  if (!sessions.length) {
+    el.innerHTML = '<p class="text-muted">Nenhum registro deste exercício ainda.</p>';
+    return;
+  }
+
+  const rows = sessions.map(function (w) {
+    return { workout: w, best: bestSetForExercise(w, name) };
+  });
+
+  const maxLoad = Math.max.apply(null, rows.map(function (r) { return r.best ? r.best.load : 0; }).concat([1]));
+
+  const withLoad = rows.filter(function (r) { return r.best; });
+  let trendIcon = '<i class="bi bi-dash text-muted"></i>';
+  if (withLoad.length >= 2) {
+    const last = withLoad[0].best.load;
+    const prev = withLoad[1].best.load;
+    trendIcon = last > prev ? '<i class="bi bi-arrow-up-right text-success"></i>'
+      : (last < prev ? '<i class="bi bi-arrow-down-right text-danger"></i>' : '<i class="bi bi-dash text-muted"></i>');
+  }
+
+  let html = '<div class="card mb-3"><div class="card-body py-2 d-flex justify-content-between align-items-center">' +
+    '<span class="small text-muted">' + trendIcon + ' ' + sessions.length + (sessions.length === 1 ? ' treino' : ' treinos') + ' com este exercício</span>' +
+    '<span class="badge text-bg-warning"><i class="bi bi-trophy"></i> PR ' + maxLoad + ' kg</span>' +
+    '</div></div>';
+
+  html += '<h6 class="text-muted"><i class="bi bi-bar-chart-line"></i> Melhor série por dia</h6>';
+  html += rows.slice(0, 12).map(function (r) {
+    const load = r.best ? r.best.load : 0;
+    const reps = r.best ? r.best.reps : 0;
+    const pct = Math.max(4, Math.round((load / maxLoad) * 100));
+    return '<div class="mb-2">' +
+      '<div class="d-flex justify-content-between small"><span>' + fmtBR(r.workout.date) + '</span><strong>' + load + ' kg × ' + reps + '</strong></div>' +
+      '<div class="progress" style="height: 10px"><div class="progress-bar" style="width: ' + pct + '%"></div></div>' +
+      '</div>';
+  }).join('');
+
+  html += '<h6 class="text-muted mt-3"><i class="bi bi-clock-history"></i> Histórico</h6>';
+  html += rows.slice(0, 20).map(function (r) {
+    const w = r.workout;
+    const warm = (w.warmups || []).find(function (x) { return x.exerciseName === name; });
+    const sets = (w.sets || []).filter(function (s) { return s.exerciseName === name; });
+    const sheetName = w.sheetName || w.typeName || '';
+    return '<div class="card mb-2"><div class="card-body py-2">' +
+      '<div class="d-flex justify-content-between align-items-center">' +
+      '<strong>' + fmtBR(w.date) + '</strong>' +
+      (sheetName ? '<span class="badge text-bg-light">' + esc(sheetName) + '</span>' : '') +
+      '</div>' +
+      (warmupHasData(warm) ? '<div class="small text-muted"><i class="bi bi-fire"></i> Aquecimento: ' + esc(warmupLine(warm)) + '</div>' : '') +
+      (sets.length ? setsSummaryLines(sets) : '<div class="small text-muted mt-1">Sem séries de trabalho.</div>') +
+      '</div></div>';
+  }).join('');
+
+  el.innerHTML = html;
+}
 /* ---------- workout form ---------- */
 
 function activeSheets() {
@@ -676,6 +772,14 @@ async function deleteWorkout() {
   await dbDelete('workouts', state.editingWorkoutId);
   state.workouts = await dbAll('workouts');
   state.editingWorkoutId = null;
+  location.hash = '#/dashboard';
+}
+async function deleteViewedWorkout() {
+  if (!state.viewingWorkoutId) return;
+  if (!confirm('Excluir este treino?')) return;
+  await dbDelete('workouts', state.viewingWorkoutId);
+  state.workouts = await dbAll('workouts');
+  state.viewingWorkoutId = null;
   location.hash = '#/dashboard';
 }
 
@@ -1696,6 +1800,14 @@ function bindEvents() {
   document.getElementById('workoutSave').addEventListener('click', guard(saveWorkout));
   document.getElementById('workoutDelete').addEventListener('click', guard(deleteWorkout));
   document.getElementById('workoutExport').addEventListener('click', function () { exportWorkoutText(state.editingWorkoutId); });
+  document.getElementById('detailBack').addEventListener('click', function () { history.back(); });
+  document.getElementById('exerciseBack').addEventListener('click', function () { history.back(); });
+  document.getElementById('detailEdit').addEventListener('click', function () {
+    state.editingWorkoutId = state.viewingWorkoutId;
+    location.hash = '#/workout';
+  });
+  document.getElementById('detailExport').addEventListener('click', function () { exportWorkoutText(state.viewingWorkoutId); });
+  document.getElementById('detailDelete').addEventListener('click', guard(deleteViewedWorkout));
   document.getElementById('workoutSheet').addEventListener('change', guard(onSheetChange));
   document.getElementById('btnAddSheet').addEventListener('click', openSheetModal);
   document.getElementById('sheetSave').addEventListener('click', guard(saveNewSheet));
