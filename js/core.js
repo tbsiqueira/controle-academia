@@ -291,6 +291,30 @@
     return lines.join('\n').trim();
   }
 
+  /* ---------- biblioteca do usuário ---------- */
+
+  // Um exercício aparece na Biblioteca a menos que seja comprovadamente do catálogo
+  // (source 'catalog' COM catalogId). Nada é inferido pelo nome: adivinhar escondia
+  // exercícios criados pelo usuário.
+  function isUserExercise(exercise) {
+    if (!exercise) return false;
+    if (exercise.source === 'catalog' && exercise.catalogId) return false;
+    return true;
+  }
+
+  function libraryExercises(exercises) {
+    return (exercises || []).filter(function (e) {
+      return e && e.active !== false && isUserExercise(e);
+    });
+  }
+
+  // Marcações antigas de 'catalog' feitas sem comprovação (sem catalogId) precisam ser desfeitas.
+  function exercisesNeedingRepair(exercises) {
+    return (exercises || []).filter(function (e) {
+      return e && e.source === 'catalog' && !e.catalogId;
+    });
+  }
+
   /* ---------- compatibilidade de backup entre versões ---------- */
 
   function normalizeSet(s, fallbackNumber) {
@@ -431,6 +455,10 @@
     defaultSettings: defaultSettings,
     weekWindow: weekWindow,
     isValidWorkout: isValidWorkout,
+    // biblioteca
+    isUserExercise: isUserExercise,
+    libraryExercises: libraryExercises,
+    exercisesNeedingRepair: exercisesNeedingRepair,
     // aquecimento e séries
     warmupHasData: warmupHasData,
     warmupLine: warmupLine,

@@ -134,6 +134,7 @@ PLANO.md
 - **Revisão 19**: textos explicativos curtos na tela **Fichas** (o que é uma ficha, o que é a Biblioteca) e dica dentro do editor de ficha.
 - **Revisão 20**: a **Biblioteca** passa a listar apenas os exercícios **criados pelo usuário** (os do catálogo não são mais copiados para lá nem aparecem na lista).
 - **Revisão 21**: padronização das barras de botões (ações na **mesma linha**, botões de ícone com largura fixa `.btn-icon`) em todas as telas.
+- **Revisão 28**: correção da Biblioteca — o app não "adivinha" mais a origem pelo nome (`isUserExercise`): exercícios criados pelo usuário voltam a aparecer, e as marcações antigas sem `catalogId` são reparadas na inicialização.
 - **Revisão 27**: correção do zoom automático do iOS ao focar campos de texto (controles de formulário com 16px em telas de celular).
 - **Revisão 26**: extração da lógica pura para `js/core.js` (datas, semana, agrupamento de séries, aquecimento, histórico, exportação de texto e `normalizeBackup`) com **testes de unidade em Node** (`tests/core.test.js`, fixtures de backups v1/v2) e **pipelines** de testes (`tests.yml` a cada push/PR) e de deploy por tag (que só publica se os testes passarem).
 - **Revisão 25**: fluxo de publicação seguro — apenas a branch `main` + **tags** de versão; o Pages é publicado por **GitHub Actions** quando uma tag `v*` é enviada (com `check.ps1` como portão antes do deploy).

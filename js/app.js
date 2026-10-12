@@ -664,7 +664,7 @@ function renderPickerResults(query) {
   const el = document.getElementById('pickerResults');
 
   const fichas = state.exercises.filter(function (e) {
-    return e.active !== false && e.source !== 'catalog' && (!lower || normalizeText(e.name).indexOf(lower) !== -1);
+    return e.active !== false && isUserExercise(e) && (!lower || normalizeText(e.name).indexOf(lower) !== -1);
   }).slice(0, 30);
 
   const catalog = (state.catalog || []).filter(function (e) {
@@ -846,7 +846,7 @@ function fillLibraryGroupFilter() {
 
   state.exercises.forEach(function (e) {
     if (e.active === false) return;
-    if (e.source === 'catalog') return;
+    if (!isUserExercise(e)) return;
     if (e.group && groups.indexOf(e.group) === -1) groups.push(e.group);
   });
   groups.sort(function (a, b) { return a.localeCompare(b, 'pt'); });
@@ -865,7 +865,7 @@ function renderExercises() {
   const query = normalizeText(state.libraryQuery);
   const list = state.exercises.filter(function (e) {
     if (e.active === false) return false;
-    if (e.source === 'catalog') return false;
+    if (!isUserExercise(e)) return false;
     if (state.libraryGroup && e.group !== state.libraryGroup) return false;
     if (query && normalizeText(e.name).indexOf(query) === -1) return false;
     return true;
@@ -1121,7 +1121,7 @@ function renderSheetPickerResults(query) {
   const el = document.getElementById('sheetPickerResults');
 
   const library = state.exercises.filter(function (e) {
-    return e.active !== false && e.source !== 'catalog' && (!lower || normalizeText(e.name).indexOf(lower) !== -1);
+    return e.active !== false && isUserExercise(e) && (!lower || normalizeText(e.name).indexOf(lower) !== -1);
   }).slice(0, 20);
 
   const catalog = (state.catalog || []).filter(function (e) {
@@ -1684,27 +1684,26 @@ function guard(fn) {
   };
 }
 
-async function markCatalogDuplicates() {
-  const catalogNames = {};
-  (state.catalog || []).forEach(function (c) {
-    catalogNames[normalizeText(c.name)] = true;
-  });
+// Versões anteriores escondiam da Biblioteca os exercícios cujo NOME existia no catálogo.
+// Isso escondia exercícios criados pelo usuário — aqui desfazemos essa marcação
+// (mantemos 'catalog' apenas quando houver catalogId, que comprova a origem).
+async function repairLibrarySources() {
+  const wrong = exercisesNeedingRepair(state.exercises);
 
-  const toMark = state.exercises.filter(function (e) {
-    return !e.source && !(e.correction || '').trim() && catalogNames[normalizeText(e.name)];
-  });
-
-  for (let i = 0; i < toMark.length; i++) {
-    toMark[i].source = 'catalog';
-    await dbPut('exercises', toMark[i]);
+  for (let i = 0; i < wrong.length; i++) {
+    wrong[i].source = 'custom';
+    await dbPut('exercises', wrong[i]);
   }
+
+  return wrong.length;
 }
 
 async function init() {
   await loadState();
+  await repairLibrarySources();
+
   try {
     await loadCatalog();
-    await markCatalogDuplicates();
   } catch (e) {
     // o catálogo é opcional para o app funcionar
   }

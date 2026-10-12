@@ -234,6 +234,47 @@ test('workoutAsText omite cardio, observacoes e ficha quando vazios', () => {
   assert.ok(text.indexOf('1. X') !== -1);
 });
 
+/* ---------- biblioteca do usuario ---------- */
+
+test('isUserExercise nao esconde exercicio criado pelo usuario', () => {
+  assert.equal(core.isUserExercise({ id: 'e1', name: 'Puxada frente supinada' }), true, 'sem source = criado pelo usuario');
+  assert.equal(core.isUserExercise({ id: 'e2', name: 'X', source: 'custom' }), true);
+  assert.equal(core.isUserExercise({ id: 'e3', name: 'X', source: 'catalog' }), true, 'marcado sem catalogId nao pode esconder');
+  assert.equal(core.isUserExercise({ id: 'e4', name: 'X', source: 'catalog', catalogId: 887 }), false, 'do catalogo com comprovacao');
+  assert.equal(core.isUserExercise(null), false);
+});
+
+test('libraryExercises lista os exercicios do usuario e ignora inativos', () => {
+  const list = core.libraryExercises([
+    { id: 'a', name: 'Elevação pélvica' },
+    { id: 'b', name: 'Puxada frente supinada', source: 'catalog' },
+    { id: 'c', name: 'Do catálogo', source: 'catalog', catalogId: 1 },
+    { id: 'd', name: 'Inativo', active: false },
+    null
+  ]);
+  assert.deepEqual(list.map(function (e) { return e.id; }), ['a', 'b']);
+});
+
+test('exercisesNeedingRepair aponta so as marcacoes sem comprovacao', () => {
+  const need = core.exercisesNeedingRepair([
+    { id: 'a', source: 'catalog' },
+    { id: 'b', source: 'catalog', catalogId: 5 },
+    { id: 'c', source: 'custom' },
+    { id: 'd' }
+  ]);
+  assert.deepEqual(need.map(function (e) { return e.id; }), ['a']);
+});
+
+test('regressao: exercicio do usuario com nome igual ao do catalogo continua visivel', () => {
+  const catalog = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data', 'exercises.json'), 'utf8'));
+  const nomeDoCatalogo = catalog.exercises[0].name;
+  const meu = { id: 'meu', name: nomeDoCatalogo, correction: '' };
+
+  assert.equal(core.isUserExercise(meu), true);
+  assert.equal(core.libraryExercises([meu]).length, 1);
+  assert.deepEqual(core.exercisesNeedingRepair([meu]), []);
+});
+
 /* ---------- compatibilidade de dados entre versoes ---------- */
 
 test('backup v1 (tipos de treino) migra para fichas sem perder dados', () => {

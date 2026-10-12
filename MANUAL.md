@@ -348,6 +348,7 @@ quem mantém o app — é uma evolução prevista.
 | Toquei em **Salvar** e não salvou | Nenhuma série/aquecimento/cardio preenchido | Preencha ao menos uma informação (o app avisa) |
 | Esqueci de registrar e quero lançar um treino de outro dia | — | Em **Treinar**, mude a **Data** |
 | A tela dá **zoom** ao tocar num campo de texto (iPhone) | Safari amplia quando o campo tem fonte menor que 16px | Corrigido nas versões novas; se ainda acontecer, use **Mais → Atualizar app** |
+| Exercícios que eu criei **sumiram da Biblioteca** | Bug corrigido na v27: o app escondia exercícios cujo nome também existia no catálogo | Use **Mais → Atualizar app** — seus exercícios nunca foram apagados |
 | Importei o backup errado | — | **Mais → Dados → Desfazer** (logo após importar) |
 
 ---
