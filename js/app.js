@@ -21,6 +21,7 @@ const state = {
   sheetPickerQuery: '',
   libraryGroup: '',
   libraryQuery: '',
+  lastImportSnapshot: null,
   calendarCursor: null
 };
 
@@ -641,8 +642,8 @@ async function saveWorkout() {
     });
   });
 
-  if (!sets.length && !cardioMinutes) {
-    alert('Adicione pelo menos um exercício com série ou informe os minutos de cardio.');
+  if (!sets.length && !warmups.length && !cardioMinutes) {
+    alert('Preencha pelo menos uma série (reps ou carga), um aquecimento ou os minutos de cardio.');
     return;
   }
 
@@ -749,11 +750,13 @@ function pickLibraryExercise(id) {
   hideExercisePicker();
 }
 
-function pickCatalogExercise(id) {
-  const e = (state.catalog || []).find(function (x) { return String(x.id) === String(id); });
-  if (!e) return;
+async function pickCatalogExercise(id) {
+  const item = (state.catalog || []).find(function (x) { return String(x.id) === String(id); });
+  if (!item) return;
 
-  addExerciseToForm({ exerciseId: null, exerciseName: e.name });
+  // Save it into the library too, so it is reusable and editable later.
+  const exercise = await ensureLibraryExercise(item.name, item.group);
+  addExerciseToForm({ exerciseId: exercise.id, exerciseName: exercise.name, note: exercise.correction || '' });
 
   hideExercisePicker();
 }
@@ -809,7 +812,7 @@ function renderFichaCatalogResults(query) {
   el.innerHTML = html;
 }
 
-async function findOrCreateExercise(name) {
+async function ensureLibraryExercise(name, group) {
   const clean = (name || '').trim();
   const existing = state.exercises.find(function (e) {
     return e.name.toLowerCase() === clean.toLowerCase();
@@ -819,7 +822,7 @@ async function findOrCreateExercise(name) {
   const exercise = {
     id: uid(),
     name: clean,
-    group: 'Outros',
+    group: group || 'Outros',
     correction: '',
     active: true,
     createdAt: new Date().toISOString(),
@@ -831,29 +834,41 @@ async function findOrCreateExercise(name) {
   return exercise;
 }
 
+function findOrCreateExercise(name) {
+  return ensureLibraryExercise(name, 'Outros');
+}
+
 async function createExerciseFromPicker() {
-  const name = state.pickerQuery;
-  if (!name) return;
-  const exercise = await findOrCreateExercise(name);
+  try {
+    const name = state.pickerQuery;
+    if (!name) return;
+    const exercise = await findOrCreateExercise(name);
 
-  addExerciseToForm({
-    exerciseId: exercise.id,
-    exerciseName: exercise.name,
-    note: exercise.correction || ''
-  });
+    addExerciseToForm({
+      exerciseId: exercise.id,
+      exerciseName: exercise.name,
+      note: exercise.correction || ''
+    });
 
-  hideExercisePicker();
+    hideExercisePicker();
+  } catch (err) {
+    alert('Erro ao criar exercício: ' + ((err && err.message) ? err.message : err));
+  }
 }
 
 async function createExerciseFromFichaSearch() {
   const name = state.fichaQuery;
   if (!name) return;
-  const exercise = await findOrCreateExercise(name);
-  document.getElementById('fichaName').value = exercise.name;
-  const groupSelect = document.getElementById('fichaGroup');
-  const match = Array.prototype.some.call(groupSelect.options, function (o) { return o.value === exercise.group; });
-  if (exercise.group && match) groupSelect.value = exercise.group;
-  document.getElementById('fichaCatalogBox').classList.add('d-none');
+  try {
+    const exercise = await findOrCreateExercise(name);
+    document.getElementById('fichaName').value = exercise.name;
+    const groupSelect = document.getElementById('fichaGroup');
+    const match = Array.prototype.some.call(groupSelect.options, function (o) { return o.value === exercise.group; });
+    if (exercise.group && match) groupSelect.value = exercise.group;
+    document.getElementById('fichaCatalogBox').classList.add('d-none');
+  } catch (err) {
+    alert('Erro ao criar exercício: ' + ((err && err.message) ? err.message : err));
+  }
 }
 
 /* ---------- exercises (fichas) ---------- */
@@ -1232,10 +1247,12 @@ function pickSheetLibraryExercise(id) {
   renderSheetPickerResults(state.sheetPickerQuery);
 }
 
-function pickSheetCatalogExercise(id) {
-  const e = (state.catalog || []).find(function (x) { return String(x.id) === String(id); });
-  if (!e) return;
-  addSheetExercise({ exerciseId: null, name: e.name, sets: 3, reps: [], note: '' });
+async function pickSheetCatalogExercise(id) {
+  const item = (state.catalog || []).find(function (x) { return String(x.id) === String(id); });
+  if (!item) return;
+
+  const exercise = await ensureLibraryExercise(item.name, item.group);
+  addSheetExercise({ exerciseId: exercise.id, name: exercise.name, sets: 3, reps: [], note: exercise.correction || '' });
   renderSheetPickerResults(state.sheetPickerQuery);
 }
 
@@ -1413,6 +1430,7 @@ function renderMore() {
   document.getElementById('setWorkoutTarget').value = state.settings.weeklyWorkoutTarget;
   document.getElementById('setCardioTarget').value = state.settings.weeklyCardioTarget;
   document.getElementById('setWeekAnchor').value = state.settings.weekAnchor || todayISO();
+  document.getElementById('btnUndoImport').classList.toggle('d-none', !state.lastImportSnapshot);
   renderColinhaList();
 }
 
@@ -1586,11 +1604,27 @@ async function importData(file) {
     return;
   }
 
-  // Safety backup of the current state before replacing.
-  await exportData();
+  if (!confirm('Substituir todos os dados atuais pelo backup importado?\n\nSe algo estiver errado, você poderá desfazer em Mais → Dados.')) return;
 
-  if (!confirm('Substituir todos os dados locais pelo backup importado?')) return;
+  // Keep the current data in memory so the import can be undone.
+  const snapshot = {
+    workouts: state.workouts,
+    exercises: state.exercises,
+    sheets: state.sheets,
+    settings: state.settings,
+    colinha: state.colinha
+  };
 
+  await restoreAll(data);
+  state.lastImportSnapshot = snapshot;
+
+  await loadState();
+  alert('Backup importado! Para desfazer, use "Desfazer importação" em Mais → Dados.');
+  location.hash = '#/dashboard';
+  renderDashboard();
+}
+
+async function restoreAll(data) {
   await dbClear('workouts');
   await dbClear('exercises');
   await dbClear('sheets');
@@ -1605,7 +1639,7 @@ async function importData(file) {
   (data.workouts || []).forEach(function (v) { if (v && v.id) stores.workouts.put(v); });
   (data.exercises || []).forEach(function (v) { if (v && v.id) stores.exercises.put(v); });
 
-  const importedSheets = data.sheets || (data.workoutTypes || []).map(function (t) {
+  const sheets = data.sheets || (data.workoutTypes || []).map(function (t) {
     return {
       id: t.id,
       name: t.name,
@@ -1615,7 +1649,7 @@ async function importData(file) {
       updatedAt: new Date().toISOString()
     };
   });
-  importedSheets.forEach(function (v) { if (v && v.id) stores.sheets.put(v); });
+  sheets.forEach(function (v) { if (v && v.id) stores.sheets.put(v); });
 
   const settings = data.settings || defaultSettings();
   settings.id = APP_SETTINGS_ID;
@@ -1628,11 +1662,18 @@ async function importData(file) {
     tx.onerror = function () { reject(tx.error); };
     tx.onabort = function () { reject(tx.error); };
   });
+}
 
+async function undoImport() {
+  const snapshot = state.lastImportSnapshot;
+  if (!snapshot) return;
+  if (!confirm('Desfazer a última importação e voltar aos dados anteriores?')) return;
+
+  await restoreAll(snapshot);
+  state.lastImportSnapshot = null;
   await loadState();
-  alert('Backup importado com sucesso.');
-  location.hash = '#/dashboard';
-  renderDashboard();
+  alert('Dados anteriores restaurados.');
+  renderMore();
 }
 
 /* ---------- events & boot ---------- */
@@ -1640,16 +1681,16 @@ async function importData(file) {
 function bindEvents() {
   window.addEventListener('hashchange', navigate);
 
-  document.getElementById('btnAddExercise').addEventListener('click', openExercisePicker);
-  document.getElementById('workoutSave').addEventListener('click', saveWorkout);
-  document.getElementById('workoutDelete').addEventListener('click', deleteWorkout);
+  document.getElementById('btnAddExercise').addEventListener('click', guard(openExercisePicker));
+  document.getElementById('workoutSave').addEventListener('click', guard(saveWorkout));
+  document.getElementById('workoutDelete').addEventListener('click', guard(deleteWorkout));
   document.getElementById('workoutExport').addEventListener('click', function () { exportWorkoutText(state.editingWorkoutId); });
-  document.getElementById('workoutSheet').addEventListener('change', onSheetChange);
+  document.getElementById('workoutSheet').addEventListener('change', guard(onSheetChange));
   document.getElementById('btnAddSheet').addEventListener('click', openSheetModal);
-  document.getElementById('sheetSave').addEventListener('click', saveNewSheet);
+  document.getElementById('sheetSave').addEventListener('click', guard(saveNewSheet));
   document.getElementById('btnNewSheet').addEventListener('click', function () { openSheetEditor(null); });
-  document.getElementById('sheetEditorSave').addEventListener('click', saveSheetEditor);
-  document.getElementById('btnSheetAddExercise').addEventListener('click', toggleSheetPicker);
+  document.getElementById('sheetEditorSave').addEventListener('click', guard(saveSheetEditor));
+  document.getElementById('btnSheetAddExercise').addEventListener('click', guard(toggleSheetPicker));
   document.getElementById('sheetPickerSearch').addEventListener('input', function () {
     renderSheetPickerResults(this.value);
   });
@@ -1663,7 +1704,7 @@ function bindEvents() {
     state.libraryQuery = this.value;
     renderExercises();
   });
-  document.getElementById('exerciseFormSave').addEventListener('click', saveExerciseForm);
+  document.getElementById('exerciseFormSave').addEventListener('click', guard(saveExerciseForm));
   document.getElementById('btnFichaCatalog').addEventListener('click', toggleFichaCatalog);
   document.getElementById('fichaCatalogSearch').addEventListener('input', function () {
     renderFichaCatalogResults(this.value);
@@ -1677,22 +1718,36 @@ function bindEvents() {
   document.getElementById('calNext').addEventListener('click', function () { changeMonth(1); });
 
   document.getElementById('btnAddColinha').addEventListener('click', function () { openColinhaForm(null); });
-  document.getElementById('colinhaSave').addEventListener('click', saveColinha);
+  document.getElementById('colinhaSave').addEventListener('click', guard(saveColinha));
 
-  document.getElementById('btnSaveSettings').addEventListener('click', saveSettingsForm);
-  document.getElementById('btnWeekToday').addEventListener('click', startWeekToday);
+  document.getElementById('btnSaveSettings').addEventListener('click', guard(saveSettingsForm));
+  document.getElementById('btnWeekToday').addEventListener('click', guard(startWeekToday));
 
-  document.getElementById('btnExport').addEventListener('click', exportData);
-  document.getElementById('exportCopy').addEventListener('click', copyExportText);
-  document.getElementById('exportShare').addEventListener('click', shareExportText);
-  document.getElementById('btnForceUpdate').addEventListener('click', forceUpdate);
+  document.getElementById('btnExport').addEventListener('click', guard(exportData));
+  document.getElementById('exportCopy').addEventListener('click', guard(copyExportText));
+  document.getElementById('exportShare').addEventListener('click', guard(shareExportText));
+  document.getElementById('btnForceUpdate').addEventListener('click', guard(forceUpdate));
   document.getElementById('btnImport').addEventListener('click', function () {
     document.getElementById('importFile').click();
   });
+  document.getElementById('btnUndoImport').addEventListener('click', guard(undoImport));
   document.getElementById('importFile').addEventListener('change', function () {
-    if (this.files && this.files[0]) importData(this.files[0]);
+    if (this.files && this.files[0]) guard(importData)(this.files[0]);
     this.value = '';
   });
+}
+
+function guard(fn) {
+  return function () {
+    try {
+      const result = fn.apply(this, arguments);
+      if (result && typeof result.catch === 'function') {
+        result.catch(function (err) { alert('Erro: ' + ((err && err.message) ? err.message : err)); });
+      }
+    } catch (err) {
+      alert('Erro: ' + ((err && err.message) ? err.message : err));
+    }
+  };
 }
 
 async function init() {

@@ -37,13 +37,13 @@ Aplicativo web instalável (PWA) para registrar treinos de academia, acompanhar 
 - **Cardio**: minutos registrados dentro do treino (um treino pode ser "só cardio").
 - **Aquecimento**: cada exercício do treino tem sua própria linha de aquecimento (reps, peso, RIR), salva junto do treino; **não** entra no desempenho por exercício nem na tonelagem.
 - **Fichas**: ao registrar, seleciona uma ficha; os exercícios dela entram no formulário na ordem cadastrada (com opção de substituir o que já estava). O nome da ficha é copiado para o treino (snapshot) para preservar o histórico.
-- **Catálogo embutido**: o app traz `data/exercises.json` (927 exercícios em pt-BR: fonte `gugeldev/exercicios-bd-ptbr`, licença CC0-1.0, + curadoria própria de exercícios comuns de academia). Cada item tem `id` inteiro sequencial **permanente** (nunca reatribuído ou reutilizado), `sourceId` original, `name` e `group`. Ao montar uma ficha (ou adicionar um exercício extra ao treino), dá para escolher do catálogo ou criar um próprio.
+- **Catálogo embutido**: o app traz `data/exercises.json` (927 exercícios em pt-BR: fonte `gugeldev/exercicios-bd-ptbr`, licença CC0-1.0, + curadoria própria de exercícios comuns de academia). Cada item tem `id` inteiro sequencial **permanente** (nunca reatribuído ou reutilizado), `sourceId` original, `name` e `group`. Ao montar uma ficha (ou adicionar um exercício extra ao treino), dá para escolher do catálogo ou criar um próprio. **Um exercício escolhido do catálogo também é salvo na Biblioteca** (com o grupo muscular), para poder ser reutilizado e editado depois.
 - **Pré-preenchimento**: ao carregar a ficha, o app cria as séries com as **reps de cada série** definidas na ficha e usa a **carga da última execução** do exercício (se houver). O **aquecimento** também vem pré-preenchido com **reps e peso do treino anterior** (RIR em branco). **Carga e RIR pertencem ao treino**, não à ficha.
 - **Criação on-the-fly**: na busca de exercícios (ao montar a ficha ou registrar o treino), se o nome não existir, o app oferece "Criar \"...\"" e cadastra o exercício na hora.
 - **Desempenho**: por exercício, mostra a última sessão (carga × reps) vs a sessão anterior e o **PR** (maior carga já registrada em uma série; em empate, a série com mais reps).
 - **Tonelagem** (opcional, Fase 2): `Σ(reps × carga)` por exercício e por treino, com exibição por toggle.
 - **Fotos** (opcional, Fase 2): 1 foto por exercício, armazenada no IndexedDB (Blob) e incluída no JSON de export como base64.
-- **Import**: restaura/substitui os dados locais após confirmação; antes de substituir, o app gera um backup automático do JSON atual.
+- **Import**: restaura/substitui os dados locais após confirmação. O estado anterior fica em memória e pode ser recuperado com **"Desfazer importação"** (Mais → Dados) — sem downloads automáticos.
 - **Edição**: treinos podem ser editados ou excluídos a qualquer momento; não há bloqueio de histórico.
 
 ## 5. Modelo de dados (IndexedDB)
@@ -116,3 +116,4 @@ PLANO.md
 - **Revisão 12**: acabamento visual — ícones em títulos/cards/botões, **barras de progresso** nas metas semanais, **seta de tendência** (↑/↓/=) no desempenho por exercício, badge de PR com troféu, numeração dos exercícios na ficha, destaque do **dia de hoje** no calendário e estados vazios com orientação.
 - **Revisão 13** (`dec-23116a57a6ed6e0c`): aba "Exercícios" renomeada para **"Biblioteca"**, com **filtro por grupo muscular**, busca e indicação de **em quais fichas** cada exercício é usado.
 - **Revisão 14**: item do menu "Registrar" renomeado para **"Treinar"**; cada treino pode ser **exportado como texto** legível (aquecimento, séries, cargas, RIR, observações, cardio) para copiar/compartilhar com a professora.
+- **Revisão 15**: exercícios escolhidos do catálogo passam a ser **salvos na Biblioteca**; **tratamento de erro visível** nas ações (sem falhas silenciosas); treino com apenas aquecimento também salva; importação sem download automático, com **"Desfazer importação"**.

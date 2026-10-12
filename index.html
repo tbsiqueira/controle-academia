@@ -8,9 +8,9 @@
   <title>Meu Treino</title>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
-  <link rel="stylesheet" href="vendor/bootstrap/bootstrap.min.css?v=15">
-  <link rel="stylesheet" href="vendor/bootstrap-icons/bootstrap-icons.min.css?v=15">
-  <link rel="stylesheet" href="css/styles.css?v=15">
+  <link rel="stylesheet" href="vendor/bootstrap/bootstrap.min.css?v=16">
+  <link rel="stylesheet" href="vendor/bootstrap-icons/bootstrap-icons.min.css?v=16">
+  <link rel="stylesheet" href="css/styles.css?v=16">
 </head>
 <body>
   <main class="container pb-nav">
@@ -156,13 +156,14 @@
           <div class="d-grid gap-2">
             <button class="btn btn-outline-primary" type="button" id="btnExport"><i class="bi bi-download"></i> Exportar backup (JSON)</button>
             <button class="btn btn-outline-secondary" type="button" id="btnImport"><i class="bi bi-upload"></i> Importar backup (JSON)</button>
+            <button class="btn btn-outline-warning d-none" type="button" id="btnUndoImport"><i class="bi bi-arrow-counterclockwise"></i> Desfazer importação</button>
             <button class="btn btn-outline-danger" type="button" id="btnForceUpdate"><i class="bi bi-arrow-repeat"></i> Forçar atualização do app</button>
             <input type="file" id="importFile" accept="application/json,.json" class="d-none">
           </div>
         </div>
       </div>
 
-      <p class="text-center text-muted small">Meu Treino <span id="appVersion">v15</span> · dados 100% locais · catálogo: gugeldev/exercicios-bd-ptbr (CC0)<br><a href="reset.html">limpar cache e atualizar</a></p>
+      <p class="text-center text-muted small">Meu Treino <span id="appVersion">v16</span> · dados 100% locais · catálogo: gugeldev/exercicios-bd-ptbr (CC0)<br><a href="reset.html">limpar cache e atualizar</a></p>
     </section>
   </main>
 
@@ -324,8 +325,8 @@
     </div>
   </div>
 
-  <script src="vendor/bootstrap/bootstrap.bundle.min.js?v=15"></script>
-  <script src="js/db.js?v=15"></script>
-  <script src="js/app.js?v=15"></script>
+  <script src="vendor/bootstrap/bootstrap.bundle.min.js?v=16"></script>
+  <script src="js/db.js?v=16"></script>
+  <script src="js/app.js?v=16"></script>
 </body>
 </html>
