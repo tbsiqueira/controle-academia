@@ -37,7 +37,7 @@ Aplicativo web instalável (PWA) para registrar treinos de academia, acompanhar 
 - **Aquecimento**: cada exercício do treino tem sua própria linha de aquecimento (reps, peso, RIR), salva junto do treino; **não** entra no desempenho por exercício nem na tonelagem.
 - **Fichas**: ao registrar, seleciona uma ficha; os exercícios dela entram no formulário na ordem cadastrada (com opção de substituir o que já estava). O nome da ficha é copiado para o treino (snapshot) para preservar o histórico.
 - **Catálogo embutido**: o app traz `data/exercises.json` (927 exercícios em pt-BR: fonte `gugeldev/exercicios-bd-ptbr`, licença CC0-1.0, + curadoria própria de exercícios comuns de academia). Cada item tem `id` inteiro sequencial **permanente** (nunca reatribuído ou reutilizado), `sourceId` original, `name` e `group`. Ao montar uma ficha (ou adicionar um exercício extra ao treino), dá para escolher do catálogo ou criar um próprio.
-- **Pré-preenchimento**: ao carregar a ficha, o app cria as séries com as **reps de cada série** definidas na ficha e usa a **carga da última execução** do exercício (se houver). RIR e observação de série começam vazios. **Carga e RIR pertencem ao treino**, não à ficha.
+- **Pré-preenchimento**: ao carregar a ficha, o app cria as séries com as **reps de cada série** definidas na ficha e usa a **carga da última execução** do exercício (se houver). O **aquecimento** também vem pré-preenchido com **reps e peso do treino anterior** (RIR em branco). **Carga e RIR pertencem ao treino**, não à ficha.
 - **Criação on-the-fly**: na busca de exercícios (ao montar a ficha ou registrar o treino), se o nome não existir, o app oferece "Criar \"...\"" e cadastra o exercício na hora.
 - **Desempenho**: por exercício, mostra a última sessão (carga × reps) vs a sessão anterior e o **PR** (maior carga já registrada em uma série; em empate, a série com mais reps).
 - **Tonelagem** (opcional, Fase 2): `Σ(reps × carga)` por exercício e por treino, com exibição por toggle.
@@ -111,3 +111,4 @@ PLANO.md
 - **Revisão 8**: na ficha, cada exercício tem **séries + reps por série** (ex.: 3×12-10-8) e **observação da professora**; **carga e RIR saíram da ficha e da biblioteca** (pertencem ao treino). Biblioteca ficou com nome, grupo e observação.
 - **Revisão 9**: **linha de aquecimento** no registro do treino (reps, peso, RIR), salva junto do treino.
 - **Revisão 10**: o aquecimento passa a ser **por exercício** (cada exercício do treino tem sua própria linha de reps/peso/RIR), não um bloco único do treino.
+- **Revisão 11**: aquecimento pré-preenchido com **reps e peso do treino anterior**; item do menu inferior "Exercícios" renomeado para **"Fichas"**.

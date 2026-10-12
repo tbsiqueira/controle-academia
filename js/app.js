@@ -363,7 +363,7 @@ function loadSheetIntoForm(sheet) {
       exerciseId: item.exerciseId || null,
       exerciseName: item.name,
       note: item.note || '',
-      warmup: { reps: '', load: '', rir: '' },
+      warmup: previousWarmupFields(item.name),
       sets: sets
     });
   });
@@ -514,6 +514,27 @@ function lastLoadsByName(name) {
   return map;
 }
 
+function lastWarmupByName(name) {
+  const sorted = state.workouts
+    .filter(function (w) {
+      return (w.warmups || []).some(function (x) { return x.exerciseName === name; });
+    })
+    .sort(function (a, b) { return a.date < b.date ? 1 : -1; });
+
+  if (!sorted.length) return null;
+  const last = sorted[0];
+  return last.warmups.find(function (x) { return x.exerciseName === name; }) || null;
+}
+
+function previousWarmupFields(name) {
+  const last = lastWarmupByName(name);
+  return {
+    reps: (last && last.reps !== null && last.reps !== undefined) ? last.reps : '',
+    load: (last && last.load !== null && last.load !== undefined) ? last.load : '',
+    rir: ''
+  };
+}
+
 function addExerciseToForm(opts) {
   const name = opts.exerciseName || 'Exercício';
   const lastLoads = lastLoadsByName(name);
@@ -529,7 +550,7 @@ function addExerciseToForm(opts) {
     exerciseId: opts.exerciseId || null,
     exerciseName: name,
     note: opts.note || '',
-    warmup: { reps: '', load: '', rir: '' },
+    warmup: previousWarmupFields(name),
     sets: sets
   });
   renderFormSets();
