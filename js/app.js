@@ -207,6 +207,15 @@ function renderWeek() {
     '</div></div></div>';
 }
 
+function warmupText(warmup) {
+  if (!warmup) return '';
+  const parts = [];
+  if (warmup.reps !== null && warmup.reps !== undefined) parts.push(warmup.reps + ' reps');
+  if (warmup.load !== null && warmup.load !== undefined) parts.push(warmup.load + ' kg');
+  if (warmup.rir !== null && warmup.rir !== undefined) parts.push('RIR ' + warmup.rir);
+  return parts.length ? 'aquec.: ' + parts.join(' · ') : '';
+}
+
 function renderRecent() {
   const el = document.getElementById('recentWorkouts');
   const recent = state.workouts.slice().sort(function (a, b) {
@@ -221,9 +230,10 @@ function renderRecent() {
   el.innerHTML = '<h6 class="mt-2">Últimos treinos</h6>' + recent.map(function (w) {
     const setCount = (w.sets || []).length;
     const name = w.sheetName || w.typeName || 'Treino';
+    const warm = warmupText(w.warmup);
     return '<div class="card mb-2"><div class="card-body py-2 d-flex justify-content-between align-items-center">' +
       '<div><strong>' + esc(name) + '</strong><br>' +
-      '<small class="text-muted">' + fmtBR(w.date) + ' · ' + setCount + ' exerc.</small></div>' +
+      '<small class="text-muted">' + fmtBR(w.date) + ' · ' + setCount + ' exerc.' + (warm ? ' · ' + esc(warm) : '') + '</small></div>' +
       '<a href="#/workout" data-edit-workout="' + esc(w.id) + '" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>' +
       '</div></div>';
   }).join('');
@@ -402,6 +412,12 @@ function renderWorkoutForm() {
   renderSheetOptions(editing ? (editing.sheetId || editing.typeId) : null);
   document.getElementById('workoutCardio').value = editing ? (editing.cardioMinutes || '') : '';
   document.getElementById('workoutNotes').value = editing ? (editing.notes || '') : '';
+
+  const warmup = (editing && editing.warmup) ? editing.warmup : {};
+  document.getElementById('warmupReps').value = (warmup.reps === undefined || warmup.reps === null) ? '' : warmup.reps;
+  document.getElementById('warmupLoad').value = (warmup.load === undefined || warmup.load === null) ? '' : warmup.load;
+  document.getElementById('warmupRir').value = (warmup.rir === undefined || warmup.rir === null) ? '' : warmup.rir;
+
   state.formSets = editing ? groupSets(editing.sets) : [];
   document.getElementById('workoutDelete').classList.toggle('d-none', !editing);
   renderFormSets();
@@ -489,6 +505,14 @@ function addExerciseToForm(opts) {
   renderFormSets();
 }
 
+function readWarmup() {
+  const reps = toNumOrNull(document.getElementById('warmupReps').value);
+  const load = toNumOrNull(document.getElementById('warmupLoad').value);
+  const rir = toNumOrNull(document.getElementById('warmupRir').value);
+  if (reps === null && load === null && rir === null) return null;
+  return { reps: reps, load: load, rir: rir };
+}
+
 async function saveWorkout() {
   const date = document.getElementById('workoutDate').value || todayISO();
   const sheetId = document.getElementById('workoutSheet').value;
@@ -536,6 +560,7 @@ async function saveWorkout() {
     sheetName: sheet ? sheet.name : '',
     cardioMinutes: cardioMinutes,
     notes: notes,
+    warmup: readWarmup(),
     sets: sets,
     createdAt: editing ? editing.createdAt : new Date().toISOString(),
     updatedAt: new Date().toISOString()
