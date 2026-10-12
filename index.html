@@ -8,9 +8,9 @@
   <title>Meu Treino</title>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
-  <link rel="stylesheet" href="vendor/bootstrap/bootstrap.min.css?v=18">
-  <link rel="stylesheet" href="vendor/bootstrap-icons/bootstrap-icons.min.css?v=18">
-  <link rel="stylesheet" href="css/styles.css?v=18">
+  <link rel="stylesheet" href="vendor/bootstrap/bootstrap.min.css?v=19">
+  <link rel="stylesheet" href="vendor/bootstrap-icons/bootstrap-icons.min.css?v=19">
+  <link rel="stylesheet" href="css/styles.css?v=19">
 </head>
 <body>
   <main class="container pb-nav">
@@ -53,10 +53,13 @@
       <div id="workoutExercises"></div>
       <button class="btn btn-outline-primary w-100 mb-2" type="button" id="btnAddExercise"><i class="bi bi-plus-circle"></i> Adicionar exercício</button>
 
-      <div class="d-grid gap-2 d-flex">
-        <button class="btn btn-primary flex-grow-1" type="button" id="workoutSave"><i class="bi bi-check-lg"></i> Salvar treino</button>
+      <div class="d-grid gap-2">
+        <button class="btn btn-primary" type="button" id="workoutSave"><i class="bi bi-check-lg"></i> Salvar treino</button>
+      </div>
+      <div class="d-flex gap-2 mb-3">
+        <button class="btn btn-outline-secondary flex-grow-1" type="button" id="workoutCancel"><i class="bi bi-x-lg"></i> Cancelar</button>
         <button class="btn btn-outline-primary d-none" type="button" id="workoutExport" title="Exportar como texto"><i class="bi bi-share"></i></button>
-        <button class="btn btn-outline-danger d-none" type="button" id="workoutDelete"><i class="bi bi-trash"></i></button>
+        <button class="btn btn-outline-danger d-none" type="button" id="workoutDelete" title="Excluir"><i class="bi bi-trash"></i></button>
       </div>
     </section>
 
@@ -184,7 +187,7 @@
         </div>
       </div>
 
-      <p class="text-center text-muted small">Meu Treino <span id="appVersion">v18</span> · dados 100% locais · catálogo: gugeldev/exercicios-bd-ptbr (CC0)<br><a href="reset.html">limpar cache e atualizar</a></p>
+      <p class="text-center text-muted small">Meu Treino <span id="appVersion">v19</span> · dados 100% locais · catálogo: gugeldev/exercicios-bd-ptbr (CC0)<br><a href="reset.html">limpar cache e atualizar</a></p>
     </section>
   </main>
 
@@ -346,8 +349,8 @@
     </div>
   </div>
 
-  <script src="vendor/bootstrap/bootstrap.bundle.min.js?v=18"></script>
-  <script src="js/db.js?v=18"></script>
-  <script src="js/app.js?v=18"></script>
+  <script src="vendor/bootstrap/bootstrap.bundle.min.js?v=19"></script>
+  <script src="js/db.js?v=19"></script>
+  <script src="js/app.js?v=19"></script>
 </body>
 </html>

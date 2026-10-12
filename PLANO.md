@@ -62,7 +62,7 @@ Stores:
 | Dashboard | Meta da semana, aviso de semana encerrada, últimos treinos (toque para **ver como foi**) |
 | Ver treino (somente leitura) | Resumo do treino com aquecimento, séries, cardio e observações; toque no exercício para ver a **evolução**; botões Editar / Exportar / Excluir |
 | Evolução do exercício | Melhor série por dia (barras), PR, tendência e histórico completo por data |
-| Treinar (registro) | Data, ficha (selecionar/criar; carrega os exercícios dela), **aquecimento por exercício (reps/peso/RIR)**, séries (reps/carga/RIR/obs), cardio, **exportar como texto** |
+| Treinar (registro) | Data, ficha (selecionar/criar; carrega os exercícios dela), **aquecimento por exercício (reps/peso/RIR)**, séries (reps/carga/RIR/obs), cardio; ações **Salvar / Cancelar** (descarta) / Exportar texto / Excluir |
 | Fichas e exercícios | Abas: **fichas** (grupo ordenado de exercícios) e **biblioteca** (filtro por grupo, busca e uso em fichas) + correção |
 | Calendário | Frequência mensal |
 | Colinha | RIR, descanso, lembretes |
@@ -121,3 +121,4 @@ PLANO.md
 - **Revisão 15**: exercícios escolhidos do catálogo passam a ser **salvos na Biblioteca**; **tratamento de erro visível** nas ações (sem falhas silenciosas); treino com apenas aquecimento também salva; importação sem download automático, com **"Desfazer importação"**.
 - **Revisão 16**: no texto exportado, o **aquecimento aparece dentro de cada exercício** (e exercícios só com aquecimento também são listados).
 - **Revisão 17**: "Desempenho por exercício" saiu do Dashboard; novo fluxo de consulta: tocar num treino abre a tela **"Como foi o treino"** (somente leitura) e tocar num exercício abre a **Evolução** (melhor série por dia, PR, tendência e histórico).
+- **Revisão 18**: botão **Cancelar** na tela de treino, descartando todas as alterações (volta ao "Como foi o treino" quando estava editando).

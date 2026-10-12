@@ -774,6 +774,26 @@ async function deleteWorkout() {
   state.editingWorkoutId = null;
   location.hash = '#/dashboard';
 }
+function cancelWorkout() {
+  const editingId = state.editingWorkoutId;
+
+  const hasContent = state.formSets.length > 0 ||
+    toNum(document.getElementById('workoutCardio').value) > 0 ||
+    document.getElementById('workoutNotes').value.trim() !== '';
+
+  if (hasContent && !confirm('Descartar as alterações deste treino?')) return;
+
+  state.formSets = [];
+  state.editingWorkoutId = null;
+
+  if (editingId) {
+    state.viewingWorkoutId = editingId;
+    location.hash = '#/detail';
+  } else {
+    location.hash = '#/dashboard';
+  }
+}
+
 async function deleteViewedWorkout() {
   if (!state.viewingWorkoutId) return;
   if (!confirm('Excluir este treino?')) return;
@@ -1799,6 +1819,7 @@ function bindEvents() {
   document.getElementById('btnAddExercise').addEventListener('click', guard(openExercisePicker));
   document.getElementById('workoutSave').addEventListener('click', guard(saveWorkout));
   document.getElementById('workoutDelete').addEventListener('click', guard(deleteWorkout));
+  document.getElementById('workoutCancel').addEventListener('click', cancelWorkout);
   document.getElementById('workoutExport').addEventListener('click', function () { exportWorkoutText(state.editingWorkoutId); });
   document.getElementById('detailBack').addEventListener('click', function () { history.back(); });
   document.getElementById('exerciseBack').addEventListener('click', function () { history.back(); });
