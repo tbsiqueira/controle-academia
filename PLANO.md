@@ -79,7 +79,10 @@ manifest.webmanifest
 sw.js (service worker)
 icons/icon-192.png, icon-512.png
 serve.ps1 (servidor local para teste)
+check.ps1 (verificações estáticas: JSON, ids, handlers, assets, versão)
 data/exercises.json (catálogo embutido de exercícios, pt-BR, CC0)
+README.md (como rodar, publicar no GitHub Pages, estrutura, versionamento)
+.gitattributes / .nojekyll (higiene do repositório e do GitHub Pages)
 PLANO.md
 ```
 - Service worker: cache-first para o "shell" do app; **nenhum dado é enviado a servidor**.
@@ -125,4 +128,5 @@ PLANO.md
 - **Revisão 19**: textos explicativos curtos na tela **Fichas** (o que é uma ficha, o que é a Biblioteca) e dica dentro do editor de ficha.
 - **Revisão 20**: a **Biblioteca** passa a listar apenas os exercícios **criados pelo usuário** (os do catálogo não são mais copiados para lá nem aparecem na lista).
 - **Revisão 21**: padronização das barras de botões (ações na **mesma linha**, botões de ícone com largura fixa `.btn-icon`) em todas as telas.
+- **Revisão 23**: revisão geral de boas práticas — `README.md` completo (com passo a passo do GitHub Pages), `check.ps1` (verificações estáticas), `.gitattributes`, `.nojekyll`, `Content-Security-Policy` e `aria-label` nos botões de ícone.
 - **Revisão 22**: busca **sem acentos** (ex.: "puxada maquina" encontra "Puxada máquina") em todas as buscas; a tela **Treinar** não cria mais fichas (o aluno cria na aba Fichas); nova tela **Apagar dados** (confirmação por digitação, sem `alert`).

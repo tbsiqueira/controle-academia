@@ -1,0 +1,9 @@
+# Normaliza finais de linha (LF) e marca binários para não serem convertidos.
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.woff binary
+*.woff2 binary

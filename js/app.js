@@ -258,7 +258,7 @@ function renderRecent() {
       '<small class="text-muted">' + fmtBR(w.date) + ' · ' + setCount + ' exerc.' + (warm ? ' · ' + esc(warm) : '') + '</small>' +
       '</button>' +
       '<div class="d-flex gap-1">' +
-      '<button type="button" class="btn btn-sm btn-outline-secondary" data-share-workout="' + esc(w.id) + '" title="Exportar como texto"><i class="bi bi-share"></i></button>' +
+      '<button type="button" class="btn btn-sm btn-outline-secondary" data-share-workout="' + esc(w.id) + '" title="Exportar como texto" aria-label="Exportar como texto"><i class="bi bi-share"></i></button>' +
       '</div>' +
       '</div></div>';
   }).join('');
@@ -593,7 +593,7 @@ function renderFormSets() {
       '<strong><i class="bi bi-activity text-primary"></i> ' + esc(group.exerciseName) + '</strong>' +
       '<div class="d-flex align-items-center gap-1">' +
       '<span class="badge text-bg-light">' + group.sets.length + (group.sets.length === 1 ? ' série' : ' séries') + '</span>' +
-      '<button type="button" class="btn btn-sm btn-outline-danger" onclick="removeFormExercise(' + exIdx + ')"><i class="bi bi-trash"></i></button>' +
+      '<button type="button" class="btn btn-sm btn-outline-danger" onclick="removeFormExercise(' + exIdx + ')" aria-label="Remover exercício"><i class="bi bi-trash"></i></button>' +
       '</div>' +
       '</div>' +
       (group.note ? '<div class="small text-muted mb-1"><i class="bi bi-info-circle"></i> ' + esc(group.note) + '</div>' : '') +
@@ -1068,8 +1068,8 @@ function renderExercises() {
       usage +
       '</div>' +
       '<div class="d-flex gap-1">' +
-      '<button type="button" class="btn btn-sm btn-outline-primary" onclick="openExerciseForm(\'' + e.id + '\')"><i class="bi bi-pencil"></i></button>' +
-      '<button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteExercise(\'' + e.id + '\')"><i class="bi bi-trash"></i></button>' +
+      '<button type="button" class="btn btn-sm btn-outline-primary" onclick="openExerciseForm(\'' + e.id + '\')" aria-label="Editar exercício"><i class="bi bi-pencil"></i></button>' +
+      '<button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteExercise(\'' + e.id + '\')" aria-label="Excluir exercício"><i class="bi bi-trash"></i></button>' +
       '</div></div></div>';
   }).join('');
 }
@@ -1158,8 +1158,8 @@ function renderSheets() {
       '<span class="badge text-bg-light">' + items.length + '</span><br>' +
       '<small class="text-muted">' + (items.length ? preview : 'sem exercícios ainda') + '</small></div>' +
       '<div class="d-flex gap-1">' +
-      '<button type="button" class="btn btn-sm btn-outline-primary" onclick="openSheetEditor(\'' + s.id + '\')"><i class="bi bi-pencil"></i></button>' +
-      '<button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteSheet(\'' + s.id + '\')"><i class="bi bi-trash"></i></button>' +
+      '<button type="button" class="btn btn-sm btn-outline-primary" onclick="openSheetEditor(\'' + s.id + '\')" aria-label="Editar ficha"><i class="bi bi-pencil"></i></button>' +
+      '<button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteSheet(\'' + s.id + '\')" aria-label="Excluir ficha"><i class="bi bi-trash"></i></button>' +
       '</div></div></div>';
   }).join('');
 }
@@ -1208,9 +1208,9 @@ function sheetExerciseRow(item, idx) {
     '<div class="d-flex justify-content-between align-items-center mb-1">' +
     '<strong><span class="badge text-bg-primary me-1">' + (idx + 1) + '</span>' + esc(item.name) + '</strong>' +
     '<div class="d-flex gap-1">' +
-    '<button type="button" class="btn btn-sm btn-outline-secondary" onclick="moveSheetExercise(' + idx + ',-1)" title="Subir"><i class="bi bi-arrow-up"></i></button>' +
-    '<button type="button" class="btn btn-sm btn-outline-secondary" onclick="moveSheetExercise(' + idx + ',1)" title="Descer"><i class="bi bi-arrow-down"></i></button>' +
-    '<button type="button" class="btn btn-sm btn-outline-danger" onclick="removeSheetExercise(' + idx + ')" title="Remover"><i class="bi bi-trash"></i></button>' +
+    '<button type="button" class="btn btn-sm btn-outline-secondary" onclick="moveSheetExercise(' + idx + ',-1)" title="Subir" aria-label="Subir exercício"><i class="bi bi-arrow-up"></i></button>' +
+    '<button type="button" class="btn btn-sm btn-outline-secondary" onclick="moveSheetExercise(' + idx + ',1)" title="Descer" aria-label="Descer exercício"><i class="bi bi-arrow-down"></i></button>' +
+    '<button type="button" class="btn btn-sm btn-outline-danger" onclick="removeSheetExercise(' + idx + ')" title="Remover" aria-label="Remover exercício"><i class="bi bi-trash"></i></button>' +
     '</div></div>' +
     '<div class="row g-1 align-items-center">' +
     '<div class="col-3"><input type="number" min="1" max="20" class="form-control form-control-sm" value="' + esc(item.sets) + '" placeholder="séries" onchange="setSheetSets(' + idx + ',this.value)"></div>' +
@@ -1476,8 +1476,8 @@ function renderColinhaList() {
     return '<div class="d-flex justify-content-between align-items-center py-1 border-bottom">' +
       '<div class="me-2"><strong>' + esc(c.title) + '</strong><br><small class="text-muted">' + esc(c.content) + '</small></div>' +
       '<div class="d-flex gap-1">' +
-      '<button type="button" class="btn btn-sm btn-outline-primary" onclick="openColinhaForm(\'' + c.id + '\')"><i class="bi bi-pencil"></i></button>' +
-      '<button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteColinha(\'' + c.id + '\')"><i class="bi bi-trash"></i></button>' +
+      '<button type="button" class="btn btn-sm btn-outline-primary" onclick="openColinhaForm(\'' + c.id + '\')" aria-label="Editar colinha"><i class="bi bi-pencil"></i></button>' +
+      '<button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteColinha(\'' + c.id + '\')" aria-label="Excluir colinha"><i class="bi bi-trash"></i></button>' +
       '</div></div>';
   }).join('');
 }
