@@ -229,7 +229,7 @@ function renderRecent() {
   }).slice(0, 5);
 
   if (!recent.length) {
-    el.innerHTML = '<p class="text-muted"><i class="bi bi-emoji-smile"></i> Nenhum treino registrado ainda. Toque em <strong>Registrar</strong> para começar.</p>';
+    el.innerHTML = '<p class="text-muted"><i class="bi bi-emoji-smile"></i> Nenhum treino registrado ainda. Toque em <strong>Treinar</strong> para começar.</p>';
     return;
   }
 
@@ -240,13 +240,22 @@ function renderRecent() {
     return '<div class="card mb-2"><div class="card-body py-2 d-flex justify-content-between align-items-center">' +
       '<div><strong>' + esc(name) + '</strong><br>' +
       '<small class="text-muted">' + fmtBR(w.date) + ' · ' + setCount + ' exerc.' + (warm ? ' · ' + esc(warm) : '') + '</small></div>' +
-      '<a href="#/workout" data-edit-workout="' + esc(w.id) + '" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>' +
+      '<div class="d-flex gap-1">' +
+      '<button type="button" class="btn btn-sm btn-outline-secondary" data-share-workout="' + esc(w.id) + '" title="Exportar como texto"><i class="bi bi-share"></i></button>' +
+      '<a href="#/workout" data-edit-workout="' + esc(w.id) + '" class="btn btn-sm btn-outline-primary" title="Editar"><i class="bi bi-pencil"></i></a>' +
+      '</div>' +
       '</div></div>';
   }).join('');
 
   el.querySelectorAll('[data-edit-workout]').forEach(function (a) {
     a.addEventListener('click', function () {
       state.editingWorkoutId = a.getAttribute('data-edit-workout');
+    });
+  });
+
+  el.querySelectorAll('[data-share-workout]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      exportWorkoutText(b.getAttribute('data-share-workout'));
     });
   });
 }
@@ -350,7 +359,7 @@ function renderSheetHint(sheetId) {
   const count = (sheet.exercises || []).length;
   hint.textContent = count
     ? (count === 1 ? '1 exercício na ficha — carregado no treino.' : count + ' exercícios na ficha — carregados no treino.')
-    : 'Esta ficha ainda não tem exercícios. Adicione em "Fichas e exercícios".';
+    : 'Esta ficha ainda não tem exercícios. Adicione na aba Fichas.';
 }
 
 function loadSheetIntoForm(sheet) {
@@ -439,7 +448,7 @@ function renderWorkoutForm() {
 
   document.getElementById('workoutTitle').innerHTML = editing
     ? '<i class="bi bi-pencil-square text-primary"></i> Editar treino'
-    : '<i class="bi bi-plus-circle text-primary"></i> Registrar treino';
+    : '<i class="bi bi-plus-circle text-primary"></i> Treinar';
   document.getElementById('workoutDate').value = editing ? editing.date : todayISO();
   renderSheetOptions(editing ? (editing.sheetId || editing.typeId) : null);
   document.getElementById('workoutCardio').value = editing ? (editing.cardioMinutes || '') : '';
@@ -447,6 +456,7 @@ function renderWorkoutForm() {
 
   state.formSets = editing ? groupSets(editing.sets, editing.warmups) : [];
   document.getElementById('workoutDelete').classList.toggle('d-none', !editing);
+  document.getElementById('workoutExport').classList.toggle('d-none', !editing);
   renderFormSets();
 }
 
@@ -1423,6 +1433,99 @@ async function startWeekToday() {
 
 /* ---------- export / import ---------- */
 
+/* ---------- share a single workout as human-readable text ---------- */
+
+function workoutAsText(workout) {
+  const lines = [];
+  lines.push('MEU TREINO — ' + fmtBR(workout.date));
+
+  const sheetName = workout.sheetName || workout.typeName;
+  if (sheetName) lines.push('Ficha: ' + sheetName);
+  lines.push('');
+
+  const warmups = workout.warmups || [];
+  if (warmups.length) {
+    lines.push('Aquecimento');
+    warmups.forEach(function (w) {
+      const parts = [];
+      if (w.reps !== null && w.reps !== undefined) parts.push(w.reps + ' reps');
+      if (w.load !== null && w.load !== undefined) parts.push(w.load + ' kg');
+      if (w.rir !== null && w.rir !== undefined) parts.push('RIR ' + w.rir);
+      lines.push('- ' + w.exerciseName + (parts.length ? ': ' + parts.join(' · ') : ''));
+    });
+    lines.push('');
+  }
+
+  const groups = [];
+  const index = {};
+  (workout.sets || []).forEach(function (s) {
+    const key = s.exerciseName || '(sem nome)';
+    if (!Object.prototype.hasOwnProperty.call(index, key)) {
+      index[key] = groups.length;
+      groups.push({ name: key, note: s.exerciseNote || '', sets: [] });
+    }
+    if (!groups[index[key]].note && s.exerciseNote) groups[index[key]].note = s.exerciseNote;
+    groups[index[key]].sets.push(s);
+  });
+
+  groups.forEach(function (g, i) {
+    lines.push((i + 1) + '. ' + g.name + (g.note ? ' (obs.: ' + g.note + ')' : ''));
+    g.sets.slice().sort(function (a, b) { return toNum(a.number) - toNum(b.number); }).forEach(function (s) {
+      const parts = [];
+      parts.push((s.reps === null || s.reps === undefined) ? '—' : s.reps + ' reps');
+      if (s.load !== null && s.load !== undefined) parts.push(s.load + ' kg');
+      if (s.rir !== null && s.rir !== undefined) parts.push('RIR ' + s.rir);
+      let line = '   Série ' + (s.number || '?') + ': ' + parts.join(' · ');
+      if (s.note) line += ' (' + s.note + ')';
+      lines.push(line);
+    });
+    lines.push('');
+  });
+
+  const cardio = toNum(workout.cardioMinutes);
+  if (cardio > 0) lines.push('Cardio: ' + cardio + ' min');
+  if (workout.notes) lines.push('Observações: ' + workout.notes);
+
+  return lines.join('\n').trim();
+}
+
+function exportWorkoutText(id) {
+  const workout = id ? state.workouts.find(function (w) { return w.id === id; }) : null;
+  if (!workout) return;
+
+  document.getElementById('exportText').value = workoutAsText(workout);
+  bootstrap.Modal.getOrCreateInstance(document.getElementById('exportModal')).show();
+}
+
+async function copyExportText() {
+  const area = document.getElementById('exportText');
+  const text = area.value;
+
+  try {
+    await navigator.clipboard.writeText(text);
+    alert('Texto copiado!');
+  } catch (e) {
+    area.select();
+    document.execCommand('copy');
+    alert('Texto copiado!');
+  }
+}
+
+async function shareExportText() {
+  const text = document.getElementById('exportText').value;
+
+  if (navigator.share) {
+    try {
+      await navigator.share({ title: 'Meu Treino', text: text });
+      return;
+    } catch (e) {
+      // cancelled or unsupported: fall back to copy
+    }
+  }
+
+  copyExportText();
+}
+
 async function exportData() {
   const payload = {
     app: 'meu-treino',
@@ -1540,6 +1643,7 @@ function bindEvents() {
   document.getElementById('btnAddExercise').addEventListener('click', openExercisePicker);
   document.getElementById('workoutSave').addEventListener('click', saveWorkout);
   document.getElementById('workoutDelete').addEventListener('click', deleteWorkout);
+  document.getElementById('workoutExport').addEventListener('click', function () { exportWorkoutText(state.editingWorkoutId); });
   document.getElementById('workoutSheet').addEventListener('change', onSheetChange);
   document.getElementById('btnAddSheet').addEventListener('click', openSheetModal);
   document.getElementById('sheetSave').addEventListener('click', saveNewSheet);
@@ -1579,6 +1683,8 @@ function bindEvents() {
   document.getElementById('btnWeekToday').addEventListener('click', startWeekToday);
 
   document.getElementById('btnExport').addEventListener('click', exportData);
+  document.getElementById('exportCopy').addEventListener('click', copyExportText);
+  document.getElementById('exportShare').addEventListener('click', shareExportText);
   document.getElementById('btnForceUpdate').addEventListener('click', forceUpdate);
   document.getElementById('btnImport').addEventListener('click', function () {
     document.getElementById('importFile').click();
