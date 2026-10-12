@@ -4,6 +4,8 @@ Aplicativo web instalável (**PWA**) para registrar treinos de academia: fichas 
 aquecimento por exercício, séries com carga e RIR, metas semanais flexíveis, calendário de frequência e
 exportação do treino como texto para enviar à professora.
 
+📖 **Como usar o app, passo a passo: [MANUAL.md](MANUAL.md)**
+
 **Todos os dados ficam apenas no seu aparelho** (IndexedDB). Não existe backend, conta, login, analytics
 ou qualquer chamada externa. O backup é feito por arquivo JSON (exportar/importar).
 
@@ -68,6 +70,7 @@ sw.js                       service worker (network-first, com fallback offline)
 reset.html                  página de escape: desregistra o service worker e limpa o cache
 serve.ps1                   servidor local de desenvolvimento
 check.ps1                   verificações estáticas
+MANUAL.md                   manual do usuário (como usar, exemplos, FAQ)
 PLANO.md                    plano/requisitos e histórico de revisões
 ```
 
