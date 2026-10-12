@@ -1,20 +1,22 @@
 'use strict';
 
-/* Service worker: cache-first for the app shell. No user data ever leaves the device. */
+/* Service worker: offline shell for Meu Treino.
+   - Navigations (HTML): network-first, so new versions roll out when online.
+   - Hashed/versioned assets (?v=): exact match, so a version bump fetches fresh files.
+   - Fonts (requested with ?hash): matched by path only.
+   No user data ever leaves the device. */
 
-const CACHE_NAME = 'meu-treino-v4';
+const CACHE_NAME = 'meu-treino-v5';
 
 const ASSETS = [
   './',
   './index.html',
-  './css/styles.css',
-  './vendor/bootstrap/bootstrap.min.css',
-  './vendor/bootstrap/bootstrap.bundle.min.js',
-  './vendor/bootstrap-icons/bootstrap-icons.min.css',
-  './vendor/bootstrap-icons/fonts/bootstrap-icons.woff2',
-  './vendor/bootstrap-icons/fonts/bootstrap-icons.woff',
-  './js/db.js',
-  './js/app.js',
+  './css/styles.css?v=5',
+  './vendor/bootstrap/bootstrap.min.css?v=5',
+  './vendor/bootstrap/bootstrap.bundle.min.js?v=5',
+  './vendor/bootstrap-icons/bootstrap-icons.min.css?v=5',
+  './js/db.js?v=5',
+  './js/app.js?v=5',
   './manifest.webmanifest',
   './data/exercises.json',
   './icons/icon-192.png',
@@ -39,6 +41,13 @@ self.addEventListener('activate', (event) => {
   );
 });
 
+function putInCache(key, response) {
+  if (!response || response.status !== 200) return response;
+  const clone = response.clone();
+  caches.open(CACHE_NAME).then((cache) => cache.put(key, clone));
+  return response;
+}
+
 self.addEventListener('fetch', (event) => {
   const request = event.request;
   if (request.method !== 'GET') return;
@@ -46,20 +55,27 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
 
-  // Cache/match by path only: fonts are requested with a cache-busting
-  // query string (?hash), but ASSETS caches them without it.
-  const cacheKey = url.origin + url.pathname;
+  // Never intercept the service worker script itself.
+  if (url.pathname.slice(-6) === '/sw.js') return;
+
+  // HTML navigations: network-first, cache as fallback.
+  if (request.mode === 'navigate') {
+    event.respondWith(
+      fetch(request)
+        .then((response) => putInCache(request, response))
+        .catch(() => caches.match(request).then((cached) => cached || caches.match('./index.html')))
+    );
+    return;
+  }
+
+  // Versioned assets (?v=): exact URL match, so a new version is fetched fresh.
+  // Everything else (fonts with ?hash): match by path, ignoring the query string.
+  const key = url.searchParams.has('v') ? request.url : (url.origin + url.pathname);
 
   event.respondWith(
-    caches.match(cacheKey).then((cached) => {
+    caches.match(key).then((cached) => {
       if (cached) return cached;
-      return fetch(request).then((response) => {
-        if (response && response.status === 200) {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(cacheKey, clone));
-        }
-        return response;
-      });
+      return fetch(request).then((response) => putInCache(key, response));
     })
   );
 });

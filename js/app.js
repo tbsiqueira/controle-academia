@@ -963,6 +963,25 @@ async function exportData() {
   setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
 }
 
+async function forceUpdate() {
+  if (!confirm('Recarregar o app do zero (limpa o cache)? Seus treinos salvos não são afetados.')) return;
+  try {
+    if ('serviceWorker' in navigator) {
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      for (let i = 0; i < registrations.length; i++) {
+        await registrations[i].unregister();
+      }
+    }
+    if (window.caches) {
+      const keys = await caches.keys();
+      await Promise.all(keys.map(function (key) { return caches.delete(key); }));
+    }
+  } catch (e) {
+    // ignore and reload anyway
+  }
+  location.reload();
+}
+
 async function importData(file) {
   const text = await file.text();
   let payload;
@@ -1050,6 +1069,7 @@ function bindEvents() {
   document.getElementById('btnAddTypeSettings').addEventListener('click', addWorkoutTypeFromInput);
 
   document.getElementById('btnExport').addEventListener('click', exportData);
+  document.getElementById('btnForceUpdate').addEventListener('click', forceUpdate);
   document.getElementById('btnImport').addEventListener('click', function () {
     document.getElementById('importFile').click();
   });

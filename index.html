@@ -8,9 +8,9 @@
   <title>Meu Treino</title>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
-  <link rel="stylesheet" href="vendor/bootstrap/bootstrap.min.css">
-  <link rel="stylesheet" href="vendor/bootstrap-icons/bootstrap-icons.min.css">
-  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="vendor/bootstrap/bootstrap.min.css?v=5">
+  <link rel="stylesheet" href="vendor/bootstrap-icons/bootstrap-icons.min.css?v=5">
+  <link rel="stylesheet" href="css/styles.css?v=5">
 </head>
 <body>
   <main class="container pb-nav">
@@ -135,12 +135,13 @@
           <div class="d-grid gap-2">
             <button class="btn btn-outline-primary" type="button" id="btnExport"><i class="bi bi-download"></i> Exportar backup (JSON)</button>
             <button class="btn btn-outline-secondary" type="button" id="btnImport"><i class="bi bi-upload"></i> Importar backup (JSON)</button>
+            <button class="btn btn-outline-danger" type="button" id="btnForceUpdate"><i class="bi bi-arrow-repeat"></i> Forçar atualização do app</button>
             <input type="file" id="importFile" accept="application/json,.json" class="d-none">
           </div>
         </div>
       </div>
 
-      <p class="text-center text-muted small">Meu Treino · dados 100% locais · catálogo: gugeldev/exercicios-bd-ptbr (CC0)</p>
+      <p class="text-center text-muted small">Meu Treino <span id="appVersion">v5</span> · dados 100% locais · catálogo: gugeldev/exercicios-bd-ptbr (CC0)</p>
     </section>
   </main>
 
@@ -269,8 +270,8 @@
     </div>
   </div>
 
-  <script src="vendor/bootstrap/bootstrap.bundle.min.js"></script>
-  <script src="js/db.js"></script>
-  <script src="js/app.js"></script>
+  <script src="vendor/bootstrap/bootstrap.bundle.min.js?v=5"></script>
+  <script src="js/db.js?v=5"></script>
+  <script src="js/app.js?v=5"></script>
 </body>
 </html>

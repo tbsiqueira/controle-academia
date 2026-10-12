@@ -46,6 +46,7 @@ while ($listener.IsListening) {
     $bytes = [System.IO.File]::ReadAllBytes($file)
     $ctx.Response.StatusCode = 200
     $ctx.Response.ContentType = $type
+    $ctx.Response.Headers.Add('Cache-Control', 'no-store')
     $ctx.Response.ContentLength64 = $bytes.Length
     $ctx.Response.OutputStream.Write($bytes, 0, $bytes.Length)
   } else {
