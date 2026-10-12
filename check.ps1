@@ -17,7 +17,7 @@ function Read-Text($relative) {
 Write-Host "Meu Treino - verificacoes estaticas" -ForegroundColor Cyan
 
 # 1) JSONs válidos
-foreach ($file in @('manifest.webmanifest', 'data\exercises.json')) {
+foreach ($file in @('manifest.webmanifest', 'data/exercises.json')) {
   try {
     $null = (Read-Text $file) | ConvertFrom-Json
     Ok "$file e JSON valido"
@@ -27,7 +27,7 @@ foreach ($file in @('manifest.webmanifest', 'data\exercises.json')) {
 }
 
 # 2) Catálogo: quantidade e ids únicos
-$catalog = (Read-Text 'data\exercises.json') | ConvertFrom-Json
+$catalog = (Read-Text 'data/exercises.json') | ConvertFrom-Json
 $ids = @($catalog.exercises | ForEach-Object { $_.id })
 $unique = @($ids | Sort-Object -Unique)
 if ($catalog.exercises.Count -eq $unique.Count) {
@@ -43,7 +43,7 @@ if ([int]$catalog.meta.nextId -gt [int]($ids | Measure-Object -Maximum).Maximum)
 
 # 3) index.html <-> js/app.js: todo getElementById precisa existir (ou ser criado dinamicamente)
 $html = Read-Text 'index.html'
-$js = Read-Text 'js\app.js'
+$js = Read-Text 'js/app.js'
 $dynamicIds = @('btnConfirmWeek', 'eraseConfirm', 'eraseAck', 'eraseConfirmBtn', 'eraseExport')
 
 $htmlIds = @([regex]::Matches($html, 'id="([^"]+)"') | ForEach-Object { $_.Groups[1].Value } | Sort-Object -Unique)

@@ -35,74 +35,59 @@ Confere JSONs, referências de `id`, handlers `onclick`, arquivos de asset e o c
 
 ---
 
-## Branches: desenvolvimento × publicado
+## Publicar no GitHub Pages (deploy por tag)
 
-| Branch | Papel |
-|---|---|
-| **`main`** | desenvolvimento. Tudo que você mexe no dia a dia vai para cá — **não publica nada** |
-| **`release`** | **é o que está publicado no GitHub Pages**. Só recebe código quando você decide publicar |
+Nada é publicado por push na `main`. O deploy acontece **somente quando você envia uma tag de versão**
+(`v1`, `v2`, ...), através do workflow `.github/workflows/deploy.yml`:
 
-As versões publicadas são marcadas com **tags** (`v1`, `v2`, ...), então dá para saber exatamente o que está
-no ar e voltar atrás se precisar.
+```
+push na main            → nada acontece com o site publicado
+push da tag v2          → roda check.ps1 e publica no GitHub Pages
+```
 
-### Publicar no GitHub Pages (uma vez só)
+Assim você desenvolve tranquilo na `main` e o app publicado só muda quando você decide marcar uma versão.
+
+### Configurar (uma vez só)
 
 1. No repositório, abra **Settings** → **Pages**.
-2. Em **Build and deployment** → **Source**, escolha **Deploy from a branch**.
-3. Em **Branch**, selecione **`release`** e a pasta **`/ (root)`**. Clique em **Save**.
-4. Aguarde 1–2 minutos. A URL publicada aparece ali:
-   `https://<usuario>.github.io/<repositorio>/`
-5. Abra essa URL no celular e use **"Adicionar à tela inicial"**:
+2. Em **Build and deployment** → **Source**, escolha **GitHub Actions**.
+3. Pronto. A URL publicada fica em `https://<usuario>.github.io/<repositorio>/`.
+4. Abra essa URL no celular e use **"Adicionar à tela inicial"**:
    - **Android/Chrome**: menu ⋮ → *Adicionar à tela inicial* / *Instalar app*.
    - **iPhone/Safari**: botão **Compartilhar** → *Adicionar à Tela de Início*.
-6. A partir daí o app abre pelo ícone e **funciona offline** (o service worker guarda os arquivos).
 
 > O repositório precisa ser **público** para o Pages no plano gratuito (em repositório privado, só com
 > GitHub Pro/Team).
 
-### Publicar uma versão nova (o dia a dia)
-
-Desenvolva normalmente na `main` e, quando quiser colocar no ar:
+### Publicar uma versão nova
 
 ```powershell
-# 1) salve o desenvolvimento (NÃO publica)
+# 1) desenvolva e salve na main (isso NÃO publica)
 git checkout main
 git add -A
 git commit -m "feat: ..."
 git push
 
-# 2) publique: leve a main para a release
-git checkout release
-git merge main
-git push
+# 2) confira antes de publicar
+powershell -ExecutionPolicy Bypass -File .\check.ps1
 
-# 3) marque a versão
+# 3) marque e envie a tag -> o deploy começa sozinho
 git tag -a v2 -m "v2: <resumo das mudancas>"
-git push --tags
-
-# 4) volte a desenvolver
-git checkout main
+git push origin v2
 ```
 
-O Pages atualiza sozinho em ~1 minuto após o push na `release`.
+Acompanhe em **Actions → Publicar no GitHub Pages**. Leva ~1 minuto.
 No aparelho, feche e abra o app (ou use **Mais → Atualizar app**) para pegar a versão nova.
 
-### Voltar atrás (rollback)
+### Voltar para uma versão anterior
 
-```powershell
-git checkout release
-git reset --hard v1        # volta a release para a tag v1
-git push --force-with-lease
-```
+Na aba **Actions**, abra a execução da tag desejada (ex.: `v1`) e clique em **Re-run all jobs** —
+o Pages volta a publicar aquele conteúdo. (Ou envie uma tag nova a partir do commit correto.)
 
-### Antes de publicar: confira
+### Publicar manualmente (emergência)
 
-```powershell
-powershell -ExecutionPolicy Bypass -File .\check.ps1
-```
-
----
-
+Aba **Actions** → **Publicar no GitHub Pages** → **Run workflow** (publica o estado atual da branch
+selecionada). Use só quando precisar.
 ## Estrutura
 
 ```
