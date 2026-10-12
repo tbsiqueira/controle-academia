@@ -332,16 +332,36 @@ function renderSheetHint(sheetId) {
 
 function loadSheetIntoForm(sheet) {
   state.formSets = [];
+
   (sheet.exercises || []).forEach(function (item) {
-    addExerciseToForm({
+    const rawReps = item.reps;
+    const repsArray = Array.isArray(rawReps) ? rawReps : [];
+    const fallbackRep = Array.isArray(rawReps) ? '' : ((rawReps === undefined || rawReps === null) ? '' : rawReps);
+    const setCount = Math.max(1, parseInt(item.sets, 10) || repsArray.length || 3);
+    const lastLoads = lastLoadsByName(item.name);
+    const sets = [];
+
+    for (let i = 1; i <= setCount; i++) {
+      const value = repsArray[i - 1];
+      const lastLoad = Object.prototype.hasOwnProperty.call(lastLoads, i) ? lastLoads[i] : '';
+      sets.push({
+        number: i,
+        reps: (value === undefined || value === null) ? fallbackRep : value,
+        load: lastLoad,
+        rir: '',
+        note: ''
+      });
+    }
+
+    state.formSets.push({
       exerciseId: item.exerciseId || null,
       exerciseName: item.name,
-      defaultSets: item.sets,
-      defaultReps: item.reps,
-      defaultLoad: item.load,
-      defaultRir: item.rir
+      note: item.note || '',
+      sets: sets
     });
   });
+
+  renderFormSets();
 }
 
 function onSheetChange() {
@@ -365,7 +385,7 @@ function groupSets(flatSets) {
     const key = s.exerciseName || '(sem nome)';
     if (!Object.prototype.hasOwnProperty.call(index, key)) {
       index[key] = groups.length;
-      groups.push({ exerciseId: s.exerciseId || null, exerciseName: key, sets: [] });
+      groups.push({ exerciseId: s.exerciseId || null, exerciseName: key, note: s.exerciseNote || '', sets: [] });
     }
     groups[index[key]].sets.push({ number: s.number, reps: s.reps, load: s.load, rir: s.rir, note: s.note || '' });
   });
@@ -410,6 +430,7 @@ function renderFormSets() {
       '<strong>' + esc(group.exerciseName) + '</strong>' +
       '<button type="button" class="btn btn-sm btn-outline-danger" onclick="removeFormExercise(' + exIdx + ')"><i class="bi bi-trash"></i></button>' +
       '</div>' +
+      (group.note ? '<div class="small text-muted mb-1"><i class="bi bi-info-circle"></i> ' + esc(group.note) + '</div>' : '') +
       '<div class="row g-1 text-center fw-semibold small text-muted mb-1">' +
       '<div class="col-2">série</div><div class="col-2">reps</div><div class="col-2">carga</div><div class="col-2">RIR</div><div class="col-4">obs</div>' +
       '</div>' +
@@ -456,21 +477,15 @@ function lastLoadsByName(name) {
 function addExerciseToForm(opts) {
   const name = opts.exerciseName || 'Exercício';
   const lastLoads = lastLoadsByName(name);
-  const setCount = Math.max(1, parseInt(opts.defaultSets, 10) || 1);
+  const setCount = Math.max(1, parseInt(opts.sets, 10) || 3);
   const sets = [];
 
   for (let i = 1; i <= setCount; i++) {
     const lastLoad = Object.prototype.hasOwnProperty.call(lastLoads, i) ? lastLoads[i] : '';
-    sets.push({
-      number: i,
-      reps: (opts.defaultReps === undefined || opts.defaultReps === null || opts.defaultReps === '') ? '' : opts.defaultReps,
-      load: lastLoad !== '' ? lastLoad : ((opts.defaultLoad === undefined || opts.defaultLoad === null || opts.defaultLoad === '') ? '' : opts.defaultLoad),
-      rir: (opts.defaultRir === undefined || opts.defaultRir === null || opts.defaultRir === '') ? '' : opts.defaultRir,
-      note: ''
-    });
+    sets.push({ number: i, reps: '', load: lastLoad, rir: '', note: '' });
   }
 
-  state.formSets.push({ exerciseId: opts.exerciseId || null, exerciseName: name, sets: sets });
+  state.formSets.push({ exerciseId: opts.exerciseId || null, exerciseName: name, note: opts.note || '', sets: sets });
   renderFormSets();
 }
 
@@ -484,14 +499,23 @@ async function saveWorkout() {
   const sets = [];
   state.formSets.forEach(function (group) {
     group.sets.forEach(function (s) {
+      const reps = toNumOrNull(s.reps);
+      const load = toNumOrNull(s.load);
+      const rir = toNumOrNull(s.rir);
+      const note = (s.note || '').trim();
+
+      // Skip empty lines (e.g. prefilled sets the user did not perform).
+      if (reps === null && load === null && rir === null && !note) return;
+
       sets.push({
         exerciseId: group.exerciseId || null,
         exerciseName: group.exerciseName,
         number: s.number,
-        reps: toNumOrNull(s.reps),
-        load: toNumOrNull(s.load),
-        rir: toNumOrNull(s.rir),
-        note: (s.note || '').trim()
+        reps: reps,
+        load: load,
+        rir: rir,
+        note: note,
+        exerciseNote: group.note || ''
       });
     });
   });
@@ -597,10 +621,7 @@ function pickLibraryExercise(id) {
   addExerciseToForm({
     exerciseId: e.id,
     exerciseName: e.name,
-    defaultSets: e.defaultSets,
-    defaultReps: e.defaultReps,
-    defaultLoad: e.defaultLoad,
-    defaultRir: e.defaultRir
+    note: e.correction || ''
   });
 
   hideExercisePicker();
@@ -610,7 +631,7 @@ function pickCatalogExercise(id) {
   const e = (state.catalog || []).find(function (x) { return String(x.id) === String(id); });
   if (!e) return;
 
-  addExerciseToForm({ exerciseId: null, exerciseName: e.name, defaultSets: 1, defaultReps: '', defaultLoad: '', defaultRir: '' });
+  addExerciseToForm({ exerciseId: null, exerciseName: e.name });
 
   hideExercisePicker();
 }
@@ -677,10 +698,6 @@ async function findOrCreateExercise(name) {
     id: uid(),
     name: clean,
     group: 'Outros',
-    defaultSets: 3,
-    defaultReps: null,
-    defaultLoad: null,
-    defaultRir: null,
     correction: '',
     active: true,
     createdAt: new Date().toISOString(),
@@ -700,10 +717,7 @@ async function createExerciseFromPicker() {
   addExerciseToForm({
     exerciseId: exercise.id,
     exerciseName: exercise.name,
-    defaultSets: exercise.defaultSets,
-    defaultReps: exercise.defaultReps,
-    defaultLoad: exercise.defaultLoad,
-    defaultRir: exercise.defaultRir
+    note: exercise.correction || ''
   });
 
   hideExercisePicker();
@@ -732,10 +746,10 @@ function renderExercises() {
   }
 
   el.innerHTML = list.map(function (e) {
-    const defaults = (e.defaultSets || 0) + '×' + (e.defaultReps || 0) + (e.defaultLoad ? ' · ' + e.defaultLoad + 'kg' : '');
+    const note = (e.correction || '').trim();
     return '<div class="card mb-2"><div class="card-body py-2 d-flex justify-content-between align-items-center">' +
-      '<div><strong>' + esc(e.name) + '</strong><br>' +
-      '<small class="text-muted">' + esc(e.group || '') + (defaults !== '0×0' ? ' · ' + defaults : '') + '</small></div>' +
+      '<div class="me-2"><strong>' + esc(e.name) + '</strong><br>' +
+      '<small class="text-muted">' + esc(e.group || '') + (note ? ' · ' + esc(note) : '') + '</small></div>' +
       '<div class="d-flex gap-1">' +
       '<button type="button" class="btn btn-sm btn-outline-primary" onclick="openExerciseForm(\'' + e.id + '\')"><i class="bi bi-pencil"></i></button>' +
       '<button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteExercise(\'' + e.id + '\')"><i class="bi bi-trash"></i></button>' +
@@ -756,10 +770,6 @@ function openExerciseForm(id) {
   document.getElementById('fichaId').value = e ? e.id : '';
   document.getElementById('fichaName').value = e ? e.name : '';
   fillGroupSelect('fichaGroup', e ? e.group : 'Peito');
-  document.getElementById('fichaSets').value = e ? (e.defaultSets || '') : '';
-  document.getElementById('fichaReps').value = e ? (e.defaultReps || '') : '';
-  document.getElementById('fichaLoad').value = e ? (e.defaultLoad || '') : '';
-  document.getElementById('fichaRir').value = e ? (e.defaultRir || '') : '';
   document.getElementById('fichaCorrection').value = e ? (e.correction || '') : '';
   document.getElementById('fichaCatalogSearch').value = '';
   document.getElementById('fichaCatalogBox').classList.add('d-none');
@@ -782,10 +792,6 @@ async function saveExerciseForm() {
     id: id || uid(),
     name: name,
     group: document.getElementById('fichaGroup').value,
-    defaultSets: toNumOrNull(document.getElementById('fichaSets').value),
-    defaultReps: toNumOrNull(document.getElementById('fichaReps').value),
-    defaultLoad: toNumOrNull(document.getElementById('fichaLoad').value),
-    defaultRir: toNumOrNull(document.getElementById('fichaRir').value),
     correction: document.getElementById('fichaCorrection').value.trim(),
     active: true,
     createdAt: existing ? existing.createdAt : new Date().toISOString(),
@@ -823,7 +829,12 @@ function renderSheets() {
 
   el.innerHTML = list.map(function (s) {
     const items = s.exercises || [];
-    const preview = items.slice(0, 4).map(function (e) { return esc(e.name); }).join(', ') + (items.length > 4 ? '…' : '');
+    const preview = items.slice(0, 4).map(function (e) {
+      const reps = Array.isArray(e.reps)
+        ? e.reps.filter(function (r) { return r !== null && r !== undefined && r !== ''; }).join('-')
+        : '';
+      return esc(e.name) + (reps ? ' ' + esc(e.sets || 0) + '×' + esc(reps) : '');
+    }).join(', ') + (items.length > 4 ? '…' : '');
     return '<div class="card mb-2"><div class="card-body py-2 d-flex justify-content-between align-items-center">' +
       '<div class="me-2"><strong>' + esc(s.name) + '</strong><br>' +
       '<small class="text-muted">' + items.length + (items.length === 1 ? ' exercício' : ' exercícios') + (preview ? ': ' + preview : '') + '</small></div>' +
@@ -899,7 +910,22 @@ function openSheetEditor(id) {
   bootstrap.Modal.getOrCreateInstance(document.getElementById('sheetEditorModal')).show();
 }
 
+function sheetRepsRow(item, idx) {
+  const count = Math.min(Math.max(parseInt(item.sets, 10) || 1, 1), 20);
+  const reps = Array.isArray(item.reps) ? item.reps : [];
+  let html = '<div class="row g-1 mt-1">';
+
+  for (let i = 0; i < count; i++) {
+    const value = (reps[i] === undefined || reps[i] === null) ? '' : reps[i];
+    html += '<div class="col-3"><input type="number" min="1" class="form-control form-control-sm" value="' + esc(value) + '" placeholder="' + (i + 1) + 'ª série" oninput="setSheetReps(' + idx + ',' + i + ',this.value)"></div>';
+  }
+
+  html += '</div>';
+  return html;
+}
+
 function sheetExerciseRow(item, idx) {
+  const note = item.note || '';
   return '<div class="border rounded p-2 mb-2">' +
     '<div class="d-flex justify-content-between align-items-center mb-1">' +
     '<strong class="small">' + esc(item.name) + '</strong>' +
@@ -908,12 +934,13 @@ function sheetExerciseRow(item, idx) {
     '<button type="button" class="btn btn-sm btn-outline-secondary" onclick="moveSheetExercise(' + idx + ',1)" title="Descer"><i class="bi bi-arrow-down"></i></button>' +
     '<button type="button" class="btn btn-sm btn-outline-danger" onclick="removeSheetExercise(' + idx + ')" title="Remover"><i class="bi bi-trash"></i></button>' +
     '</div></div>' +
-    '<div class="row g-1">' +
-    '<div class="col-3"><input type="number" min="1" class="form-control form-control-sm" value="' + esc(item.sets) + '" placeholder="séries" oninput="setSheetField(' + idx + ",'sets',this.value)\"></div>" +
-    '<div class="col-3"><input type="number" min="1" class="form-control form-control-sm" value="' + esc(item.reps) + '" placeholder="reps" oninput="setSheetField(' + idx + ",'reps',this.value)\"></div>" +
-    '<div class="col-3"><input type="number" min="0" step="0.5" class="form-control form-control-sm" value="' + esc(item.load) + '" placeholder="kg" oninput="setSheetField(' + idx + ",'load',this.value)\"></div>" +
-    '<div class="col-3"><input type="number" min="0" class="form-control form-control-sm" value="' + esc(item.rir) + '" placeholder="RIR" oninput="setSheetField(' + idx + ",'rir',this.value)\"></div>" +
-    '</div></div>';
+    '<div class="row g-1 align-items-center">' +
+    '<div class="col-3"><input type="number" min="1" max="20" class="form-control form-control-sm" value="' + esc(item.sets) + '" placeholder="séries" onchange="setSheetSets(' + idx + ',this.value)"></div>' +
+    '<div class="col-9"><input type="text" class="form-control form-control-sm" value="' + esc(note) + '" placeholder="observação da professora" oninput="setSheetField(' + idx + ",'note',this.value)\"></div>" +
+    '</div>' +
+    '<div class="small text-muted mt-1">reps por série:</div>' +
+    sheetRepsRow(item, idx) +
+    '</div>';
 }
 
 function renderSheetExerciseList() {
@@ -930,6 +957,20 @@ function renderSheetExerciseList() {
 function setSheetField(idx, field, value) {
   if (!state.sheetExercises[idx]) return;
   state.sheetExercises[idx][field] = value;
+}
+
+function setSheetSets(idx, value) {
+  const item = state.sheetExercises[idx];
+  if (!item) return;
+  item.sets = value;
+  renderSheetExerciseList();
+}
+
+function setSheetReps(idx, repIdx, value) {
+  const item = state.sheetExercises[idx];
+  if (!item) return;
+  if (!Array.isArray(item.reps)) item.reps = [];
+  item.reps[repIdx] = value;
 }
 
 function moveSheetExercise(idx, delta) {
@@ -951,9 +992,8 @@ function addSheetExercise(opts) {
     exerciseId: opts.exerciseId || null,
     name: opts.name,
     sets: (opts.sets === undefined || opts.sets === null || opts.sets === '') ? 3 : opts.sets,
-    reps: (opts.reps === undefined || opts.reps === null) ? '' : opts.reps,
-    load: (opts.load === undefined || opts.load === null) ? '' : opts.load,
-    rir: (opts.rir === undefined || opts.rir === null) ? '' : opts.rir
+    reps: Array.isArray(opts.reps) ? opts.reps.slice() : [],
+    note: opts.note || ''
   });
   renderSheetExerciseList();
 }
@@ -1019,10 +1059,9 @@ function pickSheetLibraryExercise(id) {
   addSheetExercise({
     exerciseId: e.id,
     name: e.name,
-    sets: e.defaultSets || 3,
-    reps: e.defaultReps,
-    load: e.defaultLoad,
-    rir: e.defaultRir
+    sets: 3,
+    reps: [],
+    note: e.correction || ''
   });
   renderSheetPickerResults(state.sheetPickerQuery);
 }
@@ -1030,7 +1069,7 @@ function pickSheetLibraryExercise(id) {
 function pickSheetCatalogExercise(id) {
   const e = (state.catalog || []).find(function (x) { return String(x.id) === String(id); });
   if (!e) return;
-  addSheetExercise({ exerciseId: null, name: e.name, sets: 3, reps: '', load: '', rir: '' });
+  addSheetExercise({ exerciseId: null, name: e.name, sets: 3, reps: [], note: '' });
   renderSheetPickerResults(state.sheetPickerQuery);
 }
 
@@ -1041,10 +1080,9 @@ async function createExerciseFromSheetPicker() {
   addSheetExercise({
     exerciseId: exercise.id,
     name: exercise.name,
-    sets: exercise.defaultSets || 3,
-    reps: exercise.defaultReps,
-    load: exercise.defaultLoad,
-    rir: exercise.defaultRir
+    sets: 3,
+    reps: [],
+    note: exercise.correction || ''
   });
   renderSheetPickerResults(state.sheetPickerQuery);
 }
@@ -1069,13 +1107,18 @@ async function saveSheetEditor() {
     name: name,
     active: true,
     exercises: state.sheetExercises.map(function (item) {
+      const rawReps = Array.isArray(item.reps) ? item.reps : [];
+      const count = Math.max(1, parseInt(item.sets, 10) || rawReps.length || 3);
+      const reps = [];
+      for (let i = 0; i < count; i++) {
+        reps.push(toNumOrNull(rawReps[i]));
+      }
       return {
         exerciseId: item.exerciseId || null,
         name: item.name,
-        sets: toNumOrNull(item.sets),
-        reps: toNumOrNull(item.reps),
-        load: toNumOrNull(item.load),
-        rir: toNumOrNull(item.rir)
+        sets: count,
+        reps: reps,
+        note: (item.note || '').trim()
       };
     }),
     createdAt: existing ? existing.createdAt : new Date().toISOString(),
