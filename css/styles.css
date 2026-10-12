@@ -1,0 +1,178 @@
+/* Meu Treino — mobile-first styles (Bootstrap 5 base) */
+
+:root {
+  --mt-primary: #7c3aed;
+  --mt-nav-height: 62px;
+}
+
+html, body {
+  background: #f6f5fb;
+}
+
+body {
+  min-height: 100vh;
+}
+
+.pb-nav {
+  padding-bottom: calc(var(--mt-nav-height) + env(safe-area-inset-bottom, 0px) + 12px);
+}
+
+.view {
+  animation: fade-in 0.15s ease;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Bottom navigation */
+.bottom-nav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1030;
+  display: flex;
+  height: calc(var(--mt-nav-height) + env(safe-area-inset-bottom, 0px));
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  background: #ffffff;
+  border-top: 1px solid #e5e0f3;
+  box-shadow: 0 -2px 8px rgba(60, 40, 120, 0.08);
+}
+
+.bottom-nav .nav-link {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  color: #8b86a3;
+  font-size: 0.7rem;
+  text-decoration: none;
+}
+
+.bottom-nav .nav-link i {
+  font-size: 1.35rem;
+  line-height: 1;
+}
+
+.bottom-nav .nav-link.active {
+  color: var(--mt-primary);
+  font-weight: 600;
+}
+
+/* Cards and lists */
+.card {
+  border: 1px solid #e9e4f5;
+  border-radius: 14px;
+}
+
+.card-header {
+  background: #faf8ff;
+  border-bottom: 1px solid #ece7f7;
+  border-radius: 14px 14px 0 0 !important;
+}
+
+.btn-primary {
+  --bs-btn-bg: var(--mt-primary);
+  --bs-btn-border-color: var(--mt-primary);
+  --bs-btn-hover-bg: #6d28d9;
+  --bs-btn-hover-border-color: #6d28d9;
+  --bs-btn-active-bg: #5b21b6;
+  --bs-btn-active-border-color: #5b21b6;
+}
+
+.btn-outline-primary {
+  --bs-btn-color: var(--mt-primary);
+  --bs-btn-border-color: var(--mt-primary);
+  --bs-btn-hover-bg: var(--mt-primary);
+  --bs-btn-hover-border-color: var(--mt-primary);
+  --bs-btn-active-bg: #6d28d9;
+  --bs-btn-active-border-color: #6d28d9;
+}
+
+.text-primary {
+  color: var(--mt-primary) !important;
+}
+
+/* Workout set rows */
+.set-header div {
+  font-size: 0.72rem;
+}
+
+/* Calendar */
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.cal-header {
+  margin-bottom: 4px;
+}
+
+.cal-header div {
+  text-align: center;
+  font-size: 0.72rem;
+  color: #8b86a3;
+  font-weight: 600;
+}
+
+.cal-cell {
+  position: relative;
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #ece7f7;
+  border-radius: 10px;
+  background: #ffffff;
+  font-size: 0.85rem;
+  color: #4b4453;
+}
+
+.cal-cell.empty {
+  border: none;
+  background: transparent;
+}
+
+.cal-cell.has-workout {
+  background: #ede9fe;
+  border-color: #c4b5fd;
+  font-weight: 700;
+  color: #5b21b6;
+}
+
+.cal-cell .cal-badge {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  font-size: 0.6rem;
+  background: var(--mt-primary);
+  color: #fff;
+  border-radius: 8px;
+  padding: 0 5px;
+  line-height: 1.3;
+}
+
+/* Picker list */
+#pickerResults .list-group-item {
+  border-left: none;
+  border-right: none;
+}
+
+@media (min-width: 768px) {
+  .container {
+    max-width: 720px;
+  }
+
+  .bottom-nav {
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 720px;
+    border-radius: 16px 16px 0 0;
+  }
+}

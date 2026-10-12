@@ -13,6 +13,7 @@ Aplicativo web instalável (PWA) para registrar treinos de academia, acompanhar 
 - **Tipo de treino**: lista gerenciável (CRUD de tipos; seleção ao registrar).
 - **Pré-preenchimento**: ao adicionar um exercício da ficha, as séries são criadas com os padrões e a carga da última execução.
 - **Desempenho**: progressão básica por exercício já no MVP.
+- **UI framework**: Bootstrap 5 (arquivos locais em `vendor/`, sem CDN em runtime).
 
 ## 3. Requisitos funcionais
 - **FR-01 — Registrar treino**: data, tipo (selecionado da lista gerenciável), exercícios e cardio (minutos).
@@ -64,7 +65,9 @@ Stores:
 ```
 index.html
 css/styles.css
-js/app.js (módulos: db.js, ui.js, ...)
+js/app.js + js/db.js
+vendor/bootstrap/ (Bootstrap 5 local)
+vendor/bootstrap-icons/ (ícones locais)
 manifest.webmanifest
 sw.js (service worker)
 icons/icon-192.png, icon-512.png
@@ -98,3 +101,4 @@ PLANO.md
 - **Revisão 2** (`dec-93a822fbea27513a`): tipo de treino como lista gerenciável, pré-preenchimento de séries, desempenho por exercício no MVP; edição/exclusão de treinos e backup automático no import.
 - **Revisão 3**: catálogo embutido de exercícios (`data/exercises.json`, 869 itens pt-BR, CC0-1.0, fonte `gugeldev/exercicios-bd-ptbr`); idioma do código em inglês.
 - **Revisão 4**: IDs do catálogo convertidos para inteiros sequenciais permanentes (1..869), com `sourceId` original preservado e política de estabilidade em `meta.idPolicy`.
+- **Revisão 5** (`dec-a52daaa2e8f02e86`): UI framework Bootstrap 5, com arquivos vendados localmente (sem CDN em runtime).

@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#7c3aed">
+  <meta name="description" content="Meu Treino — registre seus treinos de academia, metas semanais e desempenho. Dados 100% locais.">
+  <title>Meu Treino</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="vendor/bootstrap/bootstrap.min.css">
+  <link rel="stylesheet" href="vendor/bootstrap-icons/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <main class="container pb-nav">
+    <!-- Dashboard -->
+    <section id="view-dashboard" class="view">
+      <h1 class="h4 mt-3 mb-3"><i class="bi bi-lightning-charge-fill text-primary"></i> Meu Treino</h1>
+      <div id="weekBanner"></div>
+      <div id="weekProgress"></div>
+      <div id="recentWorkouts"></div>
+      <div id="performance"></div>
+    </section>
+
+    <!-- Workout form -->
+    <section id="view-workout" class="view d-none">
+      <h1 class="h4 mt-3 mb-3" id="workoutTitle">Registrar treino</h1>
+      <div class="card mb-3">
+        <div class="card-body">
+          <div class="mb-2">
+            <label class="form-label" for="workoutDate">Data</label>
+            <input type="date" class="form-control" id="workoutDate">
+          </div>
+          <div class="mb-2">
+            <label class="form-label" for="workoutType">Tipo de treino</label>
+            <div class="input-group">
+              <select class="form-select" id="workoutType"></select>
+              <button class="btn btn-outline-primary" type="button" id="btnAddType" title="Novo tipo"><i class="bi bi-plus-lg"></i></button>
+            </div>
+          </div>
+          <div class="mb-2">
+            <label class="form-label" for="workoutCardio">Cardio (minutos)</label>
+            <input type="number" inputmode="numeric" min="0" step="1" class="form-control" id="workoutCardio" placeholder="0">
+          </div>
+          <div class="mb-2">
+            <label class="form-label" for="workoutNotes">Observações</label>
+            <textarea class="form-control" id="workoutNotes" rows="2" placeholder="Como foi o treino?"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div id="workoutExercises"></div>
+      <button class="btn btn-outline-primary w-100 mb-2" type="button" id="btnAddExercise"><i class="bi bi-plus-circle"></i> Adicionar exercício</button>
+
+      <div class="d-grid gap-2 d-flex">
+        <button class="btn btn-primary flex-grow-1" type="button" id="workoutSave"><i class="bi bi-check-lg"></i> Salvar treino</button>
+        <button class="btn btn-outline-danger d-none" type="button" id="workoutDelete"><i class="bi bi-trash"></i></button>
+      </div>
+    </section>
+
+    <!-- Exercises -->
+    <section id="view-exercises" class="view d-none">
+      <h1 class="h4 mt-3 mb-3"><i class="bi bi-card-checklist"></i> Exercícios</h1>
+      <button class="btn btn-primary w-100 mb-3" type="button" id="btnNewExercise"><i class="bi bi-plus-circle"></i> Nova ficha</button>
+      <div id="exercisesList"></div>
+    </section>
+
+    <!-- Calendar -->
+    <section id="view-calendar" class="view d-none">
+      <h1 class="h4 mt-3 mb-3"><i class="bi bi-calendar3"></i> Frequência</h1>
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <button class="btn btn-sm btn-outline-primary" type="button" id="calPrev"><i class="bi bi-chevron-left"></i></button>
+        <strong id="calMonthLabel"></strong>
+        <button class="btn btn-sm btn-outline-primary" type="button" id="calNext"><i class="bi bi-chevron-right"></i></button>
+      </div>
+      <div class="cal-grid cal-header">
+        <div>D</div><div>S</div><div>T</div><div>Q</div><div>Q</div><div>S</div><div>S</div>
+      </div>
+      <div class="cal-grid" id="calendarGrid"></div>
+      <p class="text-muted mt-2" id="calendarTotal"></p>
+    </section>
+
+    <!-- More -->
+    <section id="view-more" class="view d-none">
+      <h1 class="h4 mt-3 mb-3"><i class="bi bi-gear"></i> Mais</h1>
+
+      <div class="card mb-3">
+        <div class="card-header fw-semibold">Metas da semana</div>
+        <div class="card-body">
+          <div class="row g-2">
+            <div class="col-6">
+              <label class="form-label" for="setWorkoutTarget">Treinos/semana</label>
+              <input type="number" min="1" step="1" class="form-control" id="setWorkoutTarget">
+            </div>
+            <div class="col-6">
+              <label class="form-label" for="setCardioTarget">Cardio (min)</label>
+              <input type="number" min="0" step="1" class="form-control" id="setCardioTarget">
+            </div>
+            <div class="col-12">
+              <label class="form-label" for="setWeekAnchor">Semana iniciada em</label>
+              <input type="date" class="form-control" id="setWeekAnchor">
+            </div>
+          </div>
+          <div class="d-flex gap-2 mt-2">
+            <button class="btn btn-primary" type="button" id="btnSaveSettings">Salvar metas</button>
+            <button class="btn btn-outline-primary" type="button" id="btnWeekToday">Iniciar semana hoje</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card mb-3">
+        <div class="card-header fw-semibold">Tipos de treino</div>
+        <div class="card-body">
+          <div id="typesList"></div>
+          <div class="input-group mt-2">
+            <input type="text" class="form-control" id="newTypeInput" placeholder="Ex.: TREINO B - superiores">
+            <button class="btn btn-outline-primary" type="button" id="btnAddTypeSettings">Adicionar</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card mb-3">
+        <div class="card-header fw-semibold">Colinha</div>
+        <div class="card-body">
+          <div id="colinhaList"></div>
+          <button class="btn btn-outline-primary w-100 mt-2" type="button" id="btnAddColinha"><i class="bi bi-plus"></i> Nova colinha</button>
+        </div>
+      </div>
+
+      <div class="card mb-3">
+        <div class="card-header fw-semibold">Dados</div>
+        <div class="card-body">
+          <p class="text-muted small">Tudo fica salvo apenas neste aparelho (IndexedDB). Use o backup JSON para transferir ou restaurar.</p>
+          <div class="d-grid gap-2">
+            <button class="btn btn-outline-primary" type="button" id="btnExport"><i class="bi bi-download"></i> Exportar backup (JSON)</button>
+            <button class="btn btn-outline-secondary" type="button" id="btnImport"><i class="bi bi-upload"></i> Importar backup (JSON)</button>
+            <input type="file" id="importFile" accept="application/json,.json" class="d-none">
+          </div>
+        </div>
+      </div>
+
+      <p class="text-center text-muted small">Meu Treino · dados 100% locais · catálogo: gugeldev/exercicios-bd-ptbr (CC0)</p>
+    </section>
+  </main>
+
+  <!-- Bottom navigation -->
+  <nav class="bottom-nav" aria-label="Navegação principal">
+    <a href="#/dashboard" class="nav-link active"><i class="bi bi-house"></i><span>Início</span></a>
+    <a href="#/workout" class="nav-link"><i class="bi bi-plus-circle"></i><span>Registrar</span></a>
+    <a href="#/exercises" class="nav-link"><i class="bi bi-card-checklist"></i><span>Exercícios</span></a>
+    <a href="#/calendar" class="nav-link"><i class="bi bi-calendar3"></i><span>Calendário</span></a>
+    <a href="#/more" class="nav-link"><i class="bi bi-gear"></i><span>Mais</span></a>
+  </nav>
+
+  <!-- Exercise picker modal -->
+  <div class="modal fade" id="exercisePickerModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen-sm-down">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="pickerTitle">Escolher exercício</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+        </div>
+        <div class="modal-body">
+          <input type="search" class="form-control mb-2" id="pickerSearch" placeholder="Buscar por nome...">
+          <div id="pickerResults" class="list-group"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Workout type modal -->
+  <div class="modal fade" id="workoutTypeModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen-sm-down">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Novo tipo de treino</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+        </div>
+        <div class="modal-body">
+          <label class="form-label" for="newTypeName">Nome</label>
+          <input type="text" class="form-control" id="newTypeName" placeholder="Ex.: TREINO A - inferiores">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" id="typeSave">Salvar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Exercise form modal -->
+  <div class="modal fade" id="exerciseFormModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen-sm-down">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exerciseFormTitle">Nova ficha</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="fichaId">
+          <div class="mb-2">
+            <label class="form-label" for="fichaName">Nome do exercício</label>
+            <div class="input-group">
+              <input type="text" class="form-control" id="fichaName" placeholder="Ex.: Puxada frente">
+              <button class="btn btn-outline-primary" type="button" id="btnFichaCatalog" title="Escolher do catálogo"><i class="bi bi-search"></i></button>
+            </div>
+          </div>
+          <div class="mb-2">
+            <label class="form-label" for="fichaGroup">Grupo muscular</label>
+            <select class="form-select" id="fichaGroup"></select>
+          </div>
+          <div class="row g-2 mb-2">
+            <div class="col-6">
+              <label class="form-label" for="fichaSets">Séries padrão</label>
+              <input type="number" min="1" step="1" class="form-control" id="fichaSets" placeholder="3">
+            </div>
+            <div class="col-6">
+              <label class="form-label" for="fichaReps">Reps padrão</label>
+              <input type="number" min="1" step="1" class="form-control" id="fichaReps" placeholder="10">
+            </div>
+            <div class="col-6">
+              <label class="form-label" for="fichaLoad">Carga padrão (kg)</label>
+              <input type="number" min="0" step="0.5" class="form-control" id="fichaLoad" placeholder="0">
+            </div>
+            <div class="col-6">
+              <label class="form-label" for="fichaRir">RIR padrão</label>
+              <input type="number" min="0" step="1" class="form-control" id="fichaRir" placeholder="2">
+            </div>
+          </div>
+          <div class="mb-2">
+            <label class="form-label" for="fichaCorrection">Lembrete de correção</label>
+            <textarea class="form-control" id="fichaCorrection" rows="3" placeholder="Ex.: cotovelos próximos ao corpo, pausa de 1s embaixo..."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" id="exerciseFormSave">Salvar ficha</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Colinha modal -->
+  <div class="modal fade" id="colinhaModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen-sm-down">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Colinha</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="colinhaId">
+          <div class="mb-2">
+            <label class="form-label" for="colinhaTitle">Título</label>
+            <input type="text" class="form-control" id="colinhaTitle" placeholder="Ex.: Repetição na reserva (RIR)">
+          </div>
+          <div class="mb-2">
+            <label class="form-label" for="colinhaContent">Conteúdo</label>
+            <textarea class="form-control" id="colinhaContent" rows="5" placeholder="Suas anotações..."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" id="colinhaSave">Salvar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="vendor/bootstrap/bootstrap.bundle.min.js"></script>
+  <script src="js/db.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
