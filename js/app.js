@@ -18,7 +18,7 @@ const state = {
   sheetExercises: [],
   pickerQuery: '',
   fichaQuery: '',
-  pickerTarget: 'workout', // 'workout' | 'sheet'
+  sheetPickerQuery: '',
   calendarCursor: null
 };
 
@@ -534,14 +534,13 @@ async function deleteWorkout() {
 
 /* ---------- exercise picker ---------- */
 
-async function openExercisePicker(target) {
-  state.pickerTarget = target === 'sheet' ? 'sheet' : 'workout';
+async function openExercisePicker() {
   await openExercisePickerModal();
 }
 
 async function openExercisePickerModal() {
   await loadCatalog().catch(function () {});
-  document.getElementById('pickerTitle').textContent = state.pickerTarget === 'sheet' ? 'Adicionar à ficha' : 'Escolher exercício';
+  document.getElementById('pickerTitle').textContent = 'Escolher exercício';
   document.getElementById('pickerSearch').value = '';
   state.pickerQuery = '';
   renderPickerResults('');
@@ -595,25 +594,14 @@ function pickLibraryExercise(id) {
   const e = state.exercises.find(function (x) { return x.id === id; });
   if (!e) return;
 
-  if (state.pickerTarget === 'sheet') {
-    addSheetExercise({
-      exerciseId: e.id,
-      name: e.name,
-      sets: e.defaultSets || 3,
-      reps: e.defaultReps,
-      load: e.defaultLoad,
-      rir: e.defaultRir
-    });
-  } else {
-    addExerciseToForm({
-      exerciseId: e.id,
-      exerciseName: e.name,
-      defaultSets: e.defaultSets,
-      defaultReps: e.defaultReps,
-      defaultLoad: e.defaultLoad,
-      defaultRir: e.defaultRir
-    });
-  }
+  addExerciseToForm({
+    exerciseId: e.id,
+    exerciseName: e.name,
+    defaultSets: e.defaultSets,
+    defaultReps: e.defaultReps,
+    defaultLoad: e.defaultLoad,
+    defaultRir: e.defaultRir
+  });
 
   hideExercisePicker();
 }
@@ -622,11 +610,7 @@ function pickCatalogExercise(id) {
   const e = (state.catalog || []).find(function (x) { return String(x.id) === String(id); });
   if (!e) return;
 
-  if (state.pickerTarget === 'sheet') {
-    addSheetExercise({ exerciseId: null, name: e.name, sets: 3, reps: '', load: '', rir: '' });
-  } else {
-    addExerciseToForm({ exerciseId: null, exerciseName: e.name, defaultSets: 1, defaultReps: '', defaultLoad: '', defaultRir: '' });
-  }
+  addExerciseToForm({ exerciseId: null, exerciseName: e.name, defaultSets: 1, defaultReps: '', defaultLoad: '', defaultRir: '' });
 
   hideExercisePicker();
 }
@@ -713,25 +697,14 @@ async function createExerciseFromPicker() {
   if (!name) return;
   const exercise = await findOrCreateExercise(name);
 
-  if (state.pickerTarget === 'sheet') {
-    addSheetExercise({
-      exerciseId: exercise.id,
-      name: exercise.name,
-      sets: exercise.defaultSets || 3,
-      reps: exercise.defaultReps,
-      load: exercise.defaultLoad,
-      rir: exercise.defaultRir
-    });
-  } else {
-    addExerciseToForm({
-      exerciseId: exercise.id,
-      exerciseName: exercise.name,
-      defaultSets: exercise.defaultSets,
-      defaultReps: exercise.defaultReps,
-      defaultLoad: exercise.defaultLoad,
-      defaultRir: exercise.defaultRir
-    });
-  }
+  addExerciseToForm({
+    exerciseId: exercise.id,
+    exerciseName: exercise.name,
+    defaultSets: exercise.defaultSets,
+    defaultReps: exercise.defaultReps,
+    defaultLoad: exercise.defaultLoad,
+    defaultRir: exercise.defaultRir
+  });
 
   hideExercisePicker();
 }
@@ -894,10 +867,19 @@ async function saveNewSheet() {
 
   await dbPut('sheets', sheet);
   state.sheets = await dbAll('sheets');
-  bootstrap.Modal.getInstance(document.getElementById('sheetModal')).hide();
   renderSheets();
   renderSheetOptions(document.getElementById('workoutSheet').value || null);
-  openSheetEditor(sheet.id);
+
+  // Open the editor only after the "new sheet" modal is fully hidden,
+  // otherwise the two modals/backdrops overlap.
+  const modalEl = document.getElementById('sheetModal');
+  const modal = bootstrap.Modal.getInstance(modalEl);
+  if (modal) {
+    modalEl.addEventListener('hidden.bs.modal', function () { openSheetEditor(sheet.id); }, { once: true });
+    modal.hide();
+  } else {
+    openSheetEditor(sheet.id);
+  }
 }
 
 function openSheetEditor(id) {
@@ -910,6 +892,9 @@ function openSheetEditor(id) {
   document.getElementById('sheetId').value = sheet ? sheet.id : '';
   document.getElementById('sheetName').value = sheet ? sheet.name : '';
   document.getElementById('sheetEditorTitle').textContent = sheet ? 'Editar ficha' : 'Nova ficha';
+  document.getElementById('sheetPickerSearch').value = '';
+  document.getElementById('sheetPickerBox').classList.add('d-none');
+  state.sheetPickerQuery = '';
   renderSheetExerciseList();
   bootstrap.Modal.getOrCreateInstance(document.getElementById('sheetEditorModal')).show();
 }
@@ -971,6 +956,97 @@ function addSheetExercise(opts) {
     rir: (opts.rir === undefined || opts.rir === null) ? '' : opts.rir
   });
   renderSheetExerciseList();
+}
+
+/* Inline exercise picker inside the sheet editor (avoids stacking modals). */
+
+async function toggleSheetPicker() {
+  const box = document.getElementById('sheetPickerBox');
+  const willShow = box.classList.contains('d-none');
+  box.classList.toggle('d-none', !willShow);
+
+  if (!willShow) return;
+
+  await loadCatalog().catch(function () {});
+  document.getElementById('sheetPickerSearch').value = '';
+  state.sheetPickerQuery = '';
+  renderSheetPickerResults('');
+  document.getElementById('sheetPickerSearch').focus();
+}
+
+function renderSheetPickerResults(query) {
+  const q = (query || '').trim();
+  state.sheetPickerQuery = q;
+  const lower = q.toLowerCase();
+  const el = document.getElementById('sheetPickerResults');
+
+  const library = state.exercises.filter(function (e) {
+    return e.active !== false && (!lower || e.name.toLowerCase().indexOf(lower) !== -1);
+  }).slice(0, 20);
+
+  const catalog = (state.catalog || []).filter(function (e) {
+    return !lower || e.name.toLowerCase().indexOf(lower) !== -1;
+  }).slice(0, 50);
+
+  let html = '';
+
+  if (q) {
+    html += '<button type="button" class="list-group-item list-group-item-action text-primary fw-semibold" onclick="createExerciseFromSheetPicker()">' +
+      '<i class="bi bi-plus-circle"></i> Criar "' + esc(q) + '"</button>';
+  }
+
+  if (library.length) {
+    html += '<div class="px-2 py-1 small text-muted fw-semibold">Meus exercícios</div>';
+    html += library.map(function (e) {
+      return '<button type="button" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" onclick="pickSheetLibraryExercise(\'' + e.id + '\')">' +
+        '<span>' + esc(e.name) + '</span><span class="badge text-bg-light">' + esc(e.group || '') + '</span></button>';
+    }).join('');
+  }
+
+  html += '<div class="px-2 py-1 small text-muted fw-semibold">Catálogo (pt-BR)</div>';
+  if (!catalog.length) html += '<div class="list-group-item small text-muted">Nada encontrado.</div>';
+  html += catalog.map(function (e) {
+    return '<button type="button" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" onclick="pickSheetCatalogExercise(' + e.id + ')">' +
+      '<span>' + esc(e.name) + '</span><span class="badge text-bg-light">' + esc(e.group || '') + '</span></button>';
+  }).join('');
+
+  el.innerHTML = html;
+}
+
+function pickSheetLibraryExercise(id) {
+  const e = state.exercises.find(function (x) { return x.id === id; });
+  if (!e) return;
+  addSheetExercise({
+    exerciseId: e.id,
+    name: e.name,
+    sets: e.defaultSets || 3,
+    reps: e.defaultReps,
+    load: e.defaultLoad,
+    rir: e.defaultRir
+  });
+  renderSheetPickerResults(state.sheetPickerQuery);
+}
+
+function pickSheetCatalogExercise(id) {
+  const e = (state.catalog || []).find(function (x) { return String(x.id) === String(id); });
+  if (!e) return;
+  addSheetExercise({ exerciseId: null, name: e.name, sets: 3, reps: '', load: '', rir: '' });
+  renderSheetPickerResults(state.sheetPickerQuery);
+}
+
+async function createExerciseFromSheetPicker() {
+  const name = state.sheetPickerQuery;
+  if (!name) return;
+  const exercise = await findOrCreateExercise(name);
+  addSheetExercise({
+    exerciseId: exercise.id,
+    name: exercise.name,
+    sets: exercise.defaultSets || 3,
+    reps: exercise.defaultReps,
+    load: exercise.defaultLoad,
+    rir: exercise.defaultRir
+  });
+  renderSheetPickerResults(state.sheetPickerQuery);
 }
 
 async function saveSheetEditor() {
@@ -1260,7 +1336,7 @@ async function importData(file) {
 function bindEvents() {
   window.addEventListener('hashchange', navigate);
 
-  document.getElementById('btnAddExercise').addEventListener('click', function () { openExercisePicker('workout'); });
+  document.getElementById('btnAddExercise').addEventListener('click', openExercisePicker);
   document.getElementById('workoutSave').addEventListener('click', saveWorkout);
   document.getElementById('workoutDelete').addEventListener('click', deleteWorkout);
   document.getElementById('workoutSheet').addEventListener('change', onSheetChange);
@@ -1268,7 +1344,10 @@ function bindEvents() {
   document.getElementById('sheetSave').addEventListener('click', saveNewSheet);
   document.getElementById('btnNewSheet').addEventListener('click', function () { openSheetEditor(null); });
   document.getElementById('sheetEditorSave').addEventListener('click', saveSheetEditor);
-  document.getElementById('btnSheetAddExercise').addEventListener('click', function () { openExercisePicker('sheet'); });
+  document.getElementById('btnSheetAddExercise').addEventListener('click', toggleSheetPicker);
+  document.getElementById('sheetPickerSearch').addEventListener('input', function () {
+    renderSheetPickerResults(this.value);
+  });
 
   document.getElementById('btnNewExercise').addEventListener('click', function () { openExerciseForm(null); });
   document.getElementById('exerciseFormSave').addEventListener('click', saveExerciseForm);
