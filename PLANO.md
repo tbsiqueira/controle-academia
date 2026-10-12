@@ -122,3 +122,4 @@ PLANO.md
 - **Revisão 16**: no texto exportado, o **aquecimento aparece dentro de cada exercício** (e exercícios só com aquecimento também são listados).
 - **Revisão 17**: "Desempenho por exercício" saiu do Dashboard; novo fluxo de consulta: tocar num treino abre a tela **"Como foi o treino"** (somente leitura) e tocar num exercício abre a **Evolução** (melhor série por dia, PR, tendência e histórico).
 - **Revisão 18**: botão **Cancelar** na tela de treino, descartando todas as alterações (volta ao "Como foi o treino" quando estava editando).
+- **Revisão 19**: textos explicativos curtos na tela **Fichas** (o que é uma ficha, o que é a Biblioteca) e dica dentro do editor de ficha.

@@ -8,9 +8,9 @@
   <title>Meu Treino</title>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
-  <link rel="stylesheet" href="vendor/bootstrap/bootstrap.min.css?v=19">
-  <link rel="stylesheet" href="vendor/bootstrap-icons/bootstrap-icons.min.css?v=19">
-  <link rel="stylesheet" href="css/styles.css?v=19">
+  <link rel="stylesheet" href="vendor/bootstrap/bootstrap.min.css?v=20">
+  <link rel="stylesheet" href="vendor/bootstrap-icons/bootstrap-icons.min.css?v=20">
+  <link rel="stylesheet" href="css/styles.css?v=20">
 </head>
 <body>
   <main class="container pb-nav">
@@ -96,10 +96,22 @@
 
       <div class="tab-content">
         <div class="tab-pane fade show active" id="tabSheets">
+          <div class="alert alert-light border small py-2 mb-3">
+            <i class="bi bi-info-circle text-primary"></i>
+            <strong>Ficha</strong> é o seu treino completo (ex.: TREINO A - inferiores): uma lista ordenada de
+            exercícios, cada um com o número de séries, as reps de cada série e a observação da professora.
+            Ao <strong>Treinar</strong>, você escolhe a ficha e os exercícios entram automaticamente no formulário.
+          </div>
           <button class="btn btn-primary w-100 mb-3" type="button" id="btnNewSheet"><i class="bi bi-plus-circle"></i> Nova ficha</button>
           <div id="sheetsList"></div>
         </div>
         <div class="tab-pane fade" id="tabExercises">
+          <div class="alert alert-light border small py-2 mb-3">
+            <i class="bi bi-info-circle text-primary"></i>
+            <strong>Biblioteca</strong> são os exercícios que você salvou (nome, grupo muscular e observação).
+            Ela serve para montar fichas sem digitar de novo: ao escolher um exercício do <strong>catálogo</strong>
+            ou criar um na hora, ele passa a ficar salvo aqui. Use o filtro e a busca para achar rápido.
+          </div>
           <button class="btn btn-primary w-100 mb-2" type="button" id="btnNewExercise"><i class="bi bi-plus-circle"></i> Novo exercício</button>
           <div class="row g-1 mb-3">
             <div class="col-6">
@@ -187,7 +199,7 @@
         </div>
       </div>
 
-      <p class="text-center text-muted small">Meu Treino <span id="appVersion">v19</span> · dados 100% locais · catálogo: gugeldev/exercicios-bd-ptbr (CC0)<br><a href="reset.html">limpar cache e atualizar</a></p>
+      <p class="text-center text-muted small">Meu Treino <span id="appVersion">v20</span> · dados 100% locais · catálogo: gugeldev/exercicios-bd-ptbr (CC0)<br><a href="reset.html">limpar cache e atualizar</a></p>
     </section>
   </main>
 
@@ -251,6 +263,7 @@
             <input type="text" class="form-control" id="sheetName" placeholder="Ex.: TREINO A - inferiores">
           </div>
           <label class="form-label">Exercícios da ficha</label>
+          <div class="form-text mb-2">Em cada exercício: nº de séries, as reps de cada série (ex.: 12-10-8) e a observação da professora. Carga e RIR você registra na hora de treinar.</div>
           <div id="sheetExerciseList"></div>
           <button class="btn btn-outline-primary w-100 mt-2" type="button" id="btnSheetAddExercise"><i class="bi bi-plus-circle"></i> Adicionar exercício</button>
           <div id="sheetPickerBox" class="d-none mt-2 border rounded p-2 bg-light">
@@ -349,8 +362,8 @@
     </div>
   </div>
 
-  <script src="vendor/bootstrap/bootstrap.bundle.min.js?v=19"></script>
-  <script src="js/db.js?v=19"></script>
-  <script src="js/app.js?v=19"></script>
+  <script src="vendor/bootstrap/bootstrap.bundle.min.js?v=20"></script>
+  <script src="js/db.js?v=20"></script>
+  <script src="js/app.js?v=20"></script>
 </body>
 </html>
