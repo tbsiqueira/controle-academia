@@ -125,6 +125,23 @@ if (($css -match 'font-size:\s*16px') -and ($css -match 'max-width:\s*767\.98px'
   Bad "falta a regra de 16px nos inputs para celular (o iOS da zoom ao focar o campo)"
 }
 
+# 10) sintaxe dos scripts (só quando o Node está instalado; no CI isso é obrigatório)
+$nodeCmd = Get-Command node -ErrorAction SilentlyContinue
+if ($nodeCmd) {
+  $syntaxErrors = @()
+  foreach ($script in @('js/core.js', 'js/app.js', 'js/db.js', 'sw.js')) {
+    & node --check $script 2>$null
+    if ($LASTEXITCODE -ne 0) { $syntaxErrors += $script }
+  }
+  if (-not $syntaxErrors) {
+    Ok "sintaxe dos scripts validada com node --check"
+  } else {
+    Bad "erro de sintaxe em: $($syntaxErrors -join ', ')"
+  }
+} else {
+  Write-Host "  --    node nao instalado: sintaxe nao verificada localmente (o CI verifica)" -ForegroundColor DarkGray
+}
+
 Write-Host ""
 if ($script:fail -eq 0) {
   Write-Host "Tudo certo." -ForegroundColor Green

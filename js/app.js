@@ -969,20 +969,37 @@ function renderSheets() {
 
   el.innerHTML = list.map(function (s) {
     const items = s.exercises || [];
-    const preview = items.slice(0, 4).map(function (e) {
-      const reps = Array.isArray(e.reps)
-        ? e.reps.filter(function (r) { return r !== null && r !== undefined && r !== ''; }).join('-')
-        : '';
-      return esc(e.name) + (reps ? ' ' + esc(e.sets || 0) + '×' + esc(reps) : '');
-    }).join(' · ') + (items.length > 4 ? ' …' : '');
-    return '<div class="card mb-2"><div class="card-body py-2 d-flex justify-content-between align-items-center">' +
-      '<div class="me-2"><strong><i class="bi bi-clipboard2-pulse text-primary"></i> ' + esc(s.name) + '</strong> ' +
-      '<span class="badge text-bg-light">' + items.length + '</span><br>' +
-      '<small class="text-muted">' + (items.length ? preview : 'sem exercícios ainda') + '</small></div>' +
+
+    const exercisesHtml = items.length
+      ? '<ul class="list-unstyled sheet-items mb-0">' + items.map(function (item, i) {
+          const reps = Array.isArray(item.reps)
+            ? item.reps.filter(function (r) { return r !== null && r !== undefined && r !== ''; }).join('-')
+            : '';
+          const setCount = parseInt(item.sets, 10) || (reps ? reps.split('-').length : 0);
+          const detail = reps ? (setCount + '×' + reps) : (setCount ? setCount + ' séries' : '');
+
+          return '<li>' +
+            '<span class="sheet-item-idx">' + (i + 1) + '</span>' +
+            '<span class="sheet-item-name">' + esc(item.name) + '</span>' +
+            (detail ? '<span class="sheet-item-detail">' + esc(detail) + '</span>' : '') +
+            (item.note ? '<span class="sheet-item-note text-truncate">' + esc(item.note) + '</span>' : '') +
+            '</li>';
+        }).join('') + '</ul>'
+      : '<p class="text-muted small mb-0 mt-1">sem exercícios ainda — toque em ✏️ para adicionar</p>';
+
+    return '<div class="card mb-2"><div class="card-body py-2">' +
+      '<div class="d-flex justify-content-between align-items-start">' +
+      '<div class="me-2">' +
+      '<strong><i class="bi bi-clipboard2-pulse text-primary"></i> ' + esc(s.name) + '</strong> ' +
+      '<span class="badge text-bg-light">' + items.length + (items.length === 1 ? ' exercício' : ' exercícios') + '</span>' +
+      '</div>' +
       '<div class="d-flex gap-1">' +
       '<button type="button" class="btn btn-sm btn-outline-primary" onclick="openSheetEditor(\'' + s.id + '\')" aria-label="Editar ficha"><i class="bi bi-pencil"></i></button>' +
       '<button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteSheet(\'' + s.id + '\')" aria-label="Excluir ficha"><i class="bi bi-trash"></i></button>' +
-      '</div></div></div>';
+      '</div>' +
+      '</div>' +
+      exercisesHtml +
+      '</div></div>';
   }).join('');
 }
 

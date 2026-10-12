@@ -25,6 +25,13 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Verificar sintaxe dos scripts de navegador
+        run: |
+          for f in js/core.js js/app.js js/db.js sw.js; do
+            echo "node --check $f"
+            node --check "$f"
+          done
+
       - name: Rodar testes (node --test)
         run: node --test tests/
 
