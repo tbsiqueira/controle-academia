@@ -23,6 +23,7 @@ const state = {
   libraryQuery: '',
   viewingWorkoutId: null,
   viewingExerciseName: '',
+  eraseDone: false,
   lastImportSnapshot: null,
   calendarCursor: null
 };
@@ -61,6 +62,14 @@ function fmtBR(iso) {
 function uid() {
   if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
   return 'id-' + Date.now() + '-' + Math.random().toString(16).slice(2);
+}
+
+function normalizeText(value) {
+  return String(value === null || value === undefined ? '' : value)
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim();
 }
 
 function esc(value) {
@@ -131,7 +140,7 @@ function navigate() {
   if (view) view.classList.remove('d-none');
 
   document.querySelectorAll('.bottom-nav a').forEach(function (a) {
-    const activeHash = (viewName === 'detail' || viewName === 'exercise') ? '#/dashboard' : hash;
+    const activeHash = (viewName === 'detail' || viewName === 'exercise') ? '#/dashboard' : ((viewName === 'erase') ? '#/more' : hash);
     a.classList.toggle('active', a.getAttribute('href') === activeHash);
   });
 
@@ -139,6 +148,7 @@ function navigate() {
   if (viewName === 'workout') renderWorkoutForm();
   if (viewName === 'detail') renderWorkoutDetail();
   if (viewName === 'exercise') renderExerciseHistory();
+  if (viewName === 'erase') renderErase();
   if (viewName === 'exercises') renderSheetsAndExercises();
   if (viewName === 'calendar') renderCalendar();
   if (viewName === 'more') renderMore();
@@ -450,7 +460,9 @@ function renderSheetHint(sheetId) {
   const hint = document.getElementById('sheetHint');
   const sheet = sheetId ? findSheet(sheetId) : null;
   if (!sheet) {
-    hint.textContent = '';
+    hint.innerHTML = activeSheets().length
+      ? 'Selecione a ficha do treino de hoje.'
+      : 'Você ainda não tem fichas. Crie a sua na aba <a href="#/exercises">Fichas</a>.';
     return;
   }
   const count = (sheet.exercises || []).length;
@@ -826,15 +838,15 @@ function hideExercisePicker() {
 function renderPickerResults(query) {
   const q = (query || '').trim();
   state.pickerQuery = q;
-  const lower = q.toLowerCase();
+  const lower = normalizeText(q);
   const el = document.getElementById('pickerResults');
 
   const fichas = state.exercises.filter(function (e) {
-    return e.active !== false && e.source !== 'catalog' && (!lower || e.name.toLowerCase().indexOf(lower) !== -1);
+    return e.active !== false && e.source !== 'catalog' && (!lower || normalizeText(e.name).indexOf(lower) !== -1);
   }).slice(0, 30);
 
   const catalog = (state.catalog || []).filter(function (e) {
-    return !lower || e.name.toLowerCase().indexOf(lower) !== -1;
+    return !lower || normalizeText(e.name).indexOf(lower) !== -1;
   }).slice(0, 50);
 
   let html = '';
@@ -908,11 +920,11 @@ function toggleFichaCatalog() {
 function renderFichaCatalogResults(query) {
   const q = (query || '').trim();
   state.fichaQuery = q;
-  const lower = q.toLowerCase();
+  const lower = normalizeText(q);
   const el = document.getElementById('fichaCatalogResults');
 
   const catalog = (state.catalog || []).filter(function (e) {
-    return !lower || e.name.toLowerCase().indexOf(lower) !== -1;
+    return !lower || normalizeText(e.name).indexOf(lower) !== -1;
   }).slice(0, 50);
 
   let html = '';
@@ -1028,12 +1040,12 @@ function renderExercises() {
   const el = document.getElementById('exercisesList');
   fillLibraryGroupFilter();
 
-  const query = (state.libraryQuery || '').trim().toLowerCase();
+  const query = normalizeText(state.libraryQuery);
   const list = state.exercises.filter(function (e) {
     if (e.active === false) return false;
     if (e.source === 'catalog') return false;
     if (state.libraryGroup && e.group !== state.libraryGroup) return false;
-    if (query && e.name.toLowerCase().indexOf(query) === -1) return false;
+    if (query && normalizeText(e.name).indexOf(query) === -1) return false;
     return true;
   });
 
@@ -1158,47 +1170,6 @@ function sheetNameExists(name, ignoreId) {
   });
 }
 
-function openSheetModal() {
-  document.getElementById('newSheetName').value = '';
-  bootstrap.Modal.getOrCreateInstance(document.getElementById('sheetModal')).show();
-}
-
-async function saveNewSheet() {
-  const name = document.getElementById('newSheetName').value.trim();
-  if (!name) {
-    alert('Informe o nome da ficha.');
-    return;
-  }
-  if (sheetNameExists(name)) {
-    alert('Já existe uma ficha com esse nome.');
-    return;
-  }
-
-  const sheet = {
-    id: uid(),
-    name: name,
-    active: true,
-    exercises: [],
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  };
-
-  await dbPut('sheets', sheet);
-  state.sheets = await dbAll('sheets');
-  renderSheets();
-  renderSheetOptions(document.getElementById('workoutSheet').value || null);
-
-  // Open the editor only after the "new sheet" modal is fully hidden,
-  // otherwise the two modals/backdrops overlap.
-  const modalEl = document.getElementById('sheetModal');
-  const modal = bootstrap.Modal.getInstance(modalEl);
-  if (modal) {
-    modalEl.addEventListener('hidden.bs.modal', function () { openSheetEditor(sheet.id); }, { once: true });
-    modal.hide();
-  } else {
-    openSheetEditor(sheet.id);
-  }
-}
 
 function openSheetEditor(id) {
   const sheet = id ? findSheet(id) : null;
@@ -1324,15 +1295,15 @@ async function toggleSheetPicker() {
 function renderSheetPickerResults(query) {
   const q = (query || '').trim();
   state.sheetPickerQuery = q;
-  const lower = q.toLowerCase();
+  const lower = normalizeText(q);
   const el = document.getElementById('sheetPickerResults');
 
   const library = state.exercises.filter(function (e) {
-    return e.active !== false && e.source !== 'catalog' && (!lower || e.name.toLowerCase().indexOf(lower) !== -1);
+    return e.active !== false && e.source !== 'catalog' && (!lower || normalizeText(e.name).indexOf(lower) !== -1);
   }).slice(0, 20);
 
   const catalog = (state.catalog || []).filter(function (e) {
-    return !lower || e.name.toLowerCase().indexOf(lower) !== -1;
+    return !lower || normalizeText(e.name).indexOf(lower) !== -1;
   }).slice(0, 50);
 
   let html = '';
@@ -1576,6 +1547,78 @@ async function startWeekToday() {
 
 /* ---------- export / import ---------- */
 
+/* ---------- erase all data (own screen, no alerts) ---------- */
+
+function renderErase() {
+  const el = document.getElementById('eraseBody');
+
+  if (state.eraseDone) {
+    el.innerHTML =
+      '<div class="alert alert-success"><i class="bi bi-check2-circle"></i> <strong>Pronto!</strong> Todos os dados do app foram apagados deste aparelho.</div>' +
+      '<p class="text-muted small">O app voltou ao estado inicial: metas padrão (3 treinos / 120 min de cardio) e semana começando hoje.</p>' +
+      '<a href="#/dashboard" class="btn btn-primary w-100">Voltar para o início</a>';
+    return;
+  }
+
+  el.innerHTML =
+    '<div class="alert alert-danger">' +
+    '<i class="bi bi-exclamation-triangle"></i> <strong>Atenção:</strong> esta ação apaga <strong>todos</strong> os dados deste aparelho — ' +
+    'treinos, fichas, exercícios da biblioteca, colinha e metas. <strong>Não há como desfazer.</strong>' +
+    '</div>' +
+    '<div class="card mb-3"><div class="card-body">' +
+    '<p class="small text-muted mb-2">Antes de apagar, você pode salvar um backup em JSON:</p>' +
+    '<button class="btn btn-outline-primary w-100" type="button" id="eraseExport"><i class="bi bi-download"></i> Exportar backup (JSON)</button>' +
+    '</div></div>' +
+    '<div class="card mb-3"><div class="card-body">' +
+    '<label class="form-label" for="eraseConfirm">Digite <strong>APAGAR</strong> para confirmar</label>' +
+    '<input type="text" class="form-control mb-2" id="eraseConfirm" autocomplete="off" autocapitalize="characters" placeholder="APAGAR">' +
+    '<div class="form-check">' +
+    '<input class="form-check-input" type="checkbox" id="eraseAck">' +
+    '<label class="form-check-label small" for="eraseAck">Entendi que não há como desfazer.</label>' +
+    '</div>' +
+    '</div></div>' +
+    '<div class="d-flex gap-2">' +
+    '<a href="#/more" class="btn btn-outline-secondary flex-fill">Cancelar</a>' +
+    '<button class="btn btn-danger flex-fill" type="button" id="eraseConfirmBtn" disabled><i class="bi bi-trash"></i> Apagar tudo</button>' +
+    '</div>';
+
+  const input = document.getElementById('eraseConfirm');
+  const ack = document.getElementById('eraseAck');
+  const confirmBtn = document.getElementById('eraseConfirmBtn');
+
+  function updateEnabled() {
+    confirmBtn.disabled = !(normalizeText(input.value) === 'apagar' && ack.checked);
+  }
+
+  input.addEventListener('input', updateEnabled);
+  ack.addEventListener('change', updateEnabled);
+  document.getElementById('eraseExport').addEventListener('click', guard(exportData));
+  confirmBtn.addEventListener('click', guard(eraseAllData));
+}
+
+async function eraseAllData() {
+  if (normalizeText(document.getElementById('eraseConfirm').value) !== 'apagar') return;
+  if (!document.getElementById('eraseAck').checked) return;
+
+  await dbClear('workouts');
+  await dbClear('exercises');
+  await dbClear('sheets');
+  await dbClear('settings');
+  await dbClear('colinha');
+
+  state.viewingWorkoutId = null;
+  state.viewingExerciseName = '';
+  state.editingWorkoutId = null;
+  state.lastImportSnapshot = null;
+  state.libraryGroup = '';
+  state.libraryQuery = '';
+  state.sheetExercises = [];
+  state.formSets = [];
+  state.eraseDone = true;
+
+  await loadState();
+  renderErase();
+}
 /* ---------- share a single workout as human-readable text ---------- */
 
 function workoutAsText(workout) {
@@ -1831,8 +1874,7 @@ function bindEvents() {
   document.getElementById('detailExport').addEventListener('click', function () { exportWorkoutText(state.viewingWorkoutId); });
   document.getElementById('detailDelete').addEventListener('click', guard(deleteViewedWorkout));
   document.getElementById('workoutSheet').addEventListener('change', guard(onSheetChange));
-  document.getElementById('btnAddSheet').addEventListener('click', openSheetModal);
-  document.getElementById('sheetSave').addEventListener('click', guard(saveNewSheet));
+
   document.getElementById('btnNewSheet').addEventListener('click', function () { openSheetEditor(null); });
   document.getElementById('sheetEditorSave').addEventListener('click', guard(saveSheetEditor));
   document.getElementById('btnSheetAddExercise').addEventListener('click', guard(toggleSheetPicker));
@@ -1876,6 +1918,7 @@ function bindEvents() {
     document.getElementById('importFile').click();
   });
   document.getElementById('btnUndoImport').addEventListener('click', guard(undoImport));
+  document.getElementById('btnEraseAll').addEventListener('click', function () { state.eraseDone = false; });
   document.getElementById('importFile').addEventListener('change', function () {
     if (this.files && this.files[0]) guard(importData)(this.files[0]);
     this.value = '';
@@ -1898,11 +1941,11 @@ function guard(fn) {
 async function markCatalogDuplicates() {
   const catalogNames = {};
   (state.catalog || []).forEach(function (c) {
-    catalogNames[(c.name || '').toLowerCase()] = true;
+    catalogNames[normalizeText(c.name)] = true;
   });
 
   const toMark = state.exercises.filter(function (e) {
-    return !e.source && !(e.correction || '').trim() && catalogNames[(e.name || '').toLowerCase()];
+    return !e.source && !(e.correction || '').trim() && catalogNames[normalizeText(e.name)];
   });
 
   for (let i = 0; i < toMark.length; i++) {

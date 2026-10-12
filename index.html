@@ -8,9 +8,9 @@
   <title>Meu Treino</title>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
-  <link rel="stylesheet" href="vendor/bootstrap/bootstrap.min.css?v=22">
-  <link rel="stylesheet" href="vendor/bootstrap-icons/bootstrap-icons.min.css?v=22">
-  <link rel="stylesheet" href="css/styles.css?v=22">
+  <link rel="stylesheet" href="vendor/bootstrap/bootstrap.min.css?v=23">
+  <link rel="stylesheet" href="vendor/bootstrap-icons/bootstrap-icons.min.css?v=23">
+  <link rel="stylesheet" href="css/styles.css?v=23">
 </head>
 <body>
   <main class="container pb-nav">
@@ -33,10 +33,7 @@
           </div>
           <div class="mb-2">
             <label class="form-label" for="workoutSheet">Ficha de treino</label>
-            <div class="input-group">
-              <select class="form-select" id="workoutSheet"></select>
-              <button class="btn btn-outline-primary" type="button" id="btnAddSheet" title="Nova ficha"><i class="bi bi-plus-lg"></i></button>
-            </div>
+            <select class="form-select" id="workoutSheet"></select>
             <div class="form-text" id="sheetHint"></div>
           </div>
           <div class="mb-2">
@@ -82,6 +79,14 @@
         <button class="btn btn-sm btn-outline-secondary" type="button" id="exerciseBack"><i class="bi bi-arrow-left"></i> Voltar</button>
       </div>
       <div id="exerciseHistory"></div>
+    </section>
+    <!-- Erase all data -->
+    <section id="view-erase" class="view d-none">
+      <div class="d-flex justify-content-between align-items-center mt-3 mb-3">
+        <h1 class="h4 mb-0"><i class="bi bi-trash"></i> Apagar dados</h1>
+        <a href="#/more" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-left"></i> Voltar</a>
+      </div>
+      <div id="eraseBody"></div>
     </section>
     <!-- Sheets & exercises -->
     <section id="view-exercises" class="view d-none">
@@ -191,15 +196,16 @@
             <button class="btn btn-outline-primary flex-fill" type="button" id="btnExport"><i class="bi bi-download"></i> Exportar</button>
             <button class="btn btn-outline-secondary flex-fill" type="button" id="btnImport"><i class="bi bi-upload"></i> Importar</button>
           </div>
-          <div class="d-flex gap-2">
+          <div class="d-flex gap-2 mb-2">
             <button class="btn btn-outline-warning d-none flex-fill" type="button" id="btnUndoImport"><i class="bi bi-arrow-counterclockwise"></i> Desfazer</button>
-            <button class="btn btn-outline-danger flex-fill" type="button" id="btnForceUpdate"><i class="bi bi-arrow-repeat"></i> Atualizar app</button>
+            <button class="btn btn-outline-secondary flex-fill" type="button" id="btnForceUpdate"><i class="bi bi-arrow-repeat"></i> Atualizar app</button>
             <input type="file" id="importFile" accept="application/json,.json" class="d-none">
           </div>
+          <a href="#/erase" class="btn btn-outline-danger w-100" id="btnEraseAll"><i class="bi bi-trash"></i> Apagar todos os dados</a>
         </div>
       </div>
 
-      <p class="text-center text-muted small">Meu Treino <span id="appVersion">v22</span> · dados 100% locais · catálogo: gugeldev/exercicios-bd-ptbr (CC0)<br><a href="reset.html">limpar cache e atualizar</a></p>
+      <p class="text-center text-muted small">Meu Treino <span id="appVersion">v23</span> · dados 100% locais · catálogo: gugeldev/exercicios-bd-ptbr (CC0)<br><a href="reset.html">limpar cache e atualizar</a></p>
     </section>
   </main>
 
@@ -223,26 +229,6 @@
         <div class="modal-body">
           <input type="search" class="form-control mb-2" id="pickerSearch" placeholder="Buscar por nome...">
           <div id="pickerResults" class="list-group"></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- New sheet modal -->
-  <div class="modal fade" id="sheetModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-fullscreen-sm-down">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">Nova ficha</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
-        </div>
-        <div class="modal-body">
-          <label class="form-label" for="newSheetName">Nome</label>
-          <input type="text" class="form-control" id="newSheetName" placeholder="Ex.: TREINO A - inferiores">
-          <div class="form-text">Depois de criar, adicione os exercícios da ficha.</div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-primary" id="sheetSave">Salvar</button>
         </div>
       </div>
     </div>
@@ -362,8 +348,8 @@
     </div>
   </div>
 
-  <script src="vendor/bootstrap/bootstrap.bundle.min.js?v=22"></script>
-  <script src="js/db.js?v=22"></script>
-  <script src="js/app.js?v=22"></script>
+  <script src="vendor/bootstrap/bootstrap.bundle.min.js?v=23"></script>
+  <script src="js/db.js?v=23"></script>
+  <script src="js/app.js?v=23"></script>
 </body>
 </html>
