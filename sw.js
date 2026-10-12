@@ -2,7 +2,7 @@
 
 /* Service worker: cache-first for the app shell. No user data ever leaves the device. */
 
-const CACHE_NAME = 'meu-treino-v1';
+const CACHE_NAME = 'meu-treino-v2';
 
 const ASSETS = [
   './',

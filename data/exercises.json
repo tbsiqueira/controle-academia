@@ -3,9 +3,9 @@
                  "source":  "https://github.com/gugeldev/exercicios-bd-ptbr",
                  "license":  "CC0-1.0",
                  "language":  "pt-BR",
-                 "count":  869,
+                 "count":  927,
                  "idPolicy":  "Sequential integer IDs assigned once in (group, name) order. IDs are permanent: never reassign, reuse, or renumber. New entries must use the next unused integer after the current max.",
-                 "nextId":  870
+                 "nextId":  928
              },
     "exercises":  [
                       {
@@ -123,6 +123,12 @@
                           "group":  "Abdômen"
                       },
                       {
+                          "id":  870,
+                          "sourceId":  "curated-ptbr-001",
+                          "name":  "Abdominal infra",
+                          "group":  "Abdômen"
+                      },
+                      {
                           "id":  20,
                           "sourceId":  "Cable_Reverse_Crunch",
                           "name":  "Abdominal Infra na Polia",
@@ -171,6 +177,12 @@
                           "group":  "Abdômen"
                       },
                       {
+                          "id":  871,
+                          "sourceId":  "curated-ptbr-002",
+                          "name":  "Abdominal oblíquo",
+                          "group":  "Abdômen"
+                      },
+                      {
                           "id":  28,
                           "sourceId":  "Seated_Leg_Tucks",
                           "name":  "Abdominal Sentado com Flexão de Joelhos",
@@ -180,6 +192,12 @@
                           "id":  29,
                           "sourceId":  "Cable_Seated_Crunch",
                           "name":  "Abdominal Sentado na Polia",
+                          "group":  "Abdômen"
+                      },
+                      {
+                          "id":  872,
+                          "sourceId":  "curated-ptbr-003",
+                          "name":  "Abdominal supra",
                           "group":  "Abdômen"
                       },
                       {
@@ -669,6 +687,12 @@
                           "group":  "Antebraços"
                       },
                       {
+                          "id":  873,
+                          "sourceId":  "curated-ptbr-004",
+                          "name":  "Rosca de punho",
+                          "group":  "Antebraços"
+                      },
+                      {
                           "id":  111,
                           "sourceId":  "Palms-Down_Wrist_Curl_Over_A_Bench",
                           "name":  "Rosca de Punho com Barra em Pronação sobre Banco",
@@ -732,6 +756,18 @@
                           "id":  121,
                           "sourceId":  "Brachialis-SMR",
                           "name":  "Liberação Miofascial do Braquial",
+                          "group":  "Bíceps"
+                      },
+                      {
+                          "id":  874,
+                          "sourceId":  "curated-ptbr-005",
+                          "name":  "Rosca 21",
+                          "group":  "Bíceps"
+                      },
+                      {
+                          "id":  875,
+                          "sourceId":  "curated-ptbr-006",
+                          "name":  "Rosca alternada",
                           "group":  "Bíceps"
                       },
                       {
@@ -831,6 +867,12 @@
                           "group":  "Bíceps"
                       },
                       {
+                          "id":  876,
+                          "sourceId":  "curated-ptbr-007",
+                          "name":  "Rosca direta",
+                          "group":  "Bíceps"
+                      },
+                      {
                           "id":  138,
                           "sourceId":  "Barbell_Curl",
                           "name":  "Rosca Direta com Barra",
@@ -846,6 +888,12 @@
                           "id":  140,
                           "sourceId":  "Standing_Biceps_Cable_Curl",
                           "name":  "Rosca Direta com Barra na Polia em Pé",
+                          "group":  "Bíceps"
+                      },
+                      {
+                          "id":  877,
+                          "sourceId":  "curated-ptbr-008",
+                          "name":  "Rosca direta com halteres",
                           "group":  "Bíceps"
                       },
                       {
@@ -876,6 +924,12 @@
                           "id":  145,
                           "sourceId":  "Incline_Inner_Biceps_Curl",
                           "name":  "Rosca Inclinada para Bíceps Interno",
+                          "group":  "Bíceps"
+                      },
+                      {
+                          "id":  878,
+                          "sourceId":  "curated-ptbr-009",
+                          "name":  "Rosca inversa",
                           "group":  "Bíceps"
                       },
                       {
@@ -1033,6 +1087,24 @@
                           "sourceId":  "Zottman_Preacher_Curl",
                           "name":  "Rosca Zottman no Banco Scott",
                           "group":  "Bíceps"
+                      },
+                      {
+                          "id":  879,
+                          "sourceId":  "curated-ptbr-010",
+                          "name":  "Bicicleta ergométrica",
+                          "group":  "Cardio"
+                      },
+                      {
+                          "id":  880,
+                          "sourceId":  "curated-ptbr-011",
+                          "name":  "Escada",
+                          "group":  "Cardio"
+                      },
+                      {
+                          "id":  881,
+                          "sourceId":  "curated-ptbr-012",
+                          "name":  "Esteira",
+                          "group":  "Cardio"
                       },
                       {
                           "id":  172,
@@ -1311,6 +1383,12 @@
                           "group":  "Costas"
                       },
                       {
+                          "id":  882,
+                          "sourceId":  "curated-ptbr-013",
+                          "name":  "Levantamento terra",
+                          "group":  "Costas"
+                      },
+                      {
                           "id":  218,
                           "sourceId":  "Reverse_Band_Deadlift",
                           "name":  "Levantamento Terra com Banda Reversa",
@@ -1389,6 +1467,12 @@
                           "group":  "Costas"
                       },
                       {
+                          "id":  883,
+                          "sourceId":  "curated-ptbr-014",
+                          "name":  "Pulldown",
+                          "group":  "Costas"
+                      },
+                      {
                           "id":  231,
                           "sourceId":  "Wide-Grip_Pulldown_Behind_The_Neck",
                           "name":  "Pulldown Atrás da Nuca com Pegada Larga",
@@ -1461,6 +1545,30 @@
                           "group":  "Costas"
                       },
                       {
+                          "id":  884,
+                          "sourceId":  "curated-ptbr-015",
+                          "name":  "Puxada frente",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  885,
+                          "sourceId":  "curated-ptbr-016",
+                          "name":  "Puxada frente pegada neutra",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  886,
+                          "sourceId":  "curated-ptbr-017",
+                          "name":  "Puxada frente pronada",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  887,
+                          "sourceId":  "curated-ptbr-018",
+                          "name":  "Puxada frente supinada",
+                          "group":  "Costas"
+                      },
+                      {
                           "id":  243,
                           "sourceId":  "V-Bar_Pulldown",
                           "name":  "Puxada no Pulley com Barra V",
@@ -1527,6 +1635,18 @@
                           "group":  "Costas"
                       },
                       {
+                          "id":  888,
+                          "sourceId":  "curated-ptbr-019",
+                          "name":  "Remada baixa",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  889,
+                          "sourceId":  "curated-ptbr-020",
+                          "name":  "Remada cavalinho",
+                          "group":  "Costas"
+                      },
+                      {
                           "id":  254,
                           "sourceId":  "Lying_Cambered_Barbell_Row",
                           "name":  "Remada com Barra Camberada Deitado",
@@ -1554,6 +1674,12 @@
                           "id":  258,
                           "sourceId":  "Sled_Row",
                           "name":  "Remada com Trenó",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  890,
+                          "sourceId":  "curated-ptbr-021",
+                          "name":  "Remada curvada",
                           "group":  "Costas"
                       },
                       {
@@ -1635,6 +1761,12 @@
                           "group":  "Costas"
                       },
                       {
+                          "id":  891,
+                          "sourceId":  "curated-ptbr-022",
+                          "name":  "Remada máquina",
+                          "group":  "Costas"
+                      },
+                      {
                           "id":  272,
                           "sourceId":  "Bodyweight_Mid_Row",
                           "name":  "Remada Média Corporal",
@@ -1674,6 +1806,12 @@
                           "id":  278,
                           "sourceId":  "Lying_T-Bar_Row",
                           "name":  "Remada T-Bar Deitado",
+                          "group":  "Costas"
+                      },
+                      {
+                          "id":  892,
+                          "sourceId":  "curated-ptbr-023",
+                          "name":  "Remada unilateral (serrote)",
                           "group":  "Costas"
                       },
                       {
@@ -1719,6 +1857,12 @@
                           "group":  "Costas"
                       },
                       {
+                          "id":  893,
+                          "sourceId":  "curated-ptbr-024",
+                          "name":  "Abdução de quadril",
+                          "group":  "Glúteos"
+                      },
+                      {
                           "id":  286,
                           "sourceId":  "Kneeling_Squat",
                           "name":  "Agachamento Ajoelhado",
@@ -1761,6 +1905,12 @@
                           "group":  "Glúteos"
                       },
                       {
+                          "id":  894,
+                          "sourceId":  "curated-ptbr-025",
+                          "name":  "Coice na polia",
+                          "group":  "Glúteos"
+                      },
+                      {
                           "id":  293,
                           "sourceId":  "Leg_Lift",
                           "name":  "Elevação de Perna",
@@ -1782,6 +1932,12 @@
                           "id":  296,
                           "sourceId":  "Barbell_Glute_Bridge",
                           "name":  "Elevação de Quadril com Barra",
+                          "group":  "Glúteos"
+                      },
+                      {
+                          "id":  895,
+                          "sourceId":  "curated-ptbr-026",
+                          "name":  "Elevação pélvica",
                           "group":  "Glúteos"
                       },
                       {
@@ -2037,6 +2193,12 @@
                           "group":  "Ombros"
                       },
                       {
+                          "id":  896,
+                          "sourceId":  "curated-ptbr-027",
+                          "name":  "Desenvolvimento",
+                          "group":  "Ombros"
+                      },
+                      {
                           "id":  339,
                           "sourceId":  "Alternating_Cable_Shoulder_Press",
                           "name":  "Desenvolvimento Alternado com Cabos",
@@ -2055,6 +2217,12 @@
                           "group":  "Ombros"
                       },
                       {
+                          "id":  897,
+                          "sourceId":  "curated-ptbr-028",
+                          "name":  "Desenvolvimento Arnold",
+                          "group":  "Ombros"
+                      },
+                      {
                           "id":  342,
                           "sourceId":  "Standing_Barbell_Press_Behind_Neck",
                           "name":  "Desenvolvimento com Barra Atrás do Pescoço em Pé",
@@ -2070,6 +2238,12 @@
                           "id":  344,
                           "sourceId":  "Standing_Palm-In_One-Arm_Dumbbell_Press",
                           "name":  "Desenvolvimento com Halter Unilateral e Pegada Neutra em Pé",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  898,
+                          "sourceId":  "curated-ptbr-029",
+                          "name":  "Desenvolvimento com halteres",
                           "group":  "Ombros"
                       },
                       {
@@ -2208,6 +2382,12 @@
                           "id":  367,
                           "sourceId":  "Smith_Incline_Shoulder_Raise",
                           "name":  "Elevação de Ombros no Smith em Banco Inclinado",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  899,
+                          "sourceId":  "curated-ptbr-030",
+                          "name":  "Elevação frontal",
                           "group":  "Ombros"
                       },
                       {
@@ -2364,6 +2544,12 @@
                           "id":  393,
                           "sourceId":  "Power_Partials",
                           "name":  "Elevações Laterais Parciais",
+                          "group":  "Ombros"
+                      },
+                      {
+                          "id":  900,
+                          "sourceId":  "curated-ptbr-031",
+                          "name":  "Encolhimento (trapézio)",
                           "group":  "Ombros"
                       },
                       {
@@ -2757,6 +2943,18 @@
                           "group":  "Panturrilhas"
                       },
                       {
+                          "id":  901,
+                          "sourceId":  "curated-ptbr-032",
+                          "name":  "Panturrilha em pé",
+                          "group":  "Panturrilhas"
+                      },
+                      {
+                          "id":  902,
+                          "sourceId":  "curated-ptbr-033",
+                          "name":  "Panturrilha sentado",
+                          "group":  "Panturrilhas"
+                      },
+                      {
                           "id":  459,
                           "sourceId":  "Dumbbell_Seated_One-Leg_Calf_Raise",
                           "name":  "Panturrilha Sentado com Uma Perna e Halteres",
@@ -2865,6 +3063,12 @@
                           "group":  "Peito"
                       },
                       {
+                          "id":  903,
+                          "sourceId":  "curated-ptbr-034",
+                          "name":  "Crossover",
+                          "group":  "Peito"
+                      },
+                      {
                           "id":  477,
                           "sourceId":  "Single-Arm_Cable_Crossover",
                           "name":  "Crossover com Cabo Unilateral",
@@ -2901,6 +3105,12 @@
                           "group":  "Peito"
                       },
                       {
+                          "id":  904,
+                          "sourceId":  "curated-ptbr-035",
+                          "name":  "Crucifixo inclinado",
+                          "group":  "Peito"
+                      },
+                      {
                           "id":  483,
                           "sourceId":  "Incline_Dumbbell_Flyes",
                           "name":  "Crucifixo Inclinado com Halteres",
@@ -2922,6 +3132,12 @@
                           "id":  486,
                           "sourceId":  "Flat_Bench_Cable_Flyes",
                           "name":  "Crucifixo no Cabo com Banco Plano",
+                          "group":  "Peito"
+                      },
+                      {
+                          "id":  905,
+                          "sourceId":  "curated-ptbr-036",
+                          "name":  "Crucifixo reto",
                           "group":  "Peito"
                       },
                       {
@@ -2964,6 +3180,12 @@
                           "id":  493,
                           "sourceId":  "Drop_Push",
                           "name":  "Flexão com Queda",
+                          "group":  "Peito"
+                      },
+                      {
+                          "id":  906,
+                          "sourceId":  "curated-ptbr-037",
+                          "name":  "Flexão de braço",
                           "group":  "Peito"
                       },
                       {
@@ -3171,6 +3393,12 @@
                           "group":  "Peito"
                       },
                       {
+                          "id":  907,
+                          "sourceId":  "curated-ptbr-038",
+                          "name":  "Supino declinado",
+                          "group":  "Peito"
+                      },
+                      {
                           "id":  528,
                           "sourceId":  "Decline_Barbell_Bench_Press",
                           "name":  "Supino Declinado com Barra",
@@ -3204,6 +3432,12 @@
                           "id":  533,
                           "sourceId":  "Barbell_Guillotine_Bench_Press",
                           "name":  "Supino Guilhotina com Barra",
+                          "group":  "Peito"
+                      },
+                      {
+                          "id":  908,
+                          "sourceId":  "curated-ptbr-039",
+                          "name":  "Supino inclinado",
                           "group":  "Peito"
                       },
                       {
@@ -3273,6 +3507,12 @@
                           "group":  "Peito"
                       },
                       {
+                          "id":  909,
+                          "sourceId":  "curated-ptbr-040",
+                          "name":  "Supino reto",
+                          "group":  "Peito"
+                      },
+                      {
                           "id":  545,
                           "sourceId":  "Barbell_Bench_Press_-_Medium_Grip",
                           "name":  "Supino Reto com Barra - Pegada Média",
@@ -3282,6 +3522,18 @@
                           "id":  546,
                           "sourceId":  "Wide-Grip_Barbell_Bench_Press",
                           "name":  "Supino Reto com Barra e Pegada Larga",
+                          "group":  "Peito"
+                      },
+                      {
+                          "id":  910,
+                          "sourceId":  "curated-ptbr-041",
+                          "name":  "Supino reto com halteres",
+                          "group":  "Peito"
+                      },
+                      {
+                          "id":  911,
+                          "sourceId":  "curated-ptbr-042",
+                          "name":  "Voador (peck deck)",
                           "group":  "Peito"
                       },
                       {
@@ -3318,6 +3570,12 @@
                           "id":  552,
                           "sourceId":  "Adductor_Groin",
                           "name":  "Adutor/Virilha com Parceiro",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  912,
+                          "sourceId":  "curated-ptbr-043",
+                          "name":  "Afundo",
                           "group":  "Pernas"
                       },
                       {
@@ -3378,6 +3636,12 @@
                           "id":  562,
                           "sourceId":  "Dumbbell_Squat_To_A_Bench",
                           "name":  "Agachamento até o Banco com Halteres",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  913,
+                          "sourceId":  "curated-ptbr-044",
+                          "name":  "Agachamento búlgaro",
                           "group":  "Pernas"
                       },
                       {
@@ -3561,6 +3825,12 @@
                           "group":  "Pernas"
                       },
                       {
+                          "id":  914,
+                          "sourceId":  "curated-ptbr-045",
+                          "name":  "Agachamento livre",
+                          "group":  "Pernas"
+                      },
+                      {
                           "id":  593,
                           "sourceId":  "Barbell_Full_Squat",
                           "name":  "Agachamento Livre com Barra",
@@ -3636,6 +3906,12 @@
                           "id":  605,
                           "sourceId":  "Weighted_Sissy_Squat",
                           "name":  "Agachamento Sissy com Peso",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  915,
+                          "sourceId":  "curated-ptbr-046",
+                          "name":  "Agachamento Smith",
                           "group":  "Pernas"
                       },
                       {
@@ -3999,6 +4275,24 @@
                           "group":  "Pernas"
                       },
                       {
+                          "id":  916,
+                          "sourceId":  "curated-ptbr-047",
+                          "name":  "Cadeira abdutora",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  917,
+                          "sourceId":  "curated-ptbr-048",
+                          "name":  "Cadeira adutora",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  918,
+                          "sourceId":  "curated-ptbr-049",
+                          "name":  "Cadeira extensora",
+                          "group":  "Pernas"
+                      },
+                      {
                           "id":  666,
                           "sourceId":  "Lying_Leg_Curls",
                           "name":  "Cadeira Flexora",
@@ -4323,6 +4617,12 @@
                           "group":  "Pernas"
                       },
                       {
+                          "id":  919,
+                          "sourceId":  "curated-ptbr-050",
+                          "name":  "Leg press 45",
+                          "group":  "Pernas"
+                      },
+                      {
                           "id":  720,
                           "sourceId":  "Narrow_Stance_Leg_Press",
                           "name":  "Leg Press com Postura Fechada",
@@ -4443,6 +4743,12 @@
                           "group":  "Pernas"
                       },
                       {
+                          "id":  920,
+                          "sourceId":  "curated-ptbr-051",
+                          "name":  "Mesa flexora",
+                          "group":  "Pernas"
+                      },
+                      {
                           "id":  740,
                           "sourceId":  "Windmills",
                           "name":  "Moinhos de Vento",
@@ -4452,6 +4758,12 @@
                           "id":  741,
                           "sourceId":  "Looking_At_Ceiling",
                           "name":  "Olhando para o Teto",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  921,
+                          "sourceId":  "curated-ptbr-052",
+                          "name":  "Passada",
                           "group":  "Pernas"
                       },
                       {
@@ -4716,6 +5028,12 @@
                           "id":  785,
                           "sourceId":  "Dumbbell_Step_Ups",
                           "name":  "Step Up com Halteres",
+                          "group":  "Pernas"
+                      },
+                      {
+                          "id":  922,
+                          "sourceId":  "curated-ptbr-053",
+                          "name":  "Stiff",
                           "group":  "Pernas"
                       },
                       {
@@ -5019,6 +5337,12 @@
                           "group":  "Tríceps"
                       },
                       {
+                          "id":  923,
+                          "sourceId":  "curated-ptbr-054",
+                          "name":  "Paralelas (mergulho)",
+                          "group":  "Tríceps"
+                      },
+                      {
                           "id":  836,
                           "sourceId":  "Pin_Presses",
                           "name":  "Press com Pinos",
@@ -5109,15 +5433,33 @@
                           "group":  "Tríceps"
                       },
                       {
+                          "id":  924,
+                          "sourceId":  "curated-ptbr-055",
+                          "name":  "Tríceps coice",
+                          "group":  "Tríceps"
+                      },
+                      {
                           "id":  851,
                           "sourceId":  "Tricep_Dumbbell_Kickback",
                           "name":  "Tríceps Coice com Halter",
                           "group":  "Tríceps"
                       },
                       {
+                          "id":  925,
+                          "sourceId":  "curated-ptbr-056",
+                          "name":  "Tríceps corda",
+                          "group":  "Tríceps"
+                      },
+                      {
                           "id":  852,
                           "sourceId":  "Cable_Rope_Overhead_Triceps_Extension",
                           "name":  "Tríceps Corda Acima da Cabeça",
+                          "group":  "Tríceps"
+                      },
+                      {
+                          "id":  926,
+                          "sourceId":  "curated-ptbr-057",
+                          "name":  "Tríceps francês",
                           "group":  "Tríceps"
                       },
                       {
@@ -5214,6 +5556,12 @@
                           "id":  868,
                           "sourceId":  "Band_Skull_Crusher",
                           "name":  "Tríceps Skull Crusher com Banda",
+                          "group":  "Tríceps"
+                      },
+                      {
+                          "id":  927,
+                          "sourceId":  "curated-ptbr-058",
+                          "name":  "Tríceps testa",
                           "group":  "Tríceps"
                       },
                       {

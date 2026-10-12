@@ -202,7 +202,11 @@
             <label class="form-label" for="fichaName">Nome do exercício</label>
             <div class="input-group">
               <input type="text" class="form-control" id="fichaName" placeholder="Ex.: Puxada frente">
-              <button class="btn btn-outline-primary" type="button" id="btnFichaCatalog" title="Escolher do catálogo"><i class="bi bi-search"></i></button>
+              <button class="btn btn-outline-primary" type="button" id="btnFichaCatalog" title="Buscar no catálogo"><i class="bi bi-search"></i></button>
+            </div>
+            <div id="fichaCatalogBox" class="d-none mt-2 border rounded p-2 bg-light">
+              <input type="search" class="form-control form-control-sm mb-2" id="fichaCatalogSearch" placeholder="Buscar no catálogo ou criar...">
+              <div id="fichaCatalogResults" class="list-group" style="max-height: 40vh; overflow-y: auto;"></div>
             </div>
           </div>
           <div class="mb-2">

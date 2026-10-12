@@ -14,7 +14,8 @@ const state = {
   catalog: null,
   editingWorkoutId: null,
   formSets: [],
-  pickerMode: 'workout', // 'workout' | 'ficha'
+  pickerQuery: '',
+  fichaQuery: '',
   calendarCursor: null
 };
 
@@ -481,54 +482,52 @@ async function deleteWorkout() {
 /* ---------- exercise picker ---------- */
 
 async function openExercisePicker() {
-  state.pickerMode = 'workout';
   await openExercisePickerModal();
 }
 
 async function openExercisePickerModal() {
   await loadCatalog().catch(function () {});
-  document.getElementById('pickerTitle').textContent = state.pickerMode === 'ficha' ? 'Escolher do catálogo' : 'Escolher exercício';
+  document.getElementById('pickerTitle').textContent = 'Escolher exercício';
   document.getElementById('pickerSearch').value = '';
+  state.pickerQuery = '';
   renderPickerResults('');
   bootstrap.Modal.getOrCreateInstance(document.getElementById('exercisePickerModal')).show();
 }
 
 function renderPickerResults(query) {
-  const q = (query || '').trim().toLowerCase();
+  const q = (query || '').trim();
+  state.pickerQuery = q;
+  const lower = q.toLowerCase();
   const el = document.getElementById('pickerResults');
 
   const fichas = state.exercises.filter(function (e) {
-    return e.active !== false && (!q || e.name.toLowerCase().indexOf(q) !== -1);
+    return e.active !== false && (!lower || e.name.toLowerCase().indexOf(lower) !== -1);
   }).slice(0, 30);
 
   const catalog = (state.catalog || []).filter(function (e) {
-    return !q || e.name.toLowerCase().indexOf(q) !== -1;
+    return !lower || e.name.toLowerCase().indexOf(lower) !== -1;
   }).slice(0, 50);
 
   let html = '';
 
-  if (state.pickerMode === 'workout') {
-    html += '<div class="px-2 py-1 small text-muted fw-semibold">Minhas fichas</div>';
-    if (!fichas.length) html += '<div class="list-group-item small text-muted">Nenhuma ficha encontrada.</div>';
-    html += fichas.map(function (e) {
-      return '<button type="button" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" onclick="pickFicha(\'' + e.id + '\')">' +
-        '<span>' + esc(e.name) + '</span><span class="badge text-bg-light">' + esc(e.group || '') + '</span></button>';
-    }).join('');
-
-    html += '<div class="px-2 py-1 small text-muted fw-semibold mt-2">Catálogo (pt-BR)</div>';
-    if (!catalog.length) html += '<div class="list-group-item small text-muted">Nada encontrado.</div>';
-    html += catalog.map(function (e) {
-      return '<button type="button" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" onclick="pickCatalogItem(' + e.id + ')">' +
-        '<span>' + esc(e.name) + '</span><span class="badge text-bg-light">' + esc(e.group || '') + '</span></button>';
-    }).join('');
-  } else {
-    html += '<div class="px-2 py-1 small text-muted fw-semibold">Catálogo (pt-BR)</div>';
-    if (!catalog.length) html += '<div class="list-group-item small text-muted">Nada encontrado.</div>';
-    html += catalog.map(function (e) {
-      return '<button type="button" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" onclick="pickCatalogForFicha(' + e.id + ')">' +
-        '<span>' + esc(e.name) + '</span><span class="badge text-bg-light">' + esc(e.group || '') + '</span></button>';
-    }).join('');
+  if (q) {
+    html += '<button type="button" class="list-group-item list-group-item-action text-primary fw-semibold" onclick="createExerciseFromPicker()">' +
+      '<i class="bi bi-plus-circle"></i> Criar "' + esc(q) + '"</button>';
   }
+
+  html += '<div class="px-2 py-1 small text-muted fw-semibold">Minhas fichas</div>';
+  if (!fichas.length) html += '<div class="list-group-item small text-muted">Nenhuma ficha encontrada.</div>';
+  html += fichas.map(function (e) {
+    return '<button type="button" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" onclick="pickFicha(\'' + e.id + '\')">' +
+      '<span>' + esc(e.name) + '</span><span class="badge text-bg-light">' + esc(e.group || '') + '</span></button>';
+  }).join('');
+
+  html += '<div class="px-2 py-1 small text-muted fw-semibold mt-2">Catálogo (pt-BR)</div>';
+  if (!catalog.length) html += '<div class="list-group-item small text-muted">Nada encontrado.</div>';
+  html += catalog.map(function (e) {
+    return '<button type="button" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" onclick="pickCatalogItem(' + e.id + ')">' +
+      '<span>' + esc(e.name) + '</span><span class="badge text-bg-light">' + esc(e.group || '') + '</span></button>';
+  }).join('');
 
   el.innerHTML = html;
 }
@@ -561,7 +560,101 @@ function pickCatalogForFicha(id) {
   const groupSelect = document.getElementById('fichaGroup');
   const match = Array.prototype.some.call(groupSelect.options, function (o) { return o.value === e.group; });
   if (e.group && match) groupSelect.value = e.group;
-  bootstrap.Modal.getInstance(document.getElementById('exercisePickerModal')).hide();
+  document.getElementById('fichaCatalogBox').classList.add('d-none');
+}
+
+function toggleFichaCatalog() {
+  const box = document.getElementById('fichaCatalogBox');
+  const willShow = box.classList.contains('d-none');
+  box.classList.toggle('d-none', !willShow);
+  if (willShow) {
+    document.getElementById('fichaCatalogSearch').value = '';
+    state.fichaQuery = '';
+    renderFichaCatalogResults('');
+    document.getElementById('fichaCatalogSearch').focus();
+  }
+}
+
+function renderFichaCatalogResults(query) {
+  const q = (query || '').trim();
+  state.fichaQuery = q;
+  const lower = q.toLowerCase();
+  const el = document.getElementById('fichaCatalogResults');
+
+  const catalog = (state.catalog || []).filter(function (e) {
+    return !lower || e.name.toLowerCase().indexOf(lower) !== -1;
+  }).slice(0, 50);
+
+  let html = '';
+
+  if (q) {
+    html += '<button type="button" class="list-group-item list-group-item-action text-primary fw-semibold" onclick="createExerciseFromFichaSearch()">' +
+      '<i class="bi bi-plus-circle"></i> Criar "' + esc(q) + '"</button>';
+  }
+
+  if (!catalog.length) {
+    html += '<div class="list-group-item small text-muted">Nada encontrado no catálogo.</div>';
+  }
+
+  html += catalog.map(function (e) {
+    return '<button type="button" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" onclick="pickCatalogForFicha(' + e.id + ')">' +
+      '<span>' + esc(e.name) + '</span><span class="badge text-bg-light">' + esc(e.group || '') + '</span></button>';
+  }).join('');
+
+  el.innerHTML = html;
+}
+
+async function findOrCreateExercise(name) {
+  const clean = (name || '').trim();
+  const existing = state.exercises.find(function (e) {
+    return e.name.toLowerCase() === clean.toLowerCase();
+  });
+  if (existing) return existing;
+
+  const exercise = {
+    id: uid(),
+    name: clean,
+    group: 'Outros',
+    defaultSets: 3,
+    defaultReps: null,
+    defaultLoad: null,
+    defaultRir: null,
+    correction: '',
+    active: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
+
+  await dbPut('exercises', exercise);
+  state.exercises.push(exercise);
+  return exercise;
+}
+
+async function createExerciseFromPicker() {
+  const name = state.pickerQuery;
+  if (!name) return;
+  const exercise = await findOrCreateExercise(name);
+  addExerciseToForm({
+    exerciseId: exercise.id,
+    exerciseName: exercise.name,
+    defaultSets: exercise.defaultSets,
+    defaultReps: exercise.defaultReps,
+    defaultLoad: exercise.defaultLoad,
+    defaultRir: exercise.defaultRir
+  });
+  const modal = bootstrap.Modal.getInstance(document.getElementById('exercisePickerModal'));
+  if (modal) modal.hide();
+}
+
+async function createExerciseFromFichaSearch() {
+  const name = state.fichaQuery;
+  if (!name) return;
+  const exercise = await findOrCreateExercise(name);
+  document.getElementById('fichaName').value = exercise.name;
+  const groupSelect = document.getElementById('fichaGroup');
+  const match = Array.prototype.some.call(groupSelect.options, function (o) { return o.value === exercise.group; });
+  if (exercise.group && match) groupSelect.value = exercise.group;
+  document.getElementById('fichaCatalogBox').classList.add('d-none');
 }
 
 /* ---------- exercises (fichas) ---------- */
@@ -605,6 +698,8 @@ function openExerciseForm(id) {
   document.getElementById('fichaLoad').value = e ? (e.defaultLoad || '') : '';
   document.getElementById('fichaRir').value = e ? (e.defaultRir || '') : '';
   document.getElementById('fichaCorrection').value = e ? (e.correction || '') : '';
+  document.getElementById('fichaCatalogSearch').value = '';
+  document.getElementById('fichaCatalogBox').classList.add('d-none');
   document.getElementById('exerciseFormTitle').textContent = e ? 'Editar ficha' : 'Nova ficha';
 
   bootstrap.Modal.getOrCreateInstance(document.getElementById('exerciseFormModal')).show();
@@ -935,9 +1030,9 @@ function bindEvents() {
 
   document.getElementById('btnNewExercise').addEventListener('click', function () { openExerciseForm(null); });
   document.getElementById('exerciseFormSave').addEventListener('click', saveExerciseForm);
-  document.getElementById('btnFichaCatalog').addEventListener('click', function () {
-    state.pickerMode = 'ficha';
-    openExercisePickerModal();
+  document.getElementById('btnFichaCatalog').addEventListener('click', toggleFichaCatalog);
+  document.getElementById('fichaCatalogSearch').addEventListener('input', function () {
+    renderFichaCatalogResults(this.value);
   });
 
   document.getElementById('pickerSearch').addEventListener('input', function () {

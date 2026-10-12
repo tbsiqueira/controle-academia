@@ -34,8 +34,9 @@ Aplicativo web instalável (PWA) para registrar treinos de academia, acompanhar 
 - **Treino válido**: conta para a meta se tiver pelo menos 1 série registrada ou cardio > 0.
 - **Cardio**: minutos registrados dentro do treino (um treino pode ser "só cardio").
 - **Tipos de treino**: ao registrar, seleciona um tipo da lista; é possível criar um novo tipo na hora. O nome do tipo é copiado para o treino (snapshot) para preservar o histórico.
-- **Catálogo embutido**: o app traz `data/exercises.json` (869 exercícios em pt-BR, fonte `gugeldev/exercicios-bd-ptbr`, licença CC0-1.0). Cada item tem `id` inteiro sequencial **permanente** (nunca reatribuído ou reutilizado), `sourceId` original, `name` e `group`. Ao criar uma ficha, o usuário pode escolher um exercício do catálogo ou criar um próprio.
+- **Catálogo embutido**: o app traz `data/exercises.json` (927 exercícios em pt-BR: fonte `gugeldev/exercicios-bd-ptbr`, licença CC0-1.0, + curadoria própria de exercícios comuns de academia). Cada item tem `id` inteiro sequencial **permanente** (nunca reatribuído ou reutilizado), `sourceId` original, `name` e `group`. Ao criar uma ficha, o usuário pode escolher um exercício do catálogo ou criar um próprio.
 - **Pré-preenchimento**: ao adicionar um exercício da ficha, o app cria as séries conforme `defaultSets` e `defaultReps`, usando a **carga da última execução** do exercício (se houver). RIR e observações começam vazios.
+- **Criação on-the-fly**: na busca de exercícios (no registro do treino ou na ficha), se o nome não existir, o app oferece "Criar \"...\"" e cadastra a ficha na hora.
 - **Desempenho**: por exercício, mostra a última sessão (carga × reps) vs a sessão anterior e o **PR** (maior carga já registrada em uma série; em empate, a série com mais reps).
 - **Tonelagem** (opcional, Fase 2): `Σ(reps × carga)` por exercício e por treino, com exibição por toggle.
 - **Fotos** (opcional, Fase 2): 1 foto por exercício, armazenada no IndexedDB (Blob) e incluída no JSON de export como base64.
@@ -102,3 +103,4 @@ PLANO.md
 - **Revisão 3**: catálogo embutido de exercícios (`data/exercises.json`, 869 itens pt-BR, CC0-1.0, fonte `gugeldev/exercicios-bd-ptbr`); idioma do código em inglês.
 - **Revisão 4**: IDs do catálogo convertidos para inteiros sequenciais permanentes (1..869), com `sourceId` original preservado e política de estabilidade em `meta.idPolicy`.
 - **Revisão 5** (`dec-a52daaa2e8f02e86`): UI framework Bootstrap 5, com arquivos vendados localmente (sem CDN em runtime).
+- **Revisão 6**: busca do catálogo inline no modal de ficha (corrige modais sobrepostos); criação on-the-fly de exercícios; catálogo ampliado com +58 exercícios comuns de academia (ids 870–927, total 927).
