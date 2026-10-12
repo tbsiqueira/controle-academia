@@ -207,13 +207,9 @@ function renderWeek() {
     '</div></div></div>';
 }
 
-function warmupText(warmup) {
-  if (!warmup) return '';
-  const parts = [];
-  if (warmup.reps !== null && warmup.reps !== undefined) parts.push(warmup.reps + ' reps');
-  if (warmup.load !== null && warmup.load !== undefined) parts.push(warmup.load + ' kg');
-  if (warmup.rir !== null && warmup.rir !== undefined) parts.push('RIR ' + warmup.rir);
-  return parts.length ? 'aquec.: ' + parts.join(' · ') : '';
+function warmupSummary(warmups) {
+  if (!warmups || !warmups.length) return '';
+  return warmups.length === 1 ? '1 aquecimento' : warmups.length + ' aquecimentos';
 }
 
 function renderRecent() {
@@ -230,7 +226,7 @@ function renderRecent() {
   el.innerHTML = '<h6 class="mt-2">Últimos treinos</h6>' + recent.map(function (w) {
     const setCount = (w.sets || []).length;
     const name = w.sheetName || w.typeName || 'Treino';
-    const warm = warmupText(w.warmup);
+    const warm = warmupSummary(w.warmups);
     return '<div class="card mb-2"><div class="card-body py-2 d-flex justify-content-between align-items-center">' +
       '<div><strong>' + esc(name) + '</strong><br>' +
       '<small class="text-muted">' + fmtBR(w.date) + ' · ' + setCount + ' exerc.' + (warm ? ' · ' + esc(warm) : '') + '</small></div>' +
@@ -367,6 +363,7 @@ function loadSheetIntoForm(sheet) {
       exerciseId: item.exerciseId || null,
       exerciseName: item.name,
       note: item.note || '',
+      warmup: { reps: '', load: '', rir: '' },
       sets: sets
     });
   });
@@ -388,17 +385,33 @@ function onSheetChange() {
   loadSheetIntoForm(sheet);
 }
 
-function groupSets(flatSets) {
+function groupSets(flatSets, warmups) {
   const groups = [];
   const index = {};
+  const warmupByName = {};
+
+  (warmups || []).forEach(function (w) {
+    warmupByName[w.exerciseName || '(sem nome)'] = w;
+  });
+
   (flatSets || []).forEach(function (s) {
     const key = s.exerciseName || '(sem nome)';
     if (!Object.prototype.hasOwnProperty.call(index, key)) {
       index[key] = groups.length;
-      groups.push({ exerciseId: s.exerciseId || null, exerciseName: key, note: s.exerciseNote || '', sets: [] });
+      const saved = warmupByName[key];
+      groups.push({
+        exerciseId: s.exerciseId || null,
+        exerciseName: key,
+        note: s.exerciseNote || '',
+        warmup: saved
+          ? { reps: saved.reps, load: saved.load, rir: saved.rir }
+          : { reps: '', load: '', rir: '' },
+        sets: []
+      });
     }
     groups[index[key]].sets.push({ number: s.number, reps: s.reps, load: s.load, rir: s.rir, note: s.note || '' });
   });
+
   return groups;
 }
 
@@ -413,12 +426,7 @@ function renderWorkoutForm() {
   document.getElementById('workoutCardio').value = editing ? (editing.cardioMinutes || '') : '';
   document.getElementById('workoutNotes').value = editing ? (editing.notes || '') : '';
 
-  const warmup = (editing && editing.warmup) ? editing.warmup : {};
-  document.getElementById('warmupReps').value = (warmup.reps === undefined || warmup.reps === null) ? '' : warmup.reps;
-  document.getElementById('warmupLoad').value = (warmup.load === undefined || warmup.load === null) ? '' : warmup.load;
-  document.getElementById('warmupRir').value = (warmup.rir === undefined || warmup.rir === null) ? '' : warmup.rir;
-
-  state.formSets = editing ? groupSets(editing.sets) : [];
+  state.formSets = editing ? groupSets(editing.sets, editing.warmups) : [];
   document.getElementById('workoutDelete').classList.toggle('d-none', !editing);
   renderFormSets();
 }
@@ -441,12 +449,21 @@ function renderFormSets() {
   }
 
   el.innerHTML = state.formSets.map(function (group, exIdx) {
+    const warm = group.warmup || {};
     return '<div class="card mb-2"><div class="card-body p-2">' +
       '<div class="d-flex justify-content-between align-items-center mb-1">' +
       '<strong>' + esc(group.exerciseName) + '</strong>' +
       '<button type="button" class="btn btn-sm btn-outline-danger" onclick="removeFormExercise(' + exIdx + ')"><i class="bi bi-trash"></i></button>' +
       '</div>' +
       (group.note ? '<div class="small text-muted mb-1"><i class="bi bi-info-circle"></i> ' + esc(group.note) + '</div>' : '') +
+      '<div class="border rounded bg-light p-1 mb-1">' +
+      '<div class="small text-muted mb-1"><i class="bi bi-fire"></i> Aquecimento</div>' +
+      '<div class="row g-1">' +
+      '<div class="col-4"><input type="number" min="0" inputmode="numeric" class="form-control form-control-sm" value="' + esc(warm.reps) + '" placeholder="reps" oninput="setWarmupField(' + exIdx + ",'reps',this.value)\"></div>" +
+      '<div class="col-4"><input type="number" min="0" step="0.5" inputmode="decimal" class="form-control form-control-sm" value="' + esc(warm.load) + '" placeholder="peso" oninput="setWarmupField(' + exIdx + ",'load',this.value)\"></div>" +
+      '<div class="col-4"><input type="number" min="0" inputmode="numeric" class="form-control form-control-sm" value="' + esc(warm.rir) + '" placeholder="RIR" oninput="setWarmupField(' + exIdx + ",'rir',this.value)\"></div>" +
+      '</div>' +
+      '</div>' +
       '<div class="row g-1 text-center fw-semibold small text-muted mb-1">' +
       '<div class="col-2">série</div><div class="col-2">reps</div><div class="col-2">carga</div><div class="col-2">RIR</div><div class="col-4">obs</div>' +
       '</div>' +
@@ -454,6 +471,13 @@ function renderFormSets() {
       '<button type="button" class="btn btn-sm btn-outline-secondary mt-1" onclick="addFormSet(' + exIdx + ')"><i class="bi bi-plus"></i> série</button>' +
       '</div></div>';
   }).join('');
+}
+
+function setWarmupField(exIdx, field, value) {
+  const group = state.formSets[exIdx];
+  if (!group) return;
+  if (!group.warmup) group.warmup = { reps: '', load: '', rir: '' };
+  group.warmup[field] = value;
 }
 
 function setField(exIdx, setIdx, field, value) {
@@ -501,14 +525,21 @@ function addExerciseToForm(opts) {
     sets.push({ number: i, reps: '', load: lastLoad, rir: '', note: '' });
   }
 
-  state.formSets.push({ exerciseId: opts.exerciseId || null, exerciseName: name, note: opts.note || '', sets: sets });
+  state.formSets.push({
+    exerciseId: opts.exerciseId || null,
+    exerciseName: name,
+    note: opts.note || '',
+    warmup: { reps: '', load: '', rir: '' },
+    sets: sets
+  });
   renderFormSets();
 }
 
-function readWarmup() {
-  const reps = toNumOrNull(document.getElementById('warmupReps').value);
-  const load = toNumOrNull(document.getElementById('warmupLoad').value);
-  const rir = toNumOrNull(document.getElementById('warmupRir').value);
+function cleanWarmup(warm) {
+  if (!warm) return null;
+  const reps = toNumOrNull(warm.reps);
+  const load = toNumOrNull(warm.load);
+  const rir = toNumOrNull(warm.rir);
   if (reps === null && load === null && rir === null) return null;
   return { reps: reps, load: load, rir: rir };
 }
@@ -544,6 +575,19 @@ async function saveWorkout() {
     });
   });
 
+  const warmups = [];
+  state.formSets.forEach(function (group) {
+    const clean = cleanWarmup(group.warmup);
+    if (!clean) return;
+    warmups.push({
+      exerciseId: group.exerciseId || null,
+      exerciseName: group.exerciseName,
+      reps: clean.reps,
+      load: clean.load,
+      rir: clean.rir
+    });
+  });
+
   if (!sets.length && !cardioMinutes) {
     alert('Adicione pelo menos um exercício com série ou informe os minutos de cardio.');
     return;
@@ -560,7 +604,7 @@ async function saveWorkout() {
     sheetName: sheet ? sheet.name : '',
     cardioMinutes: cardioMinutes,
     notes: notes,
-    warmup: readWarmup(),
+    warmups: warmups,
     sets: sets,
     createdAt: editing ? editing.createdAt : new Date().toISOString(),
     updatedAt: new Date().toISOString()

@@ -27,14 +27,14 @@ Aplicativo web instalável (PWA) para registrar treinos de academia, acompanhar 
 - **FR-09 — PWA**: instalável na tela inicial, funciona offline após a primeira carga.
 - **FR-10 — Fichas de treino**: CRUD de fichas com lista **ordenada** de exercícios; cada exercício da ficha tem **nº de séries**, **reps de cada série** (podem variar, ex.: 12-10-8) e **observação da professora**. É a ficha que você seleciona ao registrar o treino.
 - **FR-11 — Editar/excluir treino**: qualquer treino registrado pode ser aberto para edição ou exclusão.
-- **FR-12 — Aquecimento**: linha padrão no registro do treino, onde o aluno anota **reps, peso e RIR** do aquecimento.
+- **FR-12 — Aquecimento por exercício**: cada exercício no registro do treino tem sua própria linha de aquecimento, onde o aluno anota **reps, peso e RIR**.
 
 ## 4. Regras de negócio
 - **Semana**: janela de 7 dias `[início, início + 6]` a partir da data marcada. Treinos são sempre atribuídos a uma semana **pela data**. Ao passar 7 dias, o app mostra um aviso "semana encerrada" com o resultado final da semana; o usuário confirma para avançar para a próxima janela. Treinos com data fora da janela atual **nunca se perdem** (ficam salvos por data). É possível redefinir o início a qualquer momento em Ajustes.
 - **Meta padrão**: 3 treinos/semana e 120 min de cardio/semana (editável em Ajustes).
 - **Treino válido**: conta para a meta se tiver pelo menos 1 série registrada ou cardio > 0.
 - **Cardio**: minutos registrados dentro do treino (um treino pode ser "só cardio").
-- **Aquecimento**: linha padrão no formulário do treino (reps, peso, RIR), salva junto do treino; **não** entra no desempenho por exercício nem na tonelagem.
+- **Aquecimento**: cada exercício do treino tem sua própria linha de aquecimento (reps, peso, RIR), salva junto do treino; **não** entra no desempenho por exercício nem na tonelagem.
 - **Fichas**: ao registrar, seleciona uma ficha; os exercícios dela entram no formulário na ordem cadastrada (com opção de substituir o que já estava). O nome da ficha é copiado para o treino (snapshot) para preservar o histórico.
 - **Catálogo embutido**: o app traz `data/exercises.json` (927 exercícios em pt-BR: fonte `gugeldev/exercicios-bd-ptbr`, licença CC0-1.0, + curadoria própria de exercícios comuns de academia). Cada item tem `id` inteiro sequencial **permanente** (nunca reatribuído ou reutilizado), `sourceId` original, `name` e `group`. Ao montar uma ficha (ou adicionar um exercício extra ao treino), dá para escolher do catálogo ou criar um próprio.
 - **Pré-preenchimento**: ao carregar a ficha, o app cria as séries com as **reps de cada série** definidas na ficha e usa a **carga da última execução** do exercício (se houver). RIR e observação de série começam vazios. **Carga e RIR pertencem ao treino**, não à ficha.
@@ -49,7 +49,7 @@ Aplicativo web instalável (PWA) para registrar treinos de academia, acompanhar 
 Stores:
 - `sheets` (fichas): `{ id, name, active, exercises[], createdAt, updatedAt }`
   - `exercises[]`: `{ exerciseId, name, sets, reps[] (reps de cada série), note (observação da professora) }` (na ordem da ficha)
-- `workouts`: `{ id, date (YYYY-MM-DD), sheetId, sheetName (snapshot), cardioMinutes, notes, warmup { reps, load, rir } | null, sets[], createdAt, updatedAt }`
+- `workouts`: `{ id, date (YYYY-MM-DD), sheetId, sheetName (snapshot), cardioMinutes, notes, warmups[] { exerciseId, exerciseName, reps, load, rir }, sets[], createdAt, updatedAt }`
   - `sets[]`: `{ exerciseId, exerciseName (cópia do nome na época), exerciseNote (observação da ficha), number, reps, load, rir, note }`
 - `exercises`: `{ id, name, group, correction, active, createdAt, updatedAt }` (biblioteca; sem carga/RIR — esses pertencem ao treino)
 - `settings`: `{ id: 'app', weekAnchor (YYYY-MM-DD), weeklyWorkoutTarget, weeklyCardioTarget, tonnageVisible }`
@@ -59,7 +59,7 @@ Stores:
 | Tela | Função |
 |---|---|
 | Dashboard | Meta da semana, aviso de semana encerrada, últimos treinos (editar/excluir), desempenho por exercício |
-| Registrar treino | Data, ficha (selecionar/criar; carrega os exercícios dela), **aquecimento (reps/peso/RIR)**, séries (reps/carga/RIR/obs), cardio |
+| Registrar treino | Data, ficha (selecionar/criar; carrega os exercícios dela), **aquecimento por exercício (reps/peso/RIR)**, séries (reps/carga/RIR/obs), cardio |
 | Fichas e exercícios | Abas: **fichas** (grupo ordenado de exercícios) e **biblioteca de exercícios** + correção |
 | Calendário | Frequência mensal |
 | Colinha | RIR, descanso, lembretes |
@@ -109,4 +109,5 @@ PLANO.md
 - **Revisão 6**: busca do catálogo inline no modal de ficha (corrige modais sobrepostos); criação on-the-fly de exercícios; catálogo ampliado com +58 exercícios comuns de academia (ids 870–927, total 927).
 - **Revisão 7**: "ficha" passa a ser o **treino completo** (agrupamento ordenado de exercícios) e "exercícios" viram a biblioteca; ao registrar, a ficha selecionada carrega os exercícios dela. Migração automática dos antigos "tipos de treino" para fichas (IndexedDB v2).
 - **Revisão 8**: na ficha, cada exercício tem **séries + reps por série** (ex.: 3×12-10-8) e **observação da professora**; **carga e RIR saíram da ficha e da biblioteca** (pertencem ao treino). Biblioteca ficou com nome, grupo e observação.
-- **Revisão 9**: **linha de aquecimento** padrão no registro do treino (reps, peso, RIR), salva junto do treino e exibida nos últimos treinos.
+- **Revisão 9**: **linha de aquecimento** no registro do treino (reps, peso, RIR), salva junto do treino.
+- **Revisão 10**: o aquecimento passa a ser **por exercício** (cada exercício do treino tem sua própria linha de reps/peso/RIR), não um bloco único do treino.
