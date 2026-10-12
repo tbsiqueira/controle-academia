@@ -830,7 +830,7 @@ function renderPickerResults(query) {
   const el = document.getElementById('pickerResults');
 
   const fichas = state.exercises.filter(function (e) {
-    return e.active !== false && (!lower || e.name.toLowerCase().indexOf(lower) !== -1);
+    return e.active !== false && e.source !== 'catalog' && (!lower || e.name.toLowerCase().indexOf(lower) !== -1);
   }).slice(0, 30);
 
   const catalog = (state.catalog || []).filter(function (e) {
@@ -874,14 +874,12 @@ function pickLibraryExercise(id) {
   hideExercisePicker();
 }
 
-async function pickCatalogExercise(id) {
+function pickCatalogExercise(id) {
   const item = (state.catalog || []).find(function (x) { return String(x.id) === String(id); });
   if (!item) return;
 
-  // Save it into the library too, so it is reusable and editable later.
-  const exercise = await ensureLibraryExercise(item.name, item.group);
-  addExerciseToForm({ exerciseId: exercise.id, exerciseName: exercise.name, note: exercise.correction || '' });
-
+  // Catalog exercises are not copied into the library (they are already in the catalog).
+  addExerciseToForm({ exerciseId: null, exerciseName: item.name });
   hideExercisePicker();
 }
 
@@ -936,7 +934,7 @@ function renderFichaCatalogResults(query) {
   el.innerHTML = html;
 }
 
-async function ensureLibraryExercise(name, group) {
+async function ensureLibraryExercise(name, group, source) {
   const clean = (name || '').trim();
   const existing = state.exercises.find(function (e) {
     return e.name.toLowerCase() === clean.toLowerCase();
@@ -947,6 +945,7 @@ async function ensureLibraryExercise(name, group) {
     id: uid(),
     name: clean,
     group: group || 'Outros',
+    source: source || 'custom',
     correction: '',
     active: true,
     createdAt: new Date().toISOString(),
@@ -959,7 +958,7 @@ async function ensureLibraryExercise(name, group) {
 }
 
 function findOrCreateExercise(name) {
-  return ensureLibraryExercise(name, 'Outros');
+  return ensureLibraryExercise(name, 'Outros', 'custom');
 }
 
 async function createExerciseFromPicker() {
@@ -1013,6 +1012,7 @@ function fillLibraryGroupFilter() {
 
   state.exercises.forEach(function (e) {
     if (e.active === false) return;
+    if (e.source === 'catalog') return;
     if (e.group && groups.indexOf(e.group) === -1) groups.push(e.group);
   });
   groups.sort(function (a, b) { return a.localeCompare(b, 'pt'); });
@@ -1031,13 +1031,14 @@ function renderExercises() {
   const query = (state.libraryQuery || '').trim().toLowerCase();
   const list = state.exercises.filter(function (e) {
     if (e.active === false) return false;
+    if (e.source === 'catalog') return false;
     if (state.libraryGroup && e.group !== state.libraryGroup) return false;
     if (query && e.name.toLowerCase().indexOf(query) === -1) return false;
     return true;
   });
 
   if (!list.length) {
-    el.innerHTML = '<p class="text-muted"><i class="bi bi-search"></i> Nenhum exercício encontrado. Crie um novo ou ajuste o filtro/busca.</p>';
+    el.innerHTML = '<p class="text-muted"><i class="bi bi-search"></i> Nenhum exercício aqui. Crie um novo — os exercícios do catálogo não entram nesta lista.</p>';
     return;
   }
 
@@ -1096,6 +1097,7 @@ async function saveExerciseForm() {
     id: id || uid(),
     name: name,
     group: document.getElementById('fichaGroup').value,
+    source: (existing && existing.source) ? existing.source : 'custom',
     correction: document.getElementById('fichaCorrection').value.trim(),
     active: true,
     createdAt: existing ? existing.createdAt : new Date().toISOString(),
@@ -1326,7 +1328,7 @@ function renderSheetPickerResults(query) {
   const el = document.getElementById('sheetPickerResults');
 
   const library = state.exercises.filter(function (e) {
-    return e.active !== false && (!lower || e.name.toLowerCase().indexOf(lower) !== -1);
+    return e.active !== false && e.source !== 'catalog' && (!lower || e.name.toLowerCase().indexOf(lower) !== -1);
   }).slice(0, 20);
 
   const catalog = (state.catalog || []).filter(function (e) {
@@ -1371,12 +1373,11 @@ function pickSheetLibraryExercise(id) {
   renderSheetPickerResults(state.sheetPickerQuery);
 }
 
-async function pickSheetCatalogExercise(id) {
+function pickSheetCatalogExercise(id) {
   const item = (state.catalog || []).find(function (x) { return String(x.id) === String(id); });
   if (!item) return;
 
-  const exercise = await ensureLibraryExercise(item.name, item.group);
-  addSheetExercise({ exerciseId: exercise.id, name: exercise.name, sets: 3, reps: [], note: exercise.correction || '' });
+  addSheetExercise({ exerciseId: null, name: item.name, sets: 3, reps: [], note: '' });
   renderSheetPickerResults(state.sheetPickerQuery);
 }
 
@@ -1894,9 +1895,30 @@ function guard(fn) {
   };
 }
 
+async function markCatalogDuplicates() {
+  const catalogNames = {};
+  (state.catalog || []).forEach(function (c) {
+    catalogNames[(c.name || '').toLowerCase()] = true;
+  });
+
+  const toMark = state.exercises.filter(function (e) {
+    return !e.source && !(e.correction || '').trim() && catalogNames[(e.name || '').toLowerCase()];
+  });
+
+  for (let i = 0; i < toMark.length; i++) {
+    toMark[i].source = 'catalog';
+    await dbPut('exercises', toMark[i]);
+  }
+}
+
 async function init() {
   await loadState();
-  loadCatalog().catch(function () {});
+  try {
+    await loadCatalog();
+    await markCatalogDuplicates();
+  } catch (e) {
+    // o catálogo é opcional para o app funcionar
+  }
   bindEvents();
   navigate();
 
