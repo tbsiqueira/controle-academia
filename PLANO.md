@@ -33,7 +33,7 @@ Aplicativo web instalável (PWA) para registrar treinos de academia, acompanhar 
 - **Treino válido**: conta para a meta se tiver pelo menos 1 série registrada ou cardio > 0.
 - **Cardio**: minutos registrados dentro do treino (um treino pode ser "só cardio").
 - **Tipos de treino**: ao registrar, seleciona um tipo da lista; é possível criar um novo tipo na hora. O nome do tipo é copiado para o treino (snapshot) para preservar o histórico.
-- **Catálogo embutido**: o app traz `data/exercises.json` (869 exercícios em pt-BR, fonte `gugeldev/exercicios-bd-ptbr`, licença CC0-1.0). Ao criar uma ficha, o usuário pode escolher um exercício do catálogo (id, nome, grupo) ou criar um próprio.
+- **Catálogo embutido**: o app traz `data/exercises.json` (869 exercícios em pt-BR, fonte `gugeldev/exercicios-bd-ptbr`, licença CC0-1.0). Cada item tem `id` inteiro sequencial **permanente** (nunca reatribuído ou reutilizado), `sourceId` original, `name` e `group`. Ao criar uma ficha, o usuário pode escolher um exercício do catálogo ou criar um próprio.
 - **Pré-preenchimento**: ao adicionar um exercício da ficha, o app cria as séries conforme `defaultSets` e `defaultReps`, usando a **carga da última execução** do exercício (se houver). RIR e observações começam vazios.
 - **Desempenho**: por exercício, mostra a última sessão (carga × reps) vs a sessão anterior e o **PR** (maior carga já registrada em uma série; em empate, a série com mais reps).
 - **Tonelagem** (opcional, Fase 2): `Σ(reps × carga)` por exercício e por treino, com exibição por toggle.
@@ -97,3 +97,4 @@ PLANO.md
 - **Revisão 1** (`dec-392110e34edd83a3`): distribuição via GitHub Pages, IndexedDB, semana com aviso + confirmação.
 - **Revisão 2** (`dec-93a822fbea27513a`): tipo de treino como lista gerenciável, pré-preenchimento de séries, desempenho por exercício no MVP; edição/exclusão de treinos e backup automático no import.
 - **Revisão 3**: catálogo embutido de exercícios (`data/exercises.json`, 869 itens pt-BR, CC0-1.0, fonte `gugeldev/exercicios-bd-ptbr`); idioma do código em inglês.
+- **Revisão 4**: IDs do catálogo convertidos para inteiros sequenciais permanentes (1..869), com `sourceId` original preservado e política de estabilidade em `meta.idPolicy`.
