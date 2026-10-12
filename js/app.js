@@ -198,13 +198,21 @@ function renderWeek() {
   if (btn) btn.addEventListener('click', confirmNextWeek);
 
   const stats = weekStats();
+  const workoutPct = Math.min(100, Math.round((stats.workouts / Math.max(1, state.settings.weeklyWorkoutTarget)) * 100));
+  const cardioPct = Math.min(100, Math.round((stats.cardio / Math.max(1, state.settings.weeklyCardioTarget)) * 100));
+
   document.getElementById('weekProgress').innerHTML =
     '<div class="card mb-3">' +
     '<div class="card-body py-3">' +
-    '<div class="d-flex justify-content-around text-center">' +
-    '<div><div class="display-6 fw-bold">' + stats.workouts + '/' + state.settings.weeklyWorkoutTarget + '</div><small class="text-muted">treinos</small></div>' +
-    '<div><div class="display-6 fw-bold">' + stats.cardio + '/' + state.settings.weeklyCardioTarget + '</div><small class="text-muted">min cardio</small></div>' +
-    '</div></div></div>';
+    '<div class="d-flex justify-content-around text-center mb-2">' +
+    '<div><div class="display-6 fw-bold">' + stats.workouts + '/' + state.settings.weeklyWorkoutTarget + '</div><small class="text-muted"><i class="bi bi-check2-circle"></i> treinos</small></div>' +
+    '<div><div class="display-6 fw-bold">' + stats.cardio + '/' + state.settings.weeklyCardioTarget + '</div><small class="text-muted"><i class="bi bi-heart-pulse"></i> min cardio</small></div>' +
+    '</div>' +
+    '<div class="progress mb-1" style="height: 8px" role="progressbar" aria-label="Meta de treinos" aria-valuenow="' + workoutPct + '" aria-valuemin="0" aria-valuemax="100">' +
+    '<div class="progress-bar" style="width: ' + workoutPct + '%"></div></div>' +
+    '<div class="progress" style="height: 8px" role="progressbar" aria-label="Meta de cardio" aria-valuenow="' + cardioPct + '" aria-valuemin="0" aria-valuemax="100">' +
+    '<div class="progress-bar bg-info" style="width: ' + cardioPct + '%"></div></div>' +
+    '</div></div>';
 }
 
 function warmupSummary(warmups) {
@@ -219,11 +227,11 @@ function renderRecent() {
   }).slice(0, 5);
 
   if (!recent.length) {
-    el.innerHTML = '<p class="text-muted">Nenhum treino registrado ainda.</p>';
+    el.innerHTML = '<p class="text-muted"><i class="bi bi-emoji-smile"></i> Nenhum treino registrado ainda. Toque em <strong>Registrar</strong> para começar.</p>';
     return;
   }
 
-  el.innerHTML = '<h6 class="mt-2">Últimos treinos</h6>' + recent.map(function (w) {
+  el.innerHTML = '<h6 class="mt-2"><i class="bi bi-clock-history text-primary"></i> Últimos treinos</h6>' + recent.map(function (w) {
     const setCount = (w.sets || []).length;
     const name = w.sheetName || w.typeName || 'Treino';
     const warm = warmupSummary(w.warmups);
@@ -290,13 +298,20 @@ function renderPerformance() {
     return;
   }
 
-  el.innerHTML = '<h6 class="mt-3">Desempenho por exercício</h6>' + perf.map(function (p) {
+  el.innerHTML = '<h6 class="mt-3"><i class="bi bi-graph-up-arrow text-primary"></i> Desempenho por exercício</h6>' + perf.map(function (p) {
     const last = p.last ? fmtBR(p.last.date) + ' — ' + p.last.load + 'kg × ' + p.last.reps : '—';
     const prev = p.prev ? fmtBR(p.prev.date) + ' — ' + p.prev.load + 'kg × ' + p.prev.reps : '—';
+    const trend = (p.last && p.prev)
+      ? (p.last.load > p.prev.load ? 'up' : (p.last.load < p.prev.load ? 'down' : 'flat'))
+      : 'flat';
+    const trendIcon = trend === 'up'
+      ? '<i class="bi bi-arrow-up-right text-success"></i>'
+      : (trend === 'down' ? '<i class="bi bi-arrow-down-right text-danger"></i>' : '<i class="bi bi-dash text-muted"></i>');
+
     return '<div class="card mb-2"><div class="card-body py-2">' +
       '<div class="d-flex justify-content-between align-items-center">' +
-      '<strong>' + esc(p.name) + '</strong>' +
-      '<span class="badge text-bg-warning">PR ' + p.pr.load + 'kg × ' + p.pr.reps + '</span>' +
+      '<strong>' + trendIcon + ' ' + esc(p.name) + '</strong>' +
+      '<span class="badge text-bg-warning"><i class="bi bi-trophy"></i> ' + p.pr.load + 'kg × ' + p.pr.reps + '</span>' +
       '</div>' +
       '<small class="text-muted">última: ' + last + ' · anterior: ' + prev + '</small>' +
       '</div></div>';
@@ -420,7 +435,9 @@ function renderWorkoutForm() {
     ? state.workouts.find(function (w) { return w.id === state.editingWorkoutId; })
     : null;
 
-  document.getElementById('workoutTitle').textContent = editing ? 'Editar treino' : 'Registrar treino';
+  document.getElementById('workoutTitle').innerHTML = editing
+    ? '<i class="bi bi-pencil-square text-primary"></i> Editar treino'
+    : '<i class="bi bi-plus-circle text-primary"></i> Registrar treino';
   document.getElementById('workoutDate').value = editing ? editing.date : todayISO();
   renderSheetOptions(editing ? (editing.sheetId || editing.typeId) : null);
   document.getElementById('workoutCardio').value = editing ? (editing.cardioMinutes || '') : '';
@@ -452,8 +469,11 @@ function renderFormSets() {
     const warm = group.warmup || {};
     return '<div class="card mb-2"><div class="card-body p-2">' +
       '<div class="d-flex justify-content-between align-items-center mb-1">' +
-      '<strong>' + esc(group.exerciseName) + '</strong>' +
+      '<strong><i class="bi bi-activity text-primary"></i> ' + esc(group.exerciseName) + '</strong>' +
+      '<div class="d-flex align-items-center gap-1">' +
+      '<span class="badge text-bg-light">' + group.sets.length + (group.sets.length === 1 ? ' série' : ' séries') + '</span>' +
       '<button type="button" class="btn btn-sm btn-outline-danger" onclick="removeFormExercise(' + exIdx + ')"><i class="bi bi-trash"></i></button>' +
+      '</div>' +
       '</div>' +
       (group.note ? '<div class="small text-muted mb-1"><i class="bi bi-info-circle"></i> ' + esc(group.note) + '</div>' : '') +
       '<div class="border rounded bg-light p-1 mb-1">' +
@@ -831,15 +851,15 @@ function renderExercises() {
   const list = state.exercises.filter(function (e) { return e.active !== false; });
 
   if (!list.length) {
-    el.innerHTML = '<p class="text-muted">Nenhuma ficha cadastrada.</p>';
+    el.innerHTML = '<p class="text-muted"><i class="bi bi-search"></i> Nenhum exercício cadastrado. Crie um ou escolha do catálogo (927 exercícios em pt-BR).</p>';
     return;
   }
 
   el.innerHTML = list.map(function (e) {
     const note = (e.correction || '').trim();
     return '<div class="card mb-2"><div class="card-body py-2 d-flex justify-content-between align-items-center">' +
-      '<div class="me-2"><strong>' + esc(e.name) + '</strong><br>' +
-      '<small class="text-muted">' + esc(e.group || '') + (note ? ' · ' + esc(note) : '') + '</small></div>' +
+      '<div class="me-2"><strong>' + esc(e.name) + '</strong> <span class="badge text-bg-light">' + esc(e.group || '') + '</span><br>' +
+      '<small class="text-muted">' + (note ? '<i class="bi bi-info-circle"></i> ' + esc(note) : 'sem observação') + '</small></div>' +
       '<div class="d-flex gap-1">' +
       '<button type="button" class="btn btn-sm btn-outline-primary" onclick="openExerciseForm(\'' + e.id + '\')"><i class="bi bi-pencil"></i></button>' +
       '<button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteExercise(\'' + e.id + '\')"><i class="bi bi-trash"></i></button>' +
@@ -913,7 +933,7 @@ function renderSheets() {
   const list = activeSheets();
 
   if (!list.length) {
-    el.innerHTML = '<p class="text-muted">Nenhuma ficha cadastrada. Crie uma ficha (ex.: TREINO A - inferiores) e adicione os exercícios dela.</p>';
+    el.innerHTML = '<p class="text-muted"><i class="bi bi-clipboard2-plus"></i> Nenhuma ficha cadastrada. Crie uma ficha (ex.: TREINO A - inferiores) e adicione os exercícios dela.</p>';
     return;
   }
 
@@ -924,10 +944,11 @@ function renderSheets() {
         ? e.reps.filter(function (r) { return r !== null && r !== undefined && r !== ''; }).join('-')
         : '';
       return esc(e.name) + (reps ? ' ' + esc(e.sets || 0) + '×' + esc(reps) : '');
-    }).join(', ') + (items.length > 4 ? '…' : '');
+    }).join(' · ') + (items.length > 4 ? ' …' : '');
     return '<div class="card mb-2"><div class="card-body py-2 d-flex justify-content-between align-items-center">' +
-      '<div class="me-2"><strong>' + esc(s.name) + '</strong><br>' +
-      '<small class="text-muted">' + items.length + (items.length === 1 ? ' exercício' : ' exercícios') + (preview ? ': ' + preview : '') + '</small></div>' +
+      '<div class="me-2"><strong><i class="bi bi-clipboard2-pulse text-primary"></i> ' + esc(s.name) + '</strong> ' +
+      '<span class="badge text-bg-light">' + items.length + '</span><br>' +
+      '<small class="text-muted">' + (items.length ? preview : 'sem exercícios ainda') + '</small></div>' +
       '<div class="d-flex gap-1">' +
       '<button type="button" class="btn btn-sm btn-outline-primary" onclick="openSheetEditor(\'' + s.id + '\')"><i class="bi bi-pencil"></i></button>' +
       '<button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteSheet(\'' + s.id + '\')"><i class="bi bi-trash"></i></button>' +
@@ -1018,7 +1039,7 @@ function sheetExerciseRow(item, idx) {
   const note = item.note || '';
   return '<div class="border rounded p-2 mb-2">' +
     '<div class="d-flex justify-content-between align-items-center mb-1">' +
-    '<strong class="small">' + esc(item.name) + '</strong>' +
+    '<strong><span class="badge text-bg-primary me-1">' + (idx + 1) + '</span>' + esc(item.name) + '</strong>' +
     '<div class="d-flex gap-1">' +
     '<button type="button" class="btn btn-sm btn-outline-secondary" onclick="moveSheetExercise(' + idx + ',-1)" title="Subir"><i class="bi bi-arrow-up"></i></button>' +
     '<button type="button" class="btn btn-sm btn-outline-secondary" onclick="moveSheetExercise(' + idx + ',1)" title="Descer"><i class="bi bi-arrow-down"></i></button>' +
@@ -1257,17 +1278,19 @@ function renderCalendar() {
   });
 
   const cells = [];
+  const today = todayISO();
   for (let i = 0; i < firstDow; i++) cells.push('<div class="cal-cell empty"></div>');
   for (let day = 1; day <= daysInMonth; day++) {
     const iso = prefix + '-' + pad2(day);
     const count = counts[iso] || 0;
-    cells.push('<div class="cal-cell' + (count ? ' has-workout' : '') + '">' + day + (count ? '<span class="cal-badge">' + count + '</span>' : '') + '</div>');
+    const classes = 'cal-cell' + (count ? ' has-workout' : '') + (iso === today ? ' today' : '');
+    cells.push('<div class="' + classes + '">' + day + (count ? '<span class="cal-badge">' + count + '</span>' : '') + '</div>');
   }
 
   document.getElementById('calendarGrid').innerHTML = cells.join('');
 
   const total = Object.keys(counts).reduce(function (sum, k) { return sum + counts[k]; }, 0);
-  document.getElementById('calendarTotal').textContent = total + (total === 1 ? ' treino' : ' treinos') + ' em ' + monthNames[m] + '.';
+  document.getElementById('calendarTotal').innerHTML = '<i class="bi bi-calendar-check"></i> ' + total + (total === 1 ? ' treino' : ' treinos') + ' em ' + monthNames[m] + '.';
 }
 
 /* ---------- colinha ---------- */
@@ -1277,7 +1300,7 @@ function renderColinhaList() {
   const list = state.colinha.slice().sort(function (a, b) { return (a.order || 0) - (b.order || 0); });
 
   if (!list.length) {
-    el.innerHTML = '<p class="text-muted small">Nenhuma colinha ainda.</p>';
+    el.innerHTML = '<p class="text-muted small"><i class="bi bi-journal-text"></i> Nenhuma colinha ainda.</p>';
     return;
   }
 

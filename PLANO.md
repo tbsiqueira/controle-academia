@@ -112,3 +112,4 @@ PLANO.md
 - **Revisão 9**: **linha de aquecimento** no registro do treino (reps, peso, RIR), salva junto do treino.
 - **Revisão 10**: o aquecimento passa a ser **por exercício** (cada exercício do treino tem sua própria linha de reps/peso/RIR), não um bloco único do treino.
 - **Revisão 11**: aquecimento pré-preenchido com **reps e peso do treino anterior**; item do menu inferior "Exercícios" renomeado para **"Fichas"**.
+- **Revisão 12**: acabamento visual — ícones em títulos/cards/botões, **barras de progresso** nas metas semanais, **seta de tendência** (↑/↓/=) no desempenho por exercício, badge de PR com troféu, numeração dos exercícios na ficha, destaque do **dia de hoje** no calendário e estados vazios com orientação.

@@ -163,6 +163,40 @@ body {
   border-right: none;
 }
 
+/* Polish */
+.card-header i,
+.view h1 i {
+  color: var(--mt-primary);
+}
+
+.badge.text-bg-light {
+  background: #f4f1fb !important;
+  border: 1px solid #e5e0f3;
+  color: #5b5273;
+  font-weight: 600;
+}
+
+.progress {
+  background-color: #ece7f7;
+  border-radius: 6px;
+}
+
+.progress-bar {
+  background-color: var(--mt-primary);
+}
+
+.cal-cell.today {
+  outline: 2px solid var(--mt-primary);
+  outline-offset: -2px;
+  font-weight: 700;
+}
+
+/* Warm-up block */
+.card-body .bg-light.border {
+  background: #faf8ff !important;
+  border-color: #ece7f7 !important;
+}
+
 @media (min-width: 768px) {
   .container {
     max-width: 720px;
