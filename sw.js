@@ -2,7 +2,7 @@
 
 /* Service worker: cache-first for the app shell. No user data ever leaves the device. */
 
-const CACHE_NAME = 'meu-treino-v2';
+const CACHE_NAME = 'meu-treino-v3';
 
 const ASSETS = [
   './',
@@ -42,15 +42,21 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const request = event.request;
   if (request.method !== 'GET') return;
-  if (new URL(request.url).origin !== self.location.origin) return;
+
+  const url = new URL(request.url);
+  if (url.origin !== self.location.origin) return;
+
+  // Cache/match by path only: fonts are requested with a cache-busting
+  // query string (?hash), but ASSETS caches them without it.
+  const cacheKey = url.origin + url.pathname;
 
   event.respondWith(
-    caches.match(request).then((cached) => {
+    caches.match(cacheKey).then((cached) => {
       if (cached) return cached;
       return fetch(request).then((response) => {
         if (response && response.status === 200) {
           const clone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
+          caches.open(CACHE_NAME).then((cache) => cache.put(cacheKey, clone));
         }
         return response;
       });
