@@ -191,6 +191,22 @@ body {
   font-weight: 700;
 }
 
+/* iOS dá zoom automático ao focar um campo com fonte menor que 16px.
+   Nos tamanhos de celular garantimos 16px em todos os controles de formulário. */
+@media (max-width: 767.98px) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+  select,
+  textarea,
+  .form-control,
+  .form-control-sm,
+  .form-select,
+  .form-select-sm,
+  .input-group > .form-control,
+  .input-group > .form-select {
+    font-size: 16px;
+  }
+}
+
 /* Button rows */
 .btn-icon {
   flex: 0 0 auto;

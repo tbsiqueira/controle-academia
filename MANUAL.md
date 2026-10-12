@@ -347,6 +347,7 @@ quem mantém o app — é uma evolução prevista.
 | **"Semana encerrada"** e as metas não avançam | Fim dos 7 dias | Toque em **Iniciar próxima semana** no aviso do Início |
 | Toquei em **Salvar** e não salvou | Nenhuma série/aquecimento/cardio preenchido | Preencha ao menos uma informação (o app avisa) |
 | Esqueci de registrar e quero lançar um treino de outro dia | — | Em **Treinar**, mude a **Data** |
+| A tela dá **zoom** ao tocar num campo de texto (iPhone) | Safari amplia quando o campo tem fonte menor que 16px | Corrigido nas versões novas; se ainda acontecer, use **Mais → Atualizar app** |
 | Importei o backup errado | — | **Mais → Dados → Desfazer** (logo após importar) |
 
 ---

@@ -117,6 +117,14 @@ if (Test-Path (Join-Path $root 'tests/core.test.js')) {
   Bad "tests/core.test.js nao encontrado"
 }
 
+# 9) campos de formulário com 16px no celular (evita o zoom automático do iOS)
+$css = Read-Text 'css/styles.css'
+if (($css -match 'font-size:\s*16px') -and ($css -match 'max-width:\s*767\.98px')) {
+  Ok "inputs com 16px no celular (sem zoom ao focar)"
+} else {
+  Bad "falta a regra de 16px nos inputs para celular (o iOS da zoom ao focar o campo)"
+}
+
 Write-Host ""
 if ($script:fail -eq 0) {
   Write-Host "Tudo certo." -ForegroundColor Green
