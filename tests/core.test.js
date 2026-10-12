@@ -234,6 +234,24 @@ test('workoutAsText omite cardio, observacoes e ficha quando vazios', () => {
   assert.ok(text.indexOf('1. X') !== -1);
 });
 
+/* ---------- backup ---------- */
+
+test('backupFileName inclui data e hora (diferencia backups do mesmo dia)', () => {
+  const manha = core.backupFileName(new Date(2026, 9, 12, 9, 5, 7));
+  const tarde = core.backupFileName(new Date(2026, 9, 12, 13, 35, 42));
+
+  assert.equal(manha, 'meu-treino-backup-2026-10-12_09-05-07.json');
+  assert.equal(tarde, 'meu-treino-backup-2026-10-12_13-35-42.json');
+  assert.notEqual(manha, tarde);
+  assert.ok(/^meu-treino-backup-\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}\.json$/.test(tarde), 'formato estavel');
+  assert.ok(!/[:\/\\]/.test(tarde), 'nome valido em qualquer sistema de arquivos');
+});
+
+test('backupFileName funciona sem argumento (agora)', () => {
+  const nome = core.backupFileName();
+  assert.ok(/^meu-treino-backup-\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}\.json$/.test(nome));
+});
+
 /* ---------- biblioteca do usuario ---------- */
 
 test('isUserExercise nao esconde exercicio criado pelo usuario', () => {

@@ -280,7 +280,7 @@ as observações e o cardio. Campos vazios são omitidos automaticamente.
 Tudo isso fica em **Mais → Dados**.
 
 ### Exportar (backup)
-Toque em **Exportar** → o app baixa um arquivo `meu-treino-backup-AAAA-MM-DD.json` com **todos** os seus dados.
+Toque em **Exportar** → o app baixa um arquivo como `meu-treino-backup-2026-10-12_13-35-42.json` (data **e hora** da geração, para não confundir backups do mesmo dia) com **todos** os seus dados.
 
 **Quando fazer:** antes de trocar de celular, limpar o navegador, ou de vez em quando por segurança.
 Guarde no Google Drive/OneDrive/e-mail — é um arquivo pequeno.

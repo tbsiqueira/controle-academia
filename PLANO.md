@@ -134,6 +134,7 @@ PLANO.md
 - **Revisão 19**: textos explicativos curtos na tela **Fichas** (o que é uma ficha, o que é a Biblioteca) e dica dentro do editor de ficha.
 - **Revisão 20**: a **Biblioteca** passa a listar apenas os exercícios **criados pelo usuário** (os do catálogo não são mais copiados para lá nem aparecem na lista).
 - **Revisão 21**: padronização das barras de botões (ações na **mesma linha**, botões de ícone com largura fixa `.btn-icon`) em todas as telas.
+- **Revisão 30**: backup com **data e hora** no nome do arquivo (`meu-treino-backup-AAAA-MM-DD_HH-mm-ss.json`) e registro da **versão do app** dentro do arquivo.
 - **Revisão 29**: lista de fichas redesenhada — cada ficha mostra os exercícios em uma **lista** (`<ul>`) numerada, com séries×reps em destaque e a observação ao lado, em vez da linha compacta.
 - **Revisão 28**: correção da Biblioteca — o app não "adivinha" mais a origem pelo nome (`isUserExercise`): exercícios criados pelo usuário voltam a aparecer, e as marcações antigas sem `catalogId` são reparadas na inicialização.
 - **Revisão 27**: correção do zoom automático do iOS ao focar campos de texto (controles de formulário com 16px em telas de celular).

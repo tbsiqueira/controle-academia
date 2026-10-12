@@ -1498,10 +1498,16 @@ async function shareExportText() {
   copyExportText();
 }
 
+function appVersionLabel() {
+  const el = document.getElementById('appVersion');
+  return el ? el.textContent.trim() : '';
+}
+
 async function exportData() {
   const payload = {
     app: 'meu-treino',
-    version: 1,
+    version: 2,
+    appVersion: appVersionLabel(),
     exportedAt: new Date().toISOString(),
     data: {
       workouts: state.workouts,
@@ -1516,7 +1522,7 @@ async function exportData() {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = 'meu-treino-backup-' + todayISO() + '.json';
+  a.download = backupFileName();
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);

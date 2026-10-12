@@ -291,6 +291,17 @@
     return lines.join('\n').trim();
   }
 
+  /* ---------- backup ---------- */
+
+  // Nome do arquivo com data e hora, para diferenciar backups do mesmo dia.
+  // Ex.: meu-treino-backup-2026-10-12_13-35-42.json
+  function backupFileName(date) {
+    const d = date || new Date();
+    return 'meu-treino-backup-' + fmtDate(d) +
+      '_' + pad2(d.getHours()) + '-' + pad2(d.getMinutes()) + '-' + pad2(d.getSeconds()) +
+      '.json';
+  }
+
   /* ---------- biblioteca do usuário ---------- */
 
   // Um exercício aparece na Biblioteca a menos que seja comprovadamente do catálogo
@@ -455,6 +466,8 @@
     defaultSettings: defaultSettings,
     weekWindow: weekWindow,
     isValidWorkout: isValidWorkout,
+    // backup
+    backupFileName: backupFileName,
     // biblioteca
     isUserExercise: isUserExercise,
     libraryExercises: libraryExercises,
