@@ -9,3 +9,6 @@ $RECYCLE.BIN/
 # Arquivos temporários
 *.tmp
 *.log
+
+# Ferramentas do agente
+.reasonix/
