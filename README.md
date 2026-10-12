@@ -88,7 +88,7 @@ o Pages volta a publicar aquele conteúdo. (Ou envie uma tag nova a partir do co
 
 | Erro mostrado no Actions | Causa | Solução |
 |---|---|---|
-| `Tag "v1" is not allowed to deploy to github-pages due to environment protection rules` | O ambiente `github-pages` só aceita deploy da branch padrão; **tags ficam de fora** | **Settings → Environments → `github-pages` → Deployment branches and tags → Edit** → escolha **Selected branches and tags** e adicione uma regra do tipo **Tag** com o padrão `v*` (ou simplesmente **All branches and tags**) → **Save** → re-execute o workflow |
+| `Tag "v1" is not allowed to deploy to github-pages due to environment protection rules` | O ambiente `github-pages` tem regras de deploy que **não incluem tags** (ex.: só existe a regra `main`, tipo *branch*) | **Settings → Environments → `github-pages` → Deployment branches and tags** → **Add deployment branch or tag rule** → **Ref type: `Tag`** + **Name pattern: `v*`** → *Add rule* (ou troque a política para **All branches and tags**). Depois **Actions → Publicar no GitHub Pages → Re-run all jobs** |
 | `Get Pages site failed` / `Pages site not found` | Pages não está com a fonte **GitHub Actions** | **Settings → Pages → Source: GitHub Actions** |
 | Falhou em "Rodar check.ps1" | versão inconsistente ou arquivo/id faltando | rode localmente `powershell -ExecutionPolicy Bypass -File .\check.ps1` e corrija antes de taguear |
 | Deploy "verde" mas o site não atualizou | cache do navegador/service worker | no aparelho: **Mais → Atualizar app**; no PC: Ctrl+F5 ou `/reset.html` |
