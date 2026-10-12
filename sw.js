@@ -1,22 +1,21 @@
 'use strict';
 
-/* Service worker: offline shell for Meu Treino.
-   - Navigations (HTML): network-first, so new versions roll out when online.
-   - Hashed/versioned assets (?v=): exact match, so a version bump fetches fresh files.
-   - Fonts (requested with ?hash): matched by path only.
+/* Service worker: network-first with offline fallback.
+   Online = always the freshest files; offline = last cached version.
    No user data ever leaves the device. */
 
-const CACHE_NAME = 'meu-treino-v5';
+const CACHE_NAME = 'meu-treino-v6';
 
 const ASSETS = [
   './',
   './index.html',
-  './css/styles.css?v=5',
-  './vendor/bootstrap/bootstrap.min.css?v=5',
-  './vendor/bootstrap/bootstrap.bundle.min.js?v=5',
-  './vendor/bootstrap-icons/bootstrap-icons.min.css?v=5',
-  './js/db.js?v=5',
-  './js/app.js?v=5',
+  './reset.html',
+  './css/styles.css?v=6',
+  './vendor/bootstrap/bootstrap.min.css?v=6',
+  './vendor/bootstrap/bootstrap.bundle.min.js?v=6',
+  './vendor/bootstrap-icons/bootstrap-icons.min.css?v=6',
+  './js/db.js?v=6',
+  './js/app.js?v=6',
   './manifest.webmanifest',
   './data/exercises.json',
   './icons/icon-192.png',
@@ -42,10 +41,21 @@ self.addEventListener('activate', (event) => {
 });
 
 function putInCache(key, response) {
-  if (!response || response.status !== 200) return response;
-  const clone = response.clone();
-  caches.open(CACHE_NAME).then((cache) => cache.put(key, clone));
+  if (response && response.status === 200) {
+    const clone = response.clone();
+    caches.open(CACHE_NAME).then((cache) => cache.put(key, clone));
+  }
   return response;
+}
+
+async function fromCache(key, request) {
+  const direct = await caches.match(key);
+  if (direct) return direct;
+  if (request.mode === 'navigate') {
+    const index = await caches.match('./index.html');
+    if (index) return index;
+  }
+  return Response.error();
 }
 
 self.addEventListener('fetch', (event) => {
@@ -58,24 +68,13 @@ self.addEventListener('fetch', (event) => {
   // Never intercept the service worker script itself.
   if (url.pathname.slice(-6) === '/sw.js') return;
 
-  // HTML navigations: network-first, cache as fallback.
-  if (request.mode === 'navigate') {
-    event.respondWith(
-      fetch(request)
-        .then((response) => putInCache(request, response))
-        .catch(() => caches.match(request).then((cached) => cached || caches.match('./index.html')))
-    );
-    return;
-  }
-
-  // Versioned assets (?v=): exact URL match, so a new version is fetched fresh.
-  // Everything else (fonts with ?hash): match by path, ignoring the query string.
+  // Versioned assets (?v=) are cached under their exact URL;
+  // everything else (fonts with ?hash) is cached by path only.
   const key = url.searchParams.has('v') ? request.url : (url.origin + url.pathname);
 
   event.respondWith(
-    caches.match(key).then((cached) => {
-      if (cached) return cached;
-      return fetch(request).then((response) => putInCache(key, response));
-    })
+    fetch(request)
+      .then((response) => putInCache(key, response))
+      .catch(() => fromCache(key, request))
   );
 });
