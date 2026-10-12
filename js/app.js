@@ -8,14 +8,17 @@ const GROUPS = ['Peito', 'Costas', 'Ombros', 'Bíceps', 'Tríceps', 'Antebraços
 const state = {
   workouts: [],
   exercises: [],
-  workoutTypes: [],
+  sheets: [],
   settings: null,
   colinha: [],
   catalog: null,
   editingWorkoutId: null,
+  editingSheetId: null,
   formSets: [],
+  sheetExercises: [],
   pickerQuery: '',
   fichaQuery: '',
+  pickerTarget: 'workout', // 'workout' | 'sheet'
   calendarCursor: null
 };
 
@@ -88,7 +91,7 @@ function defaultSettings() {
 async function loadState() {
   state.workouts = await dbAll('workouts');
   state.exercises = await dbAll('exercises');
-  state.workoutTypes = await dbAll('workoutTypes');
+  state.sheets = await dbAll('sheets');
   state.colinha = await dbAll('colinha');
 
   let settings = await dbGet('settings', APP_SETTINGS_ID);
@@ -128,7 +131,7 @@ function navigate() {
 
   if (viewName === 'dashboard') renderDashboard();
   if (viewName === 'workout') renderWorkoutForm();
-  if (viewName === 'exercises') renderExercises();
+  if (viewName === 'exercises') renderSheetsAndExercises();
   if (viewName === 'calendar') renderCalendar();
   if (viewName === 'more') renderMore();
 }
@@ -217,8 +220,9 @@ function renderRecent() {
 
   el.innerHTML = '<h6 class="mt-2">Últimos treinos</h6>' + recent.map(function (w) {
     const setCount = (w.sets || []).length;
+    const name = w.sheetName || w.typeName || 'Treino';
     return '<div class="card mb-2"><div class="card-body py-2 d-flex justify-content-between align-items-center">' +
-      '<div><strong>' + esc(w.typeName || 'Treino') + '</strong><br>' +
+      '<div><strong>' + esc(name) + '</strong><br>' +
       '<small class="text-muted">' + fmtBR(w.date) + ' · ' + setCount + ' exerc.</small></div>' +
       '<a href="#/workout" data-edit-workout="' + esc(w.id) + '" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>' +
       '</div></div>';
@@ -295,14 +299,63 @@ function renderPerformance() {
 
 /* ---------- workout form ---------- */
 
-function renderTypeOptions(selectedId) {
-  const sel = document.getElementById('workoutType');
-  let html = '<option value="">— Selecione —</option>';
-  state.workoutTypes.forEach(function (t) {
-    if (t.active === false) return;
-    html += '<option value="' + esc(t.id) + '"' + (selectedId === t.id ? ' selected' : '') + '>' + esc(t.name) + '</option>';
+function activeSheets() {
+  return state.sheets.filter(function (s) { return s.active !== false; });
+}
+
+function findSheet(id) {
+  return state.sheets.find(function (s) { return s.id === id; }) || null;
+}
+
+function renderSheetOptions(selectedId) {
+  const sel = document.getElementById('workoutSheet');
+  let html = '<option value="">— Selecione a ficha —</option>';
+  activeSheets().forEach(function (s) {
+    html += '<option value="' + esc(s.id) + '"' + (selectedId === s.id ? ' selected' : '') + '>' + esc(s.name) + '</option>';
   });
   sel.innerHTML = html;
+  renderSheetHint(selectedId);
+}
+
+function renderSheetHint(sheetId) {
+  const hint = document.getElementById('sheetHint');
+  const sheet = sheetId ? findSheet(sheetId) : null;
+  if (!sheet) {
+    hint.textContent = '';
+    return;
+  }
+  const count = (sheet.exercises || []).length;
+  hint.textContent = count
+    ? (count === 1 ? '1 exercício na ficha — carregado no treino.' : count + ' exercícios na ficha — carregados no treino.')
+    : 'Esta ficha ainda não tem exercícios. Adicione em "Fichas e exercícios".';
+}
+
+function loadSheetIntoForm(sheet) {
+  state.formSets = [];
+  (sheet.exercises || []).forEach(function (item) {
+    addExerciseToForm({
+      exerciseId: item.exerciseId || null,
+      exerciseName: item.name,
+      defaultSets: item.sets,
+      defaultReps: item.reps,
+      defaultLoad: item.load,
+      defaultRir: item.rir
+    });
+  });
+}
+
+function onSheetChange() {
+  const sheetId = document.getElementById('workoutSheet').value;
+  renderSheetHint(sheetId);
+
+  const sheet = sheetId ? findSheet(sheetId) : null;
+  if (!sheet) return;
+  if (!(sheet.exercises || []).length) return;
+
+  if (state.formSets.length && !confirm('Substituir os exercícios já no formulário pelos da ficha "' + sheet.name + '"?')) {
+    return;
+  }
+  loadSheetIntoForm(sheet);
 }
 
 function groupSets(flatSets) {
@@ -326,7 +379,7 @@ function renderWorkoutForm() {
 
   document.getElementById('workoutTitle').textContent = editing ? 'Editar treino' : 'Registrar treino';
   document.getElementById('workoutDate').value = editing ? editing.date : todayISO();
-  renderTypeOptions(editing ? editing.typeId : null);
+  renderSheetOptions(editing ? (editing.sheetId || editing.typeId) : null);
   document.getElementById('workoutCardio').value = editing ? (editing.cardioMinutes || '') : '';
   document.getElementById('workoutNotes').value = editing ? (editing.notes || '') : '';
   state.formSets = editing ? groupSets(editing.sets) : [];
@@ -423,8 +476,8 @@ function addExerciseToForm(opts) {
 
 async function saveWorkout() {
   const date = document.getElementById('workoutDate').value || todayISO();
-  const typeId = document.getElementById('workoutType').value;
-  const type = state.workoutTypes.find(function (t) { return t.id === typeId; });
+  const sheetId = document.getElementById('workoutSheet').value;
+  const sheet = sheetId ? findSheet(sheetId) : null;
   const cardioMinutes = toNum(document.getElementById('workoutCardio').value);
   const notes = document.getElementById('workoutNotes').value.trim();
 
@@ -455,8 +508,8 @@ async function saveWorkout() {
   const workout = {
     id: editing ? editing.id : uid(),
     date: date,
-    typeId: typeId || null,
-    typeName: type ? type.name : '',
+    sheetId: sheetId || null,
+    sheetName: sheet ? sheet.name : '',
     cardioMinutes: cardioMinutes,
     notes: notes,
     sets: sets,
@@ -481,17 +534,23 @@ async function deleteWorkout() {
 
 /* ---------- exercise picker ---------- */
 
-async function openExercisePicker() {
+async function openExercisePicker(target) {
+  state.pickerTarget = target === 'sheet' ? 'sheet' : 'workout';
   await openExercisePickerModal();
 }
 
 async function openExercisePickerModal() {
   await loadCatalog().catch(function () {});
-  document.getElementById('pickerTitle').textContent = 'Escolher exercício';
+  document.getElementById('pickerTitle').textContent = state.pickerTarget === 'sheet' ? 'Adicionar à ficha' : 'Escolher exercício';
   document.getElementById('pickerSearch').value = '';
   state.pickerQuery = '';
   renderPickerResults('');
   bootstrap.Modal.getOrCreateInstance(document.getElementById('exercisePickerModal')).show();
+}
+
+function hideExercisePicker() {
+  const modal = bootstrap.Modal.getInstance(document.getElementById('exercisePickerModal'));
+  if (modal) modal.hide();
 }
 
 function renderPickerResults(query) {
@@ -515,42 +574,61 @@ function renderPickerResults(query) {
       '<i class="bi bi-plus-circle"></i> Criar "' + esc(q) + '"</button>';
   }
 
-  html += '<div class="px-2 py-1 small text-muted fw-semibold">Minhas fichas</div>';
-  if (!fichas.length) html += '<div class="list-group-item small text-muted">Nenhuma ficha encontrada.</div>';
+  html += '<div class="px-2 py-1 small text-muted fw-semibold">Meus exercícios</div>';
+  if (!fichas.length) html += '<div class="list-group-item small text-muted">Nenhum exercício cadastrado.</div>';
   html += fichas.map(function (e) {
-    return '<button type="button" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" onclick="pickFicha(\'' + e.id + '\')">' +
+    return '<button type="button" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" onclick="pickLibraryExercise(\'' + e.id + '\')">' +
       '<span>' + esc(e.name) + '</span><span class="badge text-bg-light">' + esc(e.group || '') + '</span></button>';
   }).join('');
 
   html += '<div class="px-2 py-1 small text-muted fw-semibold mt-2">Catálogo (pt-BR)</div>';
   if (!catalog.length) html += '<div class="list-group-item small text-muted">Nada encontrado.</div>';
   html += catalog.map(function (e) {
-    return '<button type="button" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" onclick="pickCatalogItem(' + e.id + ')">' +
+    return '<button type="button" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" onclick="pickCatalogExercise(' + e.id + ')">' +
       '<span>' + esc(e.name) + '</span><span class="badge text-bg-light">' + esc(e.group || '') + '</span></button>';
   }).join('');
 
   el.innerHTML = html;
 }
 
-function pickFicha(id) {
+function pickLibraryExercise(id) {
   const e = state.exercises.find(function (x) { return x.id === id; });
   if (!e) return;
-  addExerciseToForm({
-    exerciseId: e.id,
-    exerciseName: e.name,
-    defaultSets: e.defaultSets,
-    defaultReps: e.defaultReps,
-    defaultLoad: e.defaultLoad,
-    defaultRir: e.defaultRir
-  });
-  bootstrap.Modal.getInstance(document.getElementById('exercisePickerModal')).hide();
+
+  if (state.pickerTarget === 'sheet') {
+    addSheetExercise({
+      exerciseId: e.id,
+      name: e.name,
+      sets: e.defaultSets || 3,
+      reps: e.defaultReps,
+      load: e.defaultLoad,
+      rir: e.defaultRir
+    });
+  } else {
+    addExerciseToForm({
+      exerciseId: e.id,
+      exerciseName: e.name,
+      defaultSets: e.defaultSets,
+      defaultReps: e.defaultReps,
+      defaultLoad: e.defaultLoad,
+      defaultRir: e.defaultRir
+    });
+  }
+
+  hideExercisePicker();
 }
 
-function pickCatalogItem(id) {
+function pickCatalogExercise(id) {
   const e = (state.catalog || []).find(function (x) { return String(x.id) === String(id); });
   if (!e) return;
-  addExerciseToForm({ exerciseId: null, exerciseName: e.name, defaultSets: 1, defaultReps: '', defaultLoad: '', defaultRir: '' });
-  bootstrap.Modal.getInstance(document.getElementById('exercisePickerModal')).hide();
+
+  if (state.pickerTarget === 'sheet') {
+    addSheetExercise({ exerciseId: null, name: e.name, sets: 3, reps: '', load: '', rir: '' });
+  } else {
+    addExerciseToForm({ exerciseId: null, exerciseName: e.name, defaultSets: 1, defaultReps: '', defaultLoad: '', defaultRir: '' });
+  }
+
+  hideExercisePicker();
 }
 
 function pickCatalogForFicha(id) {
@@ -634,16 +712,28 @@ async function createExerciseFromPicker() {
   const name = state.pickerQuery;
   if (!name) return;
   const exercise = await findOrCreateExercise(name);
-  addExerciseToForm({
-    exerciseId: exercise.id,
-    exerciseName: exercise.name,
-    defaultSets: exercise.defaultSets,
-    defaultReps: exercise.defaultReps,
-    defaultLoad: exercise.defaultLoad,
-    defaultRir: exercise.defaultRir
-  });
-  const modal = bootstrap.Modal.getInstance(document.getElementById('exercisePickerModal'));
-  if (modal) modal.hide();
+
+  if (state.pickerTarget === 'sheet') {
+    addSheetExercise({
+      exerciseId: exercise.id,
+      name: exercise.name,
+      sets: exercise.defaultSets || 3,
+      reps: exercise.defaultReps,
+      load: exercise.defaultLoad,
+      rir: exercise.defaultRir
+    });
+  } else {
+    addExerciseToForm({
+      exerciseId: exercise.id,
+      exerciseName: exercise.name,
+      defaultSets: exercise.defaultSets,
+      defaultReps: exercise.defaultReps,
+      defaultLoad: exercise.defaultLoad,
+      defaultRir: exercise.defaultRir
+    });
+  }
+
+  hideExercisePicker();
 }
 
 async function createExerciseFromFichaSearch() {
@@ -700,7 +790,7 @@ function openExerciseForm(id) {
   document.getElementById('fichaCorrection').value = e ? (e.correction || '') : '';
   document.getElementById('fichaCatalogSearch').value = '';
   document.getElementById('fichaCatalogBox').classList.add('d-none');
-  document.getElementById('exerciseFormTitle').textContent = e ? 'Editar ficha' : 'Nova ficha';
+  document.getElementById('exerciseFormTitle').textContent = e ? 'Editar exercício' : 'Novo exercício';
 
   bootstrap.Modal.getOrCreateInstance(document.getElementById('exerciseFormModal')).show();
 }
@@ -736,63 +826,199 @@ async function saveExerciseForm() {
 }
 
 async function deleteExercise(id) {
-  if (!confirm('Excluir esta ficha?')) return;
+  if (!confirm('Excluir este exercício?')) return;
   await dbDelete('exercises', id);
   state.exercises = await dbAll('exercises');
   renderExercises();
 }
 
-/* ---------- workout types ---------- */
+/* ---------- workout sheets (fichas) ---------- */
 
-function openTypeModal() {
-  document.getElementById('newTypeName').value = '';
-  bootstrap.Modal.getOrCreateInstance(document.getElementById('workoutTypeModal')).show();
+function renderSheetsAndExercises() {
+  renderSheets();
+  renderExercises();
 }
 
-function typeNameExists(name) {
-  return state.workoutTypes.some(function (t) {
-    return t.active !== false && t.name.toLowerCase() === name.toLowerCase();
+function renderSheets() {
+  const el = document.getElementById('sheetsList');
+  const list = activeSheets();
+
+  if (!list.length) {
+    el.innerHTML = '<p class="text-muted">Nenhuma ficha cadastrada. Crie uma ficha (ex.: TREINO A - inferiores) e adicione os exercícios dela.</p>';
+    return;
+  }
+
+  el.innerHTML = list.map(function (s) {
+    const items = s.exercises || [];
+    const preview = items.slice(0, 4).map(function (e) { return esc(e.name); }).join(', ') + (items.length > 4 ? '…' : '');
+    return '<div class="card mb-2"><div class="card-body py-2 d-flex justify-content-between align-items-center">' +
+      '<div class="me-2"><strong>' + esc(s.name) + '</strong><br>' +
+      '<small class="text-muted">' + items.length + (items.length === 1 ? ' exercício' : ' exercícios') + (preview ? ': ' + preview : '') + '</small></div>' +
+      '<div class="d-flex gap-1">' +
+      '<button type="button" class="btn btn-sm btn-outline-primary" onclick="openSheetEditor(\'' + s.id + '\')"><i class="bi bi-pencil"></i></button>' +
+      '<button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteSheet(\'' + s.id + '\')"><i class="bi bi-trash"></i></button>' +
+      '</div></div></div>';
+  }).join('');
+}
+
+function sheetNameExists(name, ignoreId) {
+  return state.sheets.some(function (s) {
+    return s.active !== false && s.id !== ignoreId && s.name.toLowerCase() === name.toLowerCase();
   });
 }
 
-async function saveType() {
-  const name = document.getElementById('newTypeName').value.trim();
+function openSheetModal() {
+  document.getElementById('newSheetName').value = '';
+  bootstrap.Modal.getOrCreateInstance(document.getElementById('sheetModal')).show();
+}
+
+async function saveNewSheet() {
+  const name = document.getElementById('newSheetName').value.trim();
   if (!name) {
-    alert('Informe o nome do tipo.');
+    alert('Informe o nome da ficha.');
     return;
   }
-  if (typeNameExists(name)) {
-    alert('Esse tipo já existe.');
+  if (sheetNameExists(name)) {
+    alert('Já existe uma ficha com esse nome.');
     return;
   }
 
-  await dbPut('workoutTypes', { id: uid(), name: name, active: true });
-  state.workoutTypes = await dbAll('workoutTypes');
-  bootstrap.Modal.getInstance(document.getElementById('workoutTypeModal')).hide();
-  renderTypeOptions(document.getElementById('workoutType').value || null);
-  renderTypesList();
+  const sheet = {
+    id: uid(),
+    name: name,
+    active: true,
+    exercises: [],
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
+
+  await dbPut('sheets', sheet);
+  state.sheets = await dbAll('sheets');
+  bootstrap.Modal.getInstance(document.getElementById('sheetModal')).hide();
+  renderSheets();
+  renderSheetOptions(document.getElementById('workoutSheet').value || null);
+  openSheetEditor(sheet.id);
 }
 
-async function addWorkoutTypeFromInput() {
-  const input = document.getElementById('newTypeInput');
-  const name = input.value.trim();
-  if (!name) return;
-  if (typeNameExists(name)) {
-    alert('Esse tipo já existe.');
+function openSheetEditor(id) {
+  const sheet = id ? findSheet(id) : null;
+  state.editingSheetId = sheet ? sheet.id : null;
+  state.sheetExercises = sheet
+    ? (sheet.exercises || []).map(function (item) { return Object.assign({}, item); })
+    : [];
+
+  document.getElementById('sheetId').value = sheet ? sheet.id : '';
+  document.getElementById('sheetName').value = sheet ? sheet.name : '';
+  document.getElementById('sheetEditorTitle').textContent = sheet ? 'Editar ficha' : 'Nova ficha';
+  renderSheetExerciseList();
+  bootstrap.Modal.getOrCreateInstance(document.getElementById('sheetEditorModal')).show();
+}
+
+function sheetExerciseRow(item, idx) {
+  return '<div class="border rounded p-2 mb-2">' +
+    '<div class="d-flex justify-content-between align-items-center mb-1">' +
+    '<strong class="small">' + esc(item.name) + '</strong>' +
+    '<div class="d-flex gap-1">' +
+    '<button type="button" class="btn btn-sm btn-outline-secondary" onclick="moveSheetExercise(' + idx + ',-1)" title="Subir"><i class="bi bi-arrow-up"></i></button>' +
+    '<button type="button" class="btn btn-sm btn-outline-secondary" onclick="moveSheetExercise(' + idx + ',1)" title="Descer"><i class="bi bi-arrow-down"></i></button>' +
+    '<button type="button" class="btn btn-sm btn-outline-danger" onclick="removeSheetExercise(' + idx + ')" title="Remover"><i class="bi bi-trash"></i></button>' +
+    '</div></div>' +
+    '<div class="row g-1">' +
+    '<div class="col-3"><input type="number" min="1" class="form-control form-control-sm" value="' + esc(item.sets) + '" placeholder="séries" oninput="setSheetField(' + idx + ",'sets',this.value)\"></div>" +
+    '<div class="col-3"><input type="number" min="1" class="form-control form-control-sm" value="' + esc(item.reps) + '" placeholder="reps" oninput="setSheetField(' + idx + ",'reps',this.value)\"></div>" +
+    '<div class="col-3"><input type="number" min="0" step="0.5" class="form-control form-control-sm" value="' + esc(item.load) + '" placeholder="kg" oninput="setSheetField(' + idx + ",'load',this.value)\"></div>" +
+    '<div class="col-3"><input type="number" min="0" class="form-control form-control-sm" value="' + esc(item.rir) + '" placeholder="RIR" oninput="setSheetField(' + idx + ",'rir',this.value)\"></div>" +
+    '</div></div>';
+}
+
+function renderSheetExerciseList() {
+  const el = document.getElementById('sheetExerciseList');
+  if (!state.sheetExercises.length) {
+    el.innerHTML = '<p class="text-muted small">Nenhum exercício na ficha ainda. Use "Adicionar exercício".</p>';
+    return;
+  }
+  el.innerHTML = state.sheetExercises.map(function (item, idx) {
+    return sheetExerciseRow(item, idx);
+  }).join('');
+}
+
+function setSheetField(idx, field, value) {
+  if (!state.sheetExercises[idx]) return;
+  state.sheetExercises[idx][field] = value;
+}
+
+function moveSheetExercise(idx, delta) {
+  const target = idx + delta;
+  if (target < 0 || target >= state.sheetExercises.length) return;
+  const tmp = state.sheetExercises[idx];
+  state.sheetExercises[idx] = state.sheetExercises[target];
+  state.sheetExercises[target] = tmp;
+  renderSheetExerciseList();
+}
+
+function removeSheetExercise(idx) {
+  state.sheetExercises.splice(idx, 1);
+  renderSheetExerciseList();
+}
+
+function addSheetExercise(opts) {
+  state.sheetExercises.push({
+    exerciseId: opts.exerciseId || null,
+    name: opts.name,
+    sets: (opts.sets === undefined || opts.sets === null || opts.sets === '') ? 3 : opts.sets,
+    reps: (opts.reps === undefined || opts.reps === null) ? '' : opts.reps,
+    load: (opts.load === undefined || opts.load === null) ? '' : opts.load,
+    rir: (opts.rir === undefined || opts.rir === null) ? '' : opts.rir
+  });
+  renderSheetExerciseList();
+}
+
+async function saveSheetEditor() {
+  const name = document.getElementById('sheetName').value.trim();
+  if (!name) {
+    alert('Informe o nome da ficha.');
     return;
   }
 
-  await dbPut('workoutTypes', { id: uid(), name: name, active: true });
-  state.workoutTypes = await dbAll('workoutTypes');
-  input.value = '';
-  renderTypesList();
+  const id = document.getElementById('sheetId').value;
+  if (sheetNameExists(name, id)) {
+    alert('Já existe uma ficha com esse nome.');
+    return;
+  }
+
+  const existing = id ? findSheet(id) : null;
+
+  const sheet = {
+    id: id || uid(),
+    name: name,
+    active: true,
+    exercises: state.sheetExercises.map(function (item) {
+      return {
+        exerciseId: item.exerciseId || null,
+        name: item.name,
+        sets: toNumOrNull(item.sets),
+        reps: toNumOrNull(item.reps),
+        load: toNumOrNull(item.load),
+        rir: toNumOrNull(item.rir)
+      };
+    }),
+    createdAt: existing ? existing.createdAt : new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
+
+  await dbPut('sheets', sheet);
+  state.sheets = await dbAll('sheets');
+  bootstrap.Modal.getInstance(document.getElementById('sheetEditorModal')).hide();
+  renderSheets();
+  renderSheetOptions(document.getElementById('workoutSheet').value || null);
 }
 
-async function deleteWorkoutType(id) {
-  if (!confirm('Excluir este tipo?')) return;
-  await dbDelete('workoutTypes', id);
-  state.workoutTypes = await dbAll('workoutTypes');
-  renderTypesList();
+async function deleteSheet(id) {
+  if (!confirm('Excluir esta ficha? Os treinos já registrados não são afetados.')) return;
+  await dbDelete('sheets', id);
+  state.sheets = await dbAll('sheets');
+  renderSheets();
+  renderSheetOptions(document.getElementById('workoutSheet').value || null);
 }
 
 /* ---------- calendar ---------- */
@@ -900,25 +1126,7 @@ function renderMore() {
   document.getElementById('setWorkoutTarget').value = state.settings.weeklyWorkoutTarget;
   document.getElementById('setCardioTarget').value = state.settings.weeklyCardioTarget;
   document.getElementById('setWeekAnchor').value = state.settings.weekAnchor || todayISO();
-  renderTypesList();
   renderColinhaList();
-}
-
-function renderTypesList() {
-  const el = document.getElementById('typesList');
-  const list = state.workoutTypes.filter(function (t) { return t.active !== false; });
-
-  if (!list.length) {
-    el.innerHTML = '<p class="text-muted small">Nenhum tipo cadastrado.</p>';
-    return;
-  }
-
-  el.innerHTML = list.map(function (t) {
-    return '<div class="d-flex justify-content-between align-items-center py-1 border-bottom">' +
-      '<span>' + esc(t.name) + '</span>' +
-      '<button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteWorkoutType(\'' + t.id + '\')"><i class="bi bi-trash"></i></button>' +
-      '</div>';
-  }).join('');
 }
 
 async function saveSettingsForm() {
@@ -946,7 +1154,7 @@ async function exportData() {
     data: {
       workouts: state.workouts,
       exercises: state.exercises,
-      workoutTypes: state.workoutTypes,
+      sheets: state.sheets,
       settings: state.settings,
       colinha: state.colinha
     }
@@ -1005,7 +1213,7 @@ async function importData(file) {
 
   await dbClear('workouts');
   await dbClear('exercises');
-  await dbClear('workoutTypes');
+  await dbClear('sheets');
   await dbClear('settings');
   await dbClear('colinha');
 
@@ -1016,7 +1224,18 @@ async function importData(file) {
 
   (data.workouts || []).forEach(function (v) { if (v && v.id) stores.workouts.put(v); });
   (data.exercises || []).forEach(function (v) { if (v && v.id) stores.exercises.put(v); });
-  (data.workoutTypes || []).forEach(function (v) { if (v && v.id) stores.workoutTypes.put(v); });
+
+  const importedSheets = data.sheets || (data.workoutTypes || []).map(function (t) {
+    return {
+      id: t.id,
+      name: t.name,
+      active: t.active !== false,
+      exercises: [],
+      createdAt: t.createdAt || new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+  });
+  importedSheets.forEach(function (v) { if (v && v.id) stores.sheets.put(v); });
 
   const settings = data.settings || defaultSettings();
   settings.id = APP_SETTINGS_ID;
@@ -1041,11 +1260,15 @@ async function importData(file) {
 function bindEvents() {
   window.addEventListener('hashchange', navigate);
 
-  document.getElementById('btnAddExercise').addEventListener('click', openExercisePicker);
+  document.getElementById('btnAddExercise').addEventListener('click', function () { openExercisePicker('workout'); });
   document.getElementById('workoutSave').addEventListener('click', saveWorkout);
   document.getElementById('workoutDelete').addEventListener('click', deleteWorkout);
-  document.getElementById('btnAddType').addEventListener('click', openTypeModal);
-  document.getElementById('typeSave').addEventListener('click', saveType);
+  document.getElementById('workoutSheet').addEventListener('change', onSheetChange);
+  document.getElementById('btnAddSheet').addEventListener('click', openSheetModal);
+  document.getElementById('sheetSave').addEventListener('click', saveNewSheet);
+  document.getElementById('btnNewSheet').addEventListener('click', function () { openSheetEditor(null); });
+  document.getElementById('sheetEditorSave').addEventListener('click', saveSheetEditor);
+  document.getElementById('btnSheetAddExercise').addEventListener('click', function () { openExercisePicker('sheet'); });
 
   document.getElementById('btnNewExercise').addEventListener('click', function () { openExerciseForm(null); });
   document.getElementById('exerciseFormSave').addEventListener('click', saveExerciseForm);
@@ -1066,7 +1289,6 @@ function bindEvents() {
 
   document.getElementById('btnSaveSettings').addEventListener('click', saveSettingsForm);
   document.getElementById('btnWeekToday').addEventListener('click', startWeekToday);
-  document.getElementById('btnAddTypeSettings').addEventListener('click', addWorkoutTypeFromInput);
 
   document.getElementById('btnExport').addEventListener('click', exportData);
   document.getElementById('btnForceUpdate').addEventListener('click', forceUpdate);

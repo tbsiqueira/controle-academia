@@ -10,22 +10,22 @@ Aplicativo web instalável (PWA) para registrar treinos de academia, acompanhar 
 - **Stack**: HTML + CSS + JavaScript puro, sem build e sem dependências.
 - **Idioma da interface**: pt-BR.
 - **Idioma do código**: inglês (identificadores e comentários).
-- **Tipo de treino**: lista gerenciável (CRUD de tipos; seleção ao registrar).
-- **Pré-preenchimento**: ao adicionar um exercício da ficha, as séries são criadas com os padrões e a carga da última execução.
+- **Fichas**: uma ficha agrupa vários exercícios (ex.: "TREINO A - inferiores"); ao registrar o treino, a ficha selecionada carrega automaticamente os exercícios dela.
+- **Pré-preenchimento**: as séries vêm dos padrões salvos na ficha/exercício e da carga da última execução.
 - **Desempenho**: progressão básica por exercício já no MVP.
 - **UI framework**: Bootstrap 5 (arquivos locais em `vendor/`, sem CDN em runtime).
 
 ## 3. Requisitos funcionais
-- **FR-01 — Registrar treino**: data, tipo (selecionado da lista gerenciável), exercícios e cardio (minutos).
-- **FR-02 — Séries por exercício**: cada série guarda nº, reps feitas, carga (kg), RIR (repetição na reserva) e observação livre. As séries são **pré-preenchidas** a partir da ficha do exercício e editáveis.
+- **FR-01 — Registrar treino**: data, ficha (selecionada da lista; carrega os exercícios dela), cardio (minutos) e exercícios extras se quiser.
+- **FR-02 — Séries por exercício**: cada série guarda nº, reps feitas, carga (kg), RIR (repetição na reserva) e observação livre. As séries são **pré-preenchidas** pelos padrões da ficha e editáveis.
 - **FR-03 — Dashboard**: contador da semana (ex.: `1/3 treinos`, `30/120 min cardio`), últimos treinos e desempenho por exercício (última sessão vs anterior + PR).
 - **FR-04 — Semana flexível**: o usuário marca "semana iniciada"; o app conta 7 dias a partir dessa data, sem fixar dias da semana.
-- **FR-05 — Exercícios**: CRUD de fichas por exercício (nome, grupo muscular, séries/reps/carga padrão, lembrete de correção); ao criar, é possível selecionar de um **catálogo embutido** de exercícios em pt-BR.
+- **FR-05 — Exercícios (biblioteca)**: CRUD de exercícios (nome, grupo muscular, séries/reps/carga padrão, lembrete de correção); ao criar, é possível selecionar de um **catálogo embutido** de exercícios em pt-BR.
 - **FR-06 — Colinha**: seção de consulta rápida (RIR, tempo de descanso, lembretes) editável pelo usuário.
 - **FR-07 — Calendário de frequência**: visão mensal com os dias em que treinou e quantidade de treinos no mês.
 - **FR-08 — Backup**: exportar todos os dados em JSON (download); importar JSON restaurando os dados após confirmação, com **backup automático do estado atual antes de importar**.
 - **FR-09 — PWA**: instalável na tela inicial, funciona offline após a primeira carga.
-- **FR-10 — Tipos de treino**: CRUD da lista de tipos (ex.: "TREINO A - inferiores").
+- **FR-10 — Fichas de treino**: CRUD de fichas com lista **ordenada** de exercícios (cada um com séries/reps/carga/RIR padrão); é a ficha que você seleciona ao registrar o treino.
 - **FR-11 — Editar/excluir treino**: qualquer treino registrado pode ser aberto para edição ou exclusão.
 
 ## 4. Regras de negócio
@@ -33,10 +33,10 @@ Aplicativo web instalável (PWA) para registrar treinos de academia, acompanhar 
 - **Meta padrão**: 3 treinos/semana e 120 min de cardio/semana (editável em Ajustes).
 - **Treino válido**: conta para a meta se tiver pelo menos 1 série registrada ou cardio > 0.
 - **Cardio**: minutos registrados dentro do treino (um treino pode ser "só cardio").
-- **Tipos de treino**: ao registrar, seleciona um tipo da lista; é possível criar um novo tipo na hora. O nome do tipo é copiado para o treino (snapshot) para preservar o histórico.
-- **Catálogo embutido**: o app traz `data/exercises.json` (927 exercícios em pt-BR: fonte `gugeldev/exercicios-bd-ptbr`, licença CC0-1.0, + curadoria própria de exercícios comuns de academia). Cada item tem `id` inteiro sequencial **permanente** (nunca reatribuído ou reutilizado), `sourceId` original, `name` e `group`. Ao criar uma ficha, o usuário pode escolher um exercício do catálogo ou criar um próprio.
-- **Pré-preenchimento**: ao adicionar um exercício da ficha, o app cria as séries conforme `defaultSets` e `defaultReps`, usando a **carga da última execução** do exercício (se houver). RIR e observações começam vazios.
-- **Criação on-the-fly**: na busca de exercícios (no registro do treino ou na ficha), se o nome não existir, o app oferece "Criar \"...\"" e cadastra a ficha na hora.
+- **Fichas**: ao registrar, seleciona uma ficha; os exercícios dela entram no formulário na ordem cadastrada (com opção de substituir o que já estava). O nome da ficha é copiado para o treino (snapshot) para preservar o histórico.
+- **Catálogo embutido**: o app traz `data/exercises.json` (927 exercícios em pt-BR: fonte `gugeldev/exercicios-bd-ptbr`, licença CC0-1.0, + curadoria própria de exercícios comuns de academia). Cada item tem `id` inteiro sequencial **permanente** (nunca reatribuído ou reutilizado), `sourceId` original, `name` e `group`. Ao montar uma ficha (ou adicionar um exercício extra ao treino), dá para escolher do catálogo ou criar um próprio.
+- **Pré-preenchimento**: ao carregar a ficha (ou adicionar um exercício), o app cria as séries conforme os padrões da ficha e usa a **carga da última execução** do exercício (se houver). RIR e observações começam vazios.
+- **Criação on-the-fly**: na busca de exercícios (ao montar a ficha ou registrar o treino), se o nome não existir, o app oferece "Criar \"...\"" e cadastra o exercício na hora.
 - **Desempenho**: por exercício, mostra a última sessão (carga × reps) vs a sessão anterior e o **PR** (maior carga já registrada em uma série; em empate, a série com mais reps).
 - **Tonelagem** (opcional, Fase 2): `Σ(reps × carga)` por exercício e por treino, com exibição por toggle.
 - **Fotos** (opcional, Fase 2): 1 foto por exercício, armazenada no IndexedDB (Blob) e incluída no JSON de export como base64.
@@ -45,8 +45,9 @@ Aplicativo web instalável (PWA) para registrar treinos de academia, acompanhar 
 
 ## 5. Modelo de dados (IndexedDB)
 Stores:
-- `workoutTypes`: `{ id, name, active, createdAt, updatedAt }`
-- `workouts`: `{ id, date (YYYY-MM-DD), typeId, typeName (snapshot), cardioMinutes, notes, sets[], createdAt, updatedAt }`
+- `sheets` (fichas): `{ id, name, active, exercises[], createdAt, updatedAt }`
+  - `exercises[]`: `{ exerciseId, name, sets, reps, load, rir }` (na ordem da ficha)
+- `workouts`: `{ id, date (YYYY-MM-DD), sheetId, sheetName (snapshot), cardioMinutes, notes, sets[], createdAt, updatedAt }`
   - `sets[]`: `{ exerciseId, exerciseName (cópia do nome na época), number, reps, load, rir, note }`
 - `exercises`: `{ id, name, group, defaultSets, defaultReps, defaultLoad, defaultRir, correction, photo?, active, createdAt, updatedAt }`
 - `settings`: `{ id: 'app', weekAnchor (YYYY-MM-DD), weeklyWorkoutTarget, weeklyCardioTarget, tonnageVisible }`
@@ -56,11 +57,11 @@ Stores:
 | Tela | Função |
 |---|---|
 | Dashboard | Meta da semana, aviso de semana encerrada, últimos treinos (editar/excluir), desempenho por exercício |
-| Registrar treino | Data, tipo (selecionar/criar), exercícios + séries pré-preenchidas (reps/carga/RIR/obs), cardio |
-| Exercícios | CRUD das fichas + correção |
+| Registrar treino | Data, ficha (selecionar/criar; carrega os exercícios dela), séries (reps/carga/RIR/obs), cardio |
+| Fichas e exercícios | Abas: **fichas** (grupo ordenado de exercícios) e **biblioteca de exercícios** + correção |
 | Calendário | Frequência mensal |
 | Colinha | RIR, descanso, lembretes |
-| Ajustes | Meta semanal, início da semana, tipos de treino, exportar/importar JSON |
+| Ajustes | Meta semanal, início da semana, atalho para fichas, exportar/importar JSON |
 
 ## 7. Arquitetura / arquivos
 ```
@@ -87,7 +88,7 @@ PLANO.md
 4. Depois de instalado, o app abre pelo ícone e funciona offline.
 
 ## 9. Fases
-- **Fase 1 (MVP)**: registro completo de treino (séries pré-preenchidas, cardio), edição/exclusão de treinos, dashboard com metas e desempenho por exercício, semana com aviso + confirmação, CRUD de exercícios com catálogo embutido (correção em texto), tipos de treino, colinha, calendário, export/import JSON, PWA instalável.
+- **Fase 1 (MVP)**: fichas (grupo ordenado de exercícios) e biblioteca de exercícios com catálogo embutido, registro completo de treino (ficha carrega os exercícios, séries pré-preenchidas, cardio), edição/exclusão de treinos, dashboard com metas e desempenho por exercício, semana com aviso + confirmação, colinha, calendário, export/import JSON, PWA instalável.
 - **Fase 2 (extras)**: foto por exercício, tonelagem opcional, melhorias de UX.
 
 ## 10. Suposições a confirmar
@@ -104,3 +105,4 @@ PLANO.md
 - **Revisão 4**: IDs do catálogo convertidos para inteiros sequenciais permanentes (1..869), com `sourceId` original preservado e política de estabilidade em `meta.idPolicy`.
 - **Revisão 5** (`dec-a52daaa2e8f02e86`): UI framework Bootstrap 5, com arquivos vendados localmente (sem CDN em runtime).
 - **Revisão 6**: busca do catálogo inline no modal de ficha (corrige modais sobrepostos); criação on-the-fly de exercícios; catálogo ampliado com +58 exercícios comuns de academia (ids 870–927, total 927).
+- **Revisão 7**: "ficha" passa a ser o **treino completo** (agrupamento ordenado de exercícios) e "exercícios" viram a biblioteca; ao registrar, a ficha selecionada carrega os exercícios dela. Migração automática dos antigos "tipos de treino" para fichas (IndexedDB v2).
