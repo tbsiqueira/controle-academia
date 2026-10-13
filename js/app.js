@@ -32,6 +32,9 @@ const state = {
    As funções puras (datas, esc/toNum, semana, agrupamento, exportação) vivem em js/core.js,
    carregado antes deste arquivo. Aqui ficam só as que dependem do estado do app. */
 
+// Em pt-BR o separador decimal e a virgula: mostramos e aceitamos os dois.
+const commaDecimal = (navigator.language || '').toLowerCase().indexOf('pt') === 0;
+
 function uid() {
   if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
   return 'id-' + Date.now() + '-' + Math.random().toString(16).slice(2);
@@ -428,12 +431,13 @@ function renderWorkoutForm() {
 function setRow(exIdx, setIdx, s) {
   return '<div class="row g-1 mb-1 align-items-center">' +
     '<div class="col-2"><input type="text" inputmode="numeric" class="form-control form-control-sm text-center" value="' + esc(s.number) + '" readonly tabindex="-1"></div>' +
-    '<div class="col-2"><input type="number" inputmode="numeric" class="form-control form-control-sm" value="' + esc(s.reps) + '" oninput="setField(' + exIdx + ',' + setIdx + ",'reps',this.value)\"></div>" +
-    '<div class="col-2"><input type="number" step="0.5" inputmode="decimal" class="form-control form-control-sm" value="' + esc(s.load) + '" oninput="setField(' + exIdx + ',' + setIdx + ",'load',this.value)\"></div>" +
-    '<div class="col-2"><input type="number" inputmode="numeric" class="form-control form-control-sm" value="' + esc(s.rir) + '" oninput="setField(' + exIdx + ',' + setIdx + ",'rir',this.value)\"></div>" +
-    '<div class="col-4"><input type="text" class="form-control form-control-sm" value="' + esc(s.note) + '" oninput="setField(' + exIdx + ',' + setIdx + ",'note',this.value)\"></div>" +
+    '<div class="col-2"><input type="number" inputmode="numeric" class="form-control form-control-sm" value="' + esc(s.reps) + '" aria-label="Reps da série ' + esc(s.number) + '" oninput="setField(' + exIdx + ',' + setIdx + ",'reps',this.value)\"></div>" +
+    '<div class="col-2"><input type="text" inputmode="decimal" autocomplete="off" class="form-control form-control-sm" value="' + esc(formatDecimal(s.load, commaDecimal)) + '" aria-label="Carga da série ' + esc(s.number) + '" oninput="setField(' + exIdx + ',' + setIdx + ",'load',this.value)\"></div>" +
+    '<div class="col-2"><input type="number" inputmode="numeric" class="form-control form-control-sm" value="' + esc(s.rir) + '" aria-label="RIR da série ' + esc(s.number) + '" oninput="setField(' + exIdx + ',' + setIdx + ",'rir',this.value)\"></div>" +
+    '<div class="col-4"><input type="text" class="form-control form-control-sm" value="' + esc(s.note) + '" aria-label="Observação da série ' + esc(s.number) + '" oninput="setField(' + exIdx + ',' + setIdx + ",'note',this.value)\"></div>" +
     '</div>';
 }
+
 
 function renderFormSets() {
   const el = document.getElementById('workoutExercises');
@@ -457,7 +461,7 @@ function renderFormSets() {
       '<div class="small text-muted mb-1"><i class="bi bi-fire"></i> Aquecimento</div>' +
       '<div class="row g-1">' +
       '<div class="col-4"><input type="number" min="0" inputmode="numeric" class="form-control form-control-sm" value="' + esc(warm.reps) + '" placeholder="reps" oninput="setWarmupField(' + exIdx + ",'reps',this.value)\"></div>" +
-      '<div class="col-4"><input type="number" min="0" step="0.5" inputmode="decimal" class="form-control form-control-sm" value="' + esc(warm.load) + '" placeholder="peso" oninput="setWarmupField(' + exIdx + ",'load',this.value)\"></div>" +
+      '<div class="col-4"><input type="text" inputmode="decimal" autocomplete="off" min="0" class="form-control form-control-sm" value="' + esc(formatDecimal(warm.load, commaDecimal)) + '" placeholder="peso" aria-label="Peso do aquecimento" oninput="setWarmupField(' + exIdx + ",'load',this.value)\"></div>" +
       '<div class="col-4"><input type="number" min="0" inputmode="numeric" class="form-control form-control-sm" value="' + esc(warm.rir) + '" placeholder="RIR" oninput="setWarmupField(' + exIdx + ",'rir',this.value)\"></div>" +
       '</div>' +
       '</div>' +

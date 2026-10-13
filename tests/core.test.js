@@ -64,6 +64,48 @@ test('normalizeText ignora acentos, caixa e espacos', () => {
   assert.ok(core.normalizeText('Puxada Máquina').indexOf(core.normalizeText('puxada maquina')) === 0);
 });
 
+test('parseLocalNumber aceita virgula e ponto', () => {
+  assert.equal(core.parseLocalNumber('27,5'), 27.5);
+  assert.equal(core.parseLocalNumber('27.5'), 27.5);
+  assert.equal(core.parseLocalNumber('1.100,50'), 1100.5);
+  assert.equal(core.parseLocalNumber('12'), 12);
+  assert.equal(core.parseLocalNumber(' 30 '), 30);
+  assert.ok(Number.isNaN(core.parseLocalNumber('abc')));
+  assert.ok(Number.isNaN(core.parseLocalNumber('')));
+  assert.ok(Number.isNaN(core.parseLocalNumber(null)));
+});
+
+test('toNum e toNumOrNull aceitam virgula', () => {
+  assert.equal(core.toNum('27,5'), 27.5);
+  assert.equal(core.toNum('27,5') + core.toNum('2,5'), 30);
+  assert.equal(core.toNumOrNull('27,5'), 27.5);
+  assert.equal(core.toNumOrNull('0,5'), 0.5);
+  assert.equal(core.toNumOrNull('0'), 0);
+  assert.equal(core.toNumOrNull(''), null);
+  assert.equal(core.toNumOrNull('abc'), null);
+});
+
+test('formatDecimal mostra virgula quando o idioma usa virgula', () => {
+  assert.equal(core.formatDecimal(27.5, true), '27,5');
+  assert.equal(core.formatDecimal(27.5, false), '27.5');
+  assert.equal(core.formatDecimal(27, true), '27');
+  assert.equal(core.formatDecimal('27,5', true), '27,5');
+  assert.equal(core.formatDecimal('', true), '');
+  assert.equal(core.formatDecimal(null, true), '');
+});
+
+test('regressao: carga digitada com virgula (iPhone) nao perde a parte decimal', () => {
+  const digitado = { load: '27,5', reps: '12', rir: '2' };
+  const salvo = {
+    load: core.toNumOrNull(digitado.load),
+    reps: core.toNumOrNull(digitado.reps),
+    rir: core.toNumOrNull(digitado.rir)
+  };
+
+  assert.deepEqual(salvo, { load: 27.5, reps: 12, rir: 2 });
+  assert.equal(core.formatDecimal(salvo.load, true), '27,5', 'volta ao campo com virgula');
+});
+
 /* ---------- configuracoes e semana ---------- */
 
 test('defaultSettings usa metas padrao e a semana comecando hoje', () => {

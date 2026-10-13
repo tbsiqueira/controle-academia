@@ -133,6 +133,8 @@ Elevação pélvica                                    [3 séries]
 
 ### Detalhes que ajudam
 
+- **Carga com vírgula é aceita**: pode digitar `27,5` ou `27.5` — o app entende os dois e mostra com vírgula
+  (no iPhone, o teclado numérico traz a vírgula).
 - **Série que ficar em branco é ignorada** — se você fez só 2 das 3 séries, pode deixar a terceira vazia e salvar.
 - **Quer treinar algo fora da ficha?** Toque em **Adicionar exercício** (o mesmo buscador da ficha).
 - **Não achou o exercício no catálogo?** Digite o nome e toque em **`Criar "..."`**.

@@ -55,14 +55,44 @@
   }
 
   function toNum(value) {
-    const n = parseFloat(value);
+    const n = parseLocalNumber(value);
     return isNaN(n) ? 0 : n;
+  }
+
+  // Aceita virgula ou ponto como separador decimal (pt-BR usa virgula, e no iPhone o
+  // teclado numerico oferece a virgula).
+  // "27,5" -> 27.5 | "1.100,50" -> 1100.5 | "12" -> 12 | "abc" -> NaN
+  function parseLocalNumber(value) {
+    if (value === null || value === undefined) return NaN;
+
+    let text = String(value).trim().replace(/\s/g, '');
+    if (!text) return NaN;
+
+    const hasComma = text.indexOf(',') !== -1;
+    const hasDot = text.indexOf('.') !== -1;
+
+    if (hasComma && hasDot) {
+      text = text.replace(/\./g, '').replace(',', '.');   // 1.100,50
+    } else if (hasComma) {
+      text = text.replace(',', '.');                      // 27,5
+    }
+
+    return parseFloat(text);
   }
 
   function toNumOrNull(value) {
     if (value === '' || value === null || value === undefined) return null;
-    const n = parseFloat(value);
+    const n = parseLocalNumber(value);
     return isNaN(n) ? null : n;
+  }
+
+  // Formata um numero para exibir em campo (virgula quando o idioma usa virgula).
+  function formatDecimal(value, useComma) {
+    if (value === '' || value === null || value === undefined) return '';
+    const n = parseLocalNumber(value);
+    if (isNaN(n)) return '';
+    const text = String(n);
+    return useComma ? text.replace('.', ',') : text;
   }
 
   // Busca sem acentos (ex.: "puxada maquina" encontra "Puxada máquina").
@@ -575,6 +605,8 @@
     esc: esc,
     toNum: toNum,
     toNumOrNull: toNumOrNull,
+    parseLocalNumber: parseLocalNumber,
+    formatDecimal: formatDecimal,
     normalizeText: normalizeText,
     // configurações e semana
     defaultSettings: defaultSettings,
