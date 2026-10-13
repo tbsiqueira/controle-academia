@@ -646,6 +646,39 @@ test('workoutAsText usa o nome atual do exercicio e agrupa por id', () => {
   assert.ok(text.indexOf('8 reps') !== -1);
 });
 
+test('linkSheetItemsToExercises acha tambem no catalogo (e nao liga quando e ambiguo)', () => {
+  const fichas = [{
+    id: 's1',
+    name: 'A',
+    exercises: [
+      { exerciseId: null, name: 'Puxada frente supinada', sets: 3, reps: [], note: '' },
+      { exerciseId: null, name: 'Leg Press', sets: 4, reps: [], note: '' },
+      { exerciseId: null, name: 'Remada maquina', sets: 3, reps: [], note: '' }
+    ]
+  }];
+
+  const biblioteca = [{ id: 'e1', name: 'Bike', group: 'Outros', source: 'custom' }];
+  const catalogo = [
+    { id: 887, name: 'Puxada frente supinada', group: 'Costas' },
+    { id: 719, name: 'Leg Press', group: 'Pernas' }
+  ];
+
+  const resultado = core.linkSheetItemsToExercises(fichas, biblioteca.concat(catalogo));
+
+  assert.equal(resultado.changed, 2, 'so os dois nomes que existem no catalogo');
+  assert.equal(resultado.sheets[0].exercises[0].exerciseId, 887, 'grava o id numerico do catalogo');
+  assert.equal(resultado.sheets[0].exercises[1].exerciseId, 719);
+  assert.equal(resultado.sheets[0].exercises[2].exerciseId, null, 'nome digitado a mao continua sem id');
+
+  const ambiguo = core.linkSheetItemsToExercises(
+    [{ id: 's2', exercises: [{ exerciseId: null, name: 'Bike', sets: 1, reps: [], note: '' }] }],
+    biblioteca.concat([{ id: 999, name: 'Bike', group: 'Outros' }])
+  );
+
+  assert.equal(ambiguo.changed, 0, 'mesmo nome na biblioteca e no catalogo: nao adivinha');
+  assert.equal(ambiguo.sheets[0].exercises[0].exerciseId, null);
+});
+
 /* ---------- biblioteca do usuario ---------- */
 
 test('isUserExercise nao esconde exercicio criado pelo usuario', () => {

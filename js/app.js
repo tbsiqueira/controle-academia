@@ -1783,6 +1783,7 @@ async function importData(file) {
   state.lastImportSnapshot = snapshot;
 
   await loadState();
+  await linkSheetItems();
   alert('Backup importado! Para desfazer, use "Desfazer importação" em Mais → Dados.');
   location.hash = '#/dashboard';
   renderDashboard();
@@ -1842,6 +1843,7 @@ async function loadSampleData() {
   state.lastImportSnapshot = snapshot;
 
   await loadState();
+  await linkSheetItems();
   await repairLibrarySources();
 
   status.textContent = 'Dados de exemplo carregados: ' + data.sheets.length + ' fichas, ' +
@@ -1951,7 +1953,8 @@ function guard(fn) {
 // (mantemos 'catalog' apenas quando houver catalogId, que comprova a origem).
 // Dá "chave estrangeira" aos itens de ficha antigos: liga pelo nome ao exercício da Biblioteca.
 async function linkSheetItems() {
-  const result = linkSheetItemsToExercises(state.sheets, state.exercises);
+  // Biblioteca + catalogo: fichas antigas ganham o id do catalogo quando o nome casa exatamente.
+  const result = linkSheetItemsToExercises(state.sheets, allExercises());
   if (!result.changed) return 0;
 
   for (let i = 0; i < result.sheets.length; i++) {
