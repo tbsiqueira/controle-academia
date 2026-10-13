@@ -641,14 +641,13 @@
   }
 
   function normalizeSheet(s) {
-    const raw = s || {};
     return {
-      id: raw.id,
-      name: raw.name || '',
-      active: raw.active !== false,
-      exercises: (raw.exercises || []).map(normalizeSheetItem),
-      createdAt: raw.createdAt,
-      updatedAt: raw.updatedAt
+      id: s.id,
+      name: s.name || '',
+      active: s.active !== false,
+      exercises: (s.exercises || []).map(normalizeSheetItem),
+      createdAt: s.createdAt,
+      updatedAt: s.updatedAt
     };
   }
 
