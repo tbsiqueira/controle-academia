@@ -269,6 +269,8 @@ console.log('::notice file=' + ALVO + ',line=1::preciso (processo unico, fora do
   (precisosTexto.join(' | ') || 'nada sem cobertura'));
 
 if (completo) {
+  console.log('::notice file=' + ALVO + ',line=1::cobertura OK: 100% das linhas de ' + ALVO +
+    ' e nenhum trecho da logica sem teste (ramos medidos pelo Node: ' + medidas.ramos + '%)');
   console.log('[cobertura] 100% de linhas em ' + ALVO + ' e nenhum trecho da logica sem teste.');
   process.exit(0);
 }

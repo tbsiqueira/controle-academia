@@ -33,6 +33,8 @@ jobs:
           done
 
       - name: Rodar testes e medir cobertura de js/core.js
+        env:
+          COVERAGE_ENFORCE: '1'
         run: node tools/coverage-gate.js
 
   estatico:

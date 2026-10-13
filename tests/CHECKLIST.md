@@ -38,6 +38,9 @@ Mapa de **cada funcionalidade do app** para os testes que a cobrem. Serve para r
 - **`js/app.js` (DOM) não tem teste automatizado de tela**: isso exigiria um ambiente de navegador
   (jsdom/npm) e a decisão do projeto foi manter **zero dependências** — a lógica foi extraída para o
   `core.js` e o resto é coberto pelas verificações estáticas.
+- **Wrapper de módulo do `core.js`** (detecção Node × navegador) fica fora da meta de cobertura: cada
+  ambiente executa um dos lados. O lado do navegador é testado em `module.test.js` (carrega o core num
+  escopo sem `module.exports` e confere que as funções viram globais).
 - **Manipulação do `Bootstrap` e do IndexedDB** é verificada no app publicado, não em teste automatizado.
 - Se um dia entrar um ambiente de DOM, o alvo natural é cobrir `js/app.js` e mover a meta de cobertura
   para lá também.

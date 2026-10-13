@@ -50,9 +50,13 @@ agrupamento de séries **por id**, aquecimento, histórico/PR, geração do text
 (v1 com "tipos de treino", v2 com ficha de reps único) são normalizados sem perder nada, e a normalização
 é idempotente. Os arquivos de referência ficam em `tests/fixtures/`.
 
-**Cobertura:** `node tools/coverage-gate.js` roda os testes e exige **100% de linhas e ramos em `js/core.js`**
-(no CI, `COVERAGE_ENFORCE=1` reprova o build se cair). Ele publica o resultado como *annotations* do
-GitHub Actions, então dá para ver o que faltou sem abrir o log.
+**Cobertura:** `node tools/coverage-gate.js` roda os testes e exige **100% das linhas de `js/core.js` e
+nenhum trecho da lógica sem teste** (no CI, `COVERAGE_ENFORCE=1` reprova o build se cair). Ele publica o
+resultado como *annotations* do GitHub Actions, então dá para ver o que faltou sem abrir o log.
+
+> O **wrapper de módulo** (as primeiras linhas do `core.js`, que escolhem entre Node e navegador) fica fora
+> da conta: cada ambiente executa só um dos lados — o lado do navegador é validado por
+> `tests/module.test.js`, que carrega o core num escopo sem `module.exports`.
 
 📋 **Qual teste cobre qual funcionalidade: [tests/CHECKLIST.md](tests/CHECKLIST.md)**
 
