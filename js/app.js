@@ -1662,11 +1662,7 @@ async function shareBackup() {
   }
 
   try {
-    await navigator.share({
-      files: [backup.file],
-      title: 'Backup do Meu Treino',
-      text: 'Backup do Meu Treino (' + backup.name + ')'
-    });
+    await navigator.share(backupSharePayload(backup.file, 'Backup do Meu Treino'));
     await markBackupDone();
     backupActionStatus('Backup compartilhado: ' + backup.name);
   } catch (e) {
@@ -1678,8 +1674,11 @@ async function shareBackup() {
   }
 }
 
+// Botão único de atualização: limpa o cache (service worker) e recarrega a versão mais nova.
 async function forceUpdate() {
-  if (!confirm('Recarregar o app do zero (limpa o cache)? Seus treinos salvos não são afetados.')) return;
+  const ok = confirm('Atualizar o app?\n\nIsso limpa o cache e recarrega a versão mais nova. Seus treinos salvos não são afetados.');
+  if (!ok) return;
+
   try {
     if ('serviceWorker' in navigator) {
       const registrations = await navigator.serviceWorker.getRegistrations();
@@ -1692,10 +1691,12 @@ async function forceUpdate() {
       await Promise.all(keys.map(function (key) { return caches.delete(key); }));
     }
   } catch (e) {
-    // ignore and reload anyway
+    // segue e recarrega mesmo assim
   }
+
   location.reload();
 }
+
 
 async function importData(file) {
   const text = await file.text();

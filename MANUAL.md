@@ -377,7 +377,7 @@ quem mantém o app — é uma evolução prevista.
 | Sintoma | Causa provável | Solução |
 |---|---|---|
 | Ícones aparecem como **quadradinhos** | Arquivos antigos em cache | **Mais → Atualizar app** |
-| O app parece **desatualizado** (não aparece uma tela nova) | Service worker com versão antiga | **Mais → Atualizar app** ou abra `/reset.html` uma vez |
+| O app parece **desatualizado** (não aparece uma tela nova) | Service worker com versão antiga | **Mais → Atualizar app** (limpa o cache e recarrega). Se o app não abrir, use a página de escape `/reset.html` |
 | **"Semana encerrada"** e as metas não avançam | Fim dos 7 dias | Toque em **Iniciar próxima semana** no aviso do Início |
 | Toquei em **Salvar** e não salvou | Nenhuma série/aquecimento/cardio preenchido | Preencha ao menos uma informação (o app avisa) |
 | Esqueci de registrar e quero lançar um treino de outro dia | — | Em **Treinar**, mude a **Data** |

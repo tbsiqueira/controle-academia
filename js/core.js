@@ -491,6 +491,13 @@
     return 'download';
   }
 
+  // Conteúdo enviado ao menu de compartilhamento: SÓ o arquivo (com um título).
+  // Não mandamos "text" junto porque alguns aparelhos salvam esse texto como um
+  // segundo arquivo (.txt) além do JSON.
+  function backupSharePayload(file, title) {
+    return { files: [file], title: title || 'Backup do Meu Treino' };
+  }
+
   /* ---------- biblioteca do usuário ---------- */
 
   // Um exercício aparece na Biblioteca a menos que seja comprovadamente do catálogo
@@ -668,6 +675,7 @@
     fmtDateTimeBR: fmtDateTimeBR,
     backupStatus: backupStatus,
     backupAction: backupAction,
+    backupSharePayload: backupSharePayload,
     // biblioteca
     isUserExercise: isUserExercise,
     libraryExercises: libraryExercises,
