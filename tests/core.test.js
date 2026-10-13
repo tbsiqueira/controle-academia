@@ -489,6 +489,30 @@ test('backupHint explica o que o botao Exportar vai fazer', () => {
   assert.equal(core.backupHint('qualquer'), core.backupHint('download'));
 });
 
+test('sheetLabel mostra o nome ATUAL da ficha (renomear reflete na visao geral)', () => {
+  const sheets = [{ id: 's1', name: 'Peito e triceps' }, { id: 's2', name: 'Pernas' }];
+
+  assert.equal(core.sheetLabel({ sheetId: 's1', sheetName: 'Nome antigo' }, sheets), 'Peito e triceps');
+  assert.equal(core.sheetLabel({ sheetId: 's2' }, sheets), 'Pernas');
+  assert.equal(core.sheetLabel({ sheetId: 's9', sheetName: 'Ficha excluida' }, sheets), 'Ficha excluida', 'ficha excluida mantem o nome do registro');
+  assert.equal(core.sheetLabel({ sheetName: 'Sem id (dados antigos)' }, sheets), 'Sem id (dados antigos)');
+  assert.equal(core.sheetLabel({ typeName: 'Treino A (v1)' }, sheets), 'Treino A (v1)');
+  assert.equal(core.sheetLabel({}, sheets), '');
+  assert.equal(core.sheetLabel(null, null), '');
+  assert.equal(core.sheetLabel({ sheetId: 's1' }, null), '', 'sem fichas carregadas nao inventa nome');
+});
+
+test('workoutAsText usa o nome atual da ficha', () => {
+  const workout = { date: '2026-10-12', sheetId: 's1', sheetName: 'Nome antigo', sets: [], warmups: [] };
+  const sheets = [{ id: 's1', name: 'Peito e triceps' }];
+
+  const atual = core.workoutAsText(workout, sheets);
+  assert.match(atual, /Ficha: Peito e triceps/);
+  assert.ok(atual.indexOf('Nome antigo') === -1);
+
+  assert.match(core.workoutAsText(workout), /Ficha: Nome antigo/, 'sem a lista de fichas usa o nome guardado');
+});
+
 /* ---------- biblioteca do usuario ---------- */
 
 test('isUserExercise nao esconde exercicio criado pelo usuario', () => {

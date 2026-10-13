@@ -180,7 +180,7 @@ function renderRecent() {
 
   el.innerHTML = '<h6 class="mt-2"><i class="bi bi-clock-history text-primary"></i> Últimos treinos</h6>' + recent.map(function (w) {
     const setCount = (w.sets || []).length;
-    const name = w.sheetName || w.typeName || 'Treino';
+    const name = sheetLabel(w, state.sheets) || 'Treino';
     const warm = warmupSummary(w.warmups);
     return '<div class="card mb-2"><div class="card-body py-2 d-flex justify-content-between align-items-center">' +
       '<button type="button" class="btn btn-link p-0 text-start text-decoration-none flex-grow-1" data-view-workout="' + esc(w.id) + '">' +
@@ -223,7 +223,7 @@ function renderWorkoutDetail() {
     return;
   }
 
-  const sheetName = workout.sheetName || workout.typeName || '';
+  const sheetName = sheetLabel(workout, state.sheets);
   let html = '<div class="card mb-3"><div class="card-body py-2">' +
     '<div class="d-flex justify-content-between align-items-center">' +
     '<strong><i class="bi bi-calendar-event text-primary"></i> ' + fmtBR(workout.date) + '</strong>' +
@@ -313,7 +313,7 @@ function renderExerciseHistory() {
     const w = r.workout;
     const warm = (w.warmups || []).find(function (x) { return x.exerciseName === name; });
     const sets = (w.sets || []).filter(function (s) { return s.exerciseName === name; });
-    const sheetName = w.sheetName || w.typeName || '';
+    const sheetName = sheetLabel(w, state.sheets);
     return '<div class="card mb-2"><div class="card-body py-2">' +
       '<div class="d-flex justify-content-between align-items-center">' +
       '<strong>' + fmtBR(w.date) + '</strong>' +
@@ -1257,6 +1257,15 @@ async function createExerciseFromSheetPicker() {
   renderSheetPickerResults(state.sheetPickerQuery);
 }
 
+// Depois de renomear/excluir uma ficha, atualiza tudo que mostra o nome dela:
+// a lista de fichas, o seletor do treino, os últimos treinos (Início) e o calendário.
+function refreshAfterSheetChange() {
+  renderSheets();
+  renderSheetOptions(document.getElementById('workoutSheet').value || null);
+  renderRecent();
+  renderCalendar();
+}
+
 async function saveSheetEditor() {
   const name = document.getElementById('sheetName').value.trim();
   if (!name) {
@@ -1298,16 +1307,14 @@ async function saveSheetEditor() {
   await dbPut('sheets', sheet);
   state.sheets = await dbAll('sheets');
   bootstrap.Modal.getInstance(document.getElementById('sheetEditorModal')).hide();
-  renderSheets();
-  renderSheetOptions(document.getElementById('workoutSheet').value || null);
+  refreshAfterSheetChange();
 }
 
 async function deleteSheet(id) {
   if (!confirm('Excluir esta ficha? Os treinos já registrados não são afetados.')) return;
   await dbDelete('sheets', id);
   state.sheets = await dbAll('sheets');
-  renderSheets();
-  renderSheetOptions(document.getElementById('workoutSheet').value || null);
+  refreshAfterSheetChange();
 }
 
 /* ---------- calendar ---------- */
@@ -1510,7 +1517,7 @@ function exportWorkoutText(id) {
   const workout = id ? state.workouts.find(function (w) { return w.id === id; }) : null;
   if (!workout) return;
 
-  document.getElementById('exportText').value = workoutAsText(workout);
+  document.getElementById('exportText').value = workoutAsText(workout, state.sheets);
   bootstrap.Modal.getOrCreateInstance(document.getElementById('exportModal')).show();
 }
 

@@ -265,13 +265,31 @@
     return best;
   }
 
+  /* ---------- nome atual da ficha ---------- */
+
+  // O treino guarda o nome da ficha como estava no dia em que foi registrado (snapshot).
+  // Para MOSTRAR, resolvemos pelo id: assim renomear a ficha aparece em todo o app.
+  // Se a ficha foi excluída (ou o registro é antigo, sem id), usamos o nome guardado.
+  function sheetLabel(workout, sheets) {
+    const w = workout || {};
+    const list = sheets || [];
+
+    if (w.sheetId) {
+      for (let i = 0; i < list.length; i++) {
+        if (list[i] && list[i].id === w.sheetId && list[i].name) return list[i].name;
+      }
+    }
+
+    return w.sheetName || w.typeName || '';
+  }
+
   /* ---------- exportar treino como texto ---------- */
 
-  function workoutAsText(workout) {
+  function workoutAsText(workout, sheets) {
     const lines = [];
     lines.push('MEU TREINO — ' + fmtBR(workout.date));
 
-    const sheetName = workout.sheetName || workout.typeName;
+    const sheetName = sheetLabel(workout, sheets);
     if (sheetName) lines.push('Ficha: ' + sheetName);
     lines.push('');
 
@@ -711,6 +729,7 @@
     bestSetForExercise: bestSetForExercise,
     // exportação
     workoutAsText: workoutAsText,
+    sheetLabel: sheetLabel,
     // compatibilidade de dados
     normalizeBackup: normalizeBackup
   };
