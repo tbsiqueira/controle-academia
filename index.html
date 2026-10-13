@@ -9,9 +9,9 @@
   <title>Meu Treino</title>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
-  <link rel="stylesheet" href="vendor/bootstrap/bootstrap.min.css?v=30">
-  <link rel="stylesheet" href="vendor/bootstrap-icons/bootstrap-icons.min.css?v=30">
-  <link rel="stylesheet" href="css/styles.css?v=30">
+  <link rel="stylesheet" href="vendor/bootstrap/bootstrap.min.css?v=31">
+  <link rel="stylesheet" href="vendor/bootstrap-icons/bootstrap-icons.min.css?v=31">
+  <link rel="stylesheet" href="css/styles.css?v=31">
 </head>
 <body>
   <main class="container pb-nav">
@@ -206,7 +206,21 @@
         </div>
       </div>
 
-      <p class="text-center text-muted small">Meu Treino <span id="appVersion">v30</span> · dados 100% locais · catálogo: gugeldev/exercicios-bd-ptbr (CC0)<br><a href="reset.html">limpar cache e atualizar</a></p>
+      <div class="card mb-3">
+        <div class="card-header fw-semibold"><i class="bi bi-stars"></i> Dados de exemplo</div>
+        <div class="card-body">
+          <p class="text-muted small mb-2">
+            Carrega 3 fichas de exemplo com <strong>12 treinos</strong> já registrados (4 por ficha),
+            misturando exercícios do catálogo e exercícios criados por você.
+            Serve para conhecer o app e para testar a importação entre versões.
+            <strong>Substitui</strong> os dados atuais — dá para desfazer logo abaixo.
+          </p>
+          <button class="btn btn-outline-primary w-100" type="button" id="btnLoadSample"><i class="bi bi-stars"></i> Carregar dados de exemplo</button>
+          <p class="small text-muted mt-2 mb-0" id="sampleStatus"></p>
+        </div>
+      </div>
+
+      <p class="text-center text-muted small">Meu Treino <span id="appVersion">v31</span> · dados 100% locais · catálogo: gugeldev/exercicios-bd-ptbr (CC0)<br><a href="reset.html">limpar cache e atualizar</a></p>
     </section>
   </main>
 
@@ -349,9 +363,9 @@
     </div>
   </div>
 
-  <script src="vendor/bootstrap/bootstrap.bundle.min.js?v=30"></script>
-  <script src="js/db.js?v=30"></script>
-  <script src="js/core.js?v=30"></script>
-  <script src="js/app.js?v=30"></script>
+  <script src="vendor/bootstrap/bootstrap.bundle.min.js?v=31"></script>
+  <script src="js/db.js?v=31"></script>
+  <script src="js/core.js?v=31"></script>
+  <script src="js/app.js?v=31"></script>
 </body>
 </html>

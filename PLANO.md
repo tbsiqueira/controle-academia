@@ -84,6 +84,7 @@ icons/icon-192.png, icon-512.png
 serve.ps1 (servidor local para teste)
 check.ps1 (verificações estáticas: JSON, ids, handlers, assets, versão)
 data/exercises.json (catálogo embutido de exercícios, pt-BR, CC0)
+data/sample-data.json (dados de exemplo: 3 fichas, 12 treinos, 6 exercícios custom)
 README.md (como rodar, publicar no GitHub Pages, estrutura, versionamento)
 MANUAL.md (documentação de uso: exemplos, FAQ, problemas comuns, glossário)
 .gitattributes / .nojekyll (higiene do repositório e do GitHub Pages)
@@ -134,6 +135,7 @@ PLANO.md
 - **Revisão 19**: textos explicativos curtos na tela **Fichas** (o que é uma ficha, o que é a Biblioteca) e dica dentro do editor de ficha.
 - **Revisão 20**: a **Biblioteca** passa a listar apenas os exercícios **criados pelo usuário** (os do catálogo não são mais copiados para lá nem aparecem na lista).
 - **Revisão 21**: padronização das barras de botões (ações na **mesma linha**, botões de ícone com largura fixa `.btn-icon`) em todas as telas.
+- **Revisão 32**: dados de exemplo (fixture) — `data/sample-data.json` com 3 fichas (5-6 exercícios do catálogo + 2 custom cada) e 12 treinos (4 por ficha, datas relativas), carregável em Mais → Dados de exemplo e usada como fixture nos testes de compatibilidade.
 - **Revisão 31**: detalhes do treino em **listas** (`<ul>`) com o mesmo estilo das fichas; editor da ficha com rótulos claros; **referência por id (chave estrangeira)** nos itens de ficha — renomear um exercício atualiza fichas (por id e, para dados antigos, por nome) e o histórico que aponta para o id, com **migração automática** que liga fichas antigas à Biblioteca.
 - **Revisão 30**: backup com **data e hora** no nome do arquivo (`meu-treino-backup-AAAA-MM-DD_HH-mm-ss.json`) e registro da **versão do app** dentro do arquivo.
 - **Revisão 29**: lista de fichas redesenhada — cada ficha mostra os exercícios em uma **lista** (`<ul>`) numerada, com séries×reps em destaque e a observação ao lado, em vez da linha compacta.

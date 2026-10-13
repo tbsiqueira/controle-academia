@@ -300,7 +300,21 @@ e **marcar o checkbox**. É definitivo e não tem volta — se quiser guardar, e
 
 ### Atualizar app
 O botão **Atualizar app** limpa o cache e recarrega a versão mais nova. Use se algo parecer "travado" ou
-desatualizado (a versão atual aparece no rodapé desta tela, ex.: `v24`).
+desatualizado (a versão atual aparece no rodapé desta tela, ex.: `v31`).
+
+### Dados de exemplo (para conhecer o app)
+Ainda em **Mais**, no card **Dados de exemplo**, o botão **Carregar dados de exemplo** preenche o app com um
+conjunto pronto:
+
+- **3 fichas** (TREINO A, B e C), cada uma com exercícios do catálogo **e 2 exercícios criados por você**;
+- **12 treinos já registrados** (4 por ficha, em dias diferentes), com aquecimento, cargas e observações;
+- **3 colinhas** e metas semanais configuradas.
+
+É a melhor forma de ver como o app se comporta com dados reais. Dois avisos:
+
+- **Substitui** os seus dados. Logo após carregar aparece o botão **Desfazer** (no card **Dados**), que volta
+  tudo como estava;
+- a primeira carga precisa de **internet** (o arquivo de exemplo é baixado do próprio app e fica em cache).
 
 ---
 

@@ -121,7 +121,7 @@ index.html                  app shell (telas, modais)
 css/styles.css              estilos (tema, navegação inferior, calendário, botões)
 js/core.js                  lógica pura (datas, semana, agrupamento, exportação, compatibilidade de backups)
 js/db.js                    camada IndexedDB (workouts, exercises, sheets, settings, colinha)
-tests/core.test.js          testes de unidade e de compatibilidade de dados
+data/sample-data.json       dados de exemplo (3 fichas, 12 treinos) - usados no app e nos testestests/core.test.js          testes de unidade e de compatibilidade de dados
 tests/fixtures/             backups de versões antigas usados nos testes
 js/app.js                   lógica do app (busca, fichas, treinos, histórico, backup)
 data/exercises.json         catálogo embutido com 927 exercícios em pt-BR
@@ -135,6 +135,18 @@ check.ps1                   verificações estáticas
 MANUAL.md                   manual do usuário (como usar, exemplos, FAQ)
 PLANO.md                    plano/requisitos e histórico de revisões
 ```
+
+## Dados de exemplo (fixture)
+
+`data/sample-data.json` é uma fixture com **3 fichas**, **12 treinos** (4 por ficha) e **6 exercícios criados
+pelo usuário** — cada ficha mistura exercícios do catálogo com **2 exercícios custom**.
+
+- **No app**: **Mais → Dados de exemplo → Carregar dados de exemplo**. Substitui os dados atuais e pode ser
+  desfeito pelo botão **Desfazer** (o estado anterior fica em memória). As datas ficam em `dayOffset`
+  (dias em relação a hoje), então a demonstração está sempre recente.
+- **Nos testes**: `tests/sample-data.test.js` valida estrutura, integridade referencial, normalização de
+  backup, migração de dados antigos e renomeação — é a rede de segurança contra quebra de dados entre versões.
+- **Não** entra no precache do service worker: é buscada sob demanda (a primeira carga precisa de internet).
 
 ## Modelo de dados (IndexedDB v2)
 

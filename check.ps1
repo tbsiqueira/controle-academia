@@ -142,6 +142,42 @@ if ($nodeCmd) {
   Write-Host "  --    node nao instalado: sintaxe nao verificada localmente (o CI verifica)" -ForegroundColor DarkGray
 }
 
+# 11) dados de exemplo (mesma fixture usada pelos testes)
+$samplePath = Join-Path $root 'data/sample-data.json'
+if (Test-Path $samplePath) {
+  try {
+    $sample = (Read-Text 'data/sample-data.json') | ConvertFrom-Json
+  } catch {
+    $sample = $null
+    Bad "data/sample-data.json invalido: $($_.Exception.Message)"
+  }
+
+  if ($sample) {
+    $shapeOk = ($sample.sample -eq $true) -and (@($sample.data.sheets).Count -eq 3) -and (@($sample.data.workouts).Count -eq 12)
+    $perSheetOk = $true
+    foreach ($sheet in $sample.data.sheets) {
+      $cat = @($sheet.exercises | Where-Object { -not $_.exerciseId }).Count
+      $custom = @($sheet.exercises | Where-Object { $_.exerciseId }).Count
+      $workouts = @($sample.data.workouts | Where-Object { $_.sheetId -eq $sheet.id }).Count
+      if ($cat -lt 5 -or $custom -ne 2 -or $workouts -ne 4) { $perSheetOk = $false }
+    }
+
+    if ($shapeOk -and $perSheetOk) {
+      Ok "dados de exemplo: 3 fichas (5+ catalogo e 2 custom cada) e 12 treinos"
+    } else {
+      Bad "dados de exemplo fora do formato esperado (3 fichas / 12 treinos / 5+2 por ficha)"
+    }
+
+    if ($swAssets -contains 'data/sample-data.json') {
+      Bad "data/sample-data.json nao deve entrar no precache (e carregado sob demanda)"
+    } else {
+      Ok "dados de exemplo fora do precache (carregados sob demanda)"
+    }
+  }
+} else {
+  Bad "data/sample-data.json nao encontrado"
+}
+
 Write-Host ""
 if ($script:fail -eq 0) {
   Write-Host "Tudo certo." -ForegroundColor Green

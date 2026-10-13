@@ -298,7 +298,30 @@
     return lines.join('\n').trim();
   }
 
-  /* ---------- referência por id (chave estrangeira) ---------- */
+  /* ---------- dados de exemplo ---------- */
+
+  // Os dados de exemplo guardam as datas como deslocamento em dias (dayOffset),
+  // para a demonstracao ficar sempre recente em relacao a hoje.
+  function materializeSampleData(payload, today) {
+    const base = today || todayISO();
+    const data = payload && payload.data ? payload.data : payload;
+    const copy = JSON.parse(JSON.stringify(data || {}));
+
+    (copy.workouts || []).forEach(function (w) {
+      if (typeof w.dayOffset === 'number') {
+        w.date = addDaysISO(base, w.dayOffset);
+        delete w.dayOffset;
+      }
+    });
+
+    if (!copy.settings) copy.settings = {};
+    copy.settings.id = 'app';
+    copy.settings.weekAnchor = addDaysISO(base, -2);
+
+    return copy;
+  }
+
+  // ---------- referência por id (chave estrangeira) ----------
 
   // Liga itens de ficha antigos (só com nome) ao exercício da Biblioteca, quando o nome casa
   // de forma inequívoca. É a migração que dá "chave estrangeira" às fichas já existentes.
@@ -557,6 +580,8 @@
     defaultSettings: defaultSettings,
     weekWindow: weekWindow,
     isValidWorkout: isValidWorkout,
+    // dados de exemplo
+    materializeSampleData: materializeSampleData,
     // referência por id
     linkSheetItemsToExercises: linkSheetItemsToExercises,
     renameInSheets: renameInSheets,

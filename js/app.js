@@ -1604,7 +1604,10 @@ async function importData(file) {
     return;
   }
 
-  const data = payload && payload.data ? payload.data : payload;
+  // O arquivo de exemplo usa datas relativas (dayOffset); materializamos na importação também.
+  const data = (payload && payload.sample)
+    ? materializeSampleData(payload, todayISO())
+    : (payload && payload.data ? payload.data : payload);
   if (!data || !Array.isArray(data.workouts)) {
     alert('Este arquivo não parece ser um backup do Meu Treino.');
     return;
@@ -1656,6 +1659,40 @@ async function restoreAll(data) {
     tx.onerror = function () { reject(tx.error); };
     tx.onabort = function () { reject(tx.error); };
   });
+}
+
+async function loadSampleData() {
+  const status = document.getElementById('sampleStatus');
+  status.textContent = 'Carregando...';
+
+  const ok = confirm('Carregar os dados de exemplo?\n\nSao 3 fichas, 12 treinos e 6 exercicios. Isso substitui os dados atuais, mas voce pode desfazer em Mais > Dados.');
+  if (!ok) {
+    status.textContent = '';
+    return;
+  }
+
+  const response = await fetch('data/sample-data.json');
+  const payload = await response.json();
+  const data = materializeSampleData(payload, todayISO());
+
+  const snapshot = {
+    workouts: state.workouts,
+    exercises: state.exercises,
+    sheets: state.sheets,
+    settings: state.settings,
+    colinha: state.colinha
+  };
+
+  await restoreAll(data);
+  state.lastImportSnapshot = snapshot;
+
+  await loadState();
+  await repairLibrarySources();
+
+  status.textContent = 'Dados de exemplo carregados: ' + data.sheets.length + ' fichas, ' +
+    data.workouts.length + ' treinos e ' + data.exercises.length + ' exercicios.';
+
+  renderMore();
 }
 
 async function undoImport() {
@@ -1733,6 +1770,7 @@ function bindEvents() {
     document.getElementById('importFile').click();
   });
   document.getElementById('btnUndoImport').addEventListener('click', guard(undoImport));
+  document.getElementById('btnLoadSample').addEventListener('click', guard(loadSampleData));
   document.getElementById('btnEraseAll').addEventListener('click', function () { state.eraseDone = false; });
   document.getElementById('importFile').addEventListener('change', function () {
     if (this.files && this.files[0]) guard(importData)(this.files[0]);
