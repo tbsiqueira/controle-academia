@@ -220,6 +220,15 @@
     return e.exerciseId ? 'id:' + e.exerciseId : 'nome:' + (e.exerciseName || '(sem nome)');
   }
 
+  // Alvo de busca para o histórico de um exercício: usa o id quando o registro tem id;
+  // sem id, usa o nome GUARDADO (dados antigos só têm esse nome para casar).
+  function historyTarget(group) {
+    return {
+      exerciseId: (group && group.exerciseId) || null,
+      exerciseName: (group && group.exerciseName) || ''
+    };
+  }
+
   // Agrupa as séries planas do treino por exercício (id-first, na ordem em que aparecem),
   // juntando a observação do exercício e o aquecimento salvo.
   // Exercícios que só têm aquecimento também viram grupo (senão o aquecimento se perderia
@@ -591,6 +600,20 @@
     });
   }
 
+  // Decisão pura do reparo de sources: o que está marcado como "catalog" sem catalogId
+  // volta a ser "custom" (a adivinhação antiga escondia exercícios criados pelo usuário).
+  function fixLibrarySources(exercises) {
+    let changed = 0;
+
+    const updated = (exercises || []).map(function (e) {
+      if (!e || !(e.source === 'catalog' && !e.catalogId)) return e;
+      changed++;
+      return Object.assign({}, e, { source: 'custom' });
+    });
+
+    return { exercises: updated, changed: changed };
+  }
+
   /* ---------- compatibilidade de backup entre versões ---------- */
 
   function normalizeSet(s, fallbackNumber) {
@@ -752,6 +775,7 @@
     isUserExercise: isUserExercise,
     libraryExercises: libraryExercises,
     exercisesNeedingRepair: exercisesNeedingRepair,
+    fixLibrarySources: fixLibrarySources,
     // aquecimento e séries
     warmupHasData: warmupHasData,
     warmupLine: warmupLine,
@@ -772,6 +796,7 @@
     exerciseLabel: exerciseLabel,
     exerciseMatches: exerciseMatches,
     exerciseKey: exerciseKey,
+    historyTarget: historyTarget,
     // compatibilidade de dados
     normalizeBackup: normalizeBackup
   };

@@ -30,6 +30,7 @@ Mapa de **cada funcionalidade do app** para os testes que a cobrem. Serve para r
 | Dados de exemplo (3 fichas, 12 treinos) | `core.js`: `materializeSampleData` + `data/sample-data.json` | `sample-data.test.js` (estrutura, integridade referencial, progressão de cargas, normalização) |
 | Catálogo embutido (ids únicos, contíguos, estáveis) | `data/exercises.json` | `core.test.js` (travas de ids) + `check.ps1` |
 | Registro dos módulos no navegador (globais) | `js/core.js` (UMD) | `module.test.js` (roda o core num escopo de navegador) |
+| Base antiga (era sem ids) sobrevive ao init | `core.js`: `fixLibrarySources`, `linkSheetItemsToExercises`, `historyTarget`, `normalizeBackup` | `old-db.test.js` (nenhuma série/carga/aquecimento/item se perde; histórico por nome guardado) |
 | PWA: versão consistente, precache, offline | `index.html`, `sw.js`, `manifest.webmanifest` | `check.ps1` (13 verificações) |
 | Exportar/importar/apagar dentro do app (telas) | `js/app.js` | `check.ps1` (ids e handlers) + lógica do `core.js` |
 

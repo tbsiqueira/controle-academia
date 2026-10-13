@@ -258,8 +258,9 @@ function renderWorkoutDetail() {
   }
 
   html += groups.map(function (g, i) {
+    const alvo = historyTarget(g);
     return '<div class="card mb-2"><div class="card-body p-2">' +
-      '<button type="button" class="btn btn-link p-0 text-decoration-none d-flex justify-content-between align-items-center w-100" data-open-exercise="' + esc(g.exerciseId || '') + '" data-open-exercise-name="' + esc(labelOf(g)) + '">' +
+      '<button type="button" class="btn btn-link p-0 text-decoration-none d-flex justify-content-between align-items-center w-100" data-open-exercise="' + esc(alvo.exerciseId || '') + '" data-open-exercise-name="' + esc(alvo.exerciseName) + '">' +
       '<strong><span class="badge text-bg-primary me-1">' + (i + 1) + '</span> ' + esc(labelOf(g)) + '</strong>' +
       '<i class="bi bi-chevron-right text-muted"></i>' +
       '</button>' +
@@ -1960,14 +1961,14 @@ async function linkSheetItems() {
 }
 
 async function repairLibrarySources() {
-  const wrong = exercisesNeedingRepair(state.exercises);
+  const resultado = fixLibrarySources(state.exercises);
 
-  for (let i = 0; i < wrong.length; i++) {
-    wrong[i].source = 'custom';
-    await dbPut('exercises', wrong[i]);
+  for (let i = 0; i < resultado.exercises.length; i++) {
+    if (resultado.exercises[i] !== state.exercises[i]) await dbPut('exercises', resultado.exercises[i]);
   }
 
-  return wrong.length;
+  state.exercises = await dbAll('exercises');
+  return resultado.changed;
 }
 
 async function init() {
