@@ -72,7 +72,7 @@ function linhaDe(offset) {
 }
 
 function trechosSemTeste() {
-  const achados = [];
+  const porArquivo = {};
 
   fs.readdirSync(temporario).forEach(function (nome) {
     if (nome.indexOf('.json') === -1) return;
@@ -89,15 +89,38 @@ function trechosSemTeste() {
 
       (arquivo.functions || []).forEach(function (fn) {
         (fn.ranges || []).forEach(function (faixa) {
-          if (faixa.count > 0) return;
           if (faixa.endOffset <= faixa.startOffset) return;
 
-          achados.push({
-            inicio: linhaDe(faixa.startOffset),
-            fim: linhaDe(faixa.endOffset),
-            trecho: fonte.slice(faixa.startOffset, faixa.startOffset + 80).split('\n')[0].trim()
+          // O mesmo arquivo pode rodar mais de uma vez (ex.: teste que carrega o core no vm):
+          // um trecho so conta como sem teste se NENHUMA execucao passou por ele.
+          porArquivo[arquivo.url] = porArquivo[arquivo.url] || [];
+          porArquivo[arquivo.url].push({
+            inicio: faixa.startOffset,
+            fim: faixa.endOffset,
+            contagem: faixa.count
           });
         });
+      });
+    });
+  });
+
+  const achados = [];
+
+  Object.keys(porArquivo).forEach(function (url) {
+    const faixas = porArquivo[url];
+
+    faixas.forEach(function (faixa) {
+      if (faixa.contagem > 0) return;
+
+      const cobertoEmOutraExecucao = faixas.some(function (outra) {
+        return outra.contagem > 0 && outra.inicio <= faixa.inicio && outra.fim >= faixa.fim;
+      });
+      if (cobertoEmOutraExecucao) return;
+
+      achados.push({
+        inicio: linhaDe(faixa.inicio),
+        fim: linhaDe(faixa.fim),
+        trecho: fonte.slice(faixa.inicio, faixa.inicio + 80).split('\n')[0].trim()
       });
     });
   });
@@ -110,7 +133,9 @@ function trechosSemTeste() {
     const ultima = juntas[juntas.length - 1];
     if (ultima && a.inicio <= ultima.fim) {
       ultima.fim = Math.max(ultima.fim, a.fim);
-      if (ultima.trecho.length < 70 && a.trecho) ultima.trecho = (ultima.trecho + ' / ' + a.trecho).slice(0, 90);
+      if (ultima.trecho.length < 70 && a.trecho && ultima.trecho.indexOf(a.trecho) === -1) {
+        ultima.trecho = (ultima.trecho + ' / ' + a.trecho).slice(0, 90);
+      }
       return;
     }
     juntas.push({ inicio: a.inicio, fim: a.fim, trecho: a.trecho });
@@ -131,7 +156,8 @@ semTeste.forEach(function (t) {
 });
 
 // Annotations: aparecem no resumo do check, sem precisar abrir o log.
-semTeste.slice(0, 10).forEach(function (t) {
+// (limitadas a 5 trechos para que o resumo tambem caiba no limite do GitHub)
+semTeste.slice(0, 5).forEach(function (t) {
   const fim = t.fim > t.inicio ? ('-' + t.fim) : '';
   console.log('::warning file=' + ALVO + ',line=' + t.inicio +
     ',endLine=' + t.fim + '::sem teste (' + t.inicio + fim + '): ' + t.trecho);
