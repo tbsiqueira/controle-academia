@@ -32,10 +32,7 @@ jobs:
             node --check "$f"
           done
 
-      - name: Rodar testes (node --test)
-        run: node --test tests/
-
-      - name: Cobertura de js/core.js (gate)
+      - name: Rodar testes e medir cobertura de js/core.js
         run: node tools/coverage-gate.js
 
   estatico:
