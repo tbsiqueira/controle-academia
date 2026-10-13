@@ -1519,6 +1519,7 @@ async function eraseAllData() {
   await dbClear('colinha');
 
   state.viewingWorkoutId = null;
+  state.viewingExerciseId = null;
   state.viewingExerciseName = '';
   state.editingWorkoutId = null;
   state.lastImportSnapshot = null;
