@@ -295,6 +295,10 @@ Toque em **Exportar** — o **mesmo botão** funciona nos dois aparelhos, e a di
 Em qualquer caso o arquivo tem **todos** os seus dados. Se o compartilhamento falhar, o app avisa e
 **não** gera um segundo arquivo sozinho.
 
+**Obs.:** o app manda **só o arquivo** `.json` no compartilhamento (sem título nem texto), porque alguns
+aparelhos salvavam um arquivo `.txt` extra. Se ainda aparecer um `.txt` com "backup" no nome, escolha no menu
+**Drive** ou **Arquivos** (apps de texto, como Notas/Mensagens, salvam o conteúdo como texto).
+
 ### Levar os treinos de um aparelho para outro
 1. No aparelho que **tem** os dados: **Mais → Dados → Exportar** → salve no **Drive** (ou mande para você
    mesmo no WhatsApp);

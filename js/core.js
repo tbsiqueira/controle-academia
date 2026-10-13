@@ -455,7 +455,8 @@
   }
 
   // Situação do backup: quando foi o último e se já é hora de lembrar o usuário.
-  function backupStatus(settings, now, daysLimit) {    const limit = daysLimit || 7;
+  function backupStatus(settings, now, daysLimit) {
+    const limit = daysLimit || 7;
     const current = now || new Date();
     const last = settings && settings.lastBackupAt ? settings.lastBackupAt : null;
     const lastDate = last ? new Date(last) : null;
@@ -491,11 +492,11 @@
     return 'download';
   }
 
-  // Conteúdo enviado ao menu de compartilhamento: SÓ o arquivo (com um título).
-  // Não mandamos "text" junto porque alguns aparelhos salvam esse texto como um
-  // segundo arquivo (.txt) além do JSON.
-  function backupSharePayload(file, title) {
-    return { files: [file], title: title || 'Backup do Meu Treino' };
+  // Conteúdo enviado ao menu de compartilhamento: SÓ o arquivo, nada mais.
+  // Sem "text" e sem "title": alguns aparelhos tratam título/texto como um segundo
+  // item e salvam um arquivo .txt junto com o JSON.
+  function backupSharePayload(file) {
+    return { files: [file] };
   }
 
   // Um backup montado de verdade tem o JSON e o nome do arquivo. Qualquer outro valor

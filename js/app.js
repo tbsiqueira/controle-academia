@@ -1583,7 +1583,11 @@ async function markBackupDone() {
 
 function renderBackupStatus() {
   const el = document.getElementById('backupStatus');
-  if (el) el.textContent = backupStatus(state.settings, new Date(), BACKUP_REMINDER_DAYS).label;
+  const versao = appVersionLabel();
+  if (el) {
+    el.textContent = backupStatus(state.settings, new Date(), BACKUP_REMINDER_DAYS).label +
+      (versao ? ' · ' + versao : '');
+  }
   renderExportHint();
 }
 
@@ -1678,7 +1682,7 @@ async function exportBackup() {
   }
 
   try {
-    await navigator.share(backupSharePayload(backup.file, 'Backup do Meu Treino'));
+    await navigator.share(backupSharePayload(backup.file));
     await markBackupDone();
     backupActionStatus('Backup compartilhado: ' + backup.name);
   } catch (e) {

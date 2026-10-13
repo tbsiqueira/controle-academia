@@ -462,17 +462,14 @@ test('backupAction decide entre compartilhar e baixar (uma acao = um arquivo)', 
   assert.equal(core.backupAction({}), 'download');
 });
 
-test('backupSharePayload manda so o arquivo (sem text, para nao gerar .txt)', () => {
-  const payload = core.backupSharePayload({ name: 'meu-treino-backup.json' }, 'Backup do Meu Treino');
+test('backupSharePayload manda so o arquivo, sem text nem title (.txt fantasma)', () => {
+  const payload = core.backupSharePayload({ name: 'meu-treino-backup.json' });
 
-  assert.deepEqual(Object.keys(payload).sort(), ['files', 'title'], 'apenas files e title');
+  assert.deepEqual(Object.keys(payload), ['files'], 'apenas o arquivo');
   assert.equal(payload.files.length, 1);
   assert.equal(payload.files[0].name, 'meu-treino-backup.json');
-  assert.equal(payload.title, 'Backup do Meu Treino');
-  assert.ok(!('text' in payload), 'sem campo text: alguns aparelhos salvam o texto como .txt');
-
-  const padrao = core.backupSharePayload({ name: 'x.json' });
-  assert.equal(padrao.title, 'Backup do Meu Treino');
+  assert.ok(!('text' in payload), 'sem text: alguns aparelhos salvam o texto como .txt');
+  assert.ok(!('title' in payload), 'sem title: o sistema nomeia um .txt a partir do titulo');
 });
 
 test('isBackupPayload ignora o evento de clique (bug do botao de backup)', () => {
