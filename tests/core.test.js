@@ -475,6 +475,16 @@ test('backupSharePayload manda so o arquivo (sem text, para nao gerar .txt)', ()
   assert.equal(padrao.title, 'Backup do Meu Treino');
 });
 
+test('isBackupPayload ignora o evento de clique (bug do botao de backup)', () => {
+  assert.equal(core.isBackupPayload({ json: '{}', name: 'meu-treino-backup.json' }), true);
+  assert.equal(core.isBackupPayload(null), false);
+  assert.equal(core.isBackupPayload(undefined), false);
+  assert.equal(core.isBackupPayload({}), false);
+  assert.equal(core.isBackupPayload({ type: 'click', target: {} }), false, 'evento de clique nao e um backup');
+  assert.equal(core.isBackupPayload({ json: '{}' }), false, 'sem nome de arquivo');
+  assert.equal(core.isBackupPayload({ name: 'x.json' }), false, 'sem json');
+});
+
 /* ---------- biblioteca do usuario ---------- */
 
 test('isUserExercise nao esconde exercicio criado pelo usuario', () => {

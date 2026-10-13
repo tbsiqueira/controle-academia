@@ -498,6 +498,12 @@
     return { files: [file], title: title || 'Backup do Meu Treino' };
   }
 
+  // Um backup montado de verdade tem o JSON e o nome do arquivo. Qualquer outro valor
+  // (por exemplo, o evento de clique que o handler recebe) é ignorado.
+  function isBackupPayload(value) {
+    return !!(value && typeof value.json === 'string' && typeof value.name === 'string' && value.name);
+  }
+
   /* ---------- biblioteca do usuário ---------- */
 
   // Um exercício aparece na Biblioteca a menos que seja comprovadamente do catálogo
@@ -676,6 +682,7 @@
     backupStatus: backupStatus,
     backupAction: backupAction,
     backupSharePayload: backupSharePayload,
+    isBackupPayload: isBackupPayload,
     // biblioteca
     isUserExercise: isUserExercise,
     libraryExercises: libraryExercises,

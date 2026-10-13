@@ -90,7 +90,7 @@ if ([int]$catalog.meta.nextId -gt [int]($ids | Measure-Object -Maximum).Maximum)
 # 3) index.html <-> js/app.js: todo getElementById precisa existir (ou ser criado dinamicamente)
 $html = Read-Text 'index.html'
 $js = Read-Text 'js/app.js'
-$dynamicIds = @('btnConfirmWeek', 'eraseConfirm', 'eraseAck', 'eraseConfirmBtn', 'eraseExport', 'reminderBackup', 'reminderDismiss')
+$dynamicIds = @('btnConfirmWeek', 'eraseAck', 'eraseConfirmBtn', 'reminderBackup', 'reminderDismiss')
 
 $htmlIds = @([regex]::Matches($html, 'id="([^"]+)"') | ForEach-Object { $_.Groups[1].Value } | Sort-Object -Unique)
 $usedIds = @([regex]::Matches($js, "getElementById\('([^']+)'\)") | ForEach-Object { $_.Groups[1].Value } | Sort-Object -Unique)

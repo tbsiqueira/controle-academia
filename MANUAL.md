@@ -312,12 +312,16 @@ Os dados atuais são substituídos pelos do arquivo. Mudou de ideia? O botão
 
 ### Apagar todos os dados
 Toque em **Apagar todos os dados** — abre uma **tela própria** com o aviso do que será apagado
-(treinos, fichas, biblioteca, colinha e metas). Para confirmar, você precisa **digitar `APAGAR`**
-e **marcar o checkbox**. É definitivo e não tem volta — se quiser guardar, exporte o backup antes.
+(treinos, fichas, biblioteca, colinha e metas). Para confirmar, basta **marcar o checkbox**
+_"Quero realmente apagar todos os meus dados"_ e tocar em **Apagar tudo**.
+
+É definitivo e não tem volta — por isso a tela lembra de usar **Mais → Dados → Compartilhar backup**
+antes, caso você queira guardar uma cópia.
 
 ### Atualizar app
 O botão **Atualizar app** limpa o cache e recarrega a versão mais nova. Use se algo parecer "travado" ou
-desatualizado (a versão atual aparece no rodapé desta tela, ex.: `v31`).
+desatualizado (a versão atual aparece no rodapé desta tela, ex.: `v37`). Se o app não abrir de jeito nenhum,
+existe uma página de escape: abra o endereço do app terminando em `/reset.html`.
 
 ### Dados de exemplo (para conhecer o app)
 Ainda em **Mais**, no card **Dados de exemplo**, o botão **Carregar dados de exemplo** preenche o app com um

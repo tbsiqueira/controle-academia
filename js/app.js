@@ -1458,39 +1458,31 @@ function renderErase() {
     'treinos, fichas, exercícios da biblioteca, colinha e metas. <strong>Não há como desfazer.</strong>' +
     '</div>' +
     '<div class="card mb-3"><div class="card-body">' +
-    '<p class="small text-muted mb-2">Antes de apagar, você pode salvar um backup em JSON:</p>' +
-    '<button class="btn btn-outline-primary w-100" type="button" id="eraseExport"><i class="bi bi-download"></i> Exportar backup (JSON)</button>' +
-    '</div></div>' +
-    '<div class="card mb-3"><div class="card-body">' +
-    '<label class="form-label" for="eraseConfirm">Digite <strong>APAGAR</strong> para confirmar</label>' +
-    '<input type="text" class="form-control mb-2" id="eraseConfirm" autocomplete="off" autocapitalize="characters" placeholder="APAGAR">' +
     '<div class="form-check">' +
     '<input class="form-check-input" type="checkbox" id="eraseAck">' +
-    '<label class="form-check-label small" for="eraseAck">Entendi que não há como desfazer.</label>' +
+    '<label class="form-check-label" for="eraseAck">Quero realmente apagar todos os meus dados.</label>' +
     '</div>' +
+    '<p class="small text-muted mb-0 mt-2">Dica: se quiser guardar uma cópia antes, use ' +
+    '<strong>Mais → Dados → Compartilhar backup</strong>.</p>' +
     '</div></div>' +
     '<div class="d-flex gap-2">' +
     '<a href="#/more" class="btn btn-outline-secondary flex-fill">Cancelar</a>' +
     '<button class="btn btn-danger flex-fill" type="button" id="eraseConfirmBtn" disabled><i class="bi bi-trash"></i> Apagar tudo</button>' +
     '</div>';
 
-  const input = document.getElementById('eraseConfirm');
   const ack = document.getElementById('eraseAck');
   const confirmBtn = document.getElementById('eraseConfirmBtn');
 
-  function updateEnabled() {
-    confirmBtn.disabled = !(normalizeText(input.value) === 'apagar' && ack.checked);
-  }
+  ack.addEventListener('change', function () {
+    confirmBtn.disabled = !ack.checked;
+  });
 
-  input.addEventListener('input', updateEnabled);
-  ack.addEventListener('change', updateEnabled);
-  document.getElementById('eraseExport').addEventListener('click', guard(exportData));
   confirmBtn.addEventListener('click', guard(eraseAllData));
 }
 
 async function eraseAllData() {
-  if (normalizeText(document.getElementById('eraseConfirm').value) !== 'apagar') return;
-  if (!document.getElementById('eraseAck').checked) return;
+  const ack = document.getElementById('eraseAck');
+  if (!ack || !ack.checked) return;
 
   await dbClear('workouts');
   await dbClear('exercises');
@@ -1635,7 +1627,8 @@ function backupActionStatus(message) {
 // Salva o arquivo no aparelho (download). Aceita um backup já montado para não gerar
 // nomes diferentes na mesma ação.
 async function exportData(prebuilt) {
-  const backup = prebuilt || buildBackup();
+  // AtenÃ§Ã£o: o handler de clique passa o evento como argumento; sÃ³ usamos um backup de verdade.
+  const backup = isBackupPayload(prebuilt) ? prebuilt : buildBackup();
   const url = URL.createObjectURL(new Blob([backup.json], { type: 'application/json' }));
   const a = document.createElement('a');
   a.href = url;
@@ -1866,7 +1859,7 @@ function bindEvents() {
   document.getElementById('btnSaveSettings').addEventListener('click', guard(saveSettingsForm));
   document.getElementById('btnWeekToday').addEventListener('click', guard(startWeekToday));
 
-  document.getElementById('btnExport').addEventListener('click', guard(exportData));
+  document.getElementById('btnExport').addEventListener('click', function () { exportData(); });
   document.getElementById('btnShareBackup').addEventListener('click', guard(shareBackup));
   document.getElementById('exportCopy').addEventListener('click', guard(copyExportText));
   document.getElementById('exportShare').addEventListener('click', guard(shareExportText));
