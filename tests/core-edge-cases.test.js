@@ -312,3 +312,38 @@ test('normalizeBackup aceita ficha inativa e exercicio inativo', () => {
   assert.equal(backup.exercises[0].active, false);
   assert.equal(core.libraryExercises(backup.exercises).length, 0, 'inativo nao aparece na biblioteca');
 });
+
+test('parseLocalNumber e toNumOrNull com valores vazios ou invalidos', () => {
+  assert.equal(core.parseLocalNumber(''), Number.NaN);
+  assert.equal(core.parseLocalNumber('   '), Number.NaN);
+  assert.equal(core.parseLocalNumber(null), Number.NaN);
+  assert.equal(core.parseLocalNumber(undefined), Number.NaN);
+  assert.equal(core.parseLocalNumber('12,5'), 12.5);
+  assert.equal(core.parseLocalNumber('1.234,5'), 1234.5, 'formato brasileiro');
+  assert.equal(core.parseLocalNumber('1,234.5'), 1234.5, 'formato americano');
+  assert.equal(core.toNumOrNull(''), null);
+  assert.equal(core.toNumOrNull('abc'), null);
+  assert.equal(core.toNumOrNull(0), 0);
+  assert.equal(core.formatDecimal(0), '0');
+  assert.equal(core.formatDecimal(2.5, true), '2,5');
+});
+
+test('renameInWorkouts nao mexe quando o nome ja esta atualizado', () => {
+  const treinos = [{
+    id: 'w1',
+    sets: [{ exerciseId: 5, exerciseName: 'Novo', number: 1, reps: 10, load: 30 }],
+    warmups: [{ exerciseId: 5, exerciseName: 'Novo', reps: 15, load: 10, rir: 3 }]
+  }];
+
+  const resultado = core.renameInWorkouts(treinos, 5, 'Novo');
+
+  assert.equal(resultado.changed, 0);
+  assert.deepEqual(resultado.workouts, treinos);
+});
+
+test('isValidWorkout distingue treino vazio de treino so com cardio', () => {
+  assert.equal(core.isValidWorkout({ sets: [], cardioMinutes: 0 }), false);
+  assert.equal(core.isValidWorkout({ sets: [], cardioMinutes: 20 }), true);
+  assert.equal(core.isValidWorkout({ sets: [{ reps: 10 }] }), true, 'serie vazia nao conta');
+  assert.equal(core.isValidWorkout({ sets: [{ reps: 10, load: 20 }] }), true);
+});
