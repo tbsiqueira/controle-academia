@@ -347,3 +347,38 @@ test('isValidWorkout distingue treino vazio de treino so com cardio', () => {
   assert.equal(core.isValidWorkout({ sets: [{ reps: 10 }] }), true, 'serie vazia nao conta');
   assert.equal(core.isValidWorkout({ sets: [{ reps: 10, load: 20 }] }), true);
 });
+
+test('exerciseMatches cobre os dois lados do fallback "(sem nome)"', () => {
+  assert.equal(core.exerciseMatches({ exerciseName: '' }, { exerciseName: 'X' }), false);
+  assert.equal(core.exerciseMatches({ exerciseName: 'X' }, { exerciseName: '' }), false);
+  assert.equal(core.exerciseMatches({ exerciseName: '' }, { exerciseName: '' }), false);
+  assert.equal(core.exerciseMatches({ exerciseId: 3 }, { exerciseId: 3, exerciseName: '' }), true, 'id manda');
+});
+
+test('lastWarmupForExercise devolve null quando o treino tem aquecimento de outro exercicio', () => {
+  const treinos = [{
+    id: 'a',
+    date: '2026-10-01',
+    warmups: [{ exerciseId: 1, exerciseName: 'Esteira', reps: 5, load: 0, rir: 4 }]
+  }];
+
+  assert.equal(core.lastWarmupForExercise(treinos, { exerciseId: 2, exerciseName: 'Leg press' }), null);
+  assert.equal(core.lastWarmupForExercise(treinos, 'Leg press'), null, 'busca por nome tambem');
+});
+
+test('groupSets usa o aquecimento do grupo certo quando ha varios exercicios', () => {
+  const grupos = core.groupSets(
+    [
+      { exerciseId: 1, exerciseName: 'Leg press', number: 1, reps: 12, load: 100 },
+      { exerciseId: 2, exerciseName: 'Cadeira flexora', number: 1, reps: 12, load: 40 }
+    ],
+    [
+      { exerciseId: 2, exerciseName: 'Cadeira flexora', reps: 15, load: 20, rir: 3 },
+      { exerciseId: 1, exerciseName: 'Leg press', reps: 20, load: 40, rir: 4 }
+    ]
+  );
+
+  assert.equal(grupos.length, 2);
+  assert.deepEqual(grupos[0].warmup, { reps: 20, load: 40, rir: 4 });
+  assert.deepEqual(grupos[1].warmup, { reps: 15, load: 20, rir: 3 });
+});
