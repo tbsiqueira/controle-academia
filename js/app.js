@@ -940,8 +940,34 @@ async function saveExerciseForm() {
 
   await dbPut('exercises', exercise);
   state.exercises = await dbAll('exercises');
+
+  if (existing && existing.name !== exercise.name) {
+    await applyExerciseRename(exercise.id, existing.name, exercise.name);
+  }
+
   bootstrap.Modal.getInstance(document.getElementById('exerciseFormModal')).hide();
   renderExercises();
+}
+
+// Ao renomear um exercício, mantém fichas e histórico coerentes (referência por id).
+async function applyExerciseRename(exerciseId, oldName, newName) {
+  const sheetResult = renameInSheets(state.sheets, exerciseId, oldName, newName);
+  if (sheetResult.changed) {
+    for (let i = 0; i < sheetResult.sheets.length; i++) {
+      if (sheetResult.sheets[i] !== state.sheets[i]) await dbPut('sheets', sheetResult.sheets[i]);
+    }
+    state.sheets = await dbAll('sheets');
+  }
+
+  const workoutResult = renameInWorkouts(state.workouts, exerciseId, newName);
+  if (workoutResult.changed) {
+    for (let i = 0; i < workoutResult.workouts.length; i++) {
+      if (workoutResult.workouts[i] !== state.workouts[i]) await dbPut('workouts', workoutResult.workouts[i]);
+    }
+    state.workouts = await dbAll('workouts');
+  }
+
+  return sheetResult.changed + workoutResult.changed;
 }
 
 async function deleteExercise(id) {
@@ -1030,11 +1056,16 @@ function openSheetEditor(id) {
 function sheetRepsRow(item, idx) {
   const count = Math.min(Math.max(parseInt(item.sets, 10) || 1, 1), 20);
   const reps = Array.isArray(item.reps) ? item.reps : [];
-  let html = '<div class="row g-1 mt-1">';
+  let html = '<div class="row g-2">';
 
   for (let i = 0; i < count; i++) {
     const value = (reps[i] === undefined || reps[i] === null) ? '' : reps[i];
-    html += '<div class="col-3"><input type="number" min="1" class="form-control form-control-sm" value="' + esc(value) + '" placeholder="' + (i + 1) + 'ª série" oninput="setSheetReps(' + idx + ',' + i + ',this.value)"></div>';
+    html += '<div class="col-4">' +
+      '<input type="number" min="1" class="form-control form-control-sm" id="sheet-rep-' + idx + '-' + i + '"' +
+      ' value="' + esc(value) + '" placeholder="' + (i + 1) + 'ª série"' +
+      ' aria-label="Reps da ' + (i + 1) + 'ª série"' +
+      ' oninput="setSheetReps(' + idx + ',' + i + ',this.value)">' +
+      '</div>';
   }
 
   html += '</div>';
@@ -1043,33 +1074,48 @@ function sheetRepsRow(item, idx) {
 
 function sheetExerciseRow(item, idx) {
   const note = item.note || '';
-  return '<div class="border rounded p-2 mb-2">' +
-    '<div class="d-flex justify-content-between align-items-center mb-1">' +
+
+  return '<li class="sheet-edit-item">' +
+    '<div class="d-flex justify-content-between align-items-start mb-2">' +
     '<strong><span class="badge text-bg-primary me-1">' + (idx + 1) + '</span>' + esc(item.name) + '</strong>' +
     '<div class="d-flex gap-1">' +
     '<button type="button" class="btn btn-sm btn-outline-secondary" onclick="moveSheetExercise(' + idx + ',-1)" title="Subir" aria-label="Subir exercício"><i class="bi bi-arrow-up"></i></button>' +
     '<button type="button" class="btn btn-sm btn-outline-secondary" onclick="moveSheetExercise(' + idx + ',1)" title="Descer" aria-label="Descer exercício"><i class="bi bi-arrow-down"></i></button>' +
     '<button type="button" class="btn btn-sm btn-outline-danger" onclick="removeSheetExercise(' + idx + ')" title="Remover" aria-label="Remover exercício"><i class="bi bi-trash"></i></button>' +
-    '</div></div>' +
-    '<div class="row g-1 align-items-center">' +
-    '<div class="col-3"><input type="number" min="1" max="20" class="form-control form-control-sm" value="' + esc(item.sets) + '" placeholder="séries" onchange="setSheetSets(' + idx + ',this.value)"></div>' +
-    '<div class="col-9"><input type="text" class="form-control form-control-sm" value="' + esc(note) + '" placeholder="observação da professora" oninput="setSheetField(' + idx + ",'note',this.value)\"></div>" +
     '</div>' +
-    '<div class="small text-muted mt-1">reps por série:</div>' +
+    '</div>' +
+    '<div class="row g-2">' +
+    '<div class="col-4">' +
+    '<label class="form-label small text-muted mb-1" for="sheet-sets-' + idx + '">Séries</label>' +
+    '<input type="number" min="1" max="20" class="form-control form-control-sm" id="sheet-sets-' + idx + '" value="' + esc(item.sets) + '" placeholder="3" onchange="setSheetSets(' + idx + ',this.value)">' +
+    '</div>' +
+    '<div class="col-8">' +
+    '<label class="form-label small text-muted mb-1" for="sheet-note-' + idx + '">Observação da professora</label>' +
+    '<input type="text" class="form-control form-control-sm" id="sheet-note-' + idx + '" value="' + esc(note) + '" placeholder="ex.: pausa de 1s embaixo" oninput="setSheetField(' + idx + ",'note',this.value)\">" +
+    '</div>' +
+    '</div>' +
+    '<div class="mt-2">' +
+    '<label class="form-label small text-muted mb-1">Reps por série</label>' +
     sheetRepsRow(item, idx) +
-    '</div>';
+    '</div>' +
+    '</li>';
 }
 
 function renderSheetExerciseList() {
   const el = document.getElementById('sheetExerciseList');
+
   if (!state.sheetExercises.length) {
-    el.innerHTML = '<p class="text-muted small">Nenhum exercício na ficha ainda. Use "Adicionar exercício".</p>';
+    el.innerHTML = '<p class="text-muted small mb-0">Nenhum exercício na ficha ainda. Use "Adicionar exercício".</p>';
     return;
   }
-  el.innerHTML = state.sheetExercises.map(function (item, idx) {
+
+  el.innerHTML = '<ul class="list-unstyled mb-0">' + state.sheetExercises.map(function (item, idx) {
     return sheetExerciseRow(item, idx);
-  }).join('');
+  }).join('') + '</ul>';
 }
+
+
+
 
 function setSheetField(idx, field, value) {
   if (!state.sheetExercises[idx]) return;
@@ -1710,6 +1756,19 @@ function guard(fn) {
 // Versões anteriores escondiam da Biblioteca os exercícios cujo NOME existia no catálogo.
 // Isso escondia exercícios criados pelo usuário — aqui desfazemos essa marcação
 // (mantemos 'catalog' apenas quando houver catalogId, que comprova a origem).
+// Dá "chave estrangeira" aos itens de ficha antigos: liga pelo nome ao exercício da Biblioteca.
+async function linkSheetItems() {
+  const result = linkSheetItemsToExercises(state.sheets, state.exercises);
+  if (!result.changed) return 0;
+
+  for (let i = 0; i < result.sheets.length; i++) {
+    if (result.sheets[i] !== state.sheets[i]) await dbPut('sheets', result.sheets[i]);
+  }
+
+  state.sheets = await dbAll('sheets');
+  return result.changed;
+}
+
 async function repairLibrarySources() {
   const wrong = exercisesNeedingRepair(state.exercises);
 
@@ -1724,6 +1783,7 @@ async function repairLibrarySources() {
 async function init() {
   await loadState();
   await repairLibrarySources();
+  await linkSheetItems();
 
   try {
     await loadCatalog();

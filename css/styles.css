@@ -214,11 +214,21 @@ body {
 
 .sheet-items li {
   display: flex;
+  flex-wrap: wrap;
   align-items: baseline;
   gap: 6px;
   padding: 4px 0;
   font-size: 0.92rem;
   border-top: 1px solid #f2eefb;
+}
+
+/* Cada exercicio dentro do editor da ficha */
+.sheet-edit-item {
+  border: 1px solid #e9e4f5;
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 10px;
+  background: #ffffff;
 }
 
 .sheet-items li:first-child {

@@ -110,15 +110,22 @@ test('warmupSummary conta os aquecimentos', () => {
   assert.equal(core.warmupSummary([{}, {}]), '2 aquecimentos');
 });
 
-test('setsSummaryLines ordena por serie e escapa a observacao', () => {
+test('setsSummaryLines devolve lista ordenada por serie e escapa a observacao', () => {
   const html = core.setsSummaryLines([
     { number: 2, reps: 10, load: 27, rir: 1, note: '' },
     { number: 1, reps: 12, load: 27, rir: 2, note: '<b>forte</b>' }
   ]);
-  assert.ok(html.indexOf('Série 1: 12 reps · 27 kg · RIR 2') !== -1);
-  assert.ok(html.indexOf('Série 2: 10 reps · 27 kg · RIR 1') !== -1);
-  assert.ok(html.indexOf('&lt;b&gt;forte&lt;/b&gt;') !== -1);
-  assert.ok(html.indexOf('Série 1') < html.indexOf('Série 2'));
+
+  assert.ok(html.indexOf('<ul') === 0, 'e uma lista (ul)');
+  assert.ok(html.indexOf('sheet-item-idx') !== -1, 'usa o mesmo estilo da lista de fichas');
+  assert.ok(html.indexOf('12 reps · 27 kg · RIR 2') !== -1);
+  assert.ok(html.indexOf('10 reps · 27 kg · RIR 1') !== -1);
+  assert.ok(html.indexOf('&lt;b&gt;forte&lt;/b&gt;') !== -1, 'observacao escapada');
+  assert.ok(html.indexOf('12 reps') < html.indexOf('10 reps'), 'serie 1 antes da 2');
+});
+
+test('setsSummaryLines de lista vazia nao gera markup', () => {
+  assert.equal(core.setsSummaryLines([]), '');
 });
 
 test('groupSets agrupa por exercicio, preserva a ordem e junta o aquecimento', () => {
@@ -233,6 +240,119 @@ test('workoutAsText omite cardio, observacoes e ficha quando vazios', () => {
   assert.equal(text.indexOf('Ficha:'), -1);
   assert.ok(text.indexOf('1. X') !== -1);
 });
+
+/* ---------- referência por id (chave estrangeira) ---------- */
+
+test('linkSheetItemsToExercises liga fichas antigas ao exercicio pelo nome', () => {
+  const sheets = [{
+    id: 's1', name: 'TREINO A',
+    exercises: [
+      { name: 'Elevação pélvica', sets: 3, reps: [12, 10, 8], note: '' },
+      { name: 'Desconhecido', sets: 3, reps: [10], note: '' },
+      { name: 'Leg press 45', exerciseId: 'ja-tinha', sets: 3, reps: [12], note: '' }
+    ]
+  }];
+  const exercises = [{ id: 'e1', name: 'Elevação pélvica' }, { id: 'e2', name: 'Leg press 45' }];
+
+  const result = core.linkSheetItemsToExercises(sheets, exercises);
+
+  assert.equal(result.changed, 1);
+  assert.equal(result.sheets[0].exercises[0].exerciseId, 'e1');
+  assert.equal(result.sheets[0].exercises[1].exerciseId, undefined, 'nome desconhecido nao recebe id');
+  assert.equal(result.sheets[0].exercises[2].exerciseId, 'ja-tinha', 'id existente e preservado');
+  assert.deepEqual(result.sheets[0].exercises[0].reps, [12, 10, 8], 'nada mais muda');
+});
+
+test('linkSheetItemsToExercises nao liga quando o nome e ambiguo', () => {
+  const sheets = [{ id: 's1', name: 'A', exercises: [{ name: 'Supino', sets: 3, reps: [10], note: '' }] }];
+  const exercises = [{ id: 'e1', name: 'Supino' }, { id: 'e2', name: 'supino' }];
+
+  const result = core.linkSheetItemsToExercises(sheets, exercises);
+
+  assert.equal(result.changed, 0);
+  assert.equal(result.sheets[0].exercises[0].exerciseId, undefined);
+});
+
+test('renameInSheets atualiza por id e tambem fichas antigas pelo nome', () => {
+  const sheets = [{
+    id: 's1', name: 'A',
+    exercises: [
+      { exerciseId: 'e1', name: 'Puxada frente', sets: 3, reps: [12], note: '' },
+      { name: 'puxada frente', sets: 3, reps: [10], note: '' },
+      { exerciseId: 'e2', name: 'Outro', sets: 3, reps: [10], note: '' }
+    ]
+  }];
+
+  const result = core.renameInSheets(sheets, 'e1', 'Puxada frente', 'Puxada frente supinada');
+
+  assert.equal(result.changed, 2);
+  assert.equal(result.sheets[0].exercises[0].name, 'Puxada frente supinada');
+  assert.equal(result.sheets[0].exercises[1].name, 'Puxada frente supinada');
+  assert.equal(result.sheets[0].exercises[1].exerciseId, 'e1', 'item antigo ganha a referencia');
+  assert.equal(result.sheets[0].exercises[2].name, 'Outro', 'outros exercicios nao mudam');
+});
+
+test('renameInSheets e idempotente', () => {
+  const sheets = [{ id: 's1', name: 'A', exercises: [{ exerciseId: 'e1', name: 'Antigo', sets: 3, reps: [12], note: '' }] }];
+
+  const once = core.renameInSheets(sheets, 'e1', 'Antigo', 'Novo');
+  const twice = core.renameInSheets(once.sheets, 'e1', 'Antigo', 'Novo');
+
+  assert.equal(twice.changed, 0);
+  assert.deepEqual(twice.sheets, once.sheets);
+});
+
+test('renameInWorkouts atualiza o historico que aponta para o id', () => {
+  const workouts = [
+    {
+      id: 'w1', date: '2026-10-01',
+      sets: [{ exerciseId: 'e1', exerciseName: 'Puxada frente', number: 1, reps: 12, load: 40, rir: 2 }],
+      warmups: [{ exerciseId: 'e1', exerciseName: 'Puxada frente', reps: 15, load: 20, rir: 3 }]
+    },
+    {
+      id: 'w2', date: '2026-10-02',
+      sets: [{ exerciseId: null, exerciseName: 'Puxada frente', number: 1, reps: 10, load: 45, rir: 2 }],
+      warmups: []
+    }
+  ];
+
+  const result = core.renameInWorkouts(workouts, 'e1', 'Puxada frente supinada');
+
+  assert.equal(result.changed, 2);
+  assert.equal(result.workouts[0].sets[0].exerciseName, 'Puxada frente supinada');
+  assert.equal(result.workouts[0].warmups[0].exerciseName, 'Puxada frente supinada');
+  assert.equal(result.workouts[1].sets[0].exerciseName, 'Puxada frente', 'registro antigo (sem id) nao e reescrito');
+  assert.equal(result.workouts[1].sets[0].load, 45, 'nenhum dado do treino muda');
+});
+
+test('renameInWorkouts sem id nao altera nada', () => {
+  const workouts = [{ id: 'w', date: '2026-10-01', sets: [{ exerciseId: null, exerciseName: 'X', number: 1, reps: 10, load: 20, rir: 2 }] }];
+
+  const result = core.renameInWorkouts(workouts, null, 'Y');
+
+  assert.equal(result.changed, 0);
+  assert.deepEqual(result.workouts, workouts);
+});
+
+test('regressao: renomear exercicio reflete na ficha antiga (dados ja existentes)', () => {
+  const sheets = [{
+    id: 's1', name: 'TREINO A - inferiores',
+    exercises: [{ name: 'Elevação pelvica', sets: 3, reps: [12, 10, 8], note: 'pausa de 1s' }]
+  }];
+  const exercises = [{ id: 'e1', name: 'Elevação pelvica' }];
+
+  const linked = core.linkSheetItemsToExercises(sheets, exercises);
+  assert.equal(linked.sheets[0].exercises[0].exerciseId, 'e1', 'migracao da ficha antiga');
+
+  const renamed = core.renameInSheets(linked.sheets, 'e1', 'Elevação pelvica', 'Elevação pélvica (glúteo)');
+
+  assert.equal(renamed.sheets[0].exercises[0].name, 'Elevação pélvica (glúteo)');
+  assert.equal(renamed.sheets[0].exercises[0].exerciseId, 'e1');
+  assert.deepEqual(renamed.sheets[0].exercises[0].reps, [12, 10, 8]);
+  assert.equal(renamed.sheets[0].exercises[0].note, 'pausa de 1s');
+});
+
+/* ---------- backup ---------- */
 
 /* ---------- backup ---------- */
 

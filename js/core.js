@@ -132,11 +132,18 @@
     return parts.join(' · ');
   }
 
+  // Lista (ul) das séries, no mesmo estilo da lista de exercícios das fichas.
   function setsSummaryLines(sets) {
-    return sets.slice().sort(function (a, b) { return toNum(a.number) - toNum(b.number); }).map(function (s) {
-      return '<div class="small mt-1">Série ' + (s.number || '?') + ': ' + esc(setLine(s)) +
-        (s.note ? ' <span class="text-muted">(' + esc(s.note) + ')</span>' : '') + '</div>';
-    }).join('');
+    const ordered = (sets || []).slice().sort(function (a, b) { return toNum(a.number) - toNum(b.number); });
+    if (!ordered.length) return '';
+
+    return '<ul class="list-unstyled sheet-items mb-0">' + ordered.map(function (s) {
+      return '<li>' +
+        '<span class="sheet-item-idx">' + esc(s.number || '?') + '</span>' +
+        '<span class="sheet-item-detail">' + esc(setLine(s)) + '</span>' +
+        (s.note ? '<span class="sheet-item-note text-truncate">' + esc(s.note) + '</span>' : '') +
+        '</li>';
+    }).join('') + '</ul>';
   }
 
   // Agrupa as séries planas do treino por exercício (na ordem em que aparecem),
@@ -289,6 +296,90 @@
     if (workout.notes) lines.push('Observações: ' + workout.notes);
 
     return lines.join('\n').trim();
+  }
+
+  /* ---------- referência por id (chave estrangeira) ---------- */
+
+  // Liga itens de ficha antigos (só com nome) ao exercício da Biblioteca, quando o nome casa
+  // de forma inequívoca. É a migração que dá "chave estrangeira" às fichas já existentes.
+  function linkSheetItemsToExercises(sheets, exercises) {
+    const idsByName = {};
+    (exercises || []).forEach(function (e) {
+      const key = normalizeText(e.name);
+      if (!key) return;
+      idsByName[key] = idsByName[key] || [];
+      idsByName[key].push(e.id);
+    });
+
+    let changed = 0;
+
+    const updated = (sheets || []).map(function (sheet) {
+      let sheetChanged = false;
+      const items = (sheet.exercises || []).map(function (item) {
+        if (item.exerciseId) return item;
+        const ids = idsByName[normalizeText(item.name)] || [];
+        if (ids.length !== 1) return item;   // nome ambíguo ou inexistente: não mexe
+        changed++;
+        sheetChanged = true;
+        return Object.assign({}, item, { exerciseId: ids[0] });
+      });
+      return sheetChanged ? Object.assign({}, sheet, { exercises: items }) : sheet;
+    });
+
+    return { sheets: updated, changed: changed };
+  }
+
+  // Renomear um exercício precisa refletir nas fichas: por id (preferencial) e, para itens
+  // antigos sem id, pelo nome anterior.
+  function renameInSheets(sheets, exerciseId, oldName, newName) {
+    const oldKey = normalizeText(oldName);
+    let changed = 0;
+
+    const updated = (sheets || []).map(function (sheet) {
+      let sheetChanged = false;
+      const items = (sheet.exercises || []).map(function (item) {
+        const byId = item.exerciseId && exerciseId && item.exerciseId === exerciseId;
+        const byName = !item.exerciseId && oldKey && normalizeText(item.name) === oldKey;
+        if (!byId && !byName) return item;
+        if (item.name === newName && item.exerciseId === exerciseId) return item;
+        changed++;
+        sheetChanged = true;
+        return Object.assign({}, item, { name: newName, exerciseId: exerciseId });
+      });
+      return sheetChanged ? Object.assign({}, sheet, { exercises: items }) : sheet;
+    });
+
+    return { sheets: updated, changed: changed };
+  }
+
+  // No histórico só atualizamos registros que apontam para o id do exercício
+  // (não reescrevemos lançamentos antigos que têm apenas o nome).
+  function renameInWorkouts(workouts, exerciseId, newName) {
+    if (!exerciseId) return { workouts: workouts || [], changed: 0 };
+
+    let changed = 0;
+
+    const updated = (workouts || []).map(function (workout) {
+      let workoutChanged = false;
+
+      const sets = (workout.sets || []).map(function (s) {
+        if (s.exerciseId !== exerciseId || s.exerciseName === newName) return s;
+        changed++;
+        workoutChanged = true;
+        return Object.assign({}, s, { exerciseName: newName });
+      });
+
+      const warmups = (workout.warmups || []).map(function (w) {
+        if (w.exerciseId !== exerciseId || w.exerciseName === newName) return w;
+        changed++;
+        workoutChanged = true;
+        return Object.assign({}, w, { exerciseName: newName });
+      });
+
+      return workoutChanged ? Object.assign({}, workout, { sets: sets, warmups: warmups }) : workout;
+    });
+
+    return { workouts: updated, changed: changed };
   }
 
   /* ---------- backup ---------- */
@@ -466,6 +557,10 @@
     defaultSettings: defaultSettings,
     weekWindow: weekWindow,
     isValidWorkout: isValidWorkout,
+    // referência por id
+    linkSheetItemsToExercises: linkSheetItemsToExercises,
+    renameInSheets: renameInSheets,
+    renameInWorkouts: renameInWorkouts,
     // backup
     backupFileName: backupFileName,
     // biblioteca
