@@ -118,15 +118,11 @@ function trechosSemTeste() {
     porExecucao[chave].forEach(function (faixa) {
       if (faixa.contagem > 0) return;
 
-      // O mesmo trecho pode ter rodado em outra execucao do arquivo (ex.: vm do navegador).
-      // So conta como coberto se OUTRA execucao cobriu exatamente a mesma faixa.
+      // O mesmo trecho (mesmos offsets) pode aparecer em varias entradas do relatorio
+      // (funcoes aninhadas, o core carregado de novo no vm...). Basta UMA execucao
+      // ter passado por ele para considerarmos coberto.
       const assinatura = faixa.inicio + ':' + faixa.fim;
-      const cobertoEmOutraExecucao = executacoes.some(function (outra) {
-        return outra !== chave && (porExecucao[outra] || []).some(function (outra1) {
-          return outra1.inicio === faixa.inicio && outra1.fim === faixa.fim && outra1.contagem > 0;
-        });
-      }) && cobertos[assinatura] > 0;
-      if (cobertoEmOutraExecucao) return;
+      if (cobertos[assinatura] > 0) return;
 
       achados.push({
         inicio: linhaDe(faixa.inicio),

@@ -12,10 +12,11 @@ const vm = require('node:vm');
 require('../js/core.js');
 
 test('core.js se registra no navegador quando nao existe module.exports', () => {
-  const fonte = fs.readFileSync(path.join(__dirname, '..', 'js', 'core.js'), 'utf8');
+  const arquivo = path.join(__dirname, '..', 'js', 'core.js');
+  const fonte = fs.readFileSync(arquivo, 'utf8');
   const escopo = { self: {} };                 // simula o navegador (sem module)
   vm.createContext(escopo);
-  vm.runInContext(fonte, escopo);
+  new vm.Script(fonte, { filename: arquivo }).runInContext(escopo);
 
   assert.equal(typeof escopo.self.weekWindow, 'function', 'funcoes viram globais no navegador');
   assert.equal(typeof escopo.self.exerciseLabel, 'function', 'resolvers tambem ficam globais');
