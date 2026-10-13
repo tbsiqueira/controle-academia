@@ -35,8 +35,8 @@ jobs:
       - name: Rodar testes (node --test)
         run: node --test tests/
 
-      - name: Cobertura de js/core.js (informativa)
-        run: node --test --experimental-test-coverage tests/ || true
+      - name: Cobertura de js/core.js (gate)
+        run: node tools/coverage-gate.js
 
   estatico:
     name: Verificações estáticas
