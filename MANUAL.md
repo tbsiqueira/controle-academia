@@ -147,7 +147,7 @@ Elevação pélvica                                    [3 séries]
 ## 5. Vendo como foi o treino e a evolução
 
 **Ver um treino (somente leitura):**
-Início → **toque no treino** na lista *Últimos treinos*. Aparece o resumo do dia: ficha, cardio,
+Início → **toque no treino** na lista *Todos os treinos*. Aparece o resumo do dia: ficha, cardio,
 observações e cada exercício com aquecimento, séries e cargas. Nessa tela: **Editar**, **Exportar** e **Excluir**.
 
 **Ver a evolução de um exercício:**

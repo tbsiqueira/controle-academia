@@ -126,7 +126,7 @@ async function confirmNextWeek() {
 function renderDashboard() {
   renderWeek();
   renderBackupReminder();
-  renderRecent();
+  renderWorkoutList();
 }
 
 function renderWeek() {
@@ -168,31 +168,33 @@ function renderWeek() {
 }
 
 
-function renderRecent() {
+function renderWorkoutList() {
   const el = document.getElementById('recentWorkouts');
-  const recent = state.workouts.slice().sort(function (a, b) {
+  const workouts = state.workouts.slice().sort(function (a, b) {
     return a.date < b.date ? 1 : -1;
-  }).slice(0, 5);
+  });
 
-  if (!recent.length) {
+  if (!workouts.length) {
     el.innerHTML = '<p class="text-muted"><i class="bi bi-emoji-smile"></i> Nenhum treino registrado ainda. Toque em <strong>Treinar</strong> para começar.</p>';
     return;
   }
 
-  el.innerHTML = '<h6 class="mt-2"><i class="bi bi-clock-history text-primary"></i> Últimos treinos</h6>' + recent.map(function (w) {
-    const setCount = (w.sets || []).length;
-    const name = sheetLabel(w, state.sheets) || 'Treino';
-    const warm = warmupSummary(w.warmups);
-    return '<div class="card mb-2"><div class="card-body py-2 d-flex justify-content-between align-items-center">' +
-      '<button type="button" class="btn btn-link p-0 text-start text-decoration-none flex-grow-1" data-view-workout="' + esc(w.id) + '">' +
-      '<strong>' + esc(name) + '</strong><br>' +
-      '<small class="text-muted">' + fmtBR(w.date) + ' · ' + setCount + ' exerc.' + (warm ? ' · ' + esc(warm) : '') + '</small>' +
-      '</button>' +
-      '<div class="d-flex gap-1">' +
-      '<button type="button" class="btn btn-sm btn-outline-secondary" data-share-workout="' + esc(w.id) + '" title="Exportar como texto" aria-label="Exportar como texto"><i class="bi bi-share"></i></button>' +
-      '</div>' +
-      '</div></div>';
-  }).join('');
+  el.innerHTML = '<h6 class="mt-2"><i class="bi bi-clock-history text-primary"></i> Todos os treinos ' +
+    '<span class="badge text-bg-secondary">' + workouts.length + '</span></h6>' +
+    workouts.map(function (w) {
+      const setCount = (w.sets || []).length;
+      const name = sheetLabel(w, state.sheets) || 'Treino';
+      const warm = warmupSummary(w.warmups);
+      return '<div class="card mb-2"><div class="card-body py-2 d-flex justify-content-between align-items-center">' +
+        '<button type="button" class="btn btn-link p-0 text-start text-decoration-none flex-grow-1" data-view-workout="' + esc(w.id) + '">' +
+        '<strong>' + esc(name) + '</strong><br>' +
+        '<small class="text-muted">' + fmtBR(w.date) + ' · ' + setCount + ' exerc.' + (warm ? ' · ' + esc(warm) : '') + '</small>' +
+        '</button>' +
+        '<div class="d-flex gap-1">' +
+        '<button type="button" class="btn btn-sm btn-outline-secondary" data-share-workout="' + esc(w.id) + '" title="Exportar como texto" aria-label="Exportar como texto"><i class="bi bi-share"></i></button>' +
+        '</div>' +
+        '</div></div>';
+    }).join('');
 
   el.querySelectorAll('[data-view-workout]').forEach(function (b) {
     b.addEventListener('click', function () {
@@ -206,26 +208,6 @@ function renderRecent() {
       exportWorkoutText(b.getAttribute('data-share-workout'));
     });
   });
-}
-
-
-
-
-/* ---------- referências por id (nome sempre atual) ---------- */
-
-// Biblioteca do usuário + catálogo: usado para resolver o nome ATUAL pelo id.
-function allExercises() {
-  return (state.exercises || []).concat(state.catalog || []);
-}
-
-// Nome atual de um exercício guardado em um registro (resolve pelo id).
-function labelOf(item) {
-  return exerciseLabel(item, allExercises());
-}
-
-// Referência (id + nome atual) usada nas buscas de histórico e ao gravar.
-function refOf(item) {
-  return { exerciseId: (item && item.exerciseId) || null, exerciseName: labelOf(item) };
 }
 
 /* ---------- read-only workout detail ---------- */
@@ -1284,7 +1266,7 @@ async function createExerciseFromSheetPicker() {
 function refreshAfterSheetChange() {
   renderSheets();
   renderSheetOptions(document.getElementById('workoutSheet').value || null);
-  renderRecent();
+  renderWorkoutList();
   renderCalendar();
 }
 
