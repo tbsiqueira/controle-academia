@@ -188,6 +188,8 @@ function trechosSemTeste() {
       achados.push({
         inicio: linhaDe(faixa.inicio),
         fim: linhaDe(faixa.fim),
+        inicioOffset: faixa.inicio,
+        fimOffset: faixa.fim,
         trecho: fonte.slice(faixa.inicio, faixa.inicio + 80).split('\n')[0].trim()
       });
     });
@@ -201,12 +203,13 @@ function trechosSemTeste() {
     const ultima = juntas[juntas.length - 1];
     if (ultima && a.inicio <= ultima.fim) {
       ultima.fim = Math.max(ultima.fim, a.fim);
+      ultima.fimOffset = Math.max(ultima.fimOffset || 0, a.fimOffset || 0);
       if (ultima.trecho.length < 70 && a.trecho && ultima.trecho.indexOf(a.trecho) === -1) {
         ultima.trecho = (ultima.trecho + ' / ' + a.trecho).slice(0, 90);
       }
       return;
     }
-    juntas.push({ inicio: a.inicio, fim: a.fim, trecho: a.trecho });
+    juntas.push({ inicio: a.inicio, fim: a.fim, inicioOffset: a.inicioOffset, fimOffset: a.fimOffset, trecho: a.trecho });
   });
 
   return juntas;
@@ -246,6 +249,14 @@ const listaDeLinhas = semTeste.map(function (t) {
 }).join(', ');
 
 console.log('::notice file=' + ALVO + ',line=1::trechos sem teste: ' + listaDeLinhas);
+
+// Detalhe (offsets do V8 + trecho) para conferir o mapeamento linha/offset.
+const detalhes = semTeste.map(function (t) {
+  return 'offsets ' + t.inicioOffset + ':' + t.fimOffset + ' (linhas ' + t.inicio + '-' + t.fim + ') ' +
+    JSON.stringify(t.trecho.slice(0, 70));
+}).join(' | ');
+
+console.log('::notice file=' + ALVO + ',line=1::detalhe: ' + detalhes);
 
 if (enforcar) {
   console.log('::error file=' + ALVO + '::' + resumo);
