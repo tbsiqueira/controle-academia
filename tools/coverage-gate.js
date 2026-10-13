@@ -184,6 +184,12 @@ const resumo = '[cobertura] ' + ALVO + ' com ' + semTeste.length + ' trecho(s) s
   ' (linhas do Node: ' + medidas.linhas + '%, ramos: ' + medidas.ramos + '%)' +
   (enforcar ? '' : ' (informativo)');
 
+const listaDeLinhas = semTeste.map(function (t) {
+  return t.fim > t.inicio ? (t.inicio + '-' + t.fim) : String(t.inicio);
+}).join(', ');
+
+console.log('::notice file=' + ALVO + ',line=1::trechos sem teste: ' + listaDeLinhas);
+
 if (enforcar) {
   console.log('::error file=' + ALVO + '::' + resumo);
   console.error('\n' + resumo);
