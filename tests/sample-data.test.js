@@ -161,3 +161,15 @@ test('regressao: renomear um exercicio custom da fixture atualiza só a ficha qu
   assert.equal(itens[0].name, novoNome);
   assert.deepEqual(itens[0].reps, [12, 10, 10], 'nada mais mudou');
 });
+
+test('fixture: o contador do card conta exercicios (nao series)', () => {
+  const data = sample.data;
+
+  data.workouts.forEach(function (w) {
+    const exercicios = core.countExercises(w);
+    const series = (w.sets || []).length;
+
+    assert.ok(exercicios >= 5, w.id + ': pelo menos 5 exercicios no treino');
+    assert.ok(exercicios < series, w.id + ': exercicios (' + exercicios + ') != series (' + series + ')');
+  });
+});

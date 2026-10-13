@@ -458,3 +458,36 @@ test('lastLoadsForExercise ordena tres treinos (comparador nos dois sentidos)', 
   assert.deepEqual(core.lastLoadsForExercise(treinos, 'X'), { 1: 20 }, 'pega o treino mais recente');
   assert.deepEqual(core.lastLoadsForExercise(treinos.slice().reverse(), 'X'), { 1: 20 });
 });
+
+test('countExercises conta cada exercicio uma vez (series + aquecimento)', () => {
+  assert.equal(core.countExercises(), 0);
+  assert.equal(core.countExercises({}), 0);
+
+  const treino = {
+    sets: [
+      { exerciseId: 5, exerciseName: 'Remada baixa', number: 1, reps: 10, load: 30 },
+      { exerciseId: 5, exerciseName: 'Nome antigo', number: 2, reps: 8, load: 35 },
+      { exerciseId: 6, exerciseName: 'Leg press 45', number: 1, reps: 12, load: 100 },
+      { exerciseName: 'Esteira inclinada', number: 1, reps: 1, load: 0 }
+    ],
+    warmups: [
+      { exerciseId: 5, exerciseName: 'Remada baixa', reps: 15, load: 20, rir: 3 },
+      { exerciseId: 7, exerciseName: 'So aquecimento', reps: 10, load: 10, rir: 2 }
+    ]
+  };
+
+  assert.equal(core.countExercises(treino), 4, 'Remada (2 series + aquecimento) conta 1 vez');
+  assert.equal(core.countExercises({ sets: treino.sets }), 3, 'sem aquecimentos, sobram 3 exercicios');
+
+  assert.equal(core.countExercises({ sets: [
+    { exerciseId: 1, exerciseName: 'Rosca', reps: 10 },
+    { exerciseId: 2, exerciseName: 'Rosca', reps: 10 }
+  ] }), 2, 'mesmo nome com ids diferentes = exercicios diferentes');
+
+  assert.equal(core.countExercises({ sets: [
+    { exerciseName: 'Rosca', reps: 10 },
+    { exerciseName: 'Rosca', reps: 8 }
+  ] }), 1, 'registros antigos sem id com o mesmo nome contam uma vez');
+
+  assert.equal(core.countExercises({ sets: [{ reps: 10 }] }), 1, 'exercicio sem nome conta como um');
+});

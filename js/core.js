@@ -229,6 +229,23 @@
     };
   }
 
+  // Quantos EXERCÍCIOS o treino tem: conta cada exercício uma vez (id-first), juntando
+  // as séries de trabalho com o aquecimento do mesmo exercício.
+  function countExercises(workout) {
+    const w = workout || {};
+    const vistos = {};
+    let total = 0;
+
+    (w.sets || []).concat(w.warmups || []).forEach(function (entry) {
+      const key = exerciseKey(entry);
+      if (vistos[key]) return;
+      vistos[key] = true;
+      total++;
+    });
+
+    return total;
+  }
+
   // Agrupa as séries planas do treino por exercício (id-first, na ordem em que aparecem),
   // juntando a observação do exercício e o aquecimento salvo.
   // Exercícios que só têm aquecimento também viram grupo (senão o aquecimento se perderia
@@ -797,6 +814,7 @@
     exerciseMatches: exerciseMatches,
     exerciseKey: exerciseKey,
     historyTarget: historyTarget,
+    countExercises: countExercises,
     // compatibilidade de dados
     normalizeBackup: normalizeBackup
   };

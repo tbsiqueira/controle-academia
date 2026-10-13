@@ -183,12 +183,15 @@ function renderWorkoutList() {
     '<span class="badge text-bg-secondary">' + workouts.length + '</span></h6>' +
     workouts.map(function (w) {
       const setCount = (w.sets || []).length;
+      const exerciseCount = countExercises(w);
       const name = sheetLabel(w, state.sheets) || 'Treino';
       const warm = warmupSummary(w.warmups);
       return '<div class="card mb-2"><div class="card-body py-2 d-flex justify-content-between align-items-center">' +
         '<button type="button" class="btn btn-link p-0 text-start text-decoration-none flex-grow-1" data-view-workout="' + esc(w.id) + '">' +
         '<strong>' + esc(name) + '</strong><br>' +
-        '<small class="text-muted">' + fmtBR(w.date) + ' · ' + setCount + ' exerc.' + (warm ? ' · ' + esc(warm) : '') + '</small>' +
+        '<small class="text-muted">' + fmtBR(w.date) + ' · ' + exerciseCount + (exerciseCount === 1 ? ' exercício' : ' exercícios') +
+        (setCount ? ' · ' + setCount + (setCount === 1 ? ' série' : ' séries') : '') +
+        (warm ? ' · ' + esc(warm) : '') + '</small>' +
         '</button>' +
         '<div class="d-flex gap-1">' +
         '<button type="button" class="btn btn-sm btn-outline-secondary" data-share-workout="' + esc(w.id) + '" title="Exportar como texto" aria-label="Exportar como texto"><i class="bi bi-share"></i></button>' +
