@@ -320,7 +320,7 @@ test('parseLocalNumber e toNumOrNull com valores vazios ou invalidos', () => {
   assert.equal(core.parseLocalNumber(undefined), Number.NaN);
   assert.equal(core.parseLocalNumber('12,5'), 12.5);
   assert.equal(core.parseLocalNumber('1.234,5'), 1234.5, 'formato brasileiro');
-  assert.equal(core.parseLocalNumber('1,234.5'), 1234.5, 'formato americano');
+  assert.equal(core.parseLocalNumber('1,234.5'), 1.2345, 'entrada ambigua segue a leitura pt-BR (ponto = milhar)');
   assert.equal(core.toNumOrNull(''), null);
   assert.equal(core.toNumOrNull('abc'), null);
   assert.equal(core.toNumOrNull(0), 0);
