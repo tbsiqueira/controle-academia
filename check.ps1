@@ -246,6 +246,37 @@ if (Test-Path $generator) {
   Bad "tools/build-sample-data.ps1 nao encontrado"
 }
 
+# 13) gate de cobertura obrigatorio + checklist de funcionalidades
+if (Test-Path (Join-Path $root 'tools/coverage-gate.js')) {
+  $gateSource = Read-Text 'tools/coverage-gate.js'
+  $workflowTests = Read-Text '.github/workflows/tests.yml'
+
+  if ($workflowTests -match 'tools/coverage-gate\.js') {
+    Ok "gate de cobertura ligado no CI (tools/coverage-gate.js)"
+  } else {
+    Bad "o workflow de testes nao roda tools/coverage-gate.js"
+  }
+
+  if ($gateSource -match 'js/core\.js' -and $gateSource -match 'COVERAGE_ENFORCE') {
+    Ok "gate de cobertura exige 100% de js/core.js"
+  } else {
+    Bad "tools/coverage-gate.js nao exige 100% de js/core.js"
+  }
+} else {
+  Bad "tools/coverage-gate.js nao encontrado"
+}
+
+if (Test-Path (Join-Path $root 'tests/CHECKLIST.md')) {
+  $checklist = Read-Text 'tests/CHECKLIST.md'
+  if ($checklist -match 'Funcionalidade' -and $checklist -match 'core\.js') {
+    Ok "checklist de funcionalidades x testes presente"
+  } else {
+    Bad "tests/CHECKLIST.md sem a tabela de funcionalidades"
+  }
+} else {
+  Bad "tests/CHECKLIST.md nao encontrado"
+}
+
 Write-Host ""
 if ($script:fail -eq 0) {
   Write-Host "Tudo certo." -ForegroundColor Green

@@ -219,8 +219,10 @@ O que você pode fazer:
 - Ver **em quais fichas** cada exercício é usado (`📋 usada em: TREINO A, TREINO B` ou `⊖ não usada em nenhuma ficha`);
 - **Editar** (nome, grupo, observação) ou **excluir** um exercício que não usa mais.
 
-> **Renomear é seguro:** ao mudar o nome de um exercício, o app atualiza automaticamente **as fichas** que o
-> usam e o **histórico** daquele exercício — suas séries, cargas e a evolução continuam no mesmo lugar.
+> **Renomear é seguro:** o app guarda a **referência por id**, não pelo nome. Ao mudar o nome de um
+> exercício, ele atualiza automaticamente **as fichas** que o usam e o **histórico** daquele exercício — suas
+> séries, cargas e a evolução continuam no mesmo lugar. Ao mudar o nome de uma **ficha**, o nome novo aparece
+> em todo o app (Início, treinos já registrados, histórico e calendário).
 
 > **Quando criar um exercício próprio?** Quando a máquina/nome da sua academia é específico
 > (ex.: "Puxada frente supinada na barra W"). Escreva e toque em **`Criar "..."`** — ele entra na Biblioteca e

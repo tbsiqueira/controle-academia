@@ -45,10 +45,16 @@ Os dois rodam automaticamente no GitHub Actions:
 | `.github/workflows/deploy.yml` | antes de publicar — **uma tag só publica se os testes passarem** |
 
 **O que os testes cobrem:** toda a lógica pura (`js/core.js`) — datas, janela da semana, busca sem acentos,
-agrupamento de séries, aquecimento, histórico/PR, geração do texto exportado e, principalmente,
-**compatibilidade de dados entre versões**: backups antigos (v1 com "tipos de treino", v2 com ficha de
-reps único) são normalizados sem perder nada, e a normalização é idempotente.
-Os arquivos de referência ficam em `tests/fixtures/`.
+agrupamento de séries **por id**, aquecimento, histórico/PR, geração do texto exportado, backup
+(nome/status/lembrete/payload) e, principalmente, **compatibilidade de dados entre versões**: backups antigos
+(v1 com "tipos de treino", v2 com ficha de reps único) são normalizados sem perder nada, e a normalização
+é idempotente. Os arquivos de referência ficam em `tests/fixtures/`.
+
+**Cobertura:** `node tools/coverage-gate.js` roda os testes e exige **100% de linhas e ramos em `js/core.js`**
+(no CI, `COVERAGE_ENFORCE=1` reprova o build se cair). Ele publica o resultado como *annotations* do
+GitHub Actions, então dá para ver o que faltou sem abrir o log.
+
+📋 **Qual teste cobre qual funcionalidade: [tests/CHECKLIST.md](tests/CHECKLIST.md)**
 
 ---
 
@@ -119,14 +125,20 @@ selecionada). Use só quando precisar.
 ```
 index.html                  app shell (telas, modais)
 css/styles.css              estilos (tema, navegação inferior, calendário, botões)
-js/core.js                  lógica pura (datas, semana, agrupamento, exportação, compatibilidade de backups)
+js/core.js                  lógica pura (datas, semana, agrupamento por id, histórico, exportação, backups)
+js/app.js                   lógica do app (telas, fichas, treinos, histórico, backup)
 js/db.js                    camada IndexedDB (workouts, exercises, sheets, settings, colinha)
-data/sample-data.json       dados de exemplo (3 fichas, 12 treinos) - usados no app e nos testes
-tools/build-sample-data.ps1 gerador da fixture de exemplo (o check.ps1 confere se esta em sincronia)
-tools/sample-data-content.json  conteudo em pt-BR dos dados de exemplotests/core.test.js          testes de unidade e de compatibilidade de dados
-tests/fixtures/             backups de versões antigas usados nos testes
-js/app.js                   lógica do app (busca, fichas, treinos, histórico, backup)
 data/exercises.json         catálogo embutido com 927 exercícios em pt-BR
+data/sample-data.json       dados de exemplo (3 fichas, 12 treinos) - usados no app e nos testes
+tools/build-sample-data.ps1 gerador da fixture de exemplo (o check.ps1 confere se está em sincronia)
+tools/sample-data-content.json  conteúdo em pt-BR dos dados de exemplo
+tools/coverage-gate.js      roda os testes e exige 100% de cobertura de js/core.js
+tests/core.test.js          testes da lógica pura e da compatibilidade de dados
+tests/core-edge-cases.test.js  testes de borda (dados ausentes/inválidos, nomes congelados, ids)
+tests/module.test.js        registro do core no navegador (sem module.exports)
+tests/sample-data.test.js   testes da fixture de exemplo
+tests/CHECKLIST.md          mapa funcionalidade -> testes
+tests/fixtures/             backups de versões antigas usados nos testes
 vendor/                     Bootstrap 5 + Bootstrap Icons (locais, sem CDN)
 manifest.webmanifest        manifest do PWA
 sw.js                       service worker (network-first, com fallback offline)
@@ -155,22 +167,30 @@ pelo usuário** — cada ficha mistura exercícios do catálogo com **2 exercíc
 
 ## Modelo de dados (IndexedDB v2)
 
+**Regra do projeto: referência sempre por `id`; o nome é só uma cópia de apoio.** Todo registro que aponta
+para um exercício ou para uma ficha guarda o `id` e, junto, o nome *como estava no dia* (para não perder
+contexto se o registro for excluído). Na hora de exibir, o app resolve o **nome atual pelo id**
+(`exerciseLabel`, `sheetLabel`) — por isso renomear um exercício ou uma ficha aparece em todo o app,
+inclusive no histórico. Registros antigos, que só têm o nome, continuam funcionando pelo fallback.
+
 | Store | Conteúdo |
 |---|---|
 | `workouts` | treinos: `date`, `sheetId`/`sheetName`, `cardioMinutes`, `notes`, `warmups[]`, `sets[]` |
-| `sheets` | fichas: `name` + `exercises[]` (`name`, `sets`, `reps[]` por série, `note`) |
+| `sheets` | fichas: `name` + `exercises[]` (`exerciseId`, `name`, `sets`, `reps[]` por série, `note`) |
 | `exercises` | biblioteca do usuário: `name`, `group`, `correction`, `source` (`custom`) |
-| `settings` | metas semanais, início da semana, preferências |
+| `settings` | metas semanais, início da semana, `lastBackupAt` (lembrete), preferências |
 | `colinha` | anotações de consulta rápida |
+
+Nos treinos, cada série/aquecimento tem `exerciseId` + `exerciseName` (cópia). Fichas antigas ganham o
+`exerciseId` automaticamente na abertura do app (`linkSheetItemsToExercises`), quando o nome casa de forma
+inequívoca com um exercício da biblioteca.
 
 ## Versionamento
 
-Ao alterar `index.html`, `css` ou `js`, atualize a versão em três lugares:
-
-1. `index.html`: os `?v=N` das tags `<link>`/`<script>` e o `<span id="appVersion">`;
-2. `sw.js`: `CACHE_NAME` (`meu-treino-vN`) e os `?v=N` da lista `ASSETS`.
-
-Isso garante que o app instalado receba a versão nova (o rodapé de **Mais** mostra a versão carregada).
+Ao alterar `index.html`, `css` ou `js`, atualize a versão em **dois** lugares: `index.html` (os `?v=N` das
+tags `<link>`/`<script>` e o `<span id="appVersion">`) e `sw.js` (`CACHE_NAME` = `meu-treino-vN` e os `?v=N`
+da lista `ASSETS`). Isso garante que o app instalado receba a versão nova (o rodapé de **Mais** e a linha de
+status do backup mostram a versão carregada). O `check.ps1` reprova o commit se as duas saírem de sincronia.
 
 ## Privacidade
 
