@@ -177,6 +177,11 @@ contexto se o registro for excluído). Na hora de exibir, o app resolve o **nome
 (`exerciseLabel`, `sheetLabel`) — por isso renomear um exercício ou uma ficha aparece em todo o app,
 inclusive no histórico. Registros antigos, que só têm o nome, continuam funcionando pelo fallback.
 
+Dois espaços de id, sem colisão: **biblioteca do usuário** = UUID (texto) e **catálogo embutido** = inteiro
+(1..927). O `id` é sempre comparado **como texto** (`String(id)`) no core, porque ele pode chegar como número
+(registro do banco) ou como texto (atributo `data-*` do HTML) — regra única em `exerciseMatches`,
+`exerciseKey`, `exerciseLabel` e `sheetLabel`.
+
 | Store | Conteúdo |
 |---|---|
 | `workouts` | treinos: `date`, `sheetId`/`sheetName`, `cardioMinutes`, `notes`, `warmups[]`, `sets[]` |
