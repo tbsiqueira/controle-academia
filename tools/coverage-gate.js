@@ -132,19 +132,18 @@ function linhaDe(offset) {
   return fonte.slice(0, offset).split('\n').length;
 }
 
-function trechosSemTeste() {
+function trechosSemTeste(diretorio) {
   const porExecucao = {};
   const cobertos = {};
   const contagens = {};
-  const fontes = [];
   const executacoes = [];
 
-  fs.readdirSync(temporario).forEach(function (nome) {
+  fs.readdirSync(diretorio).forEach(function (nome) {
     if (nome.indexOf('.json') === -1) return;
 
     let bruto;
     try {
-      bruto = JSON.parse(fs.readFileSync(path.join(temporario, nome), 'utf8'));
+      bruto = JSON.parse(fs.readFileSync(path.join(diretorio, nome), 'utf8'));
     } catch (e) {
       return;
     }
@@ -156,7 +155,6 @@ function trechosSemTeste() {
       // mesmo core.js de novo): usamos o par url+indice como identificador.
       const chave = arquivo.url + '#' + nome + '#' + indiceArquivo;
       executacoes.push(chave);
-      fontes.push(nome + ':' + (arquivo.functions || []).length + 'f');
       porExecucao[chave] = porExecucao[chave] || [];
 
       (arquivo.functions || []).forEach(function (fn) {
@@ -217,10 +215,10 @@ function trechosSemTeste() {
     juntas.push({ inicio: a.inicio, fim: a.fim, inicioOffset: a.inicioOffset, fimOffset: a.fimOffset, trecho: a.trecho });
   });
 
-  return { trechos: juntas, contagens: contagens, executacoes: executacoes.length, fontes: fontes.join(' ') };
+  return { trechos: juntas, contagens: contagens, executacoes: executacoes.length };
 }
 
-const diagnostico = trechosSemTeste();
+const diagnostico = trechosSemTeste(temporario);
 const semTeste = diagnostico.trechos;
 // Criterio do gate: cobertura do Node (autoritativa) em 100% de linhas e de ramos.
 // A lista de trechos e informativa: ajuda a achar o que falta, mas nao decide, porque o V8
@@ -240,8 +238,31 @@ const listaDeLinhas = semTeste.map(function (t) {
   return t.fim > t.inicio ? (t.inicio + '-' + t.fim) : String(t.inicio);
 }).join(', ');
 
+// Segunda passada: roda TODOS os arquivos de teste em um unico processo. Sem processos
+// separados, o V8 reporta tudo (sem falso positivo) e a lista fica precisa.
+function diagnosticoPreciso() {
+  const diretorio = fs.mkdtempSync(path.join(os.tmpdir(), 'mt-cobertura-1p-'));
+  const arquivos = fs.readdirSync(path.join(process.cwd(), 'tests')).filter(function (f) {
+    return f.indexOf('.test.js') !== -1;
+  });
+  const codigo = arquivos.map(function (f) { return "require('./tests/" + f + "');"; }).join(' ');
+
+  spawnSync(process.execPath, ['-e', codigo], {
+    encoding: 'utf8',
+    env: Object.assign({}, process.env, { NODE_V8_COVERAGE: diretorio })
+  });
+
+  return trechosSemTeste(diretorio).trechos;
+}
 console.log('::notice file=' + ALVO + ',line=1::trechos que o V8 nao viu executar: ' +
   (listaDeLinhas || 'nenhum'));
+
+const precisos = diagnosticoPreciso().map(function (t) {
+  return (t.fim > t.inicio ? (t.inicio + '-' + t.fim) : String(t.inicio)) + ' [' + t.trecho.slice(0, 45) + ']';
+});
+
+console.log('::notice file=' + ALVO + ',line=1::preciso (processo unico): ' +
+  (precisos.join(' | ') || 'nada sem cobertura'));
 
 if (completo) {
   console.log('[cobertura] 100% de linhas e ramos em ' + ALVO + '.');
