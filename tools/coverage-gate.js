@@ -136,6 +136,7 @@ function trechosSemTeste() {
   const porExecucao = {};
   const cobertos = {};
   const contagens = {};
+  const fontes = [];
   const executacoes = [];
 
   fs.readdirSync(temporario).forEach(function (nome) {
@@ -155,6 +156,7 @@ function trechosSemTeste() {
       // mesmo core.js de novo): usamos o par url+indice como identificador.
       const chave = arquivo.url + '#' + nome + '#' + indiceArquivo;
       executacoes.push(chave);
+      fontes.push(nome + ':' + (arquivo.functions || []).length + 'f');
       porExecucao[chave] = porExecucao[chave] || [];
 
       (arquivo.functions || []).forEach(function (fn) {
@@ -215,7 +217,7 @@ function trechosSemTeste() {
     juntas.push({ inicio: a.inicio, fim: a.fim, inicioOffset: a.inicioOffset, fimOffset: a.fimOffset, trecho: a.trecho });
   });
 
-  return { trechos: juntas, contagens: contagens, executacoes: executacoes.length };
+  return { trechos: juntas, contagens: contagens, executacoes: executacoes.length, fontes: fontes.join(' ') };
 }
 
 const diagnostico = trechosSemTeste();
@@ -263,7 +265,8 @@ const detalhes = semTeste.map(function (t) {
     JSON.stringify(t.trecho.slice(0, 50));
 }).join(' | ');
 
-console.log('::notice file=' + ALVO + ',line=1::execucoes ' + diagnostico.execucoes + ' | detalhe: ' + detalhes);
+console.log('::notice file=' + ALVO + ',line=1::execucoes ' + diagnostico.executacoes + ' | detalhe: ' + detalhes);
+console.log('::notice file=' + ALVO + ',line=1::fontes ' + diagnostico.fontes + '');
 
 if (enforcar) {
   console.log('::error file=' + ALVO + '::' + resumo);
