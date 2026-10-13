@@ -22,6 +22,7 @@ const state = {
   libraryGroup: '',
   libraryQuery: '',
   viewingWorkoutId: null,
+  viewingExerciseId: null,
   viewingExerciseName: '',
   eraseDone: false,
   lastImportSnapshot: null,
@@ -210,6 +211,23 @@ function renderRecent() {
 
 
 
+/* ---------- referências por id (nome sempre atual) ---------- */
+
+// Biblioteca do usuário + catálogo: usado para resolver o nome ATUAL pelo id.
+function allExercises() {
+  return (state.exercises || []).concat(state.catalog || []);
+}
+
+// Nome atual de um exercício guardado em um registro (resolve pelo id).
+function labelOf(item) {
+  return exerciseLabel(item, allExercises());
+}
+
+// Referência (id + nome atual) usada nas buscas de histórico e ao gravar.
+function refOf(item) {
+  return { exerciseId: (item && item.exerciseId) || null, exerciseName: labelOf(item) };
+}
+
 /* ---------- read-only workout detail ---------- */
 
 function renderWorkoutDetail() {
@@ -241,8 +259,8 @@ function renderWorkoutDetail() {
 
   html += groups.map(function (g, i) {
     return '<div class="card mb-2"><div class="card-body p-2">' +
-      '<button type="button" class="btn btn-link p-0 text-decoration-none d-flex justify-content-between align-items-center w-100" data-open-exercise="' + esc(g.exerciseName) + '">' +
-      '<strong><span class="badge text-bg-primary me-1">' + (i + 1) + '</span> ' + esc(g.exerciseName) + '</strong>' +
+      '<button type="button" class="btn btn-link p-0 text-decoration-none d-flex justify-content-between align-items-center w-100" data-open-exercise="' + esc(g.exerciseId || '') + '" data-open-exercise-name="' + esc(labelOf(g)) + '">' +
+      '<strong><span class="badge text-bg-primary me-1">' + (i + 1) + '</span> ' + esc(labelOf(g)) + '</strong>' +
       '<i class="bi bi-chevron-right text-muted"></i>' +
       '</button>' +
       (g.note ? '<div class="small text-muted"><i class="bi bi-info-circle"></i> ' + esc(g.note) + '</div>' : '') +
@@ -255,7 +273,8 @@ function renderWorkoutDetail() {
 
   el.querySelectorAll('[data-open-exercise]').forEach(function (b) {
     b.addEventListener('click', function () {
-      state.viewingExerciseName = b.getAttribute('data-open-exercise');
+      state.viewingExerciseId = b.getAttribute('data-open-exercise') || null;
+      state.viewingExerciseName = b.getAttribute('data-open-exercise-name') || '';
       location.hash = '#/exercise';
     });
   });
@@ -266,11 +285,12 @@ function renderWorkoutDetail() {
 
 
 function renderExerciseHistory() {
-  const name = state.viewingExerciseName || '';
+  const target = { exerciseId: state.viewingExerciseId || null, exerciseName: state.viewingExerciseName || '' };
+  const name = labelOf(target);
   document.getElementById('exerciseHistoryTitle').innerHTML = '<i class="bi bi-graph-up text-primary"></i> ' + esc(name);
 
   const el = document.getElementById('exerciseHistory');
-  const sessions = sessionsForExercise(state.workouts, name);
+  const sessions = sessionsForExercise(state.workouts, target);
 
   if (!sessions.length) {
     el.innerHTML = '<p class="text-muted">Nenhum registro deste exercício ainda.</p>';
@@ -278,7 +298,7 @@ function renderExerciseHistory() {
   }
 
   const rows = sessions.map(function (w) {
-    return { workout: w, best: bestSetForExercise(w, name) };
+    return { workout: w, best: bestSetForExercise(w, target) };
   });
 
   const maxLoad = Math.max.apply(null, rows.map(function (r) { return r.best ? r.best.load : 0; }).concat([1]));
@@ -311,8 +331,8 @@ function renderExerciseHistory() {
   html += '<h6 class="text-muted mt-3"><i class="bi bi-clock-history"></i> Histórico</h6>';
   html += rows.slice(0, 20).map(function (r) {
     const w = r.workout;
-    const warm = (w.warmups || []).find(function (x) { return x.exerciseName === name; });
-    const sets = (w.sets || []).filter(function (s) { return s.exerciseName === name; });
+    const warm = (w.warmups || []).find(function (x) { return exerciseMatches(x, target); });
+    const sets = (w.sets || []).filter(function (s) { return exerciseMatches(s, target); });
     const sheetName = sheetLabel(w, state.sheets);
     return '<div class="card mb-2"><div class="card-body py-2">' +
       '<div class="d-flex justify-content-between align-items-center">' +
@@ -369,7 +389,8 @@ function loadSheetIntoForm(sheet) {
     const repsArray = Array.isArray(rawReps) ? rawReps : [];
     const fallbackRep = Array.isArray(rawReps) ? '' : ((rawReps === undefined || rawReps === null) ? '' : rawReps);
     const setCount = Math.max(1, parseInt(item.sets, 10) || repsArray.length || 3);
-    const lastLoads = lastLoadsForExercise(state.workouts, item.name);
+    const ref = refOf(item);
+    const lastLoads = lastLoadsForExercise(state.workouts, ref);
     const sets = [];
 
     for (let i = 1; i <= setCount; i++) {
@@ -386,9 +407,9 @@ function loadSheetIntoForm(sheet) {
 
     state.formSets.push({
       exerciseId: item.exerciseId || null,
-      exerciseName: item.name,
+      exerciseName: ref.exerciseName,
       note: item.note || '',
-      warmup: previousWarmupFields(state.workouts, item.name),
+      warmup: previousWarmupFields(state.workouts, ref),
       sets: sets
     });
   });
@@ -452,7 +473,7 @@ function renderFormSets() {
     const warm = group.warmup || {};
     return '<div class="card mb-2"><div class="card-body p-2">' +
       '<div class="d-flex justify-content-between align-items-center mb-1">' +
-      '<strong><i class="bi bi-activity text-primary"></i> ' + esc(group.exerciseName) + '</strong>' +
+      '<strong><i class="bi bi-activity text-primary"></i> ' + esc(labelOf(group)) + '</strong>' +
       '<div class="d-flex align-items-center gap-1">' +
       '<span class="badge text-bg-light">' + group.sets.length + (group.sets.length === 1 ? ' série' : ' séries') + '</span>' +
       '<button type="button" class="btn btn-sm btn-outline-danger" onclick="removeFormExercise(' + exIdx + ')" aria-label="Remover exercício"><i class="bi bi-trash"></i></button>' +
@@ -505,8 +526,8 @@ function removeFormExercise(exIdx) {
 
 
 function addExerciseToForm(opts) {
-  const name = opts.exerciseName || 'Exercício';
-  const lastLoads = lastLoadsForExercise(state.workouts, name);
+  const ref = { exerciseId: opts.exerciseId || null, exerciseName: opts.exerciseName || 'Exercício' };
+  const lastLoads = lastLoadsForExercise(state.workouts, ref);
   const setCount = Math.max(1, parseInt(opts.sets, 10) || 3);
   const sets = [];
 
@@ -516,10 +537,10 @@ function addExerciseToForm(opts) {
   }
 
   state.formSets.push({
-    exerciseId: opts.exerciseId || null,
-    exerciseName: name,
+    exerciseId: ref.exerciseId,
+    exerciseName: labelOf(ref) || 'Exercício',
     note: opts.note || '',
-    warmup: previousWarmupFields(state.workouts, name),
+    warmup: previousWarmupFields(state.workouts, ref),
     sets: sets
   });
   renderFormSets();
@@ -554,7 +575,7 @@ async function saveWorkout() {
 
       sets.push({
         exerciseId: group.exerciseId || null,
-        exerciseName: group.exerciseName,
+        exerciseName: labelOf(group),
         number: s.number,
         reps: reps,
         load: load,
@@ -571,7 +592,7 @@ async function saveWorkout() {
     if (!clean) return;
     warmups.push({
       exerciseId: group.exerciseId || null,
-      exerciseName: group.exerciseName,
+      exerciseName: labelOf(group),
       reps: clean.reps,
       load: clean.load,
       rir: clean.rir
@@ -719,7 +740,7 @@ function pickCatalogExercise(id) {
   if (!item) return;
 
   // Catalog exercises are not copied into the library (they are already in the catalog).
-  addExerciseToForm({ exerciseId: null, exerciseName: item.name });
+  addExerciseToForm({ exerciseId: item.id, exerciseName: item.name });
   hideExercisePicker();
 }
 
@@ -1012,7 +1033,7 @@ function renderSheets() {
 
           return '<li>' +
             '<span class="sheet-item-idx">' + (i + 1) + '</span>' +
-            '<span class="sheet-item-name">' + esc(item.name) + '</span>' +
+            '<span class="sheet-item-name">' + esc(labelOf(item)) + '</span>' +
             (detail ? '<span class="sheet-item-detail">' + esc(detail) + '</span>' : '') +
             (item.note ? '<span class="sheet-item-note text-truncate">' + esc(item.note) + '</span>' : '') +
             '</li>';
@@ -1083,7 +1104,7 @@ function sheetExerciseRow(item, idx) {
 
   return '<li class="sheet-edit-item">' +
     '<div class="d-flex justify-content-between align-items-start mb-2">' +
-    '<strong><span class="badge text-bg-primary me-1">' + (idx + 1) + '</span>' + esc(item.name) + '</strong>' +
+    '<strong><span class="badge text-bg-primary me-1">' + (idx + 1) + '</span>' + esc(labelOf(item)) + '</strong>' +
     '<div class="d-flex gap-1">' +
     '<button type="button" class="btn btn-sm btn-outline-secondary" onclick="moveSheetExercise(' + idx + ',-1)" title="Subir" aria-label="Subir exercício"><i class="bi bi-arrow-up"></i></button>' +
     '<button type="button" class="btn btn-sm btn-outline-secondary" onclick="moveSheetExercise(' + idx + ',1)" title="Descer" aria-label="Descer exercício"><i class="bi bi-arrow-down"></i></button>' +
@@ -1239,7 +1260,7 @@ function pickSheetCatalogExercise(id) {
   const item = (state.catalog || []).find(function (x) { return String(x.id) === String(id); });
   if (!item) return;
 
-  addSheetExercise({ exerciseId: null, name: item.name, sets: 3, reps: [], note: '' });
+  addSheetExercise({ exerciseId: item.id, name: item.name, sets: 3, reps: [], note: '' });
   renderSheetPickerResults(state.sheetPickerQuery);
 }
 
@@ -1294,7 +1315,7 @@ async function saveSheetEditor() {
       }
       return {
         exerciseId: item.exerciseId || null,
-        name: item.name,
+        name: labelOf(item),
         sets: count,
         reps: reps,
         note: (item.note || '').trim()
@@ -1517,7 +1538,7 @@ function exportWorkoutText(id) {
   const workout = id ? state.workouts.find(function (w) { return w.id === id; }) : null;
   if (!workout) return;
 
-  document.getElementById('exportText').value = workoutAsText(workout, state.sheets);
+  document.getElementById('exportText').value = workoutAsText(workout, state.sheets, allExercises());
   bootstrap.Modal.getOrCreateInstance(document.getElementById('exportModal')).show();
 }
 

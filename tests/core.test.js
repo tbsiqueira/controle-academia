@@ -513,6 +513,139 @@ test('workoutAsText usa o nome atual da ficha', () => {
   assert.match(core.workoutAsText(workout), /Ficha: Nome antigo/, 'sem a lista de fichas usa o nome guardado');
 });
 
+/* ---------- referência por id (nome sempre atual) ---------- */
+
+test('exerciseLabel usa o nome atual pelo id e cai no nome guardado', () => {
+  const lib = [{ id: 15, name: 'Remada baixa' }, { id: 'u1', name: 'Meu exercicio' }];
+
+  assert.equal(core.exerciseLabel({ exerciseId: 15, exerciseName: 'Nome antigo' }, lib), 'Remada baixa');
+  assert.equal(core.exerciseLabel({ exerciseId: 'u1' }, lib), 'Meu exercicio');
+  assert.equal(core.exerciseLabel({ exerciseId: 99, exerciseName: 'Excluido' }, lib), 'Excluido', 'id que nao existe mais');
+  assert.equal(core.exerciseLabel({ exerciseName: 'Antigo sem id' }, lib), 'Antigo sem id');
+  assert.equal(core.exerciseLabel({ name: 'Campo name' }, lib), 'Campo name');
+  assert.equal(core.exerciseLabel({}, lib), '');
+  assert.equal(core.exerciseLabel(null, null), '');
+});
+
+test('exerciseTarget normaliza string, objeto e vazio', () => {
+  assert.deepEqual(core.exerciseTarget('Puxada'), { exerciseId: null, exerciseName: 'Puxada' });
+  assert.deepEqual(core.exerciseTarget({ exerciseId: 3, exerciseName: 'X' }), { exerciseId: 3, exerciseName: 'X' });
+  assert.deepEqual(core.exerciseTarget({ exerciseId: 3, name: 'Y' }), { exerciseId: 3, exerciseName: 'Y' });
+  assert.deepEqual(core.exerciseTarget(), { exerciseId: null, exerciseName: '' });
+  assert.deepEqual(core.exerciseTarget(null), { exerciseId: null, exerciseName: '' });
+});
+
+test('exerciseMatches compara por id quando os dois tem id', () => {
+  assert.equal(core.exerciseMatches({ exerciseId: 7, exerciseName: 'Antigo' }, { exerciseId: 7, exerciseName: 'Novo' }), true);
+  assert.equal(core.exerciseMatches({ exerciseId: 7, exerciseName: 'Antigo' }, { exerciseId: 8, exerciseName: 'Antigo' }), false, 'mesmo nome, ids diferentes');
+  assert.equal(core.exerciseMatches({ exerciseName: 'Antigo' }, { exerciseId: 7, exerciseName: 'Antigo' }), true, 'registro antigo sem id cai no nome');
+  assert.equal(core.exerciseMatches({ exerciseName: 'X' }, 'X'), true);
+  assert.equal(core.exerciseMatches({ exerciseName: 'X' }, 'Y'), false);
+  assert.equal(core.exerciseMatches({}, {}), false, 'nada para comparar');
+  assert.equal(core.exerciseMatches(null, null), false);
+});
+
+test('exerciseKey usa id quando existe e nome como fallback', () => {
+  assert.equal(core.exerciseKey({ exerciseId: 5, exerciseName: 'X' }), 'id:5');
+  assert.equal(core.exerciseKey({ exerciseName: 'X' }), 'nome:X');
+  assert.equal(core.exerciseKey({}), 'nome:(sem nome)');
+});
+
+test('groupSets separa exercicios diferentes com o mesmo nome (por id)', () => {
+  const groups = core.groupSets([
+    { exerciseId: 1, exerciseName: 'Rosca', number: 1, reps: 10, load: 10 },
+    { exerciseId: 2, exerciseName: 'Rosca', number: 1, reps: 10, load: 20 }
+  ], []);
+
+  assert.equal(groups.length, 2, 'nao junta exercicios diferentes so porque o nome e igual');
+  assert.equal(groups[0].exerciseId, 1);
+  assert.equal(groups[1].exerciseId, 2);
+});
+
+test('groupSets casa o aquecimento pelo id (mesmo com nome antigo)', () => {
+  const groups = core.groupSets(
+    [{ exerciseId: 5, exerciseName: 'Nome antigo', number: 1, reps: 10, load: 30 }],
+    [{ exerciseId: 5, exerciseName: 'Nome novo', reps: 15, load: 10, rir: 3 }]
+  );
+
+  assert.equal(groups.length, 1);
+  assert.deepEqual(groups[0].warmup, { reps: 15, load: 10, rir: 3 });
+});
+
+test('groupSets cria grupo para exercicio so com aquecimento (nao perde ao editar)', () => {
+  const groups = core.groupSets([], [{ exerciseId: 9, exerciseName: 'Esteira', reps: 5, load: 0, rir: 4 }]);
+
+  assert.equal(groups.length, 1);
+  assert.equal(groups[0].exerciseName, 'Esteira');
+  assert.equal(groups[0].sets.length, 0);
+  assert.deepEqual(groups[0].warmup, { reps: 5, load: 0, rir: 4 });
+});
+
+test('groupSets junta registros antigos sem id pelo nome', () => {
+  const groups = core.groupSets([
+    { exerciseName: 'Leg', number: 1, reps: 10, load: 100 },
+    { exerciseName: 'Leg', number: 2, reps: 8, load: 110 }
+  ], [{ exerciseName: 'Leg', reps: 15, load: 50, rir: 3 }]);
+
+  assert.equal(groups.length, 1);
+  assert.equal(groups[0].exerciseId, null);
+  assert.equal(groups[0].sets.length, 2);
+  assert.deepEqual(groups[0].warmup, { reps: 15, load: 50, rir: 3 });
+});
+
+test('historico por id: renomear o exercicio nao perde nem separa o historico', () => {
+  const workouts = [
+    { id: 'a', date: '2026-10-01', sets: [{ exerciseId: 5, exerciseName: 'Nome antigo', number: 1, reps: 10, load: 40 }] },
+    { id: 'b', date: '2026-10-08', sets: [{ exerciseId: 5, exerciseName: 'Nome novo', number: 1, reps: 10, load: 45 }] }
+  ];
+  const target = { exerciseId: 5, exerciseName: 'Nome novo' };
+
+  assert.deepEqual(core.lastLoadsForExercise(workouts, target), { 1: 45 });
+  assert.deepEqual(core.sessionsForExercise(workouts, target).map(function (w) { return w.id; }), ['b', 'a']);
+  assert.deepEqual(core.bestSetForExercise(workouts[0], target), { load: 40, reps: 10 });
+});
+
+test('historico nao mistura exercicios diferentes com o mesmo nome', () => {
+  const workouts = [
+    { id: 'a', date: '2026-10-01', sets: [{ exerciseId: 1, exerciseName: 'Rosca', number: 1, reps: 10, load: 10 }] },
+    { id: 'b', date: '2026-10-08', sets: [{ exerciseId: 2, exerciseName: 'Rosca', number: 1, reps: 10, load: 99 }] }
+  ];
+
+  assert.deepEqual(core.lastLoadsForExercise(workouts, { exerciseId: 1, exerciseName: 'Rosca' }), { 1: 10 });
+  assert.equal(core.sessionsForExercise(workouts, { exerciseId: 1, exerciseName: 'Rosca' }).length, 1);
+});
+
+test('lastWarmupForExercise busca pelo id (registro com nome antigo)', () => {
+  const workouts = [
+    { id: 'a', date: '2026-10-01', warmups: [{ exerciseId: 5, exerciseName: 'Antigo', reps: 15, load: 20, rir: 3 }] },
+    { id: 'b', date: '2026-10-08', warmups: [{ exerciseId: 6, exerciseName: 'Outro', reps: 12, load: 30, rir: 2 }] }
+  ];
+
+  assert.deepEqual(
+    core.lastWarmupForExercise(workouts, { exerciseId: 5, exerciseName: 'Novo' }),
+    { exerciseId: 5, exerciseName: 'Antigo', reps: 15, load: 20, rir: 3 }
+  );
+  assert.equal(core.lastWarmupForExercise(workouts, { exerciseId: 99, exerciseName: 'Nada' }), null);
+  assert.equal(core.lastWarmupForExercise([], { exerciseId: 5 }), null);
+});
+
+test('workoutAsText usa o nome atual do exercicio e agrupa por id', () => {
+  const workout = {
+    date: '2026-10-08',
+    sets: [
+      { exerciseId: 5, exerciseName: 'Antigo', number: 1, reps: 10, load: 30 },
+      { exerciseId: 5, exerciseName: 'Antigo', number: 2, reps: 8, load: 35 }
+    ]
+  };
+
+  const text = core.workoutAsText(workout, [], [{ id: 5, name: 'Remada baixa' }]);
+
+  assert.ok(text.indexOf('1. Remada baixa') !== -1);
+  assert.equal(text.indexOf('Antigo'), -1, 'nome congelado nao aparece');
+  assert.ok(text.indexOf('2. ') === -1, 'series agrupadas por id em um unico exercicio');
+  assert.ok(text.indexOf('8 reps') !== -1);
+});
+
 /* ---------- biblioteca do usuario ---------- */
 
 test('isUserExercise nao esconde exercicio criado pelo usuario', () => {

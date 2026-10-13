@@ -176,29 +176,67 @@
     }).join('') + '</ul>';
   }
 
-  // Agrupa as séries planas do treino por exercício (na ordem em que aparecem),
+  /* ---------- referência por id (evita nome congelado) ---------- */
+
+  // Normaliza a referência de um exercício. Aceita { exerciseId, exerciseName }
+  // ou só o nome (chamadas antigas).
+  function exerciseTarget(target) {
+    if (!target) return { exerciseId: null, exerciseName: '' };
+    if (typeof target === 'string') return { exerciseId: null, exerciseName: target };
+    return {
+      exerciseId: target.exerciseId || null,
+      exerciseName: target.exerciseName || target.name || ''
+    };
+  }
+
+  // Nome ATUAL do exercício: resolve pelo id na lista (biblioteca + catálogo) e só cai
+  // no nome guardado quando não existe id (dados antigos) ou o exercício foi excluído.
+  function exerciseLabel(item, exercises) {
+    const ref = item || {};
+    const list = exercises || [];
+
+    if (ref.exerciseId) {
+      for (let i = 0; i < list.length; i++) {
+        if (list[i] && list[i].id === ref.exerciseId && list[i].name) return list[i].name;
+      }
+    }
+
+    return ref.exerciseName || ref.name || '';
+  }
+
+  // Mesmo exercício? Compara pelo id quando a referência tem id; senão, pelo nome.
+  function exerciseMatches(entry, target) {
+    const e = entry || {};
+    const t = exerciseTarget(target);
+
+    if (t.exerciseId && e.exerciseId) return e.exerciseId === t.exerciseId;
+    if (!t.exerciseName && !e.exerciseName) return false;   // nada para comparar
+    return (e.exerciseName || '(sem nome)') === (t.exerciseName || '(sem nome)');
+  }
+
+  // Chave de agrupamento: id quando existe, nome como fallback (dados antigos).
+  function exerciseKey(entry) {
+    const e = entry || {};
+    return e.exerciseId ? 'id:' + e.exerciseId : 'nome:' + (e.exerciseName || '(sem nome)');
+  }
+
+  // Agrupa as séries planas do treino por exercício (id-first, na ordem em que aparecem),
   // juntando a observação do exercício e o aquecimento salvo.
+  // Exercícios que só têm aquecimento também viram grupo (senão o aquecimento se perderia
+  // ao editar o treino).
   function groupSets(flatSets, warmups) {
     const groups = [];
     const index = {};
-    const warmupByName = {};
-
-    (warmups || []).forEach(function (w) {
-      warmupByName[w.exerciseName || '(sem nome)'] = w;
-    });
 
     (flatSets || []).forEach(function (s) {
-      const key = s.exerciseName || '(sem nome)';
+      const key = exerciseKey(s);
       if (!Object.prototype.hasOwnProperty.call(index, key)) {
         index[key] = groups.length;
-        const saved = warmupByName[key];
         groups.push({
           exerciseId: s.exerciseId || null,
-          exerciseName: key,
+          exerciseName: s.exerciseName || '(sem nome)',
           note: s.exerciseNote || '',
-          warmup: saved
-            ? { reps: saved.reps, load: saved.load, rir: saved.rir }
-            : { reps: '', load: '', rir: '' },
+          warmup: { reps: '', load: '', rir: '' },
           sets: []
         });
       }
@@ -207,37 +245,65 @@
       group.sets.push({ number: s.number, reps: s.reps, load: s.load, rir: s.rir, note: s.note || '' });
     });
 
+    (warmups || []).forEach(function (w) {
+      const key = exerciseKey(w);
+      let group = null;
+
+      if (Object.prototype.hasOwnProperty.call(index, key)) {
+        group = groups[index[key]];
+      } else {
+        // Aquecimento de um exercício sem séries de trabalho (ou registro antigo).
+        for (let i = 0; i < groups.length; i++) {
+          if (exerciseMatches(w, groups[i])) { group = groups[i]; break; }
+        }
+      }
+
+      if (!group) {
+        index[key] = groups.length;
+        group = {
+          exerciseId: w.exerciseId || null,
+          exerciseName: w.exerciseName || '(sem nome)',
+          note: '',
+          warmup: { reps: '', load: '', rir: '' },
+          sets: []
+        };
+        groups.push(group);
+      }
+
+      group.warmup = { reps: w.reps, load: w.load, rir: w.rir };
+    });
+
     return groups;
   }
 
-  /* ---------- histórico por exercício ---------- */
-
-  function lastLoadsForExercise(workouts, name) {
+  // Histórico por exercício: sempre pelo id quando o registro tem id, com o nome
+  // como fallback (dados antigos sem id).
+  function lastLoadsForExercise(workouts, target) {
     const sorted = (workouts || []).filter(function (w) {
-      return (w.sets || []).some(function (s) { return s.exerciseName === name; });
+      return (w.sets || []).some(function (s) { return exerciseMatches(s, target); });
     }).sort(function (a, b) { return a.date < b.date ? 1 : -1; });
 
     if (!sorted.length) return {};
     const last = sorted[0];
     const map = {};
     last.sets.forEach(function (s) {
-      if (s.exerciseName === name && toNum(s.load) > 0) map[s.number] = s.load;
+      if (exerciseMatches(s, target) && toNum(s.load) > 0) map[s.number] = s.load;
     });
     return map;
   }
 
-  function lastWarmupForExercise(workouts, name) {
+  function lastWarmupForExercise(workouts, target) {
     const sorted = (workouts || []).filter(function (w) {
-      return (w.warmups || []).some(function (x) { return x.exerciseName === name; });
+      return (w.warmups || []).some(function (x) { return exerciseMatches(x, target); });
     }).sort(function (a, b) { return a.date < b.date ? 1 : -1; });
 
     if (!sorted.length) return null;
     const last = sorted[0];
-    return (last.warmups || []).find(function (x) { return x.exerciseName === name; }) || null;
+    return (last.warmups || []).find(function (x) { return exerciseMatches(x, target); }) || null;
   }
 
-  function previousWarmupFields(workouts, name) {
-    const last = lastWarmupForExercise(workouts, name);
+  function previousWarmupFields(workouts, target) {
+    const last = lastWarmupForExercise(workouts, target);
     return {
       reps: (last && last.reps !== null && last.reps !== undefined) ? last.reps : '',
       load: (last && last.load !== null && last.load !== undefined) ? last.load : '',
@@ -245,17 +311,17 @@
     };
   }
 
-  function sessionsForExercise(workouts, name) {
+  function sessionsForExercise(workouts, target) {
     return (workouts || []).filter(function (w) {
-      return (w.sets || []).some(function (s) { return s.exerciseName === name; }) ||
-        (w.warmups || []).some(function (x) { return x.exerciseName === name; });
+      return (w.sets || []).some(function (s) { return exerciseMatches(s, target); }) ||
+        (w.warmups || []).some(function (x) { return exerciseMatches(x, target); });
     }).sort(function (a, b) { return a.date < b.date ? 1 : -1; });
   }
 
-  function bestSetForExercise(workout, name) {
+  function bestSetForExercise(workout, target) {
     let best = null;
-    (workout.sets || []).forEach(function (s) {
-      if (s.exerciseName !== name) return;
+    ((workout && workout.sets) || []).forEach(function (s) {
+      if (!exerciseMatches(s, target)) return;
       const load = toNum(s.load);
       const reps = toNum(s.reps);
       if (!best || load > best.load || (load === best.load && reps > best.reps)) {
@@ -265,7 +331,7 @@
     return best;
   }
 
-  /* ---------- nome atual da ficha ---------- */
+/* ---------- nome atual da ficha ---------- */
 
   // O treino guarda o nome da ficha como estava no dia em que foi registrado (snapshot).
   // Para MOSTRAR, resolvemos pelo id: assim renomear a ficha aparece em todo o app.
@@ -285,7 +351,7 @@
 
   /* ---------- exportar treino como texto ---------- */
 
-  function workoutAsText(workout, sheets) {
+  function workoutAsText(workout, sheets, exercises) {
     const lines = [];
     lines.push('MEU TREINO — ' + fmtBR(workout.date));
 
@@ -293,42 +359,12 @@
     if (sheetName) lines.push('Ficha: ' + sheetName);
     lines.push('');
 
-    const warmupByName = {};
-    (workout.warmups || []).forEach(function (w) {
-      warmupByName[w.exerciseName || '(sem nome)'] = w;
-    });
-
-    const groups = [];
-    const index = {};
-    (workout.sets || []).forEach(function (s) {
-      const key = s.exerciseName || '(sem nome)';
-      if (!Object.prototype.hasOwnProperty.call(index, key)) {
-        index[key] = groups.length;
-        groups.push({ name: key, note: s.exerciseNote || '', sets: [] });
-      }
-      if (!groups[index[key]].note && s.exerciseNote) groups[index[key]].note = s.exerciseNote;
-      groups[index[key]].sets.push(s);
-    });
-
-    // Exercícios só com aquecimento também aparecem.
-    (workout.warmups || []).forEach(function (w) {
-      const key = w.exerciseName || '(sem nome)';
-      if (Object.prototype.hasOwnProperty.call(index, key)) return;
-      index[key] = groups.length;
-      groups.push({ name: key, note: '', sets: [] });
-    });
+    const groups = groupSets(workout.sets, workout.warmups);
 
     groups.forEach(function (g, i) {
-      lines.push((i + 1) + '. ' + g.name + (g.note ? ' (obs.: ' + g.note + ')' : ''));
+      lines.push((i + 1) + '. ' + exerciseLabel(g, exercises) + (g.note ? ' (obs.: ' + g.note + ')' : ''));
 
-      const warm = warmupByName[g.name];
-      if (warm) {
-        const warmParts = [];
-        if (warm.reps !== null && warm.reps !== undefined) warmParts.push(warm.reps + ' reps');
-        if (warm.load !== null && warm.load !== undefined) warmParts.push(warm.load + ' kg');
-        if (warm.rir !== null && warm.rir !== undefined) warmParts.push('RIR ' + warm.rir);
-        if (warmParts.length) lines.push('   Aquecimento: ' + warmParts.join(' · '));
-      }
+      if (warmupHasData(g.warmup)) lines.push('   Aquecimento: ' + warmupLine(g.warmup));
 
       g.sets.slice().sort(function (a, b) { return toNum(a.number) - toNum(b.number); }).forEach(function (s) {
         let line = '   Série ' + (s.number || '?') + ': ' + setLine(s);
@@ -346,7 +382,7 @@
     return lines.join('\n').trim();
   }
 
-  /* ---------- dados de exemplo ---------- */
+/* ---------- dados de exemplo ---------- */
 
   // Os dados de exemplo guardam as datas como deslocamento em dias (dayOffset),
   // para a demonstracao ficar sempre recente em relacao a hoje.
@@ -730,6 +766,10 @@
     // exportação
     workoutAsText: workoutAsText,
     sheetLabel: sheetLabel,
+    exerciseTarget: exerciseTarget,
+    exerciseLabel: exerciseLabel,
+    exerciseMatches: exerciseMatches,
+    exerciseKey: exerciseKey,
     // compatibilidade de dados
     normalizeBackup: normalizeBackup
   };
