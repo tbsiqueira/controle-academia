@@ -135,6 +135,7 @@ function linhaDe(offset) {
 function trechosSemTeste() {
   const porExecucao = {};
   const cobertos = {};
+  const contagens = {};
   const executacoes = [];
 
   fs.readdirSync(temporario).forEach(function (nome) {
@@ -162,6 +163,8 @@ function trechosSemTeste() {
 
           const assinatura = faixa.startOffset + ':' + faixa.endOffset;
           if (faixa.count > 0) cobertos[assinatura] = (cobertos[assinatura] || 0) + 1;
+          contagens[assinatura] = contagens[assinatura] || [];
+          contagens[assinatura].push(faixa.count);
 
           porExecucao[chave].push({
             inicio: faixa.startOffset,
@@ -212,10 +215,11 @@ function trechosSemTeste() {
     juntas.push({ inicio: a.inicio, fim: a.fim, inicioOffset: a.inicioOffset, fimOffset: a.fimOffset, trecho: a.trecho });
   });
 
-  return juntas;
+  return { trechos: juntas, contagens: contagens, executacoes: executacoes.length };
 }
 
-const semTeste = trechosSemTeste();
+const diagnostico = trechosSemTeste();
+const semTeste = diagnostico.trechos;
 const completo = semTeste.length === 0;
 
 console.log('\n[cobertura] ' + ALVO + ' — trechos (statements/ramos do V8): ' +
@@ -250,13 +254,16 @@ const listaDeLinhas = semTeste.map(function (t) {
 
 console.log('::notice file=' + ALVO + ',line=1::trechos sem teste: ' + listaDeLinhas);
 
-// Detalhe (offsets do V8 + trecho) para conferir o mapeamento linha/offset.
+// Detalhe (offsets do V8 + trecho + contagens observadas) para conferir o mapeamento.
 const detalhes = semTeste.map(function (t) {
-  return 'offsets ' + t.inicioOffset + ':' + t.fimOffset + ' (linhas ' + t.inicio + '-' + t.fim + ') ' +
-    JSON.stringify(t.trecho.slice(0, 70));
+  const assinatura = t.inicioOffset + ':' + t.fimOffset;
+  const contagens = (diagnostico.contagens[assinatura] || []).join('/');
+
+  return 'offsets ' + assinatura + ' (linhas ' + t.inicio + '-' + t.fim + ') contagens[' + contagens + '] ' +
+    JSON.stringify(t.trecho.slice(0, 50));
 }).join(' | ');
 
-console.log('::notice file=' + ALVO + ',line=1::detalhe: ' + detalhes);
+console.log('::notice file=' + ALVO + ',line=1::execucoes ' + diagnostico.execucoes + ' | detalhe: ' + detalhes);
 
 if (enforcar) {
   console.log('::error file=' + ALVO + '::' + resumo);
