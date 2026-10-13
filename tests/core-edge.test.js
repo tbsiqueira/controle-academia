@@ -37,9 +37,8 @@ test('setsSummaryLines sem series nao gera markup e aceita serie sem numero', ()
 
   assert.ok(html.indexOf('>?</span>') !== -1, 'serie sem numero usa ?');
   assert.ok(html.indexOf('12 reps') !== -1);
-
-  const ordem = html.indexOf('12 reps') < html.indexOf('>?</span>');
-  assert.ok(ordem, 'ordena por numero da serie');
+  assert.ok(html.indexOf('>?</span>') < html.indexOf('12 reps'), 'sem numero conta como 0 e vem primeiro');
+  assert.ok(html.indexOf('12 reps') < html.indexOf('6 reps'), 'ordena por numero da serie');
 });
 
 test('groupSets sem series nem aquecimentos devolve lista vazia', () => {

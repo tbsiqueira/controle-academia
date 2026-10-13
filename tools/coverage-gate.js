@@ -18,7 +18,7 @@ const ALVO = 'js/core.js';
 const enforcar = process.env.COVERAGE_ENFORCE === '1';
 const temporario = fs.mkdtempSync(path.join(os.tmpdir(), 'mt-cobertura-'));
 
-const rodar = spawnSync(process.execPath, ['--test', '--experimental-test-coverage', 'tests/'], {
+const rodar = spawnSync(process.execPath, ['--test', '--experimental-test-coverage', '--test-reporter=tap', 'tests/'], {
   encoding: 'utf8',
   env: Object.assign({}, process.env, { NODE_V8_COVERAGE: temporario })
 });
@@ -26,8 +26,61 @@ const rodar = spawnSync(process.execPath, ['--test', '--experimental-test-covera
 const saida = String(rodar.stdout || '') + String(rodar.stderr || '');
 process.stdout.write(saida);
 
+/* ---------- falhas dos testes (viram annotations, para dar para ler sem o log) ---------- */
+
+function falhasDosTestes(texto) {
+  const linhas = texto.split('\n');
+  const falhas = [];
+
+  linhas.forEach(function (linha, i) {
+    const titulo = linha.match(/^not ok \d+ - (.*)$/);
+    if (!titulo) return;
+
+    let arquivo = 'tools/coverage-gate.js';
+    let linhaArquivo = 1;
+    let erro = '';
+    const raiz = process.cwd().replace(/\\/g, '/') + '/';
+
+    for (let j = i + 1; j < Math.min(i + 60, linhas.length); j++) {
+      const local = linhas[j].match(/location: '(.*)'/);
+      if (local) {
+        try {
+          const info = JSON.parse(local[1]);
+          if (info.file) arquivo = String(info.file).replace(/\\/g, '/').replace(raiz, '');
+          if (info.line) linhaArquivo = info.line;
+        } catch (e) { /* sem location: aponta para o proprio gate */ }
+      }
+
+      const falha = linhas[j].match(/^\s*error: \|?-*\s*(.*)$/);
+      if (falha && !erro) {
+        const proxima = (linhas[j + 1] || '').trim();
+        erro = (falha[1] || proxima || '').trim();
+      }
+
+      if (/^\.\.\.$/.test(linhas[j].trim())) break;
+    }
+
+    falhas.push({
+      titulo: titulo[1].trim(),
+      arquivo: arquivo,
+      linha: linhaArquivo,
+      erro: erro.replace(/\s+/g, ' ').slice(0, 220)
+    });
+  });
+
+  return falhas;
+}
+
 if (rodar.status !== 0) {
-  console.error('\n[cobertura] os testes falharam: corrija antes de medir a cobertura.');
+  const falhas = falhasDosTestes(saida);
+
+  console.error('\n[cobertura] ' + (falhas.length || 'alguns') + ' teste(s) falharam.');
+
+  falhas.slice(0, 5).forEach(function (f) {
+    console.log('::error file=' + f.arquivo + ',line=' + f.linha + '::' + f.titulo +
+      (f.erro ? (' — ' + f.erro) : ''));
+  });
+
   process.exit(rodar.status || 1);
 }
 
