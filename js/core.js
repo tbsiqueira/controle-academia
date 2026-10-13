@@ -197,7 +197,7 @@
 
     if (ref.exerciseId) {
       for (let i = 0; i < list.length; i++) {
-        if (list[i] && list[i].id === ref.exerciseId && list[i].name) return list[i].name;
+        if (list[i] && String(list[i].id) === String(ref.exerciseId) && list[i].name) return list[i].name;
       }
     }
 
@@ -205,19 +205,22 @@
   }
 
   // Mesmo exercício? Compara pelo id quando a referência tem id; senão, pelo nome.
+  // O id é comparado como TEXTO: o mesmo id pode chegar como número (registro) ou
+  // texto (atributo data-* do HTML), e os dois precisam casar.
   function exerciseMatches(entry, target) {
     const e = entry || {};
     const t = exerciseTarget(target);
 
-    if (t.exerciseId && e.exerciseId) return e.exerciseId === t.exerciseId;
+    if (t.exerciseId && e.exerciseId) return String(e.exerciseId) === String(t.exerciseId);
     if (!t.exerciseName && !e.exerciseName) return false;   // nada para comparar
     return (e.exerciseName || '(sem nome)') === (t.exerciseName || '(sem nome)');
   }
 
   // Chave de agrupamento: id quando existe, nome como fallback (dados antigos).
+  // Normalizada como texto pelo mesmo motivo do exerciseMatches.
   function exerciseKey(entry) {
     const e = entry || {};
-    return e.exerciseId ? 'id:' + e.exerciseId : 'nome:' + (e.exerciseName || '(sem nome)');
+    return e.exerciseId ? 'id:' + String(e.exerciseId) : 'nome:' + (e.exerciseName || '(sem nome)');
   }
 
   // Alvo de busca para o histórico de um exercício: usa o id quando o registro tem id;
@@ -369,7 +372,7 @@
 
     if (w.sheetId) {
       for (let i = 0; i < list.length; i++) {
-        if (list[i] && list[i].id === w.sheetId && list[i].name) return list[i].name;
+        if (list[i] && String(list[i].id) === String(w.sheetId) && list[i].name) return list[i].name;
       }
     }
 

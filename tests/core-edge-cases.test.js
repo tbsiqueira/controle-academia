@@ -491,3 +491,29 @@ test('countExercises conta cada exercicio uma vez (series + aquecimento)', () =>
 
   assert.equal(core.countExercises({ sets: [{ reps: 10 }] }), 1, 'exercicio sem nome conta como um');
 });
+
+test('id em texto e numero sao o mesmo exercicio (data-* devolve texto)', () => {
+  assert.equal(core.exerciseMatches({ exerciseId: 887, exerciseName: 'Puxada' }, { exerciseId: '887', exerciseName: 'Puxada' }), true);
+  assert.equal(core.exerciseMatches({ exerciseId: '887' }, { exerciseId: 887 }), true);
+  assert.equal(core.exerciseMatches({ exerciseId: 887 }, { exerciseId: 888 }), false);
+  assert.equal(core.exerciseKey({ exerciseId: 887 }), core.exerciseKey({ exerciseId: '887' }));
+
+  assert.equal(core.exerciseLabel({ exerciseId: '887' }, [{ id: 887, name: 'Puxada frente supinada' }]), 'Puxada frente supinada');
+  assert.equal(core.sheetLabel({ sheetId: 3 }, [{ id: '3', name: 'Ficha antiga' }]), 'Ficha antiga');
+});
+
+test('regressao: historico de exercicio do catalogo aberto pelo clique', () => {
+  const treinos = [
+    { id: 'w1', date: '2026-10-01', sets: [{ exerciseId: 887, exerciseName: 'Puxada frente supinada', number: 1, reps: 12, load: 40 }] },
+    { id: 'w2', date: '2026-10-08', sets: [{ exerciseId: 887, exerciseName: 'Puxada frente supinada', number: 1, reps: 10, load: 45 }] }
+  ];
+
+  // o clique no detalhe do treino manda o id como TEXTO (atributo data-*)
+  const alvo = { exerciseId: '887', exerciseName: 'Puxada frente supinada' };
+
+  assert.equal(core.sessionsForExercise(treinos, alvo).length, 2, 'achava zero antes da correcao');
+  assert.deepEqual(core.lastLoadsForExercise(treinos, alvo), { 1: 45 });
+  assert.equal(core.bestSetForExercise(treinos[0], alvo).load, 40);
+  assert.equal(core.previousWarmupFields(treinos, alvo).reps, '', 'sem aquecimento registrado');
+  assert.equal(core.countExercises({ sets: [{ exerciseId: '887' }, { exerciseId: 887 }] }), 1, 'texto e numero contam como o mesmo exercicio');
+});
