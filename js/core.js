@@ -299,7 +299,8 @@
 
     if (!sorted.length) return null;
     const last = sorted[0];
-    return last.warmups.find(function (x) { return exerciseMatches(x, target); }) || null;
+    // A lista ja foi filtrada por aquecimento deste exercicio, entao o find sempre acha.
+    return last.warmups.find(function (x) { return exerciseMatches(x, target); });
   }
 
   function previousWarmupFields(workouts, target) {
@@ -707,7 +708,7 @@
 
     return {
       workouts: (source.workouts || []).filter(function (w) { return w && w.id; }).map(normalizeWorkout),
-      sheets: (rawSheets || []).filter(function (s) { return s && s.id; }).map(normalizeSheet),
+      sheets: rawSheets.filter(function (s) { return s && s.id; }).map(normalizeSheet),
       exercises: (source.exercises || []).filter(function (e) { return e && e.id; }).map(normalizeExercise),
       settings: normalizeSettings(source.settings),
       colinha: (source.colinha || []).filter(function (c) { return c && c.id; })
