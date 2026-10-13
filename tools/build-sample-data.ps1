@@ -15,6 +15,9 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
+# Saida deterministica: mesma cultura em qualquer maquina/versao do PowerShell.
+[System.Threading.Thread]::CurrentThread.CurrentCulture = [System.Globalization.CultureInfo]::InvariantCulture
+
 $root = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
 if (-not $OutputPath) { $OutputPath = Join-Path $root 'data/sample-data.json' }
 if (-not $ContentPath) { $ContentPath = Join-Path $PSScriptRoot 'sample-data-content.json' }
@@ -135,6 +138,23 @@ $doc = [pscustomobject]@{
 }
 
 $json = $doc | ConvertTo-Json -Depth 10 -Compress
+
+# JSON apenas ASCII (\uXXXX para acentos): assim Windows PowerShell 5.1 e PowerShell 7
+# geram exatamente os mesmos bytes, e o check.ps1 pode comparar por hash.
+function ConvertTo-AsciiJson([string]$text) {
+  $sb = New-Object System.Text.StringBuilder
+  foreach ($ch in $text.ToCharArray()) {
+    $code = [int][char]$ch
+    if ($code -gt 126 -or $code -lt 32 -or $ch -eq '<' -or $ch -eq '>' -or $ch -eq '&' -or $ch -eq "'") {
+      [void]$sb.Append('\u' + $code.ToString('x4'))
+    } else {
+      [void]$sb.Append($ch)
+    }
+  }
+  return $sb.ToString()
+}
+
+$json = ConvertTo-AsciiJson $json
 [System.IO.File]::WriteAllText($OutputPath, $json, (New-Object System.Text.UTF8Encoding($false)))
 
 $check = [System.IO.File]::ReadAllText($OutputPath, [System.Text.Encoding]::UTF8) | ConvertFrom-Json
