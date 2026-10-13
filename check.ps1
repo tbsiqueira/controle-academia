@@ -277,6 +277,70 @@ if (Test-Path (Join-Path $root 'tests/CHECKLIST.md')) {
   Bad "tests/CHECKLIST.md nao encontrado"
 }
 
+# 14) toda funcao chamada no js/app.js precisa existir (evita ReferenceError em runtime,
+#     que o --check de sintaxe do Node NAO detecta)
+$appSource = Read-Text 'js/app.js'
+$coreSource = Read-Text 'js/core.js'
+$dbSource = Read-Text 'js/db.js'
+
+# remove strings e comentarios: sobram so as chamadas e definicoes de verdade
+$limpo = $appSource
+$limpo = [regex]::Replace($limpo, "'([^'\\\n]|\\.)*'", "''")
+$limpo = [regex]::Replace($limpo, '"([^"\\\n]|\\.)*"', '""')
+$limpo = [regex]::Replace($limpo, '/\*[\s\S]*?\*/', ' ')
+$limpo = [regex]::Replace($limpo, '(?m)//.*$', ' ')
+
+$chamadas = @([regex]::Matches($limpo, '(?<![\w.$])([A-Za-z_$][\w$]*)\s*\(') |
+  ForEach-Object { $_.Groups[1].Value } | Select-Object -Unique)
+
+$definidasApp = @([regex]::Matches($limpo, '(?:function|async function)\s+([A-Za-z_$][\w$]*)\s*\(') |
+  ForEach-Object { $_.Groups[1].Value })
+$definidasApp += @([regex]::Matches($limpo, '(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*=') |
+  ForEach-Object { $_.Groups[1].Value })
+# nomes de parametros tambem sao chamaveis (callbacks como resolve/reject)
+$definidasApp += @([regex]::Matches($limpo, 'function\s*[A-Za-z_$\w]*\s*\(([^)]*)\)') |
+  ForEach-Object { $_.Groups[1].Value -split ',' } |
+  ForEach-Object { $_.Trim() -replace '=.*$', '' } |
+  Where-Object { $_ -match '^[A-Za-z_$][\w$]*$' })
+
+$definidasCore = @([regex]::Matches($coreSource, '(?:function|async function)\s+([A-Za-z_$][\w$]*)\s*\(') |
+  ForEach-Object { $_.Groups[1].Value })
+$coreKeys = @()
+$coreReturn = $coreSource.LastIndexOf("  return {")
+if ($coreReturn -ge 0) {
+  $coreKeys = @([regex]::Matches($coreSource.Substring($coreReturn), '(?m)^\s{4}([A-Za-z_$][\w$]*):') |
+    ForEach-Object { $_.Groups[1].Value })
+}
+
+$definidasDb = @([regex]::Matches($dbSource, '(?:function|async function)\s+([A-Za-z_$][\w$]*)\s*\(') |
+  ForEach-Object { $_.Groups[1].Value })
+
+$nativas = @(
+  'if', 'for', 'while', 'switch', 'catch', 'return', 'typeof', 'function', 'new', 'await', 'do',
+  'else', 'case', 'delete', 'in', 'instanceof', 'void', 'yield', 'try', 'finally', 'throw', 'class',
+  'super', 'this', 'with', 'debugger',
+  'parseInt', 'parseFloat', 'isNaN', 'isFinite', 'String', 'Number', 'Boolean', 'Array', 'Object',
+  'JSON', 'Date', 'Math', 'RegExp', 'Promise', 'Error', 'Map', 'Set', 'Symbol', 'BigInt', 'File',
+  'Blob', 'URL', 'URLSearchParams', 'FormData', 'Image', 'TextEncoder', 'TextDecoder',
+  'alert', 'confirm', 'prompt', 'setTimeout', 'clearTimeout', 'setInterval', 'clearInterval',
+  'fetch', 'btoa', 'atob', 'encodeURIComponent', 'decodeURIComponent', 'requestAnimationFrame',
+  'structuredClone', 'queueMicrotask'
+)
+
+$faltando = @($chamadas | Where-Object {
+  $nativas -notcontains $_ -and
+  $definidasApp -notcontains $_ -and
+  $definidasCore -notcontains $_ -and
+  $coreKeys -notcontains $_ -and
+  $definidasDb -notcontains $_
+})
+
+if (-not $faltando) {
+  Ok "toda funcao chamada no app.js existe ($($chamadas.Count) nomes conferidos)"
+} else {
+  Bad "funcoes chamadas no app.js sem definicao (ReferenceError): $($faltando -join ', ')"
+}
+
 Write-Host ""
 if ($script:fail -eq 0) {
   Write-Host "Tudo certo." -ForegroundColor Green

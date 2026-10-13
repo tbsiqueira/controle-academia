@@ -210,6 +210,23 @@ function renderWorkoutList() {
   });
 }
 
+/* ---------- referências por id (nome sempre atual) ---------- */
+
+// Biblioteca do usuário + catálogo: usado para resolver o nome ATUAL pelo id.
+function allExercises() {
+  return (state.exercises || []).concat(state.catalog || []);
+}
+
+// Nome atual de um exercício guardado em um registro (resolve pelo id).
+function labelOf(item) {
+  return exerciseLabel(item, allExercises());
+}
+
+// Referência (id + nome atual) usada nas buscas de histórico e ao gravar.
+function refOf(item) {
+  return { exerciseId: (item && item.exerciseId) || null, exerciseName: labelOf(item) };
+}
+
 /* ---------- read-only workout detail ---------- */
 
 function renderWorkoutDetail() {
