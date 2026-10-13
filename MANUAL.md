@@ -284,11 +284,26 @@ as observações e o cardio. Campos vazios são omitidos automaticamente.
 
 Tudo isso fica em **Mais → Dados**.
 
-### Exportar (backup)
-Toque em **Exportar** → o app baixa um arquivo como `meu-treino-backup-2026-10-12_13-35-42.json` (data **e hora** da geração, para não confundir backups do mesmo dia) com **todos** os seus dados.
+### Compartilhar backup (o jeito mais prático no celular)
+Toque em **Compartilhar backup** → abre o menu de compartilhamento do aparelho com o arquivo pronto.
+Escolha **Drive**, **WhatsApp**, **Arquivos**, e-mail… No computador o mesmo botão baixa o arquivo.
 
-**Quando fazer:** antes de trocar de celular, limpar o navegador, ou de vez em quando por segurança.
-Guarde no Google Drive/OneDrive/e-mail — é um arquivo pequeno.
+É assim que se leva o treino de um aparelho para outro:
+
+1. No aparelho que **tem** os dados: **Mais → Dados → Compartilhar backup** → salve no **Drive** (ou mande
+   para você mesmo no WhatsApp);
+2. No outro aparelho: **Mais → Dados → Importar** → escolha o arquivo (no iPhone, "Procurar" → Drive/Arquivos).
+
+### Exportar (arquivo no aparelho)
+Toque em **Exportar** → baixa um arquivo como `meu-treino-backup-2026-10-12_13-35-42.json` (data **e hora** da
+geração, para não confundir backups do mesmo dia) com **todos** os seus dados.
+
+### Status e lembrete de backup
+Logo abaixo dos botões aparece **quando foi o último backup** (ex.: _"Último backup: 12/10/2026 13:35 (há 3 dias)"_).
+Se passar de **7 dias** sem backup, o app mostra um aviso no **Início** com o botão **Fazer backup** — e um
+**Depois** para dispensar naquela sessão.
+
+**Quando fazer:** de vez em quando por segurança, e sempre antes de trocar de celular ou limpar o navegador.
 
 ### Importar (restaurar)
 Toque em **Importar** → escolha o arquivo `.json` → confirme.

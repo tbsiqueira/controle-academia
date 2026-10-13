@@ -25,6 +25,7 @@ const state = {
   viewingExerciseName: '',
   eraseDone: false,
   lastImportSnapshot: null,
+  dismissBackupReminder: false,
   calendarCursor: null
 };
 
@@ -123,6 +124,7 @@ async function confirmNextWeek() {
 
 function renderDashboard() {
   renderWeek();
+  renderBackupReminder();
   renderRecent();
 }
 
@@ -1416,6 +1418,7 @@ function renderMore() {
   document.getElementById('setCardioTarget').value = state.settings.weeklyCardioTarget;
   document.getElementById('setWeekAnchor').value = state.settings.weekAnchor || todayISO();
   document.getElementById('btnUndoImport').classList.toggle('d-none', !state.lastImportSnapshot);
+  renderBackupStatus();
   renderColinhaList();
 }
 
@@ -1553,7 +1556,12 @@ function appVersionLabel() {
   return el ? el.textContent.trim() : '';
 }
 
-async function exportData() {
+/* ---------- backup (arquivo, compartilhar e lembrete) ---------- */
+
+// Depois de quantos dias sem backup o app lembra o usuário.
+const BACKUP_REMINDER_DAYS = 7;
+
+function buildBackup() {
   const payload = {
     app: 'meu-treino',
     version: 2,
@@ -1568,15 +1576,88 @@ async function exportData() {
     }
   };
 
-  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
+  const json = JSON.stringify(payload, null, 2);
+  const name = backupFileName();
+
+  return { name: name, json: json, file: new File([json], name, { type: 'application/json' }) };
+}
+
+async function markBackupDone() {
+  state.settings.lastBackupAt = new Date().toISOString();
+  await dbPut('settings', state.settings);
+  renderBackupStatus();
+  renderBackupReminder();
+}
+
+function renderBackupStatus() {
+  const el = document.getElementById('backupStatus');
+  if (!el) return;
+  el.textContent = backupStatus(state.settings, new Date(), BACKUP_REMINDER_DAYS).label;
+}
+
+// Lembrete no Início quando o último backup está velho (ou nunca foi feito).
+function renderBackupReminder() {
+  const el = document.getElementById('backupReminder');
+  if (!el) return;
+
+  const hasData = state.workouts.length > 0 || state.sheets.length > 0;
+  const info = backupStatus(state.settings, new Date(), BACKUP_REMINDER_DAYS);
+
+  if (!hasData || !info.overdue || state.dismissBackupReminder) {
+    el.innerHTML = '';
+    return;
+  }
+
+  el.innerHTML = '<div class="alert alert-warning py-2">' +
+    '<div><i class="bi bi-cloud-arrow-up"></i> <strong>Backup pendente.</strong> ' + esc(info.label) +
+    ' Guarde uma cópia para não perder seus treinos.</div>' +
+    '<div class="d-flex gap-2 mt-2">' +
+    '<button type="button" class="btn btn-sm btn-primary flex-fill" id="reminderBackup"><i class="bi bi-share"></i> Fazer backup</button>' +
+    '<button type="button" class="btn btn-sm btn-outline-secondary" id="reminderDismiss">Depois</button>' +
+    '</div></div>';
+
+  document.getElementById('reminderBackup').addEventListener('click', guard(shareBackup));
+  document.getElementById('reminderDismiss').addEventListener('click', function () {
+    state.dismissBackupReminder = true;
+    renderBackupReminder();
+  });
+}
+
+// Salva o arquivo no aparelho (download).
+async function exportData() {
+  const backup = buildBackup();
+  const url = URL.createObjectURL(new Blob([backup.json], { type: 'application/json' }));
   const a = document.createElement('a');
   a.href = url;
-  a.download = backupFileName();
+  a.download = backup.name;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
   setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+
+  await markBackupDone();
+}
+
+// Abre o menu de compartilhamento do aparelho com o arquivo (Drive, WhatsApp, Arquivos...).
+// Se o navegador não souber compartilhar arquivos, cai no download normal.
+async function shareBackup() {
+  const backup = buildBackup();
+
+  if (navigator.canShare && navigator.canShare({ files: [backup.file] })) {
+    try {
+      await navigator.share({
+        files: [backup.file],
+        title: 'Backup do Meu Treino',
+        text: 'Backup do Meu Treino (' + backup.name + ')'
+      });
+      await markBackupDone();
+      return;
+    } catch (e) {
+      if (e && e.name === 'AbortError') return;   // usuário cancelou: não faz nada
+    }
+  }
+
+  await exportData();
 }
 
 async function forceUpdate() {
@@ -1767,6 +1848,7 @@ function bindEvents() {
   document.getElementById('btnWeekToday').addEventListener('click', guard(startWeekToday));
 
   document.getElementById('btnExport').addEventListener('click', guard(exportData));
+  document.getElementById('btnShareBackup').addEventListener('click', guard(shareBackup));
   document.getElementById('exportCopy').addEventListener('click', guard(copyExportText));
   document.getElementById('exportShare').addEventListener('click', guard(shareExportText));
   document.getElementById('btnForceUpdate').addEventListener('click', guard(forceUpdate));

@@ -446,6 +446,43 @@
       '.json';
   }
 
+  // Data e hora local no formato brasileiro: 12/10/2026 13:35
+  function fmtDateTimeBR(iso) {
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return '';
+    return pad2(d.getDate()) + '/' + pad2(d.getMonth() + 1) + '/' + d.getFullYear() +
+      ' ' + pad2(d.getHours()) + ':' + pad2(d.getMinutes());
+  }
+
+  // Situação do backup: quando foi o último e se já é hora de lembrar o usuário.
+  function backupStatus(settings, now, daysLimit) {
+    const limit = daysLimit || 7;
+    const current = now || new Date();
+    const last = settings && settings.lastBackupAt ? settings.lastBackupAt : null;
+    const lastDate = last ? new Date(last) : null;
+
+    if (!lastDate || isNaN(lastDate.getTime())) {
+      return {
+        lastBackupAt: null,
+        daysSince: null,
+        overdue: true,
+        label: 'Você ainda não fez nenhum backup.'
+      };
+    }
+
+    const daysSince = Math.max(0, Math.floor((current.getTime() - lastDate.getTime()) / 86400000));
+    let when = 'hoje';
+    if (daysSince === 1) when = 'ontem';
+    else if (daysSince > 1) when = 'há ' + daysSince + ' dias';
+
+    return {
+      lastBackupAt: last,
+      daysSince: daysSince,
+      overdue: daysSince >= limit,
+      label: 'Último backup: ' + fmtDateTimeBR(last) + ' (' + when + ')'
+    };
+  }
+
   /* ---------- biblioteca do usuário ---------- */
 
   // Um exercício aparece na Biblioteca a menos que seja comprovadamente do catálogo
@@ -620,6 +657,8 @@
     renameInWorkouts: renameInWorkouts,
     // backup
     backupFileName: backupFileName,
+    fmtDateTimeBR: fmtDateTimeBR,
+    backupStatus: backupStatus,
     // biblioteca
     isUserExercise: isUserExercise,
     libraryExercises: libraryExercises,

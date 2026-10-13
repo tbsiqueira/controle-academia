@@ -414,6 +414,45 @@ test('backupFileName funciona sem argumento (agora)', () => {
   assert.ok(/^meu-treino-backup-\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}\.json$/.test(nome));
 });
 
+test('fmtDateTimeBR mostra data e hora locais', () => {
+  const local = new Date(2026, 9, 12, 13, 35, 0);
+
+  assert.equal(core.fmtDateTimeBR(local.toISOString()), '12/10/2026 13:35');
+  assert.equal(core.fmtDateTimeBR(''), '');
+  assert.equal(core.fmtDateTimeBR('nao eh data'), '');
+});
+
+test('backupStatus: sem backup, avisa', () => {
+  const info = core.backupStatus({}, new Date(2026, 9, 12, 10, 0), 7);
+
+  assert.equal(info.lastBackupAt, null);
+  assert.equal(info.daysSince, null);
+  assert.equal(info.overdue, true);
+  assert.match(info.label, /nenhum backup/i);
+});
+
+test('backupStatus: conta os dias e avisa depois do limite', () => {
+  const now = new Date(2026, 9, 12, 10, 0);
+
+  const hoje = core.backupStatus({ lastBackupAt: new Date(2026, 9, 12, 8, 0).toISOString() }, now, 7);
+  assert.equal(hoje.daysSince, 0);
+  assert.equal(hoje.overdue, false);
+  assert.match(hoje.label, /\(hoje\)/);
+
+  const ontem = core.backupStatus({ lastBackupAt: new Date(2026, 9, 11, 8, 0).toISOString() }, now, 7);
+  assert.equal(ontem.daysSince, 1);
+  assert.match(ontem.label, /\(ontem\)/);
+
+  const semana = core.backupStatus({ lastBackupAt: new Date(2026, 9, 4, 8, 0).toISOString() }, now, 7);
+  assert.equal(semana.daysSince, 8);
+  assert.equal(semana.overdue, true);
+  assert.match(semana.label, /h\u00e1 8 dias/);
+
+  const noLimite = core.backupStatus({ lastBackupAt: new Date(2026, 9, 5, 10, 0).toISOString() }, now, 7);
+  assert.equal(noLimite.daysSince, 7);
+  assert.equal(noLimite.overdue, true, 'no dia do limite ja avisa');
+});
+
 /* ---------- biblioteca do usuario ---------- */
 
 test('isUserExercise nao esconde exercicio criado pelo usuario', () => {
