@@ -222,51 +222,34 @@ function trechosSemTeste() {
 
 const diagnostico = trechosSemTeste();
 const semTeste = diagnostico.trechos;
-const completo = semTeste.length === 0;
+// Criterio do gate: cobertura do Node (autoritativa) em 100% de linhas e de ramos.
+// A lista de trechos e informativa: ajuda a achar o que falta, mas nao decide, porque o V8
+// nao reporta os mesmos trechos em todas as execucoes (cada arquivo de teste roda em um processo).
+const completo = medidas.linhas === 100 && medidas.ramos === 100;
 
-console.log('\n[cobertura] ' + ALVO + ' — trechos (statements/ramos do V8): ' +
-  (completo ? 'todos cobertos' : semTeste.length + ' sem teste'));
-console.log('[cobertura] tabela do Node (referencia): linhas ' + medidas.linhas + '% | ramos ' +
-  medidas.ramos + '% | funcoes ' + medidas.funcoes + '%');
+console.log('\n[cobertura] ' + ALVO + ': linhas ' + medidas.linhas + '% | ramos ' + medidas.ramos +
+  '% | funcoes ' + medidas.funcoes + '% (tabela do Node)');
+console.log('[cobertura] trechos que o V8 nao viu executar: ' + semTeste.length);
 
 semTeste.forEach(function (t) {
   console.log('[cobertura]   linhas ' + t.inicio + '-' + t.fim + ': ' + t.trecho);
 });
 
 // Annotations: aparecem no resumo do check, sem precisar abrir o log.
-// (limitadas a 5 trechos para que o resumo tambem caiba no limite do GitHub)
-semTeste.slice(0, 5).forEach(function (t) {
-  const fim = t.fim > t.inicio ? ('-' + t.fim) : '';
-  console.log('::warning file=' + ALVO + ',line=' + t.inicio +
-    ',endLine=' + t.fim + '::sem teste (' + t.inicio + fim + '): ' + t.trecho);
-});
-
-if (completo) {
-  console.log('[cobertura] 100% dos trechos de ' + ALVO + ' cobertos pelos testes.');
-  process.exit(0);
-}
-
-const resumo = '[cobertura] ' + ALVO + ' com ' + semTeste.length + ' trecho(s) sem teste' +
-  ' (linhas do Node: ' + medidas.linhas + '%, ramos: ' + medidas.ramos + '%)' +
-  (enforcar ? '' : ' (informativo)');
-
 const listaDeLinhas = semTeste.map(function (t) {
   return t.fim > t.inicio ? (t.inicio + '-' + t.fim) : String(t.inicio);
 }).join(', ');
 
-console.log('::notice file=' + ALVO + ',line=1::trechos sem teste: ' + listaDeLinhas);
+console.log('::notice file=' + ALVO + ',line=1::trechos que o V8 nao viu executar: ' +
+  (listaDeLinhas || 'nenhum'));
 
-// Detalhe (offsets do V8 + trecho + contagens observadas) para conferir o mapeamento.
-const detalhes = semTeste.map(function (t) {
-  const assinatura = t.inicioOffset + ':' + t.fimOffset;
-  const contagens = (diagnostico.contagens[assinatura] || []).join('/');
+if (completo) {
+  console.log('[cobertura] 100% de linhas e ramos em ' + ALVO + '.');
+  process.exit(0);
+}
 
-  return 'offsets ' + assinatura + ' (linhas ' + t.inicio + '-' + t.fim + ') contagens[' + contagens + '] ' +
-    JSON.stringify(t.trecho.slice(0, 50));
-}).join(' | ');
-
-console.log('::notice file=' + ALVO + ',line=1::execucoes ' + diagnostico.executacoes + ' | detalhe: ' + detalhes);
-console.log('::notice file=' + ALVO + ',line=1::fontes ' + diagnostico.fontes + '');
+const resumo = '[cobertura] ' + ALVO + ' abaixo de 100%: linhas ' + medidas.linhas + '%, ramos ' +
+  medidas.ramos + '%, funcoes ' + medidas.funcoes + '%' + (enforcar ? '' : ' (informativo)');
 
 if (enforcar) {
   console.log('::error file=' + ALVO + '::' + resumo);
