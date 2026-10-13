@@ -313,6 +313,15 @@ Se passar de **7 dias** sem backup, o app mostra um aviso no **Início** com o b
 
 **Quando fazer:** de vez em quando por segurança, e sempre antes de trocar de celular ou limpar o navegador.
 
+### Ver dados (consulta, somente leitura)
+Ainda em **Mais → Dados → Ver dados** você vê o que o app guarda neste aparelho: **contagens** (treinos,
+exercícios, fichas, colinha), a lista de **treinos** (com ficha, nº de exercícios e séries), de **fichas**,
+da **biblioteca** (com "usado em" quais fichas) e suas metas/semana. Nessa tela também dá para **Copiar JSON**
+(cola em qualquer lugar) ou **Exportar backup** pelo caminho normal.
+
+É só consulta: **nada é alterado ali**. Serve para conferir, por exemplo, se um exercício antigo já ganhou
+o id do catálogo ou quantos treinos você tem registrados.
+
 ### Importar (restaurar)
 Toque em **Importar** → escolha o arquivo `.json` → confirme.
 Os dados atuais são substituídos pelos do arquivo. Mudou de ideia? O botão

@@ -85,7 +85,7 @@ function navigate() {
   if (view) view.classList.remove('d-none');
 
   document.querySelectorAll('.bottom-nav a').forEach(function (a) {
-    const activeHash = (viewName === 'detail' || viewName === 'exercise') ? '#/dashboard' : ((viewName === 'erase') ? '#/more' : hash);
+    const activeHash = (viewName === 'detail' || viewName === 'exercise') ? '#/dashboard' : ((viewName === 'erase' || viewName === 'data') ? '#/more' : hash);
     a.classList.toggle('active', a.getAttribute('href') === activeHash);
   });
 
@@ -94,6 +94,7 @@ function navigate() {
   if (viewName === 'detail') renderWorkoutDetail();
   if (viewName === 'exercise') renderExerciseHistory();
   if (viewName === 'erase') renderErase();
+  if (viewName === 'data') renderData();
   if (viewName === 'exercises') renderSheetsAndExercises();
   if (viewName === 'calendar') renderCalendar();
   if (viewName === 'more') renderMore();
@@ -1578,6 +1579,149 @@ async function shareExportText() {
 function appVersionLabel() {
   const el = document.getElementById('appVersion');
   return el ? el.textContent.trim() : '';
+}
+
+/* ---------- ver dados (somente leitura) ---------- */
+
+// Mostra a base que esta no aparelho: contagens, tabelas e copia/exporta o JSON.
+// Nada aqui escreve no banco: e uma tela de consulta.
+function renderData() {
+  const el = document.getElementById('dataBody');
+
+  const treinos = state.workouts.slice().sort(function (a, b) { return a.date < b.date ? 1 : -1; });
+  const fichas = state.sheets.slice().sort(function (a, b) { return String(a.name).localeCompare(String(b.name)); });
+  const biblioteca = state.exercises.slice().sort(function (a, b) { return String(a.name).localeCompare(String(b.name)); });
+  const colinha = state.colinha.slice().sort(function (a, b) { return (a.order || 0) - (b.order || 0); });
+  const semana = weekRange();
+  const ultimoBackup = state.settings.lastBackupAt ? fmtDateTimeBR(state.settings.lastBackupAt) : 'nunca';
+
+  function contador(rotulo, valor) {
+    return '<div class="col-3"><div class="h5 mb-0 fw-bold">' + valor + '</div>' +
+      '<small class="text-muted">' + esc(rotulo) + '</small></div>';
+  }
+
+  function fichasQueUsam(exercicioId) {
+    return state.sheets.filter(function (s) {
+      return (s.exercises || []).some(function (item) {
+        return item.exerciseId && String(item.exerciseId) === String(exercicioId);
+      });
+    }).map(function (s) { return s.name; });
+  }
+
+  let html = '<p class="text-muted small">Tudo o que o app guarda fica <strong>apenas neste aparelho</strong> ' +
+    '(IndexedDB <code>meu-treino</code>). Esta tela é <strong>somente leitura</strong> — nada é alterado aqui.</p>';
+
+  html += '<div class="card mb-3"><div class="card-body py-3">' +
+    '<div class="row text-center g-2">' +
+    contador('treinos', treinos.length) +
+    contador('exercícios', biblioteca.length) +
+    contador('fichas', fichas.length) +
+    contador('colinha', colinha.length) +
+    '</div></div></div>';
+
+  html += '<div class="card mb-3"><div class="card-body py-2">' +
+    '<div class="d-flex gap-2">' +
+    '<button type="button" class="btn btn-outline-primary flex-fill" id="dataCopy"><i class="bi bi-clipboard"></i> Copiar JSON</button>' +
+    '<button type="button" class="btn btn-outline-secondary flex-fill" id="dataExport"><i class="bi bi-download"></i> Exportar backup</button>' +
+    '</div><p class="small text-muted mb-0 mt-2" id="dataStatus">' +
+    'O JSON tem os 5 grupos de dados: treinos, exercícios, fichas, metas e colinha.</p>' +
+    '</div></div>';
+
+  html += '<div class="card mb-3"><div class="card-header fw-semibold"><i class="bi bi-gear"></i> Metas e semana</div>' +
+    '<div class="card-body py-2 small">' +
+    '<div>Treinos por semana: <strong>' + toNum(state.settings.weeklyWorkoutTarget) + '</strong></div>' +
+    '<div>Cardio por semana: <strong>' + toNum(state.settings.weeklyCardioTarget) + ' min</strong></div>' +
+    '<div>Semana atual: <strong>' + fmtBR(semana.anchor) + ' – ' + fmtBR(semana.end) + '</strong></div>' +
+    '<div>Último backup: <strong>' + esc(ultimoBackup) + '</strong></div>' +
+    '</div></div>';
+
+  html += '<div class="card mb-3"><div class="card-header fw-semibold"><i class="bi bi-clock-history"></i> Treinos (' + treinos.length + ')</div>' +
+    '<div class="card-body py-2">';
+
+  if (!treinos.length) {
+    html += '<p class="small text-muted mb-0">Nenhum treino registrado.</p>';
+  } else {
+    html += '<div class="table-responsive"><table class="table table-sm align-middle mb-0">' +
+      '<thead><tr><th>Data</th><th>Ficha</th><th class="text-end">Exerc.</th><th class="text-end">Séries</th><th></th></tr></thead><tbody>' +
+      treinos.map(function (w) {
+        return '<tr>' +
+          '<td class="text-nowrap">' + fmtBR(w.date) + '</td>' +
+          '<td>' + esc(sheetLabel(w, state.sheets) || '—') + '</td>' +
+          '<td class="text-end">' + countExercises(w) + '</td>' +
+          '<td class="text-end">' + (w.sets || []).length + '</td>' +
+          '<td class="text-end"><button type="button" class="btn btn-sm btn-link p-0" data-open="' + esc(w.id) + '" aria-label="Abrir treino"><i class="bi bi-chevron-right"></i></button></td>' +
+          '</tr>';
+      }).join('') + '</tbody></table></div>';
+  }
+
+  html += '</div></div>';
+
+  html += '<div class="card mb-3"><div class="card-header fw-semibold"><i class="bi bi-clipboard2-pulse"></i> Fichas (' + fichas.length + ')</div>' +
+    '<div class="card-body py-2">';
+
+  if (!fichas.length) {
+    html += '<p class="small text-muted mb-0">Nenhuma ficha cadastrada.</p>';
+  } else {
+    html += '<div class="table-responsive"><table class="table table-sm align-middle mb-0">' +
+      '<thead><tr><th>Ficha</th><th class="text-end">Exerc.</th><th>Status</th></tr></thead><tbody>' +
+      fichas.map(function (s) {
+        return '<tr><td>' + esc(s.name) + '</td>' +
+          '<td class="text-end">' + (s.exercises || []).length + '</td>' +
+          '<td>' + (s.active === false ? '<span class="badge text-bg-secondary">inativa</span>' : '<span class="badge text-bg-light">ativa</span>') + '</td></tr>';
+      }).join('') + '</tbody></table></div>';
+  }
+
+  html += '</div></div>';
+
+  html += '<div class="card mb-3"><div class="card-header fw-semibold"><i class="bi bi-card-checklist"></i> Biblioteca (' + biblioteca.length + ')</div>' +
+    '<div class="card-body py-2">';
+
+  if (!biblioteca.length) {
+    html += '<p class="small text-muted mb-0">Nenhum exercício seu na biblioteca (o catálogo tem 927 e vive em <code>data/exercises.json</code>).</p>';
+  } else {
+    html += '<div class="table-responsive"><table class="table table-sm align-middle mb-0">' +
+      '<thead><tr><th>Exercício</th><th>Grupo</th><th>Usado em</th></tr></thead><tbody>' +
+      biblioteca.map(function (e) {
+        const usados = fichasQueUsam(e.id);
+        return '<tr><td>' + esc(e.name) + (e.active === false ? ' <span class="badge text-bg-secondary">inativo</span>' : '') + '</td>' +
+          '<td class="small text-muted">' + esc(e.group || '—') + '</td>' +
+          '<td class="small text-muted">' + (usados.length ? esc(usados.join(', ')) : '—') + '</td></tr>';
+      }).join('') + '</tbody></table></div>';
+  }
+
+  html += '</div></div>';
+
+  if (colinha.length) {
+    html += '<div class="card mb-3"><div class="card-header fw-semibold"><i class="bi bi-journal-text"></i> Colinha (' + colinha.length + ')</div>' +
+      '<div class="card-body py-2"><ul class="list-unstyled mb-0 small">' +
+      colinha.map(function (c) { return '<li>' + esc(c.title || '(sem título)') + '</li>'; }).join('') +
+      '</ul></div></div>';
+  }
+
+  el.innerHTML = html;
+
+  el.querySelectorAll('[data-open]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      state.viewingWorkoutId = b.getAttribute('data-open');
+      location.hash = '#/detail';
+    });
+  });
+
+  document.getElementById('dataCopy').addEventListener('click', function () { copyAllData(); });
+  document.getElementById('dataExport').addEventListener('click', guard(exportBackup));
+}
+
+// Copia o JSON completo (mesmo conteudo do arquivo de backup) para a area de transferencia.
+async function copyAllData() {
+  const status = document.getElementById('dataStatus');
+  const json = buildBackup().json;
+
+  try {
+    await navigator.clipboard.writeText(json);
+    status.textContent = 'JSON copiado (' + json.length + ' caracteres). Cole onde quiser.';
+  } catch (e) {
+    status.textContent = 'Não deu para copiar aqui. Use "Exportar backup" para gerar o arquivo.';
+  }
 }
 
 /* ---------- backup (arquivo, compartilhar e lembrete) ---------- */

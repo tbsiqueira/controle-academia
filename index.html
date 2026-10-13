@@ -11,9 +11,9 @@
   <link rel="icon" href="icons/icon-16.png" sizes="16x16" type="image/png">
   <link rel="icon" href="icons/icon-32.png" sizes="32x32" type="image/png">
   <link rel="apple-touch-icon" href="icons/icon-180.png">
-  <link rel="stylesheet" href="vendor/bootstrap/bootstrap.min.css?v=47">
-  <link rel="stylesheet" href="vendor/bootstrap-icons/bootstrap-icons.min.css?v=47">
-  <link rel="stylesheet" href="css/styles.css?v=47">
+  <link rel="stylesheet" href="vendor/bootstrap/bootstrap.min.css?v=48">
+  <link rel="stylesheet" href="vendor/bootstrap-icons/bootstrap-icons.min.css?v=48">
+  <link rel="stylesheet" href="css/styles.css?v=48">
 </head>
 <body>
   <main class="container pb-nav">
@@ -91,6 +91,14 @@
         <a href="#/more" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-left"></i> Voltar</a>
       </div>
       <div id="eraseBody"></div>
+    </section>
+    <!-- View data (read-only) -->
+    <section id="view-data" class="view d-none">
+      <div class="d-flex justify-content-between align-items-center mt-3 mb-3">
+        <h1 class="h4 mb-0"><i class="bi bi-database"></i> Ver dados</h1>
+        <a href="#/more" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-left"></i> Voltar</a>
+      </div>
+      <div id="dataBody"></div>
     </section>
     <!-- Sheets & exercises -->
     <section id="view-exercises" class="view d-none">
@@ -200,6 +208,7 @@
             <button class="btn btn-primary flex-fill" type="button" id="btnExport"><i class="bi bi-share"></i> Exportar</button>
             <button class="btn btn-outline-secondary flex-fill" type="button" id="btnImport"><i class="bi bi-upload"></i> Importar</button>
           </div>
+          <a href="#/data" class="btn btn-outline-secondary w-100 mb-1" id="btnViewData"><i class="bi bi-list-columns-reverse"></i> Ver dados</a>
           <p class="small text-muted mb-1" id="backupAction"></p>
           <p class="small text-muted mb-2" id="backupStatus"></p>
           <div class="d-flex gap-2 mb-2">
@@ -225,7 +234,7 @@
         </div>
       </div>
 
-      <p class="text-center text-muted small">Meu Treino <span id="appVersion">v47</span> · dados 100% locais · catálogo: gugeldev/exercicios-bd-ptbr (CC0)</p>
+      <p class="text-center text-muted small">Meu Treino <span id="appVersion">v48</span> · dados 100% locais · catálogo: gugeldev/exercicios-bd-ptbr (CC0)</p>
     </section>
   </main>
 
@@ -368,9 +377,9 @@
     </div>
   </div>
 
-  <script src="vendor/bootstrap/bootstrap.bundle.min.js?v=47"></script>
-  <script src="js/db.js?v=47"></script>
-  <script src="js/core.js?v=47"></script>
-  <script src="js/app.js?v=47"></script>
+  <script src="vendor/bootstrap/bootstrap.bundle.min.js?v=48"></script>
+  <script src="js/db.js?v=48"></script>
+  <script src="js/core.js?v=48"></script>
+  <script src="js/app.js?v=48"></script>
 </body>
 </html>
