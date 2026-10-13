@@ -504,6 +504,13 @@
     return !!(value && typeof value.json === 'string' && typeof value.name === 'string' && value.name);
   }
 
+  // Dica mostrada embaixo do botão Exportar: diz para onde o arquivo vai neste aparelho.
+  function backupHint(action) {
+    return action === 'share'
+      ? 'Abre o menu do celular para salvar no Drive, WhatsApp ou Arquivos.'
+      : 'Baixa o arquivo .json do backup para guardar onde quiser.';
+  }
+
   /* ---------- biblioteca do usuário ---------- */
 
   // Um exercício aparece na Biblioteca a menos que seja comprovadamente do catálogo
@@ -683,6 +690,7 @@
     backupAction: backupAction,
     backupSharePayload: backupSharePayload,
     isBackupPayload: isBackupPayload,
+    backupHint: backupHint,
     // biblioteca
     isUserExercise: isUserExercise,
     libraryExercises: libraryExercises,

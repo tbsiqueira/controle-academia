@@ -1463,7 +1463,7 @@ function renderErase() {
     '<label class="form-check-label" for="eraseAck">Quero realmente apagar todos os meus dados.</label>' +
     '</div>' +
     '<p class="small text-muted mb-0 mt-2">Dica: se quiser guardar uma cópia antes, use ' +
-    '<strong>Mais → Dados → Compartilhar backup</strong>.</p>' +
+    '<strong>Mais → Dados → Exportar</strong>.</p>' +
     '</div></div>' +
     '<div class="d-flex gap-2">' +
     '<a href="#/more" class="btn btn-outline-secondary flex-fill">Cancelar</a>' +
@@ -1583,8 +1583,8 @@ async function markBackupDone() {
 
 function renderBackupStatus() {
   const el = document.getElementById('backupStatus');
-  if (!el) return;
-  el.textContent = backupStatus(state.settings, new Date(), BACKUP_REMINDER_DAYS).label;
+  if (el) el.textContent = backupStatus(state.settings, new Date(), BACKUP_REMINDER_DAYS).label;
+  renderExportHint();
 }
 
 // Lembrete no Início quando o último backup está velho (ou nunca foi feito).
@@ -1608,7 +1608,7 @@ function renderBackupReminder() {
     '<button type="button" class="btn btn-sm btn-outline-secondary" id="reminderDismiss">Depois</button>' +
     '</div></div>';
 
-  document.getElementById('reminderBackup').addEventListener('click', guard(shareBackup));
+  document.getElementById('reminderBackup').addEventListener('click', guard(exportBackup));
   document.getElementById('reminderDismiss').addEventListener('click', function () {
     state.dismissBackupReminder = true;
     renderBackupReminder();
@@ -1624,10 +1624,34 @@ function backupActionStatus(message) {
   if (el) el.textContent = message || '';
 }
 
+// O navegador deste aparelho sabe compartilhar arquivos?
+function canShareBackupFile() {
+  if (!navigator.canShare) return false;
+  try {
+    return !!navigator.canShare(backupSharePayload(new File([], 'backup.json', { type: 'application/json' })));
+  } catch (e) {
+    return false;
+  }
+}
+
+// Dica embaixo do botão Exportar: diz para onde o arquivo vai neste aparelho (e ajusta o ícone).
+function renderExportHint() {
+  const hint = document.getElementById('backupAction');
+  const btn = document.getElementById('btnExport');
+  const action = backupAction({ canShareFiles: canShareBackupFile(), touch: isTouchDevice() });
+
+  if (hint) hint.textContent = backupHint(action);
+  if (btn) {
+    btn.innerHTML = (action === 'share'
+      ? '<i class="bi bi-share"></i> '
+      : '<i class="bi bi-download"></i> ') + 'Exportar';
+  }
+}
+
 // Salva o arquivo no aparelho (download). Aceita um backup já montado para não gerar
 // nomes diferentes na mesma ação.
-async function exportData(prebuilt) {
-  // AtenÃ§Ã£o: o handler de clique passa o evento como argumento; sÃ³ usamos um backup de verdade.
+async function downloadBackup(prebuilt) {
+  // Atenção: o handler de clique passa o evento como argumento; só usamos um backup de verdade.
   const backup = isBackupPayload(prebuilt) ? prebuilt : buildBackup();
   const url = URL.createObjectURL(new Blob([backup.json], { type: 'application/json' }));
   const a = document.createElement('a');
@@ -1642,15 +1666,14 @@ async function exportData(prebuilt) {
   backupActionStatus('Arquivo gerado: ' + backup.name);
 }
 
-// Abre o menu de compartilhamento do aparelho com o arquivo (Drive, WhatsApp, Arquivos...).
-// Só no celular/tablet; no computador (ou sem suporte) baixa direto.
-// Se o compartilhamento falhar, NÃO baixa sozinho — assim nunca aparecem dois arquivos.
-async function shareBackup() {
+// Botão "Exportar": abre o menu de compartilhamento do aparelho (Drive, WhatsApp, Arquivos)
+// no celular/tablet e baixa o arquivo no computador. Se o compartilhamento falhar,
+// NÃO baixa sozinho — assim nunca aparecem dois arquivos.
+async function exportBackup() {
   const backup = buildBackup();
-  const canShareFiles = !!(navigator.canShare && navigator.canShare({ files: [backup.file] }));
 
-  if (backupAction({ canShareFiles: canShareFiles, touch: isTouchDevice() }) === 'download') {
-    await exportData(backup);
+  if (backupAction({ canShareFiles: canShareBackupFile(), touch: isTouchDevice() }) === 'download') {
+    await downloadBackup(backup);
     return;
   }
 
@@ -1663,11 +1686,10 @@ async function shareBackup() {
       backupActionStatus('Compartilhamento cancelado — nada foi gerado.');
       return;
     }
-    backupActionStatus('Não deu para compartilhar agora. Use "Exportar" para baixar o arquivo.');
+    backupActionStatus('Não deu para compartilhar agora. Tente de novo ou use um computador.');
   }
 }
 
-// Botão único de atualização: limpa o cache (service worker) e recarrega a versão mais nova.
 async function forceUpdate() {
   const ok = confirm('Atualizar o app?\n\nIsso limpa o cache e recarrega a versão mais nova. Seus treinos salvos não são afetados.');
   if (!ok) return;
@@ -1859,8 +1881,7 @@ function bindEvents() {
   document.getElementById('btnSaveSettings').addEventListener('click', guard(saveSettingsForm));
   document.getElementById('btnWeekToday').addEventListener('click', guard(startWeekToday));
 
-  document.getElementById('btnExport').addEventListener('click', function () { exportData(); });
-  document.getElementById('btnShareBackup').addEventListener('click', guard(shareBackup));
+  document.getElementById('btnExport').addEventListener('click', guard(exportBackup));
   document.getElementById('exportCopy').addEventListener('click', guard(copyExportText));
   document.getElementById('exportShare').addEventListener('click', guard(shareExportText));
   document.getElementById('btnForceUpdate').addEventListener('click', guard(forceUpdate));

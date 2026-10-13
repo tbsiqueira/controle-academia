@@ -284,19 +284,21 @@ as observações e o cardio. Campos vazios são omitidos automaticamente.
 
 Tudo isso fica em **Mais → Dados**.
 
-### Compartilhar backup (o jeito mais prático no celular)
-Toque em **Compartilhar backup** → abre o menu de compartilhamento do aparelho com o arquivo pronto.
-Escolha **Drive**, **WhatsApp**, **Arquivos**, e-mail… No computador o mesmo botão baixa o arquivo.
+### Exportar (backup)
+Toque em **Exportar** — o **mesmo botão** funciona nos dois aparelhos, e a dica embaixo dele diz o que vai acontecer:
 
-É assim que se leva o treino de um aparelho para outro:
+- **Celular/tablet**: abre o **menu de compartilhamento** com o arquivo pronto — escolha **Drive**,
+  **WhatsApp**, **Arquivos**, e-mail…
+- **Computador**: baixa o arquivo direto, com nome tipo `meu-treino-backup-2026-10-12_13-35-42.json`
+  (data **e hora** da geração, para não confundir backups do mesmo dia).
 
-1. No aparelho que **tem** os dados: **Mais → Dados → Compartilhar backup** → salve no **Drive** (ou mande
-   para você mesmo no WhatsApp);
+Em qualquer caso o arquivo tem **todos** os seus dados. Se o compartilhamento falhar, o app avisa e
+**não** gera um segundo arquivo sozinho.
+
+### Levar os treinos de um aparelho para outro
+1. No aparelho que **tem** os dados: **Mais → Dados → Exportar** → salve no **Drive** (ou mande para você
+   mesmo no WhatsApp);
 2. No outro aparelho: **Mais → Dados → Importar** → escolha o arquivo (no iPhone, "Procurar" → Drive/Arquivos).
-
-### Exportar (arquivo no aparelho)
-Toque em **Exportar** → baixa um arquivo como `meu-treino-backup-2026-10-12_13-35-42.json` (data **e hora** da
-geração, para não confundir backups do mesmo dia) com **todos** os seus dados.
 
 ### Status e lembrete de backup
 Logo abaixo dos botões aparece **quando foi o último backup** (ex.: _"Último backup: 12/10/2026 13:35 (há 3 dias)"_).
@@ -315,7 +317,7 @@ Toque em **Apagar todos os dados** — abre uma **tela própria** com o aviso do
 (treinos, fichas, biblioteca, colinha e metas). Para confirmar, basta **marcar o checkbox**
 _"Quero realmente apagar todos os meus dados"_ e tocar em **Apagar tudo**.
 
-É definitivo e não tem volta — por isso a tela lembra de usar **Mais → Dados → Compartilhar backup**
+É definitivo e não tem volta — por isso a tela lembra de usar **Mais → Dados → Exportar**
 antes, caso você queira guardar uma cópia.
 
 ### Atualizar app

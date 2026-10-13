@@ -485,6 +485,13 @@ test('isBackupPayload ignora o evento de clique (bug do botao de backup)', () =>
   assert.equal(core.isBackupPayload({ name: 'x.json' }), false, 'sem json');
 });
 
+test('backupHint explica o que o botao Exportar vai fazer', () => {
+  assert.match(core.backupHint('share'), /Drive/);
+  assert.match(core.backupHint('share'), /WhatsApp/);
+  assert.match(core.backupHint('download'), /Baixa o arquivo/);
+  assert.equal(core.backupHint('qualquer'), core.backupHint('download'));
+});
+
 /* ---------- biblioteca do usuario ---------- */
 
 test('isUserExercise nao esconde exercicio criado pelo usuario', () => {

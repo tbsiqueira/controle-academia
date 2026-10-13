@@ -9,9 +9,9 @@
   <title>Meu Treino</title>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
-  <link rel="stylesheet" href="vendor/bootstrap/bootstrap.min.css?v=37">
-  <link rel="stylesheet" href="vendor/bootstrap-icons/bootstrap-icons.min.css?v=37">
-  <link rel="stylesheet" href="css/styles.css?v=37">
+  <link rel="stylesheet" href="vendor/bootstrap/bootstrap.min.css?v=38">
+  <link rel="stylesheet" href="vendor/bootstrap-icons/bootstrap-icons.min.css?v=38">
+  <link rel="stylesheet" href="css/styles.css?v=38">
 </head>
 <body>
   <main class="container pb-nav">
@@ -195,12 +195,11 @@
         <div class="card-body">
           <p class="text-muted small">Seus dados ficam apenas neste aparelho (IndexedDB). Guarde uma cópia no backup para não perder nada — e para levar os treinos de um aparelho para outro.</p>
           <div class="d-flex gap-2 mb-1">
-            <button class="btn btn-outline-primary flex-fill" type="button" id="btnExport"><i class="bi bi-download"></i> Exportar</button>
+            <button class="btn btn-primary flex-fill" type="button" id="btnExport"><i class="bi bi-share"></i> Exportar</button>
             <button class="btn btn-outline-secondary flex-fill" type="button" id="btnImport"><i class="bi bi-upload"></i> Importar</button>
           </div>
+          <p class="small text-muted mb-1" id="backupAction"></p>
           <p class="small text-muted mb-2" id="backupStatus"></p>
-          <button class="btn btn-primary w-100 mb-2" type="button" id="btnShareBackup"><i class="bi bi-share"></i> Compartilhar backup (Drive, WhatsApp...)</button>
-          <p class="small text-muted mb-2" id="backupAction"></p>
           <div class="d-flex gap-2 mb-2">
             <button class="btn btn-outline-warning d-none flex-fill" type="button" id="btnUndoImport"><i class="bi bi-arrow-counterclockwise"></i> Desfazer</button>
             <button class="btn btn-outline-secondary flex-fill" type="button" id="btnForceUpdate" title="Limpa o cache e recarrega a versão mais nova"><i class="bi bi-arrow-repeat"></i> Atualizar app</button>
@@ -224,7 +223,7 @@
         </div>
       </div>
 
-      <p class="text-center text-muted small">Meu Treino <span id="appVersion">v37</span> · dados 100% locais · catálogo: gugeldev/exercicios-bd-ptbr (CC0)</p>
+      <p class="text-center text-muted small">Meu Treino <span id="appVersion">v38</span> · dados 100% locais · catálogo: gugeldev/exercicios-bd-ptbr (CC0)</p>
     </section>
   </main>
 
@@ -367,9 +366,9 @@
     </div>
   </div>
 
-  <script src="vendor/bootstrap/bootstrap.bundle.min.js?v=37"></script>
-  <script src="js/db.js?v=37"></script>
-  <script src="js/core.js?v=37"></script>
-  <script src="js/app.js?v=37"></script>
+  <script src="vendor/bootstrap/bootstrap.bundle.min.js?v=38"></script>
+  <script src="js/db.js?v=38"></script>
+  <script src="js/core.js?v=38"></script>
+  <script src="js/app.js?v=38"></script>
 </body>
 </html>
