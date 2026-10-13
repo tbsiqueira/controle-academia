@@ -382,3 +382,50 @@ test('groupSets usa o aquecimento do grupo certo quando ha varios exercicios', (
   assert.deepEqual(grupos[0].warmup, { reps: 20, load: 40, rir: 4 });
   assert.deepEqual(grupos[1].warmup, { reps: 15, load: 20, rir: 3 });
 });
+
+test('exerciseLabel e sheetLabel pulam entradas invalidas da lista', () => {
+  const exercicios = [null, { id: 7 }, { id: 7, name: 'Remada baixa' }];
+  assert.equal(core.exerciseLabel({ exerciseId: 7, exerciseName: 'Antigo' }, exercicios), 'Remada baixa');
+
+  const fichas = [null, { id: 's1' }, { id: 's1', name: 'Ficha A' }];
+  assert.equal(core.sheetLabel({ sheetId: 's1', sheetName: 'Antiga' }, fichas), 'Ficha A');
+});
+
+test('normalizeSheetItem deduz as series de outras fontes quando falta sets', () => {
+  const backup = core.normalizeBackup({
+    sheets: [{
+      id: 's1',
+      exercises: [
+        { name: 'A', reps: [12, 10] },
+        { name: 'B', reps: '' },
+        { name: 'C', reps: [], sets: 1 }
+      ]
+    }]
+  });
+
+  const itens = backup.sheets[0].exercises;
+  assert.deepEqual(itens[0].reps, [12, 10], 'sem sets, vale a quantidade de reps');
+  assert.equal(itens[0].sets, 2);
+  assert.deepEqual(itens[1].reps, [null, null, null], 'reps vazio cai no padrao de 3 series');
+  assert.deepEqual(itens[2].reps, [null], 'sets informado ganha da lista de reps');
+});
+
+test('normalizeWorkout completa ficha e nome ausentes', () => {
+  const backup = core.normalizeBackup({
+    workouts: [
+      { id: 'w1', sets: [] },
+      { id: 'w2', sheetId: 's9', typeName: 'Antigo', sets: [] }
+    ]
+  });
+
+  assert.equal(backup.workouts[0].sheetId, null, 'sem typeId fica null');
+  assert.equal(backup.workouts[0].sheetName, '');
+  assert.equal(backup.workouts[1].sheetId, 's9', 'sheetId informado e mantido');
+  assert.equal(backup.workouts[1].sheetName, 'Antigo', 'typeName vira sheetName');
+});
+
+test('normalizeText e toNumOrNull aceitam undefined', () => {
+  assert.equal(core.normalizeText(undefined), '');
+  assert.equal(core.normalizeText(0), '0');
+  assert.equal(core.toNumOrNull(undefined), null);
+});
