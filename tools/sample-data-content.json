@@ -1,0 +1,63 @@
+{
+  "customExercises": [
+    { "id": "ex-custom-1", "name": "Elevação pélvica unilateral", "group": "Glúteos", "correction": "subir devagar, 2 segundos na descida" },
+    { "id": "ex-custom-2", "name": "Cadeira abdutora antiga", "group": "Pernas", "correction": "máquina da sala 2, banco mais alto" },
+    { "id": "ex-custom-3", "name": "Puxada frente supinada na barra W", "group": "Costas", "correction": "pegada fechada, cotovelo junto ao corpo" },
+    { "id": "ex-custom-4", "name": "Tríceps testa na barra W", "group": "Tríceps", "correction": "descer até a testa, sem abrir o cotovelo" },
+    { "id": "ex-custom-5", "name": "Abdominal na polia com corda", "group": "Abdômen", "correction": "puxar o cotovelo até o joelho, expirar na subida" },
+    { "id": "ex-custom-6", "name": "Esteira inclinada", "group": "Cardio", "correction": "12% de inclinação, 6 km/h" }
+  ],
+  "plan": [
+    {
+      "id": "sample-sheet-a",
+      "name": "TREINO A - inferiores",
+      "catalogIds": [914, 919, 918, 920, 922],
+      "customIds": ["ex-custom-1", "ex-custom-2"],
+      "dayOffsets": [-20, -13, -6, -1],
+      "cardioMinutes": [0, 15, 0, 20],
+      "notes": [
+        "primeiro treino registrado",
+        "me sentindo forte hoje",
+        "cansado, dormi mal",
+        "treino curto, bem feito"
+      ]
+    },
+    {
+      "id": "sample-sheet-b",
+      "name": "TREINO B - superiores",
+      "catalogIds": [909, 887, 888, 898, 876, 861],
+      "customIds": ["ex-custom-3", "ex-custom-4"],
+      "dayOffsets": [-19, -12, -5, -2],
+      "cardioMinutes": [20, 0, 15, 0],
+      "notes": [
+        "ombro ok hoje",
+        "",
+        "aumentei a puxada",
+        "fui ate a falha na ultima serie"
+      ]
+    },
+    {
+      "id": "sample-sheet-c",
+      "name": "TREINO C - corpo inteiro + cardio",
+      "catalogIds": [915, 535, 889, 376, 901, 26],
+      "customIds": ["ex-custom-5", "ex-custom-6"],
+      "dayOffsets": [-18, -11, -4, 0],
+      "cardioMinutes": [30, 30, 35, 30],
+      "notes": [
+        "dia de cardio",
+        "pernas pesadas",
+        "",
+        "semana fechada"
+      ]
+    }
+  ],
+  "colinha": [
+    { "id": "sample-note-1", "title": "RIR (repetição na reserva)", "content": "RIR 2 = parar quando ainda daria 2 repetições boas. Se passar de 2, aumente a carga.", "order": 1 },
+    { "id": "sample-note-2", "title": "Descanso entre séries", "content": "Compostos: 2 a 3 min. Isolados: 60 a 90 s.", "order": 2 },
+    { "id": "sample-note-3", "title": "Lembrete da professora", "content": "Nunca travar a respiração: expirar na fase de esforço.", "order": 3 }
+  ],
+  "settings": {
+    "weeklyWorkoutTarget": 3,
+    "weeklyCardioTarget": 120
+  }
+}

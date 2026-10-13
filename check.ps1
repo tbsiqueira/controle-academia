@@ -178,6 +178,28 @@ if (Test-Path $samplePath) {
   Bad "data/sample-data.json nao encontrado"
 }
 
+# 12) ferramentas versionadas e fixture de exemplo em sincronia com o gerador
+$generator = Join-Path $root 'tools/build-sample-data.ps1'
+if (Test-Path $generator) {
+  $tmpSample = Join-Path ([System.IO.Path]::GetTempPath()) ('mt-sample-check-' + [guid]::NewGuid().ToString('N') + '.json')
+  try {
+    & $generator -OutputPath $tmpSample 6>$null | Out-Null
+    $hashCommitted = (Get-FileHash (Join-Path $root 'data/sample-data.json') -Algorithm SHA256).Hash
+    $hashGenerated = (Get-FileHash $tmpSample -Algorithm SHA256).Hash
+    if ($hashCommitted -eq $hashGenerated) {
+      Ok "dados de exemplo em sincronia com tools/build-sample-data.ps1"
+    } else {
+      Bad "data/sample-data.json difere do gerador - rode: tools/build-sample-data.ps1"
+    }
+  } catch {
+    Bad "falha ao rodar o gerador: $($_.Exception.Message)"
+  } finally {
+    if (Test-Path $tmpSample) { Remove-Item $tmpSample -Force }
+  }
+} else {
+  Bad "tools/build-sample-data.ps1 nao encontrado"
+}
+
 Write-Host ""
 if ($script:fail -eq 0) {
   Write-Host "Tudo certo." -ForegroundColor Green

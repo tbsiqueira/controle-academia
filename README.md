@@ -121,7 +121,9 @@ index.html                  app shell (telas, modais)
 css/styles.css              estilos (tema, navegação inferior, calendário, botões)
 js/core.js                  lógica pura (datas, semana, agrupamento, exportação, compatibilidade de backups)
 js/db.js                    camada IndexedDB (workouts, exercises, sheets, settings, colinha)
-data/sample-data.json       dados de exemplo (3 fichas, 12 treinos) - usados no app e nos testestests/core.test.js          testes de unidade e de compatibilidade de dados
+data/sample-data.json       dados de exemplo (3 fichas, 12 treinos) - usados no app e nos testes
+tools/build-sample-data.ps1 gerador da fixture de exemplo (o check.ps1 confere se esta em sincronia)
+tools/sample-data-content.json  conteudo em pt-BR dos dados de exemplotests/core.test.js          testes de unidade e de compatibilidade de dados
 tests/fixtures/             backups de versões antigas usados nos testes
 js/app.js                   lógica do app (busca, fichas, treinos, histórico, backup)
 data/exercises.json         catálogo embutido com 927 exercícios em pt-BR
@@ -147,6 +149,9 @@ pelo usuário** — cada ficha mistura exercícios do catálogo com **2 exercíc
 - **Nos testes**: `tests/sample-data.test.js` valida estrutura, integridade referencial, normalização de
   backup, migração de dados antigos e renomeação — é a rede de segurança contra quebra de dados entre versões.
 - **Não** entra no precache do service worker: é buscada sob demanda (a primeira carga precisa de internet).
+- **Reprodutível**: é gerada por `tools/build-sample-data.ps1` a partir de `tools/sample-data-content.json`
+  (veja `tools/README.md`). O `check.ps1` regenera e compara o hash — se o JSON e o gerador saírem de
+  sincronia, a pipeline avisa.
 
 ## Modelo de dados (IndexedDB v2)
 
