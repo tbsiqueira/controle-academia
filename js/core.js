@@ -455,8 +455,7 @@
   }
 
   // Situação do backup: quando foi o último e se já é hora de lembrar o usuário.
-  function backupStatus(settings, now, daysLimit) {
-    const limit = daysLimit || 7;
+  function backupStatus(settings, now, daysLimit) {    const limit = daysLimit || 7;
     const current = now || new Date();
     const last = settings && settings.lastBackupAt ? settings.lastBackupAt : null;
     const lastDate = last ? new Date(last) : null;
@@ -481,6 +480,15 @@
       overdue: daysSince >= limit,
       label: 'Último backup: ' + fmtDateTimeBR(last) + ' (' + when + ')'
     };
+  }
+
+  // Decide o que fazer quando o usuário pede backup: abrir o menu de compartilhamento
+  // (celular/tablet, que sabe compartilhar arquivos) ou baixar o arquivo (computador).
+  // Assim uma ação gera UM arquivo só.
+  function backupAction(options) {
+    const opts = options || {};
+    if (opts.canShareFiles && opts.touch) return 'share';
+    return 'download';
   }
 
   /* ---------- biblioteca do usuário ---------- */
@@ -659,6 +667,7 @@
     backupFileName: backupFileName,
     fmtDateTimeBR: fmtDateTimeBR,
     backupStatus: backupStatus,
+    backupAction: backupAction,
     // biblioteca
     isUserExercise: isUserExercise,
     libraryExercises: libraryExercises,

@@ -453,6 +453,15 @@ test('backupStatus: conta os dias e avisa depois do limite', () => {
   assert.equal(noLimite.overdue, true, 'no dia do limite ja avisa');
 });
 
+test('backupAction decide entre compartilhar e baixar (uma acao = um arquivo)', () => {
+  assert.equal(core.backupAction({ canShareFiles: true, touch: true }), 'share', 'celular que sabe compartilhar');
+  assert.equal(core.backupAction({ canShareFiles: true, touch: false }), 'download', 'computador baixa direto');
+  assert.equal(core.backupAction({ canShareFiles: false, touch: true }), 'download', 'sem suporte a arquivos');
+  assert.equal(core.backupAction({ canShareFiles: false, touch: false }), 'download');
+  assert.equal(core.backupAction(), 'download');
+  assert.equal(core.backupAction({}), 'download');
+});
+
 /* ---------- biblioteca do usuario ---------- */
 
 test('isUserExercise nao esconde exercicio criado pelo usuario', () => {

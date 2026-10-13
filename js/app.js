@@ -1623,9 +1623,19 @@ function renderBackupReminder() {
   });
 }
 
-// Salva o arquivo no aparelho (download).
-async function exportData() {
-  const backup = buildBackup();
+function isTouchDevice() {
+  return !!(window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
+}
+
+function backupActionStatus(message) {
+  const el = document.getElementById('backupAction');
+  if (el) el.textContent = message || '';
+}
+
+// Salva o arquivo no aparelho (download). Aceita um backup já montado para não gerar
+// nomes diferentes na mesma ação.
+async function exportData(prebuilt) {
+  const backup = prebuilt || buildBackup();
   const url = URL.createObjectURL(new Blob([backup.json], { type: 'application/json' }));
   const a = document.createElement('a');
   a.href = url;
@@ -1636,28 +1646,36 @@ async function exportData() {
   setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
 
   await markBackupDone();
+  backupActionStatus('Arquivo gerado: ' + backup.name);
 }
 
 // Abre o menu de compartilhamento do aparelho com o arquivo (Drive, WhatsApp, Arquivos...).
-// Se o navegador não souber compartilhar arquivos, cai no download normal.
+// Só no celular/tablet; no computador (ou sem suporte) baixa direto.
+// Se o compartilhamento falhar, NÃO baixa sozinho — assim nunca aparecem dois arquivos.
 async function shareBackup() {
   const backup = buildBackup();
+  const canShareFiles = !!(navigator.canShare && navigator.canShare({ files: [backup.file] }));
 
-  if (navigator.canShare && navigator.canShare({ files: [backup.file] })) {
-    try {
-      await navigator.share({
-        files: [backup.file],
-        title: 'Backup do Meu Treino',
-        text: 'Backup do Meu Treino (' + backup.name + ')'
-      });
-      await markBackupDone();
-      return;
-    } catch (e) {
-      if (e && e.name === 'AbortError') return;   // usuário cancelou: não faz nada
-    }
+  if (backupAction({ canShareFiles: canShareFiles, touch: isTouchDevice() }) === 'download') {
+    await exportData(backup);
+    return;
   }
 
-  await exportData();
+  try {
+    await navigator.share({
+      files: [backup.file],
+      title: 'Backup do Meu Treino',
+      text: 'Backup do Meu Treino (' + backup.name + ')'
+    });
+    await markBackupDone();
+    backupActionStatus('Backup compartilhado: ' + backup.name);
+  } catch (e) {
+    if (e && e.name === 'AbortError') {
+      backupActionStatus('Compartilhamento cancelado — nada foi gerado.');
+      return;
+    }
+    backupActionStatus('Não deu para compartilhar agora. Use "Exportar" para baixar o arquivo.');
+  }
 }
 
 async function forceUpdate() {
