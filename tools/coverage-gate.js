@@ -72,7 +72,9 @@ function linhaDe(offset) {
 }
 
 function trechosSemTeste() {
-  const porArquivo = {};
+  const porExecucao = {};
+  const cobertos = {};
+  const executacoes = [];
 
   fs.readdirSync(temporario).forEach(function (nome) {
     if (nome.indexOf('.json') === -1) return;
@@ -84,17 +86,23 @@ function trechosSemTeste() {
       return;
     }
 
-    (bruto.result || []).forEach(function (arquivo) {
+    (bruto.result || []).forEach(function (arquivo, indiceArquivo) {
       if (!arquivo.url || arquivo.url.indexOf('/' + ALVO) === -1) return;
+
+      // Cada entrada do relatorio e uma execucao do arquivo (o teste do vm carrega o
+      // mesmo core.js de novo): usamos o par url+indice como identificador.
+      const chave = arquivo.url + '#' + nome + '#' + indiceArquivo;
+      executacoes.push(chave);
+      porExecucao[chave] = porExecucao[chave] || [];
 
       (arquivo.functions || []).forEach(function (fn) {
         (fn.ranges || []).forEach(function (faixa) {
           if (faixa.endOffset <= faixa.startOffset) return;
 
-          // O mesmo arquivo pode rodar mais de uma vez (ex.: teste que carrega o core no vm):
-          // um trecho so conta como sem teste se NENHUMA execucao passou por ele.
-          porArquivo[arquivo.url] = porArquivo[arquivo.url] || [];
-          porArquivo[arquivo.url].push({
+          const assinatura = faixa.startOffset + ':' + faixa.endOffset;
+          if (faixa.count > 0) cobertos[assinatura] = (cobertos[assinatura] || 0) + 1;
+
+          porExecucao[chave].push({
             inicio: faixa.startOffset,
             fim: faixa.endOffset,
             contagem: faixa.count
@@ -106,15 +114,18 @@ function trechosSemTeste() {
 
   const achados = [];
 
-  Object.keys(porArquivo).forEach(function (url) {
-    const faixas = porArquivo[url];
-
-    faixas.forEach(function (faixa) {
+  Object.keys(porExecucao).forEach(function (chave) {
+    porExecucao[chave].forEach(function (faixa) {
       if (faixa.contagem > 0) return;
 
-      const cobertoEmOutraExecucao = faixas.some(function (outra) {
-        return outra.contagem > 0 && outra.inicio <= faixa.inicio && outra.fim >= faixa.fim;
-      });
+      // O mesmo trecho pode ter rodado em outra execucao do arquivo (ex.: vm do navegador).
+      // So conta como coberto se OUTRA execucao cobriu exatamente a mesma faixa.
+      const assinatura = faixa.inicio + ':' + faixa.fim;
+      const cobertoEmOutraExecucao = executacoes.some(function (outra) {
+        return outra !== chave && (porExecucao[outra] || []).some(function (outra1) {
+          return outra1.inicio === faixa.inicio && outra1.fim === faixa.fim && outra1.contagem > 0;
+        });
+      }) && cobertos[assinatura] > 0;
       if (cobertoEmOutraExecucao) return;
 
       achados.push({
@@ -145,11 +156,12 @@ function trechosSemTeste() {
 }
 
 const semTeste = trechosSemTeste();
-const completo = medidas.linhas === 100 && medidas.ramos === 100;
+const completo = semTeste.length === 0;
 
-console.log('\n[cobertura] ' + ALVO + ': linhas ' + medidas.linhas + '% | ramos ' + medidas.ramos +
-  '% | funcoes ' + medidas.funcoes + '%');
-console.log('[cobertura] trechos sem teste: ' + semTeste.length);
+console.log('\n[cobertura] ' + ALVO + ' — trechos (statements/ramos do V8): ' +
+  (completo ? 'todos cobertos' : semTeste.length + ' sem teste'));
+console.log('[cobertura] tabela do Node (referencia): linhas ' + medidas.linhas + '% | ramos ' +
+  medidas.ramos + '% | funcoes ' + medidas.funcoes + '%');
 
 semTeste.forEach(function (t) {
   console.log('[cobertura]   linhas ' + t.inicio + '-' + t.fim + ': ' + t.trecho);
@@ -164,12 +176,12 @@ semTeste.slice(0, 5).forEach(function (t) {
 });
 
 if (completo) {
-  console.log('[cobertura] ' + ALVO + ' com 100% de linhas e ramos.');
+  console.log('[cobertura] 100% dos trechos de ' + ALVO + ' cobertos pelos testes.');
   process.exit(0);
 }
 
-const resumo = '[cobertura] ' + ALVO + ' abaixo de 100%: linhas ' + medidas.linhas + '%, ramos ' +
-  medidas.ramos + '%, ' + semTeste.length + ' trecho(s) sem teste' +
+const resumo = '[cobertura] ' + ALVO + ' com ' + semTeste.length + ' trecho(s) sem teste' +
+  ' (linhas do Node: ' + medidas.linhas + '%, ramos: ' + medidas.ramos + '%)' +
   (enforcar ? '' : ' (informativo)');
 
 if (enforcar) {
