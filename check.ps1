@@ -14,6 +14,52 @@ function Read-Text($relative) {
   return [System.IO.File]::ReadAllText((Join-Path $root $relative), [System.Text.Encoding]::UTF8)
 }
 
+# Impressao digital do conteudo dos dados de exemplo: compara o SIGNIFICADO do arquivo,
+# nao os bytes. Assim nao importa se o JSON foi serializado pelo Windows PowerShell 5.1
+# ou pelo PowerShell 7 (formatacao/escapes diferentes).
+function Get-FixtureFingerprint([string]$path) {
+  $doc = [System.IO.File]::ReadAllText($path, [System.Text.Encoding]::UTF8) | ConvertFrom-Json
+  $inv = [System.Globalization.CultureInfo]::InvariantCulture
+  $lines = New-Object System.Collections.Generic.List[string]
+
+  $lines.Add('app|' + $doc.app + '|' + $doc.version + '|' + $doc.sample)
+
+  foreach ($s in $doc.data.sheets) {
+    $lines.Add('sheet|' + $s.id + '|' + $s.name + '|' + $s.active)
+    foreach ($i in $s.exercises) {
+      $reps = @($i.reps) | ForEach-Object { if ($null -eq $_) { 'null' } else { ([double]$_).ToString($inv) } }
+      $lines.Add('item|' + $i.exerciseId + '|' + $i.name + '|' + $i.sets + '|' + ($reps -join ',') + '|' + $i.note)
+    }
+  }
+
+  foreach ($w in $doc.data.workouts) {
+    $lines.Add('workout|' + $w.id + '|' + $w.dayOffset + '|' + $w.sheetId + '|' + $w.sheetName + '|' + $w.cardioMinutes + '|' + $w.notes)
+    foreach ($wu in $w.warmups) {
+      $lines.Add('warm|' + $wu.exerciseId + '|' + $wu.exerciseName + '|' +
+        ([double]$wu.reps).ToString($inv) + '|' + ([double]$wu.load).ToString($inv) + '|' + ([double]$wu.rir).ToString($inv))
+    }
+    foreach ($st in $w.sets) {
+      $lines.Add('set|' + $st.exerciseId + '|' + $st.exerciseName + '|' + $st.number + '|' +
+        ([double]$st.reps).ToString($inv) + '|' + ([double]$st.load).ToString($inv) + '|' + ([double]$st.rir).ToString($inv) + '|' +
+        $st.note + '|' + $st.exerciseNote)
+    }
+  }
+
+  foreach ($e in $doc.data.exercises) {
+    $lines.Add('ex|' + $e.id + '|' + $e.name + '|' + $e.group + '|' + $e.source + '|' + $e.correction + '|' + $e.active)
+  }
+
+  foreach ($n in $doc.data.colinha) {
+    $lines.Add('note|' + $n.id + '|' + $n.title + '|' + $n.content + '|' + $n.order)
+  }
+
+  $lines.Add('settings|' + $doc.data.settings.weekAnchor + '|' + $doc.data.settings.weeklyWorkoutTarget + '|' + $doc.data.settings.weeklyCardioTarget)
+
+  $sha = [System.Security.Cryptography.SHA256]::Create()
+  $bytes = [System.Text.Encoding]::UTF8.GetBytes(($lines -join "`n"))
+  return [System.BitConverter]::ToString($sha.ComputeHash($bytes)).Replace('-', '')
+}
+
 Write-Host "Meu Treino - verificacoes estaticas" -ForegroundColor Cyan
 
 # 1) JSONs válidos
@@ -184,10 +230,10 @@ if (Test-Path $generator) {
   $tmpSample = Join-Path ([System.IO.Path]::GetTempPath()) ('mt-sample-check-' + [guid]::NewGuid().ToString('N') + '.json')
   try {
     & $generator -OutputPath $tmpSample 6>$null | Out-Null
-    $hashCommitted = (Get-FileHash (Join-Path $root 'data/sample-data.json') -Algorithm SHA256).Hash
-    $hashGenerated = (Get-FileHash $tmpSample -Algorithm SHA256).Hash
-    if ($hashCommitted -eq $hashGenerated) {
-      Ok "dados de exemplo em sincronia com tools/build-sample-data.ps1"
+    $fpCommitted = Get-FixtureFingerprint (Join-Path $root 'data/sample-data.json')
+    $fpGenerated = Get-FixtureFingerprint $tmpSample
+    if ($fpCommitted -eq $fpGenerated) {
+      Ok "dados de exemplo em sincronia com tools/build-sample-data.ps1 (conteudo)"
     } else {
       Bad "data/sample-data.json difere do gerador - rode: tools/build-sample-data.ps1"
     }

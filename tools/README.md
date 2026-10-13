@@ -14,8 +14,9 @@ mas ficam versionados para que qualquer mudança seja reproduzível.
 powershell -ExecutionPolicy Bypass -File .\tools\build-sample-data.ps1
 ```
 
-O `check.ps1` (e a pipeline) **regenera a fixture e compara o hash** com o arquivo commitado — assim o
-gerador e o JSON nunca ficam fora de sincronia. Se você mudar o conteúdo, rode o comando acima e commite
+O `check.ps1` (e a pipeline) **regenera a fixture e compara o conteúdo** com o arquivo commitado — assim o
+gerador e o JSON nunca ficam fora de sincronia (a comparação é por significado, não por bytes, porque o
+Windows PowerShell 5.1 e o PowerShell 7 serializam o JSON de formas diferentes). Se você mudar o conteúdo, rode o comando acima e commite
 o `data/sample-data.json` resultante.
 
 ## Como as fichas de exemplo são montadas
