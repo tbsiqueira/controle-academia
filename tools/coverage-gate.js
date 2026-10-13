@@ -220,10 +220,14 @@ function trechosSemTeste(diretorio) {
 
 const diagnostico = trechosSemTeste(temporario);
 const semTeste = diagnostico.trechos;
-// Criterio do gate: cobertura do Node (autoritativa) em 100% de linhas e de ramos.
-// A lista de trechos e informativa: ajuda a achar o que falta, mas nao decide, porque o V8
-// nao reporta os mesmos trechos em todas as execucoes (cada arquivo de teste roda em um processo).
-const completo = medidas.linhas === 100 && medidas.ramos === 100;
+// O wrapper de modulo (primeiras linhas do arquivo) escolhe entre Node e navegador: cada
+// ambiente executa so um lado, e o lado do navegador e validado em tests/module.test.js.
+const FIM_DO_WRAPPER = 16;
+
+// Criterio do gate: 100% de linhas (tabela do Node) + nenhum trecho da LOGICA sem teste
+// (passada em processo unico, que nao tem os falsos positivos do relatorio por processo).
+const precisos = diagnosticoPreciso().filter(function (t) { return t.inicio > FIM_DO_WRAPPER; });
+const completo = medidas.linhas === 100 && precisos.length === 0;
 
 console.log('\n[cobertura] ' + ALVO + ': linhas ' + medidas.linhas + '% | ramos ' + medidas.ramos +
   '% | funcoes ' + medidas.funcoes + '% (tabela do Node)');
@@ -257,20 +261,20 @@ function diagnosticoPreciso() {
 console.log('::notice file=' + ALVO + ',line=1::trechos que o V8 nao viu executar: ' +
   (listaDeLinhas || 'nenhum'));
 
-const precisos = diagnosticoPreciso().map(function (t) {
+const precisosTexto = precisos.map(function (t) {
   return (t.fim > t.inicio ? (t.inicio + '-' + t.fim) : String(t.inicio)) + ' [' + t.trecho.slice(0, 45) + ']';
 });
 
-console.log('::notice file=' + ALVO + ',line=1::preciso (processo unico): ' +
-  (precisos.join(' | ') || 'nada sem cobertura'));
+console.log('::notice file=' + ALVO + ',line=1::preciso (processo unico, fora do wrapper): ' +
+  (precisosTexto.join(' | ') || 'nada sem cobertura'));
 
 if (completo) {
-  console.log('[cobertura] 100% de linhas e ramos em ' + ALVO + '.');
+  console.log('[cobertura] 100% de linhas em ' + ALVO + ' e nenhum trecho da logica sem teste.');
   process.exit(0);
 }
 
 const resumo = '[cobertura] ' + ALVO + ' abaixo de 100%: linhas ' + medidas.linhas + '%, ramos ' +
-  medidas.ramos + '%, funcoes ' + medidas.funcoes + '%' + (enforcar ? '' : ' (informativo)');
+  medidas.ramos + '%, funcoes ' + medidas.funcoes + '%, ' + precisos.length + ' trecho(s) da logica sem teste' + (enforcar ? '' : ' (informativo)');
 
 if (enforcar) {
   console.log('::error file=' + ALVO + '::' + resumo);

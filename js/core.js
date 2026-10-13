@@ -299,7 +299,7 @@
 
     if (!sorted.length) return null;
     const last = sorted[0];
-    return (last.warmups || []).find(function (x) { return exerciseMatches(x, target); }) || null;
+    return last.warmups.find(function (x) { return exerciseMatches(x, target); }) || null;
   }
 
   function previousWarmupFields(workouts, target) {

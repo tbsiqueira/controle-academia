@@ -429,3 +429,32 @@ test('normalizeText e toNumOrNull aceitam undefined', () => {
   assert.equal(core.normalizeText(0), '0');
   assert.equal(core.toNumOrNull(undefined), null);
 });
+
+test('historico e normalizacao aceitam argumentos ausentes', () => {
+  assert.deepEqual(core.lastLoadsForExercise(), {});
+  assert.equal(core.lastWarmupForExercise(), null);
+  assert.deepEqual(core.sessionsForExercise(), []);
+  assert.deepEqual(core.lastLoadsForExercise(null, 'X'), {});
+  assert.equal(core.lastWarmupForExercise(null, 'X'), null);
+  assert.deepEqual(core.sessionsForExercise(null, 'X'), []);
+
+  const vazio = core.normalizeBackup();
+  assert.deepEqual(vazio.workouts, []);
+  assert.deepEqual(vazio.sheets, []);
+  assert.deepEqual(vazio.exercises, []);
+
+  const semListas = core.normalizeBackup({ settings: {} });
+  assert.deepEqual(semListas.sheets, []);
+  assert.deepEqual(semListas.exercises, []);
+});
+
+test('lastLoadsForExercise ordena tres treinos (comparador nos dois sentidos)', () => {
+  const treinos = [
+    { id: 'a', date: '2026-10-01', sets: [{ exerciseName: 'X', number: 1, reps: 10, load: 10 }] },
+    { id: 'b', date: '2026-10-05', sets: [{ exerciseName: 'X', number: 1, reps: 10, load: 20 }] },
+    { id: 'c', date: '2026-10-03', sets: [{ exerciseName: 'X', number: 1, reps: 10, load: 15 }] }
+  ];
+
+  assert.deepEqual(core.lastLoadsForExercise(treinos, 'X'), { 1: 20 }, 'pega o treino mais recente');
+  assert.deepEqual(core.lastLoadsForExercise(treinos.slice().reverse(), 'X'), { 1: 20 });
+});
