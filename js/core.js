@@ -618,7 +618,9 @@
   }
 
   function normalizeSheetItem(item) {
-    const raw = item || {};
+    if (!item) return null;
+
+    const raw = item;
     const legacySingle = !Array.isArray(raw.reps) && raw.reps !== undefined && raw.reps !== null && raw.reps !== '';
     let reps = Array.isArray(raw.reps) ? raw.reps.slice() : [];
 
@@ -645,7 +647,7 @@
       id: s.id,
       name: s.name || '',
       active: s.active !== false,
-      exercises: (s.exercises || []).map(normalizeSheetItem),
+      exercises: (s.exercises || []).map(normalizeSheetItem).filter(Boolean),
       createdAt: s.createdAt,
       updatedAt: s.updatedAt
     };

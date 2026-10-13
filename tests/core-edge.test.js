@@ -47,11 +47,15 @@ test('groupSets sem series nem aquecimentos devolve lista vazia', () => {
 });
 
 test('groupSets usa "(sem nome)" quando o registro nao tem nome', () => {
-  const grupos = core.groupSets([{ number: 1, reps: 10, load: 20 }], [{ reps: 15, load: 10 }]);
+  const grupos = core.groupSets([{ number: 1, reps: 10, load: 20 }], [{ exerciseName: 'Esteira', reps: 15, load: 10 }]);
 
   assert.equal(grupos.length, 2);
   assert.equal(grupos[0].exerciseName, '(sem nome)');
-  assert.equal(grupos[1].exerciseName, '(sem nome)');
+  assert.equal(grupos[1].exerciseName, 'Esteira');
+
+  const soAquecimento = core.groupSets([], [{ reps: 15 }]);
+  assert.equal(soAquecimento.length, 1);
+  assert.equal(soAquecimento[0].exerciseName, '(sem nome)', 'aquecimento sem nome tambem tem grupo');
 });
 
 test('groupSets guarda a observacao da primeira serie que tem observacao', () => {

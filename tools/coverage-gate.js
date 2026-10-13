@@ -41,8 +41,12 @@ function falhasDosTestes(texto) {
     let erro = '';
     const raiz = process.cwd().replace(/\\/g, '/') + '/';
 
-    for (let j = i + 1; j < Math.min(i + 60, linhas.length); j++) {
-      const local = linhas[j].match(/location: '(.*)'/);
+    for (let j = i + 1; j < linhas.length; j++) {
+      const linhaAtual = linhas[j];
+      if (/^\.\.\.$/.test(linhaAtual.trim())) break;
+      if (/^not ok |^ok \d+/.test(linhaAtual)) break;
+
+      const local = linhaAtual.match(/location: '(.*)'/);
       if (local) {
         try {
           const info = JSON.parse(local[1]);
@@ -51,13 +55,17 @@ function falhasDosTestes(texto) {
         } catch (e) { /* sem location: aponta para o proprio gate */ }
       }
 
-      const falha = linhas[j].match(/^\s*error: \|?-*\s*(.*)$/);
-      if (falha && !erro) {
-        const proxima = (linhas[j + 1] || '').trim();
-        erro = (falha[1] || proxima || '').trim();
+      const inicio = linhaAtual.match(/^\s*error: \|?-*\s*(.*)$/);
+      if (inicio) {
+        const partes = [inicio[1]];
+        for (let k = j + 1; k < linhas.length; k++) {
+          const seguinte = linhas[k];
+          if (/^\s*(code|stack|failureType|location|duration_ms|type):/.test(seguinte)) break;
+          if (/^\.\.\.$/.test(seguinte.trim())) break;
+          partes.push(seguinte.trim());
+        }
+        erro = partes.join(' ').replace(/\s+/g, ' ').trim();
       }
-
-      if (/^\.\.\.$/.test(linhas[j].trim())) break;
     }
 
     falhas.push({
