@@ -313,6 +313,14 @@ Se passar de **7 dias** sem backup, o app mostra um aviso no **Início** com o b
 
 **Quando fazer:** de vez em quando por segurança, e sempre antes de trocar de celular ou limpar o navegador.
 
+### Espaço usado e armazenamento protegido
+Abaixo do status do backup aparece **quanto espaço o app usa** (cada treino ocupa poucos KB — anos de treino
+cabem em poucos MB). Ao abrir, o app pede ao navegador para **proteger** os dados (não apagar quando o aparelho
+ficar sem espaço). O navegador decide sozinho: costuma aceitar quando o app está **instalado na tela inicial**.
+Se aparecer _"armazenamento não protegido"_, o app funciona igual — só mantenha o backup em dia. No iPhone,
+abra sempre pelo ícone da tela inicial: o Safari apaga dados de sites não visitados por 7 dias, mas não de apps
+instalados.
+
 ### Ver dados (consulta, somente leitura)
 Ainda em **Mais → Dados → Ver dados** você vê o que o app guarda neste aparelho: **contagens** (treinos,
 exercícios, fichas, colinha), a lista de **treinos** (com ficha, nº de exercícios e séries), de **fichas**,

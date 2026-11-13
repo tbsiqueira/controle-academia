@@ -1451,7 +1451,52 @@ function renderMore() {
   document.getElementById('setWeekAnchor').value = state.settings.weekAnchor || todayISO();
   document.getElementById('btnUndoImport').classList.toggle('d-none', !state.lastImportSnapshot);
   renderBackupStatus();
+  renderStorageInfo();
   renderColinhaList();
+}
+
+/* ---------- armazenamento persistente ---------- */
+
+// Pede ao navegador para nao apagar os dados quando o aparelho ficar sem espaco.
+// O navegador pode recusar; nesse caso o app continua funcionando como antes.
+async function requestPersistentStorage() {
+  try {
+    if (!navigator.storage || !navigator.storage.persist) return null;
+    if (navigator.storage.persisted && await navigator.storage.persisted()) return true;
+    return await navigator.storage.persist();
+  } catch (e) {
+    return null;
+  }
+}
+
+function formatBytes(bytes) {
+  if (!bytes || bytes < 1024) return (bytes || 0) + ' B';
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(0) + ' KB';
+  if (bytes < 1024 * 1024 * 1024) return (bytes / (1024 * 1024)).toFixed(1).replace('.', ',') + ' MB';
+  return (bytes / (1024 * 1024 * 1024)).toFixed(1).replace('.', ',') + ' GB';
+}
+
+// Mostra em Mais -> Dados quanto espaco o app usa e se o armazenamento e persistente.
+async function renderStorageInfo() {
+  const el = document.getElementById('storageInfo');
+  if (!el) return;
+  if (!navigator.storage || !navigator.storage.estimate) {
+    el.textContent = '';
+    return;
+  }
+
+  try {
+    const est = await navigator.storage.estimate();
+    const persisted = navigator.storage.persisted ? await navigator.storage.persisted() : false;
+    let text = 'Espaço usado: ' + formatBytes(est.usage);
+    if (est.quota) text += ' de ' + formatBytes(est.quota) + ' disponíveis';
+    text += persisted
+      ? ' · armazenamento protegido'
+      : ' · armazenamento não protegido (o navegador pode apagar se faltar espaço — mantenha o backup em dia)';
+    el.textContent = text;
+  } catch (e) {
+    el.textContent = '';
+  }
 }
 
 async function saveSettingsForm() {
@@ -2132,6 +2177,9 @@ async function init() {
   }
   bindEvents();
   navigate();
+
+  // nao bloqueia a abertura do app; atualiza o card Dados quando o navegador responder
+  requestPersistentStorage().then(function () { renderStorageInfo(); });
 
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js').catch(function () {});
