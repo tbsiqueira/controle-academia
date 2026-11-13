@@ -38,6 +38,33 @@ test('fmtBR formata no padrao brasileiro', () => {
   assert.equal(core.fmtBR(''), '—');
 });
 
+test('dateParts separa dia, mes e dia da semana para a lista do Inicio', () => {
+  const p = core.dateParts('2026-11-11', '2026-11-20');
+  assert.equal(p.day, '11');
+  assert.equal(p.weekday, 'qua');
+  assert.equal(p.month, 'nov');
+  assert.equal(p.relative, '');
+  assert.equal(p.monthKey, '2026-11');
+  assert.equal(p.monthLabel, 'novembro de 2026');
+
+  assert.equal(core.dateParts('2026-03-01').month, 'mar');
+  assert.equal(core.dateParts('2026-03-01').weekday, 'dom');
+  assert.equal(core.dateParts('2026-03-01').relative, '');
+});
+
+test('dateParts marca hoje e ontem, inclusive na virada do ano', () => {
+  assert.equal(core.dateParts('2026-11-13', '2026-11-13').relative, 'hoje');
+  assert.equal(core.dateParts('2026-11-12', '2026-11-13').relative, 'ontem');
+  assert.equal(core.dateParts('2026-12-31', '2027-01-01').relative, 'ontem');
+  assert.equal(core.dateParts('2026-11-11', '2026-11-13').relative, '');
+});
+
+test('dateParts devolve null para data vazia ou invalida', () => {
+  assert.equal(core.dateParts(''), null);
+  assert.equal(core.dateParts(null), null);
+  assert.equal(core.dateParts('13/11/2026'), null);
+});
+
 /* ---------- texto e numeros ---------- */
 
 test('esc neutraliza HTML', () => {

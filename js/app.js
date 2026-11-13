@@ -180,6 +180,17 @@ function renderWorkoutList() {
     return;
   }
 
+  // Agrupa por mês (cabeçalho com a contagem) e mostra a data como um bloco à esquerda,
+  // para dar para achar um treino rápido mesmo com muitos registros.
+  const today = todayISO();
+  const monthCounts = {};
+  workouts.forEach(function (w) {
+    const p = dateParts(w.date);
+    const key = p ? p.monthKey : '';
+    monthCounts[key] = (monthCounts[key] || 0) + 1;
+  });
+
+  let currentMonth = null;
   el.innerHTML = '<h6 class="mt-2"><i class="bi bi-clock-history text-primary"></i> Todos os treinos ' +
     '<span class="badge text-bg-secondary">' + workouts.length + '</span></h6>' +
     workouts.map(function (w) {
@@ -187,11 +198,33 @@ function renderWorkoutList() {
       const exerciseCount = countExercises(w);
       const name = sheetLabel(w, state.sheets) || 'Treino';
       const warm = warmupSummary(w.warmups);
-      return '<div class="card mb-2"><div class="card-body py-2 d-flex justify-content-between align-items-center">' +
-        '<button type="button" class="btn btn-link p-0 text-start text-decoration-none flex-grow-1" data-view-workout="' + esc(w.id) + '">' +
+      const p = dateParts(w.date, today);
+      const monthKey = p ? p.monthKey : '';
+
+      let header = '';
+      if (monthKey !== currentMonth) {
+        currentMonth = monthKey;
+        const count = monthCounts[monthKey];
+        header = '<div class="workout-month">' + esc(p ? p.monthLabel : 'Sem data') +
+          ' <span class="text-muted">· ' + count + (count === 1 ? ' treino' : ' treinos') + '</span></div>';
+      }
+
+      const dateBlock = p
+        ? '<div class="workout-date' + (p.relative === 'hoje' ? ' is-today' : '') + '" aria-hidden="true">' +
+          '<span class="workout-date-weekday">' + esc(p.relative || p.weekday) + '</span>' +
+          '<span class="workout-date-day">' + esc(p.day) + '</span>' +
+          '<span class="workout-date-month">' + esc(p.month) + '</span>' +
+          '</div>'
+        : '<div class="workout-date" aria-hidden="true"><span class="workout-date-day">—</span></div>';
+
+      return header +
+        '<div class="card mb-2' + (p && p.relative === 'hoje' ? ' workout-today' : '') + '"><div class="card-body py-2 d-flex align-items-center gap-2">' +
+        dateBlock +
+        '<button type="button" class="btn btn-link p-0 text-start text-decoration-none flex-grow-1 min-w-0" data-view-workout="' + esc(w.id) + '" aria-label="' + esc(name + ', ' + fmtBR(w.date)) + '">' +
         '<strong>' + esc(name) + '</strong><br>' +
-        '<small class="text-muted">' + fmtBR(w.date) + ' · ' + exerciseCount + (exerciseCount === 1 ? ' exercício' : ' exercícios') +
+        '<small class="text-muted">' + exerciseCount + (exerciseCount === 1 ? ' exercício' : ' exercícios') +
         (setCount ? ' · ' + setCount + (setCount === 1 ? ' série' : ' séries') : '') +
+        (toNum(w.cardioMinutes) > 0 ? ' · ' + toNum(w.cardioMinutes) + ' min cardio' : '') +
         (warm ? ' · ' + esc(warm) : '') + '</small>' +
         '</button>' +
         '<div class="d-flex gap-1">' +

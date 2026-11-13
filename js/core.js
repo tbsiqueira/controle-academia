@@ -45,6 +45,29 @@
     return p[2] + '/' + p[1] + '/' + p[0];
   }
 
+  const WEEKDAYS_SHORT = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb'];
+  const MONTHS = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
+
+  // Partes de uma data para a lista de treinos do Início: bloco com dia grande,
+  // mês e dia da semana ("hoje"/"ontem" quando for o caso) e a chave do mês para agrupar.
+  function dateParts(iso, todayIso) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(String(iso || ''))) return null;
+    const d = parseDate(iso);
+    let relative = '';
+    if (todayIso) {
+      if (iso === todayIso) relative = 'hoje';
+      else if (iso === addDaysISO(todayIso, -1)) relative = 'ontem';
+    }
+    return {
+      day: pad2(d.getDate()),
+      weekday: WEEKDAYS_SHORT[d.getDay()],
+      month: MONTHS[d.getMonth()].slice(0, 3),
+      relative: relative,
+      monthKey: String(iso).slice(0, 7),
+      monthLabel: MONTHS[d.getMonth()] + ' de ' + d.getFullYear()
+    };
+  }
+
   /* ---------- texto e números ---------- */
 
   function esc(value) {
@@ -766,6 +789,7 @@
     todayISO: todayISO,
     addDaysISO: addDaysISO,
     fmtBR: fmtBR,
+    dateParts: dateParts,
     // texto e números
     esc: esc,
     toNum: toNum,

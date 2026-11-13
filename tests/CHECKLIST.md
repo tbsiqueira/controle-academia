@@ -11,7 +11,7 @@ Mapa de **cada funcionalidade do app** para os testes que a cobrem. Serve para r
 
 | Funcionalidade | Onde vive | Testes |
 |---|---|---|
-| Datas (ISO ↔ BR, somar dias, fuso local) | `core.js`: `pad2`, `fmtDate`, `parseDate`, `todayISO`, `addDaysISO`, `fmtBR`, `fmtDateTimeBR` | `core.test.js` (datas), `core-edge-cases.test.js` (formato vazio) |
+| Datas (ISO ↔ BR, somar dias, fuso local) | `core.js`: `pad2`, `fmtDate`, `parseDate`, `todayISO`, `addDaysISO`, `fmtBR`, `dateParts`, `fmtDateTimeBR` | `core.test.js` (datas), `core-edge-cases.test.js` (formato vazio) |
 | Semana flexível (janela de 7 dias, metas, aviso) | `core.js`: `defaultSettings`, `weekWindow`, `isValidWorkout` | `core.test.js`, `core-edge-cases.test.js` (`weekWindow` sem argumento) |
 | Números com vírgula (bug do iPhone) | `core.js`: `parseLocalNumber`, `toNum`, `toNumOrNull`, `formatDecimal` | `core.test.js` (inclui regressão da carga `27,5`) |
 | Busca sem acentos | `core.js`: `normalizeText` | `core.test.js` |
