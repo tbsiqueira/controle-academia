@@ -394,11 +394,6 @@ body {
 
 .rest-bar.is-done {
   background: #b45309;
-  animation: rest-pulse 0.8s ease-in-out 3;
-}
-
-@keyframes rest-pulse {
-  50% { filter: brightness(1.25); }
 }
 
 .rest-bar-inner {

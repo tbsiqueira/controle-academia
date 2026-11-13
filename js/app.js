@@ -825,16 +825,15 @@ function removeFormExercise(exIdx) {
 
 /* ---------- rest timer ---------- */
 
-// Sem som de propósito: o app nunca toca áudio. O fim do descanso é avisado só na tela
-// (barra laranja piscando) e com vibração onde o aparelho permite.
-const rest = { end: 0, total: 0, interval: null, hideTimer: null };
+// De propósito: sem som, sem vibração, sem piscar. No fim do descanso o contador
+// só fica laranja e permanece assim até tocar no ✕ (ou iniciar outro descanso).
+const rest = { end: 0, total: 0, interval: null };
 
 function startRest(seconds) {
   const secs = seconds || restSecondsOf(state.settings);
   rest.total = secs;
   rest.end = Date.now() + secs * 1000;
   clearInterval(rest.interval);
-  clearTimeout(rest.hideTimer);
   const bar = document.getElementById('restBar');
   bar.classList.remove('d-none', 'is-done');
   rest.interval = setInterval(tickRest, 250);
@@ -850,7 +849,6 @@ function addRest(seconds) {
 
 function stopRest() {
   clearInterval(rest.interval);
-  clearTimeout(rest.hideTimer);
   rest.interval = null;
   document.getElementById('restBar').classList.add('d-none');
 }
@@ -864,14 +862,10 @@ function tickRest() {
     clearInterval(rest.interval);
     rest.interval = null;
     bar.classList.add('is-done');
-    document.getElementById('restLabel').textContent = 'Descanso terminado!';
     document.getElementById('restClock').textContent = '0:00';
     document.getElementById('restProgress').style.width = '100%';
-    if (navigator.vibrate) navigator.vibrate([300, 150, 300]);
-    rest.hideTimer = setTimeout(stopRest, 5000);
     return;
   }
-  document.getElementById('restLabel').textContent = 'Descanso';
   document.getElementById('restClock').textContent = fmtClock(left);
   document.getElementById('restProgress').style.width = Math.min(100, Math.round((1 - left / rest.total) * 100)) + '%';
 }

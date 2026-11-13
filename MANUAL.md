@@ -153,7 +153,7 @@ Elevação pélvica                                    [3 séries]
 - **Repetir o último treino desta ficha:** ao escolher a ficha, aparece esse botão. Ele preenche o treino com os
   mesmos exercícios, reps e cargas da última vez; RIR e observações ficam em branco.
 - **Timer de descanso:** o botão verde **Descanso** em cada exercício abre uma barra acima do menu com a contagem
-  regressiva, **+15s** e **✕**. No fim a barra fica laranja e pisca, e o celular vibra (Android). O app não toca som.
+  regressiva, **+15s** e **✕**. Quando o tempo acaba, o contador fica **laranja** em 0:00 até você fechar no **✕** (sem som nem vibração).
   O tempo padrão (90 s) muda em **Mais → Metas da semana → Descanso entre séries**.
 - **Ficha excluída:** ao editar um treino antigo cuja ficha foi excluída, a ficha aparece como
   _"NOME (excluída)"_ e o nome continua guardado ao salvar.
