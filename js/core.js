@@ -384,6 +384,146 @@
     return best;
   }
 
+  /* ---------- formulário: última sessão, repetir treino, rascunho ---------- */
+
+  function byDateDesc(a, b) {
+    return a.date < b.date ? 1 : -1;
+  }
+
+  function blankIfNull(v) {
+    return (v === null || v === undefined) ? '' : v;
+  }
+
+  // Séries da última vez que este exercício foi feito (ignorando o treino em edição),
+  // para a dica "última vez" no formulário.
+  function lastSessionForExercise(workouts, target, excludeId) {
+    const sorted = (workouts || []).filter(function (w) {
+      if (excludeId && String(w.id) === String(excludeId)) return false;
+      return (w.sets || []).some(function (s) { return exerciseMatches(s, target); });
+    }).sort(byDateDesc);
+
+    if (!sorted.length) return null;
+    const sets = sorted[0].sets.filter(function (s) { return exerciseMatches(s, target); })
+      .sort(function (a, b) { return toNum(a.number) - toNum(b.number); })
+      .map(function (s) { return { number: s.number, reps: s.reps, load: s.load, rir: s.rir }; });
+    return { date: sorted[0].date, sets: sets };
+  }
+
+  // "27 kg × 12 (RIR 2) · 27 kg × 10" — compacto, para caber numa linha no celular.
+  function lastSessionLine(session, useComma) {
+    if (!session) return '';
+    return session.sets.map(function (s) {
+      const load = formatDecimal(s.load, useComma);
+      const reps = blankIfNull(s.reps) === '' ? '—' : s.reps;
+      return (load ? load + ' kg × ' : '') + reps + (blankIfNull(s.rir) === '' ? '' : ' (RIR ' + s.rir + ')');
+    }).join(' · ');
+  }
+
+  // Último treino registrado com esta ficha (ignorando o treino em edição).
+  function lastWorkoutForSheet(workouts, sheetId, excludeId) {
+    if (!sheetId) return null;
+    const sorted = (workouts || []).filter(function (w) {
+      if (excludeId && String(w.id) === String(excludeId)) return false;
+      const id = w.sheetId || w.typeId;
+      return !!id && String(id) === String(sheetId) && ((w.sets || []).length + (w.warmups || []).length) > 0;
+    }).sort(byDateDesc);
+    return sorted[0] || null;
+  }
+
+  // Formulário a partir de um treino anterior: mesmos exercícios, reps e cargas.
+  // RIR e observações ficam em branco (são do treino de hoje).
+  function formFromWorkout(workout) {
+    const w = workout || {};
+    return groupSets(w.sets, w.warmups).map(function (g) {
+      const sets = g.sets.slice().sort(function (a, b) { return toNum(a.number) - toNum(b.number); });
+      return {
+        exerciseId: g.exerciseId,
+        exerciseName: g.exerciseName,
+        note: g.note,
+        warmup: { reps: blankIfNull(g.warmup.reps), load: blankIfNull(g.warmup.load), rir: '' },
+        sets: sets.map(function (s, i) {
+          return { number: i + 1, reps: blankIfNull(s.reps), load: blankIfNull(s.load), rir: '', note: '' };
+        })
+      };
+    });
+  }
+
+  // Rascunho do treino em andamento: vale a pena guardar/oferecer só se tem algo preenchido.
+  function draftHasContent(draft) {
+    if (!draft) return false;
+    return (draft.formSets || []).length > 0 || toNum(draft.cardio) > 0 || String(draft.notes || '').trim() !== '';
+  }
+
+  /* ---------- descanso ---------- */
+
+  // Tempo de descanso padrão (segundos): o do usuário se for razoável, senão 90.
+  function restSecondsOf(settings) {
+    const n = Math.round(toNum(settings && settings.restSeconds));
+    return (n >= 10 && n <= 900) ? n : 90;
+  }
+
+  // 75 -> "1:15"; negativo vira 0:00.
+  function fmtClock(seconds) {
+    const s = Math.max(0, Math.ceil(toNum(seconds)));
+    return Math.floor(s / 60) + ':' + pad2(s % 60);
+  }
+
+  /* ---------- lista do Início ---------- */
+
+  // Primeiro dia do mês anterior: o Início mostra o mês atual e o anterior.
+  function recentCutoff(todayIso) {
+    const d = parseDate(todayIso);
+    return fmtDate(new Date(d.getFullYear(), d.getMonth() - 1, 1));
+  }
+
+  // Quantos treinos (de uma lista em ordem decrescente de data) mostrar sem expandir:
+  // os do mês atual e do anterior, e no mínimo `minCount` (para quem ficou um tempo parado).
+  function visibleWorkoutCount(sortedDesc, todayIso, minCount) {
+    const list = sortedDesc || [];
+    const cutoff = recentCutoff(todayIso);
+    const recent = list.filter(function (w) { return w.date >= cutoff; }).length;
+    return Math.min(list.length, Math.max(recent, minCount));
+  }
+
+  // Nomes de ficha presentes nos treinos (para o filtro do Início), em ordem alfabética.
+  function sheetFilterOptions(workouts, sheets) {
+    const seen = {};
+    (workouts || []).forEach(function (w) {
+      const label = sheetLabel(w, sheets);
+      if (label) seen[label] = true;
+    });
+    return Object.keys(seen).sort(function (a, b) { return a.localeCompare(b, 'pt-BR'); });
+  }
+
+  /* ---------- evolução semanal ---------- */
+
+  // Volume (tonelagem) de um treino: soma de reps × carga das séries de trabalho.
+  // O aquecimento não entra (regra do app).
+  function workoutVolume(workout) {
+    return ((workout && workout.sets) || []).reduce(function (sum, s) {
+      return sum + toNum(s.reps) * toNum(s.load);
+    }, 0);
+  }
+
+  // Totais das últimas `count` semanas (janelas de 7 dias como as metas), da mais antiga para a atual.
+  function weeklyTotals(workouts, anchorIso, count) {
+    const out = [];
+    for (let i = count - 1; i >= 0; i--) {
+      const start = addDaysISO(anchorIso, -7 * i);
+      const end = addDaysISO(start, 6);
+      const week = { start: start, end: end, workouts: 0, volume: 0, cardio: 0 };
+      (workouts || []).forEach(function (w) {
+        if (w.date < start || w.date > end || !isValidWorkout(w)) return;
+        week.workouts++;
+        week.volume += workoutVolume(w);
+        week.cardio += toNum(w.cardioMinutes);
+      });
+      week.volume = Math.round(week.volume);
+      out.push(week);
+    }
+    return out;
+  }
+
 /* ---------- nome atual da ficha ---------- */
 
   // O treino guarda o nome da ficha como estava no dia em que foi registrado (snapshot).
@@ -833,6 +973,19 @@
     previousWarmupFields: previousWarmupFields,
     sessionsForExercise: sessionsForExercise,
     bestSetForExercise: bestSetForExercise,
+    // formulário, descanso, Início e evolução
+    lastSessionForExercise: lastSessionForExercise,
+    lastSessionLine: lastSessionLine,
+    lastWorkoutForSheet: lastWorkoutForSheet,
+    formFromWorkout: formFromWorkout,
+    draftHasContent: draftHasContent,
+    restSecondsOf: restSecondsOf,
+    fmtClock: fmtClock,
+    recentCutoff: recentCutoff,
+    visibleWorkoutCount: visibleWorkoutCount,
+    sheetFilterOptions: sheetFilterOptions,
+    workoutVolume: workoutVolume,
+    weeklyTotals: weeklyTotals,
     // exportação
     workoutAsText: workoutAsText,
     sheetLabel: sheetLabel,

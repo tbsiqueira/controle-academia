@@ -21,6 +21,11 @@ Mapa de **cada funcionalidade do app** para os testes que a cobrem. Serve para r
 | Histórico por exercício (gráfico, PR, tendência) | `core.js`: `lastLoadsForExercise`, `lastWarmupForExercise`, `sessionsForExercise`, `bestSetForExercise`, `exerciseMatches` | `core.test.js`, `core-edge-cases.test.js` (renomear não perde histórico; nomes iguais não se misturam; ordenação) |
 | Nome **atual** de exercício e de ficha (sem nome congelado) | `core.js`: `exerciseLabel`, `sheetLabel`, `exerciseTarget` | `core.test.js`, `core-edge-cases.test.js` |
 | Renomear exercício propaga (fichas antigas e histórico) | `core.js`: `renameInSheets`, `renameInWorkouts`, `linkSheetItemsToExercises` | `core.test.js`, `sample-data.test.js` (fixture antiga religada) |
+| Dica "Última vez" e repetir o último treino da ficha | `core.js`: `lastSessionForExercise`, `lastSessionLine`, `lastWorkoutForSheet`, `formFromWorkout` | `form-and-progress.test.js` (ignora o treino em edição, `typeId` antigo, RIR/obs em branco) |
+| Rascunho do treino em andamento | `core.js`: `draftHasContent` (gravação/restauração no `app.js`) | `form-and-progress.test.js` |
+| Timer de descanso | `core.js`: `restSecondsOf`, `fmtClock` | `form-and-progress.test.js` |
+| Lista curta do Início e filtro por ficha | `core.js`: `recentCutoff`, `visibleWorkoutCount`, `sheetFilterOptions` | `form-and-progress.test.js` (virada do ano, mínimo de treinos) |
+| Evolução semanal (volume, treinos, cardio) | `core.js`: `workoutVolume`, `weeklyTotals` | `form-and-progress.test.js` (aquecimento fora do volume, treino inválido) |
 | Texto do treino para enviar à professora | `core.js`: `workoutAsText` | `core.test.js`, `core-edge-cases.test.js` (nome atual, série sem número, treino vazio) |
 | Fichas: criar/editar/excluir, itens, migração por nome | `core.js`: `normalizeSheet*`, `linkSheetItemsToExercises` | `core.test.js`, `core-edge-cases.test.js` |
 | Biblioteca do usuário × catálogo | `core.js`: `isUserExercise`, `libraryExercises`, `exercisesNeedingRepair` | `core.test.js`, `core-edge-cases.test.js` |

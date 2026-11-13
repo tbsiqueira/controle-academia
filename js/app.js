@@ -27,8 +27,16 @@ const state = {
   eraseDone: false,
   lastImportSnapshot: null,
   dismissBackupReminder: false,
-  calendarCursor: null
+  calendarCursor: null,
+  draft: null,
+  showAllWorkouts: false,
+  workoutFilter: ''
 };
+
+// Rascunho do treino em andamento: um registro extra no store "settings" (id próprio).
+// Não muda o formato do banco nem entra no backup (o backup exporta só o registro "app").
+const DRAFT_ID = 'workoutDraft';
+const HOME_MIN_WORKOUTS = 10;
 
 /* ---------- helpers ----------
    As funções puras (datas, esc/toNum, semana, agrupamento, exportação) vivem em js/core.js,
@@ -59,6 +67,12 @@ async function loadState() {
     await dbPut('settings', settings);
   }
   state.settings = settings;
+
+  try {
+    state.draft = (await dbGet('settings', DRAFT_ID)) || null;
+  } catch (e) {
+    state.draft = null;
+  }
 }
 
 async function loadCatalog() {
@@ -75,6 +89,7 @@ function navigate() {
   const hash = location.hash || '#/dashboard';
   const viewName = hash.replace('#/', '') || 'dashboard';
 
+  flushDraft();   // grava o que foi digitado agora há pouco antes de sair do formulário
   if (viewName !== 'workout') state.editingWorkoutId = null;
 
   document.querySelectorAll('.view').forEach(function (v) {
@@ -125,6 +140,7 @@ async function confirmNextWeek() {
 /* ---------- dashboard ---------- */
 
 function renderDashboard() {
+  renderDraftBanner();
   renderWeek();
   renderBackupReminder();
   renderWorkoutList();
@@ -180,20 +196,52 @@ function renderWorkoutList() {
     return;
   }
 
+  // Filtro por ficha (só aparece com 2+ fichas usadas).
+  const options = sheetFilterOptions(workouts, state.sheets);
+  if (state.workoutFilter && options.indexOf(state.workoutFilter) === -1) state.workoutFilter = '';
+  const filtered = state.workoutFilter
+    ? workouts.filter(function (w) { return sheetLabel(w, state.sheets) === state.workoutFilter; })
+    : workouts;
+
+  // Lista curta: mês atual e anterior (mínimo de 10); o resto em "Ver meses anteriores".
+  const today = todayISO();
+  const defaultCount = visibleWorkoutCount(filtered, today, HOME_MIN_WORKOUTS);
+  const shown = state.showAllWorkouts ? filtered : filtered.slice(0, defaultCount);
+  const hiddenCount = filtered.length - shown.length;
+
   // Agrupa por mês (cabeçalho com a contagem) e mostra a data como um bloco à esquerda,
   // para dar para achar um treino rápido mesmo com muitos registros.
-  const today = todayISO();
   const monthCounts = {};
-  workouts.forEach(function (w) {
+  filtered.forEach(function (w) {
     const p = dateParts(w.date);
     const key = p ? p.monthKey : '';
     monthCounts[key] = (monthCounts[key] || 0) + 1;
   });
 
+  const filterHtml = options.length > 1
+    ? '<select class="form-select form-select-sm mb-2" id="workoutFilter" aria-label="Filtrar treinos por ficha">' +
+      '<option value="">Todas as fichas</option>' +
+      options.map(function (o) {
+        return '<option value="' + esc(o) + '"' + (o === state.workoutFilter ? ' selected' : '') + '>' + esc(o) + '</option>';
+      }).join('') +
+      '</select>'
+    : '';
+
+  let moreHtml = '';
+  if (hiddenCount > 0) {
+    moreHtml = '<button type="button" class="btn btn-outline-primary w-100 mb-2" id="btnShowAllWorkouts">' +
+      '<i class="bi bi-chevron-down"></i> Ver meses anteriores (' + hiddenCount + (hiddenCount === 1 ? ' treino' : ' treinos') + ')</button>';
+  } else if (state.showAllWorkouts && filtered.length > defaultCount) {
+    moreHtml = '<button type="button" class="btn btn-outline-secondary w-100 mb-2" id="btnShowLessWorkouts">' +
+      '<i class="bi bi-chevron-up"></i> Mostrar só os recentes</button>';
+  }
+
   let currentMonth = null;
-  el.innerHTML = '<h6 class="mt-2"><i class="bi bi-clock-history text-primary"></i> Todos os treinos ' +
-    '<span class="badge text-bg-secondary">' + workouts.length + '</span></h6>' +
-    workouts.map(function (w) {
+  el.innerHTML = '<h6 class="mt-2"><i class="bi bi-clock-history text-primary"></i> ' +
+    (state.workoutFilter ? 'Treinos da ficha' : 'Todos os treinos') + ' ' +
+    '<span class="badge text-bg-secondary">' + filtered.length + '</span></h6>' +
+    filterHtml +
+    shown.map(function (w) {
       const setCount = (w.sets || []).length;
       const exerciseCount = countExercises(w);
       const name = sheetLabel(w, state.sheets) || 'Treino';
@@ -231,7 +279,21 @@ function renderWorkoutList() {
         '<button type="button" class="btn btn-sm btn-outline-secondary" data-share-workout="' + esc(w.id) + '" title="Exportar como texto" aria-label="Exportar como texto"><i class="bi bi-share"></i></button>' +
         '</div>' +
         '</div></div>';
-    }).join('');
+    }).join('') +
+    moreHtml;
+
+  const filterSel = document.getElementById('workoutFilter');
+  if (filterSel) {
+    filterSel.addEventListener('change', function () {
+      state.workoutFilter = this.value;
+      state.showAllWorkouts = false;
+      renderWorkoutList();
+    });
+  }
+  const showAll = document.getElementById('btnShowAllWorkouts');
+  if (showAll) showAll.addEventListener('click', function () { state.showAllWorkouts = true; renderWorkoutList(); });
+  const showLess = document.getElementById('btnShowLessWorkouts');
+  if (showLess) showLess.addEventListener('click', function () { state.showAllWorkouts = false; renderWorkoutList(); });
 
   el.querySelectorAll('[data-view-workout]').forEach(function (b) {
     b.addEventListener('click', function () {
@@ -383,6 +445,130 @@ function renderExerciseHistory() {
 
   el.innerHTML = html;
 }
+/* ---------- workout draft (treino em andamento) ---------- */
+
+let draftTimer = null;
+
+function isWorkoutFormOpen() {
+  return location.hash === '#/workout';
+}
+
+function currentDraft() {
+  return {
+    id: DRAFT_ID,
+    editingWorkoutId: state.editingWorkoutId || null,
+    date: document.getElementById('workoutDate').value,
+    sheetId: document.getElementById('workoutSheet').value,
+    cardio: document.getElementById('workoutCardio').value,
+    notes: document.getElementById('workoutNotes').value,
+    formSets: JSON.parse(JSON.stringify(state.formSets)),
+    savedAt: new Date().toISOString()
+  };
+}
+
+// Chamado a cada alteração no formulário: grava o rascunho logo depois (sem travar a digitação).
+function scheduleDraftSave() {
+  if (!isWorkoutFormOpen()) return;
+  clearTimeout(draftTimer);
+  draftTimer = setTimeout(saveDraftNow, 500);
+}
+
+// Monta o rascunho de forma síncrona (antes de qualquer await), então dá para chamar
+// no começo do navigate(), antes de a troca de tela limpar o treino em edição.
+async function saveDraftNow() {
+  clearTimeout(draftTimer);
+  draftTimer = null;
+
+  const draft = currentDraft();
+  try {
+    if (draftHasContent(draft)) {
+      state.draft = draft;
+      await dbPut('settings', draft);
+    } else if (state.draft) {
+      state.draft = null;
+      await dbDelete('settings', DRAFT_ID);
+    }
+  } catch (e) {
+    // sem rascunho o app continua funcionando como antes
+  }
+}
+
+// Ao sair do app (trocar de app, bloquear a tela), grava na hora o que estiver pendente.
+function flushDraft() {
+  if (draftTimer) saveDraftNow();
+}
+
+async function clearDraft() {
+  clearTimeout(draftTimer);
+  draftTimer = null;
+  state.draft = null;
+  try {
+    await dbDelete('settings', DRAFT_ID);
+  } catch (e) {
+    // nada a fazer
+  }
+}
+
+function draftDescription(draft) {
+  const editing = draft.editingWorkoutId
+    ? state.workouts.find(function (w) { return w.id === draft.editingWorkoutId; })
+    : null;
+  const sheet = draft.sheetId ? findSheet(draft.sheetId) : null;
+  const name = sheet ? sheet.name : (editing ? sheetLabel(editing, state.sheets) : '');
+  const saved = draft.savedAt ? new Date(draft.savedAt) : null;
+  const when = saved && !isNaN(saved.getTime())
+    ? ' · salvo ' + (fmtDate(saved) === todayISO() ? 'hoje' : 'em ' + fmtBR(fmtDate(saved))) + ' às ' + pad2(saved.getHours()) + ':' + pad2(saved.getMinutes())
+    : '';
+  return (editing ? 'Edição do treino de ' + fmtBR(editing.date) : 'Treino novo') + (name ? ' · ' + name : '') + when;
+}
+
+function renderDraftBanner() {
+  const el = document.getElementById('draftBanner');
+  if (!el) return;
+  if (!draftHasContent(state.draft)) {
+    el.innerHTML = '';
+    return;
+  }
+  el.innerHTML = '<div class="alert alert-primary py-2 draft-banner">' +
+    '<div><i class="bi bi-pencil-square"></i> <strong>Treino em andamento</strong> (não salvo)</div>' +
+    '<div class="small mb-2">' + esc(draftDescription(state.draft)) + '</div>' +
+    '<div class="d-flex gap-2">' +
+    '<button type="button" class="btn btn-sm btn-primary flex-fill" id="btnResumeDraft"><i class="bi bi-play-fill"></i> Continuar</button>' +
+    '<button type="button" class="btn btn-sm btn-outline-secondary" id="btnDiscardDraft">Descartar</button>' +
+    '</div></div>';
+  document.getElementById('btnResumeDraft').addEventListener('click', resumeDraft);
+  document.getElementById('btnDiscardDraft').addEventListener('click', discardDraft);
+}
+
+function resumeDraft() {
+  if (!state.draft) return;
+  state.editingWorkoutId = state.draft.editingWorkoutId || null;
+  if (isWorkoutFormOpen()) navigate();
+  else location.hash = '#/workout';
+}
+
+async function discardDraft() {
+  if (!confirm('Descartar o treino em andamento? O que foi digitado e não salvo será perdido.')) return;
+  await clearDraft();
+  renderDashboard();
+}
+
+// Decide se o formulário abre a partir do rascunho. Se o rascunho é de OUTRO treino
+// (ex.: começou um treino novo e agora abriu "Editar" de um antigo), pergunta antes,
+// para nunca sobrescrever um rascunho sem querer.
+function draftForForm() {
+  const draft = state.draft;
+  if (!draftHasContent(draft)) return null;
+  if ((draft.editingWorkoutId || null) === (state.editingWorkoutId || null)) return draft;
+
+  if (confirm('Você tem um treino em andamento que não foi salvo:\n' + draftDescription(draft) +
+    '\n\nOK: continuar esse treino\nCancelar: descartar o rascunho e seguir')) {
+    return draft;
+  }
+  clearDraft();
+  return null;
+}
+
 /* ---------- workout form ---------- */
 
 function activeSheets() {
@@ -390,15 +576,31 @@ function activeSheets() {
 }
 
 function findSheet(id) {
-  return state.sheets.find(function (s) { return s.id === id; }) || null;
+  return state.sheets.find(function (s) { return String(s.id) === String(id); }) || null;
 }
 
-function renderSheetOptions(selectedId) {
+function sameId(a, b) {
+  return a !== null && a !== undefined && a !== '' && String(a) === String(b);
+}
+
+// fallbackName: nome guardado no treino em edição, usado quando a ficha foi excluída.
+function renderSheetOptions(selectedId, fallbackName) {
   const sel = document.getElementById('workoutSheet');
   let html = '<option value="">— Selecione a ficha —</option>';
+  let found = false;
   activeSheets().forEach(function (s) {
-    html += '<option value="' + esc(s.id) + '"' + (selectedId === s.id ? ' selected' : '') + '>' + esc(s.name) + '</option>';
+    const selected = sameId(selectedId, s.id);
+    if (selected) found = true;
+    html += '<option value="' + esc(s.id) + '"' + (selected ? ' selected' : '') + '>' + esc(s.name) + '</option>';
   });
+
+  // Ficha excluída ou inativa: mantém a opção, para não perder o nome ao salvar a edição.
+  if (selectedId && !found) {
+    const sheet = findSheet(selectedId);
+    const label = sheet ? sheet.name + ' (inativa)' : (fallbackName || 'Ficha') + ' (excluída)';
+    html += '<option value="' + esc(selectedId) + '" selected>' + esc(label) + '</option>';
+  }
+
   sel.innerHTML = html;
   renderSheetHint(selectedId);
 }
@@ -406,16 +608,44 @@ function renderSheetOptions(selectedId) {
 function renderSheetHint(sheetId) {
   const hint = document.getElementById('sheetHint');
   const sheet = sheetId ? findSheet(sheetId) : null;
+  renderRepeatLast(sheetId);
   if (!sheet) {
-    hint.innerHTML = activeSheets().length
-      ? 'Selecione a ficha do treino de hoje.'
-      : 'Você ainda não tem fichas. Crie a sua na aba <a href="#/exercises">Fichas</a>.';
+    hint.innerHTML = sheetId
+      ? 'Esta ficha foi excluída — o nome dela continua guardado neste treino.'
+      : (activeSheets().length
+        ? 'Selecione a ficha do treino de hoje.'
+        : 'Você ainda não tem fichas. Crie a sua na aba <a href="#/exercises">Fichas</a>.');
     return;
   }
   const count = (sheet.exercises || []).length;
   hint.textContent = count
     ? (count === 1 ? '1 exercício na ficha — carregado no treino.' : count + ' exercícios na ficha — carregados no treino.')
     : 'Esta ficha ainda não tem exercícios. Adicione na aba Fichas.';
+}
+
+// Botão "Repetir último treino desta ficha": preenche com os mesmos exercícios, reps e cargas.
+function renderRepeatLast(sheetId) {
+  const el = document.getElementById('repeatLast');
+  if (!el) return;
+  const last = lastWorkoutForSheet(state.workouts, sheetId, state.editingWorkoutId);
+  if (!last) {
+    el.innerHTML = '';
+    return;
+  }
+  el.innerHTML = '<button type="button" class="btn btn-sm btn-outline-primary mt-2 w-100" id="btnRepeatLast">' +
+    '<i class="bi bi-arrow-repeat"></i> Repetir o último treino desta ficha (' + fmtBR(last.date) + ')</button>';
+  document.getElementById('btnRepeatLast').addEventListener('click', function () {
+    repeatLastWorkout(last);
+  });
+}
+
+function repeatLastWorkout(last) {
+  if (state.formSets.length && !confirm('Substituir os exercícios do formulário pelo treino de ' + fmtBR(last.date) + '?\n\nReps e cargas vêm daquele treino; RIR e observações ficam em branco.')) {
+    return;
+  }
+  state.formSets = formFromWorkout(last);
+  renderFormSets();
+  scheduleDraftSave();
 }
 
 function loadSheetIntoForm(sheet) {
@@ -452,11 +682,13 @@ function loadSheetIntoForm(sheet) {
   });
 
   renderFormSets();
+  scheduleDraftSave();
 }
 
 function onSheetChange() {
   const sheetId = document.getElementById('workoutSheet').value;
   renderSheetHint(sheetId);
+  scheduleDraftSave();
 
   const sheet = sheetId ? findSheet(sheetId) : null;
   if (!sheet) return;
@@ -470,6 +702,13 @@ function onSheetChange() {
 
 
 function renderWorkoutForm() {
+  const draft = draftForForm();
+  if (draft) {
+    // o treino do rascunho pode ter sido excluído nesse meio-tempo: aí vira treino novo
+    const exists = draft.editingWorkoutId && state.workouts.some(function (w) { return w.id === draft.editingWorkoutId; });
+    state.editingWorkoutId = exists ? draft.editingWorkoutId : null;
+  }
+
   const editing = state.editingWorkoutId
     ? state.workouts.find(function (w) { return w.id === state.editingWorkoutId; })
     : null;
@@ -477,12 +716,28 @@ function renderWorkoutForm() {
   document.getElementById('workoutTitle').innerHTML = editing
     ? '<i class="bi bi-pencil-square text-primary"></i> Editar treino'
     : '<i class="bi bi-plus-circle text-primary"></i> Treinar';
-  document.getElementById('workoutDate').value = editing ? editing.date : todayISO();
-  renderSheetOptions(editing ? (editing.sheetId || editing.typeId) : null);
-  document.getElementById('workoutCardio').value = editing ? (editing.cardioMinutes || '') : '';
-  document.getElementById('workoutNotes').value = editing ? (editing.notes || '') : '';
 
-  state.formSets = editing ? groupSets(editing.sets, editing.warmups) : [];
+  const editingSheetName = editing ? (editing.sheetName || editing.typeName || '') : '';
+
+  if (draft) {
+    document.getElementById('workoutDate').value = draft.date || todayISO();
+    renderSheetOptions(draft.sheetId || null, editingSheetName);
+    document.getElementById('workoutCardio').value = draft.cardio || '';
+    document.getElementById('workoutNotes').value = draft.notes || '';
+    state.formSets = JSON.parse(JSON.stringify(draft.formSets || []));
+  } else {
+    document.getElementById('workoutDate').value = editing ? editing.date : todayISO();
+    renderSheetOptions(editing ? (editing.sheetId || editing.typeId) : null, editingSheetName);
+    document.getElementById('workoutCardio').value = editing ? (editing.cardioMinutes || '') : '';
+    document.getElementById('workoutNotes').value = editing ? (editing.notes || '') : '';
+    state.formSets = editing ? groupSets(editing.sets, editing.warmups) : [];
+  }
+
+  const notice = document.getElementById('draftNotice');
+  notice.innerHTML = draft
+    ? '<div class="alert alert-info py-1 px-2 small mb-2"><i class="bi bi-cloud-check"></i> Rascunho recuperado — continue de onde parou.</div>'
+    : '';
+
   document.getElementById('workoutDelete').classList.toggle('d-none', !editing);
   document.getElementById('workoutExport').classList.toggle('d-none', !editing);
   renderFormSets();
@@ -508,6 +763,7 @@ function renderFormSets() {
 
   el.innerHTML = state.formSets.map(function (group, exIdx) {
     const warm = group.warmup || {};
+    const last = lastSessionForExercise(state.workouts, refOf(group), state.editingWorkoutId);
     return '<div class="card mb-2"><div class="card-body p-2">' +
       '<div class="d-flex justify-content-between align-items-center mb-1">' +
       '<strong><i class="bi bi-activity text-primary"></i> ' + esc(labelOf(group)) + '</strong>' +
@@ -517,6 +773,7 @@ function renderFormSets() {
       '</div>' +
       '</div>' +
       (group.note ? '<div class="small text-muted mb-1"><i class="bi bi-info-circle"></i> ' + esc(group.note) + '</div>' : '') +
+      (last ? '<div class="small last-session mb-1"><i class="bi bi-clock-history"></i> <span class="fw-semibold">Última vez (' + fmtBR(last.date) + '):</span> ' + esc(lastSessionLine(last, commaDecimal)) + '</div>' : '') +
       '<div class="border rounded bg-light p-1 mb-1">' +
       '<div class="small text-muted mb-1"><i class="bi bi-fire"></i> Aquecimento</div>' +
       '<div class="row g-1">' +
@@ -529,7 +786,10 @@ function renderFormSets() {
       '<div class="col-2">série</div><div class="col-2">reps</div><div class="col-2">carga</div><div class="col-2">RIR</div><div class="col-4">obs</div>' +
       '</div>' +
       group.sets.map(function (s, setIdx) { return setRow(exIdx, setIdx, s); }).join('') +
-      '<button type="button" class="btn btn-sm btn-outline-secondary mt-1" onclick="addFormSet(' + exIdx + ')"><i class="bi bi-plus"></i> série</button>' +
+      '<div class="d-flex gap-1 mt-1">' +
+      '<button type="button" class="btn btn-sm btn-outline-secondary" onclick="addFormSet(' + exIdx + ')"><i class="bi bi-plus"></i> série</button>' +
+      '<button type="button" class="btn btn-sm btn-outline-success ms-auto" onclick="startRest()"><i class="bi bi-stopwatch"></i> Descanso ' + fmtClock(restSecondsOf(state.settings)) + '</button>' +
+      '</div>' +
       '</div></div>';
   }).join('');
 }
@@ -539,12 +799,14 @@ function setWarmupField(exIdx, field, value) {
   if (!group) return;
   if (!group.warmup) group.warmup = { reps: '', load: '', rir: '' };
   group.warmup[field] = value;
+  scheduleDraftSave();
 }
 
 function setField(exIdx, setIdx, field, value) {
   const group = state.formSets[exIdx];
   if (!group || !group.sets[setIdx]) return;
   group.sets[setIdx][field] = value;
+  scheduleDraftSave();
 }
 
 function addFormSet(exIdx) {
@@ -552,11 +814,66 @@ function addFormSet(exIdx) {
   if (!group) return;
   group.sets.push({ number: group.sets.length + 1, reps: '', load: '', rir: '', note: '' });
   renderFormSets();
+  scheduleDraftSave();
 }
 
 function removeFormExercise(exIdx) {
   state.formSets.splice(exIdx, 1);
   renderFormSets();
+  scheduleDraftSave();
+}
+
+/* ---------- rest timer ---------- */
+
+// Sem som de propósito: o app nunca toca áudio. O fim do descanso é avisado só na tela
+// (barra laranja piscando) e com vibração onde o aparelho permite.
+const rest = { end: 0, total: 0, interval: null, hideTimer: null };
+
+function startRest(seconds) {
+  const secs = seconds || restSecondsOf(state.settings);
+  rest.total = secs;
+  rest.end = Date.now() + secs * 1000;
+  clearInterval(rest.interval);
+  clearTimeout(rest.hideTimer);
+  const bar = document.getElementById('restBar');
+  bar.classList.remove('d-none', 'is-done');
+  rest.interval = setInterval(tickRest, 250);
+  tickRest();
+}
+
+function addRest(seconds) {
+  if (!rest.interval) return;
+  rest.end += seconds * 1000;
+  rest.total += seconds;
+  tickRest();
+}
+
+function stopRest() {
+  clearInterval(rest.interval);
+  clearTimeout(rest.hideTimer);
+  rest.interval = null;
+  document.getElementById('restBar').classList.add('d-none');
+}
+
+// Conta pelo horário de término (e não por "ticks"), então continua certo mesmo se o
+// celular pausar o app em segundo plano.
+function tickRest() {
+  const left = (rest.end - Date.now()) / 1000;
+  const bar = document.getElementById('restBar');
+  if (left <= 0) {
+    clearInterval(rest.interval);
+    rest.interval = null;
+    bar.classList.add('is-done');
+    document.getElementById('restLabel').textContent = 'Descanso terminado!';
+    document.getElementById('restClock').textContent = '0:00';
+    document.getElementById('restProgress').style.width = '100%';
+    if (navigator.vibrate) navigator.vibrate([300, 150, 300]);
+    rest.hideTimer = setTimeout(stopRest, 5000);
+    return;
+  }
+  document.getElementById('restLabel').textContent = 'Descanso';
+  document.getElementById('restClock').textContent = fmtClock(left);
+  document.getElementById('restProgress').style.width = Math.min(100, Math.round((1 - left / rest.total) * 100)) + '%';
 }
 
 
@@ -581,6 +898,7 @@ function addExerciseToForm(opts) {
     sets: sets
   });
   renderFormSets();
+  scheduleDraftSave();
 }
 
 function cleanWarmup(warm) {
@@ -645,11 +963,15 @@ async function saveWorkout() {
     ? state.workouts.find(function (w) { return w.id === state.editingWorkoutId; })
     : null;
 
+  // Ficha excluída: mantém o id e o nome guardados no treino em edição (antes eles se perdiam).
+  const editingSheetId = editing ? (editing.sheetId || editing.typeId) : null;
+  const keepsOldSheet = !sheet && sameId(editingSheetId, sheetId);
+
   const workout = {
     id: editing ? editing.id : uid(),
     date: date,
-    sheetId: sheetId || null,
-    sheetName: sheet ? sheet.name : '',
+    sheetId: keepsOldSheet ? editingSheetId : (sheetId || null),
+    sheetName: sheet ? sheet.name : (keepsOldSheet ? (editing.sheetName || editing.typeName || '') : ''),
     cardioMinutes: cardioMinutes,
     notes: notes,
     warmups: warmups,
@@ -659,6 +981,7 @@ async function saveWorkout() {
   };
 
   await dbPut('workouts', workout);
+  await clearDraft();
   state.workouts = await dbAll('workouts');
   state.editingWorkoutId = null;
   location.hash = '#/dashboard';
@@ -667,6 +990,7 @@ async function saveWorkout() {
 async function deleteWorkout() {
   if (!state.editingWorkoutId) return;
   if (!confirm('Excluir este treino?')) return;
+  await clearDraft();
   await dbDelete('workouts', state.editingWorkoutId);
   state.workouts = await dbAll('workouts');
   state.editingWorkoutId = null;
@@ -681,6 +1005,7 @@ function cancelWorkout() {
 
   if (hasContent && !confirm('Descartar as alterações deste treino?')) return;
 
+  clearDraft();
   state.formSets = [];
   state.editingWorkoutId = null;
 
@@ -1415,6 +1740,49 @@ function renderCalendar() {
 
   const total = Object.keys(counts).reduce(function (sum, k) { return sum + counts[k]; }, 0);
   document.getElementById('calendarTotal').innerHTML = '<i class="bi bi-calendar-check"></i> ' + total + (total === 1 ? ' treino' : ' treinos') + ' em ' + monthNames[m] + '.';
+  renderWeeklyProgress();
+}
+
+/* ---------- evolução semanal (volume, treinos, cardio) ---------- */
+
+function fmtKg(n) {
+  return Math.round(n).toLocaleString('pt-BR') + ' kg';
+}
+
+function renderWeeklyProgress() {
+  const el = document.getElementById('weeklyProgress');
+  if (!el) return;
+
+  const weeks = weeklyTotals(state.workouts, weekRange().anchor, 8);
+  if (!weeks.some(function (w) { return w.workouts > 0; })) {
+    el.innerHTML = '';
+    return;
+  }
+
+  const maxVolume = Math.max.apply(null, weeks.map(function (w) { return w.volume; }).concat([1]));
+  const target = state.settings.weeklyWorkoutTarget;
+
+  el.innerHTML = '<div class="card mt-3"><div class="card-body">' +
+    '<h2 class="h6 mb-1"><i class="bi bi-graph-up-arrow text-primary"></i> Evolução das últimas 8 semanas</h2>' +
+    '<p class="small text-muted mb-2">Volume = soma de reps × carga das séries (sem aquecimento). Semanas no mesmo ciclo das metas.</p>' +
+    weeks.slice().reverse().map(function (w, i) {
+      const pct = w.volume ? Math.max(3, Math.round((w.volume / maxVolume) * 100)) : 0;
+      const hitGoal = w.workouts >= target;
+      return '<div class="week-row mb-2">' +
+        '<div class="d-flex justify-content-between small">' +
+        '<span>' + (i === 0 ? '<strong>Esta semana</strong>' : fmtBR(w.start).slice(0, 5) + ' – ' + fmtBR(w.end).slice(0, 5)) + '</span>' +
+        '<span><strong>' + fmtKg(w.volume) + '</strong></span>' +
+        '</div>' +
+        '<div class="progress" style="height: 10px" role="progressbar" aria-label="Volume da semana" aria-valuenow="' + pct + '" aria-valuemin="0" aria-valuemax="100">' +
+        '<div class="progress-bar" style="width: ' + pct + '%"></div></div>' +
+        '<div class="small text-muted">' +
+        '<span class="' + (hitGoal ? 'text-success fw-semibold' : '') + '">' + (hitGoal ? '<i class="bi bi-check-circle-fill"></i> ' : '') +
+        w.workouts + '/' + target + (w.workouts === 1 ? ' treino' : ' treinos') + '</span>' +
+        (w.cardio ? ' · ' + w.cardio + ' min cardio' : '') +
+        '</div>' +
+        '</div>';
+    }).join('') +
+    '</div></div>';
 }
 
 /* ---------- colinha ---------- */
@@ -1482,6 +1850,7 @@ function renderMore() {
   document.getElementById('setWorkoutTarget').value = state.settings.weeklyWorkoutTarget;
   document.getElementById('setCardioTarget').value = state.settings.weeklyCardioTarget;
   document.getElementById('setWeekAnchor').value = state.settings.weekAnchor || todayISO();
+  document.getElementById('setRestSeconds').value = restSecondsOf(state.settings);
   document.getElementById('btnUndoImport').classList.toggle('d-none', !state.lastImportSnapshot);
   renderBackupStatus();
   renderStorageInfo();
@@ -1536,6 +1905,7 @@ async function saveSettingsForm() {
   state.settings.weeklyWorkoutTarget = Math.max(1, toNum(document.getElementById('setWorkoutTarget').value) || 1);
   state.settings.weeklyCardioTarget = Math.max(0, toNum(document.getElementById('setCardioTarget').value) || 0);
   state.settings.weekAnchor = document.getElementById('setWeekAnchor').value || todayISO();
+  state.settings.restSeconds = restSecondsOf({ restSeconds: document.getElementById('setRestSeconds').value });
   await dbPut('settings', state.settings);
   alert('Metas salvas.');
 }
@@ -2105,6 +2475,17 @@ function bindEvents() {
   document.getElementById('detailExport').addEventListener('click', function () { exportWorkoutText(state.viewingWorkoutId); });
   document.getElementById('detailDelete').addEventListener('click', guard(deleteViewedWorkout));
   document.getElementById('workoutSheet').addEventListener('change', guard(onSheetChange));
+  ['workoutDate', 'workoutCardio', 'workoutNotes'].forEach(function (id) {
+    document.getElementById(id).addEventListener('input', scheduleDraftSave);
+    document.getElementById(id).addEventListener('change', scheduleDraftSave);
+  });
+  // Celular: ao trocar de app ou bloquear a tela, grava o rascunho na hora.
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'hidden') flushDraft();
+  });
+  window.addEventListener('pagehide', flushDraft);
+  document.getElementById('restAdd').addEventListener('click', function () { addRest(15); });
+  document.getElementById('restStop').addEventListener('click', stopRest);
 
   document.getElementById('btnNewSheet').addEventListener('click', function () { openSheetEditor(null); });
   document.getElementById('sheetEditorSave').addEventListener('click', guard(saveSheetEditor));

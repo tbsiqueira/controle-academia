@@ -11,15 +11,16 @@
   <link rel="icon" href="icons/icon-16.png" sizes="16x16" type="image/png">
   <link rel="icon" href="icons/icon-32.png" sizes="32x32" type="image/png">
   <link rel="apple-touch-icon" href="icons/icon-180.png">
-  <link rel="stylesheet" href="vendor/bootstrap/bootstrap.min.css?v=50">
-  <link rel="stylesheet" href="vendor/bootstrap-icons/bootstrap-icons.min.css?v=50">
-  <link rel="stylesheet" href="css/styles.css?v=50">
+  <link rel="stylesheet" href="vendor/bootstrap/bootstrap.min.css?v=51">
+  <link rel="stylesheet" href="vendor/bootstrap-icons/bootstrap-icons.min.css?v=51">
+  <link rel="stylesheet" href="css/styles.css?v=51">
 </head>
 <body>
   <main class="container pb-nav">
     <!-- Dashboard -->
     <section id="view-dashboard" class="view">
       <h1 class="h4 mt-3 mb-3"><i class="bi bi-lightning-charge-fill text-primary"></i> Meu Treino</h1>
+      <div id="draftBanner"></div>
       <div id="weekBanner"></div>
       <div id="weekProgress"></div>
       <div id="backupReminder"></div>
@@ -29,6 +30,7 @@
     <!-- Workout form -->
     <section id="view-workout" class="view d-none">
       <h1 class="h4 mt-3 mb-3" id="workoutTitle">Treinar</h1>
+      <div id="draftNotice"></div>
       <div class="card mb-3">
         <div class="card-body">
           <div class="mb-2">
@@ -39,6 +41,7 @@
             <label class="form-label" for="workoutSheet">Ficha de treino</label>
             <select class="form-select" id="workoutSheet"></select>
             <div class="form-text" id="sheetHint"></div>
+            <div id="repeatLast"></div>
           </div>
           <div class="mb-2">
             <label class="form-label" for="workoutCardio">Cardio (minutos)</label>
@@ -154,6 +157,7 @@
       </div>
       <div class="cal-grid" id="calendarGrid"></div>
       <p class="text-muted mt-2" id="calendarTotal"></p>
+      <div id="weeklyProgress"></div>
     </section>
 
     <!-- More -->
@@ -175,6 +179,11 @@
             <div class="col-12">
               <label class="form-label" for="setWeekAnchor">Semana iniciada em</label>
               <input type="date" class="form-control" id="setWeekAnchor">
+            </div>
+            <div class="col-12">
+              <label class="form-label" for="setRestSeconds">Descanso entre séries (segundos)</label>
+              <input type="number" min="10" max="900" step="5" inputmode="numeric" class="form-control" id="setRestSeconds">
+              <div class="form-text">Usado pelo botão <i class="bi bi-stopwatch"></i> Descanso no treino. Padrão: 90.</div>
             </div>
           </div>
           <div class="d-flex gap-2 mt-2">
@@ -235,9 +244,21 @@
         </div>
       </div>
 
-      <p class="text-center text-muted small">Meu Treino <span id="appVersion">v50</span> · dados 100% locais · catálogo: gugeldev/exercicios-bd-ptbr (CC0)</p>
+      <p class="text-center text-muted small">Meu Treino <span id="appVersion">v51</span> · dados 100% locais · catálogo: gugeldev/exercicios-bd-ptbr (CC0)</p>
     </section>
   </main>
+
+  <!-- Rest timer (aparece acima da navegação enquanto conta) -->
+  <div id="restBar" class="rest-bar d-none" role="status" aria-live="polite">
+    <div class="rest-bar-inner">
+      <i class="bi bi-stopwatch"></i>
+      <span id="restLabel">Descanso</span>
+      <strong id="restClock" class="rest-clock">0:00</strong>
+      <button type="button" class="btn btn-sm btn-light ms-auto" id="restAdd">+15s</button>
+      <button type="button" class="btn btn-sm btn-outline-light" id="restStop" aria-label="Parar descanso"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <div class="rest-progress"><div id="restProgress"></div></div>
+  </div>
 
   <!-- Bottom navigation -->
   <nav class="bottom-nav" aria-label="Navegação principal">
@@ -378,9 +399,9 @@
     </div>
   </div>
 
-  <script src="vendor/bootstrap/bootstrap.bundle.min.js?v=50"></script>
-  <script src="js/db.js?v=50"></script>
-  <script src="js/core.js?v=50"></script>
-  <script src="js/app.js?v=50"></script>
+  <script src="vendor/bootstrap/bootstrap.bundle.min.js?v=51"></script>
+  <script src="js/db.js?v=51"></script>
+  <script src="js/core.js?v=51"></script>
+  <script src="js/app.js?v=51"></script>
 </body>
 </html>

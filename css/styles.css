@@ -366,3 +366,68 @@ body {
 .min-w-0 {
   min-width: 0;
 }
+
+/* Treino em andamento (rascunho) no Início */
+.draft-banner {
+  border-left: 4px solid var(--mt-primary);
+}
+
+/* Dica "Última vez" em cada exercício do formulário */
+.last-session {
+  padding: 0.2rem 0.4rem;
+  border-radius: 0.35rem;
+  background: #f1ecfd;
+  color: #4c1d95;
+}
+
+/* Timer de descanso: barra fixa logo acima da navegação inferior */
+.rest-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: calc(var(--mt-nav-height) + env(safe-area-inset-bottom, 0px));
+  z-index: 1031;
+  background: #15803d;
+  color: #ffffff;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.rest-bar.is-done {
+  background: #b45309;
+  animation: rest-pulse 0.8s ease-in-out 3;
+}
+
+@keyframes rest-pulse {
+  50% { filter: brightness(1.25); }
+}
+
+.rest-bar-inner {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 0.45rem 0.75rem;
+}
+
+.rest-clock {
+  font-size: 1.35rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.rest-progress {
+  height: 4px;
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.rest-progress > div {
+  height: 100%;
+  width: 0;
+  background: #ffffff;
+  transition: width 0.25s linear;
+}
+
+/* Com o timer aberto, a página ganha espaço extra para a barra não cobrir o Salvar */
+body:has(.rest-bar:not(.d-none)) .pb-nav {
+  padding-bottom: calc(var(--mt-nav-height) + env(safe-area-inset-bottom, 0px) + 72px);
+}

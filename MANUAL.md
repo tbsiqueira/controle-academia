@@ -142,9 +142,33 @@ Elevação pélvica                                    [3 séries]
 - **Errou algo?** Toque em **Cancelar** — nada é salvo e você volta para a tela anterior.
 - **Precisa editar um treino já salvo?** Início → toque no treino → **Editar**.
 
+### Ajudas durante o treino (v51)
+
+- **Nada se perde se o app fechar.** Tudo o que você digita no treino é guardado como **rascunho** na hora.
+  Se o celular fechar o app (ou você trocar de aba), ao voltar em **Treinar** o treino reaparece com o aviso
+  _"Rascunho recuperado"_, e o **Início** mostra o cartão **Treino em andamento** com **Continuar** e
+  **Descartar**. O rascunho some quando você **Salva** ou **Cancela**. Ele não entra no backup.
+- **Última vez:** cada exercício mostra, em lilás, o que você fez da última vez
+  (ex.: _"Última vez (08/11/2026): 27 kg × 12 (RIR 2) · 27 kg × 10"_), para decidir se sobe a carga.
+- **Repetir o último treino desta ficha:** ao escolher a ficha, aparece esse botão. Ele preenche o treino com os
+  mesmos exercícios, reps e cargas da última vez; RIR e observações ficam em branco.
+- **Timer de descanso:** o botão verde **Descanso** em cada exercício abre uma barra acima do menu com a contagem
+  regressiva, **+15s** e **✕**. No fim a barra fica laranja e pisca, e o celular vibra (Android). O app não toca som.
+  O tempo padrão (90 s) muda em **Mais → Metas da semana → Descanso entre séries**.
+- **Ficha excluída:** ao editar um treino antigo cuja ficha foi excluída, a ficha aparece como
+  _"NOME (excluída)"_ e o nome continua guardado ao salvar.
+
 ---
 
 ## 5. Vendo como foi o treino e a evolução
+
+**Lista do Início:** mostra o **mês atual e o anterior** (no mínimo 10 treinos), agrupados por mês, com o
+treino de **hoje em verde**. O botão **Ver meses anteriores** abre o resto. Com 2 ou mais fichas usadas,
+aparece o filtro **Todas as fichas** para ver só os treinos de uma ficha.
+
+**Evolução semanal:** na aba **Calendário**, abaixo do mês, o cartão **Evolução das últimas 8 semanas** mostra,
+por semana (no mesmo ciclo das metas): **volume** (soma de reps × carga, sem aquecimento), treinos feitos/meta
+(verde quando bateu a meta) e minutos de cardio.
 
 **Ver um treino (somente leitura):**
 Início → **toque no treino** na lista *Todos os treinos*. Aparece o resumo do dia: ficha, cardio,
