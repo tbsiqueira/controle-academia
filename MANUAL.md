@@ -166,6 +166,11 @@ Elevação pélvica                                    [3 séries]
 treino de **hoje em verde**. O botão **Ver meses anteriores** abre o resto. Com 2 ou mais fichas usadas,
 aparece o filtro **Todas as fichas** para ver só os treinos de uma ficha.
 
+**Recordes 🏆:** quando um treino passa da **maior carga que você já usou** num exercício (comparando com os
+treinos de datas anteriores), o cartão dele no Início ganha o selo amarelo **recorde** (ou _"2 recordes"_), e no
+resumo do treino o exercício mostra _"Recorde: 47,5 kg × 8 (antes: 45 kg)"_. A primeira vez que você faz um
+exercício e carga igual à anterior não contam. Vale para todo o histórico, inclusive treinos antigos.
+
 **Evolução semanal:** na aba **Calendário**, abaixo do mês, o cartão **Evolução das últimas 8 semanas** mostra,
 por semana (no mesmo ciclo das metas): **volume** (soma de reps × carga, sem aquecimento), treinos feitos/meta
 (verde quando bateu a meta) e minutos de cardio.

@@ -426,3 +426,19 @@ body {
 body:has(.rest-bar:not(.d-none)) .pb-nav {
   padding-bottom: calc(var(--mt-nav-height) + env(safe-area-inset-bottom, 0px) + 72px);
 }
+
+/* Recordes pessoais (só visual) */
+.pr-badge {
+  background: #fef3c7;
+  color: #92400e;
+  font-weight: 600;
+  vertical-align: text-bottom;
+}
+
+.pr-line {
+  margin: 0.15rem 0 0.25rem;
+  padding: 0.2rem 0.4rem;
+  border-radius: 0.35rem;
+  background: #fef3c7;
+  color: #92400e;
+}

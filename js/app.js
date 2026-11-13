@@ -245,6 +245,7 @@ function renderWorkoutList() {
       const setCount = (w.sets || []).length;
       const exerciseCount = countExercises(w);
       const name = sheetLabel(w, state.sheets) || 'Treino';
+      const recordCount = workoutRecords(state.workouts, w).length;
       const warm = warmupSummary(w.warmups);
       const p = dateParts(w.date, today);
       const monthKey = p ? p.monthKey : '';
@@ -269,7 +270,9 @@ function renderWorkoutList() {
         '<div class="card mb-2' + (p && p.relative === 'hoje' ? ' workout-today' : '') + '"><div class="card-body py-2 d-flex align-items-center gap-2">' +
         dateBlock +
         '<button type="button" class="btn btn-link p-0 text-start text-decoration-none flex-grow-1 min-w-0" data-view-workout="' + esc(w.id) + '" aria-label="' + esc(name + ', ' + fmtBR(w.date)) + '">' +
-        '<strong>' + esc(name) + '</strong><br>' +
+        '<strong>' + esc(name) + '</strong>' +
+        (recordCount ? ' <span class="badge pr-badge"><i class="bi bi-trophy-fill"></i> ' + (recordCount === 1 ? 'recorde' : recordCount + ' recordes') + '</span>' : '') +
+        '<br>' +
         '<small class="text-muted">' + exerciseCount + (exerciseCount === 1 ? ' exercício' : ' exercícios') +
         (setCount ? ' · ' + setCount + (setCount === 1 ? ' série' : ' séries') : '') +
         (toNum(w.cardioMinutes) > 0 ? ' · ' + toNum(w.cardioMinutes) + ' min cardio' : '') +
@@ -328,6 +331,15 @@ function refOf(item) {
 
 /* ---------- read-only workout detail ---------- */
 
+// Linha "Recorde" no resumo do treino, para o exercício que bateu a maior carga anterior.
+function prLine(records, group) {
+  const rec = (records || []).find(function (r) { return exerciseMatches(r, group); });
+  if (!rec) return '';
+  return '<div class="small pr-line"><i class="bi bi-trophy-fill"></i> <strong>Recorde:</strong> ' +
+    esc(formatDecimal(rec.load, commaDecimal)) + ' kg × ' + esc(rec.reps) +
+    ' <span class="text-muted">(antes: ' + esc(formatDecimal(rec.previous, commaDecimal)) + ' kg)</span></div>';
+}
+
 function renderWorkoutDetail() {
   const el = document.getElementById('detailBody');
   const workout = state.viewingWorkoutId
@@ -350,6 +362,7 @@ function renderWorkoutDetail() {
     '</div></div>';
 
   const groups = groupSets(workout.sets, workout.warmups);
+  const records = workoutRecords(state.workouts, workout);
 
   if (!groups.length) {
     html += '<p class="text-muted">Este treino não tem exercícios registrados.</p>';
@@ -363,6 +376,7 @@ function renderWorkoutDetail() {
       '<i class="bi bi-chevron-right text-muted"></i>' +
       '</button>' +
       (g.note ? '<div class="small text-muted"><i class="bi bi-info-circle"></i> ' + esc(g.note) + '</div>' : '') +
+      prLine(records, g) +
       (warmupHasData(g.warmup) ? '<div class="small text-muted"><i class="bi bi-fire"></i> Aquecimento: ' + esc(warmupLine(g.warmup)) + '</div>' : '') +
       (g.sets.length ? setsSummaryLines(g.sets) : '<div class="small text-muted mt-1">Sem séries de trabalho.</div>') +
       '</div></div>';

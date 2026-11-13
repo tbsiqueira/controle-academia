@@ -384,6 +384,39 @@
     return best;
   }
 
+  /* ---------- recordes pessoais ---------- */
+
+  // Exercícios em que este treino bateu o recorde de carga, comparando só com treinos de
+  // datas ANTERIORES. A primeira vez que um exercício é feito não conta como recorde.
+  // Calculado na hora (nada é gravado), então funciona para todo o histórico.
+  function workoutRecords(workouts, workout) {
+    const w = workout || {};
+    const earlier = (workouts || []).filter(function (x) {
+      return x.date < w.date && String(x.id) !== String(w.id);
+    });
+    const records = [];
+
+    groupSets(w.sets, []).forEach(function (g) {
+      const today = bestSetForExercise(w, g);
+      let previous = 0;
+      earlier.forEach(function (x) {
+        const best = bestSetForExercise(x, g);
+        if (best && best.load > previous) previous = best.load;
+      });
+      if (previous > 0 && today.load > previous) {
+        records.push({
+          exerciseId: g.exerciseId,
+          exerciseName: g.exerciseName,
+          load: today.load,
+          reps: today.reps,
+          previous: previous
+        });
+      }
+    });
+
+    return records;
+  }
+
   /* ---------- formulário: última sessão, repetir treino, rascunho ---------- */
 
   function byDateDesc(a, b) {
@@ -973,6 +1006,8 @@
     previousWarmupFields: previousWarmupFields,
     sessionsForExercise: sessionsForExercise,
     bestSetForExercise: bestSetForExercise,
+    // recordes
+    workoutRecords: workoutRecords,
     // formulário, descanso, Início e evolução
     lastSessionForExercise: lastSessionForExercise,
     lastSessionLine: lastSessionLine,

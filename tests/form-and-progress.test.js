@@ -138,6 +138,45 @@ test('sheetFilterOptions lista as fichas usadas, sem repetir e em ordem', () => 
   assert.deepEqual(core.sheetFilterOptions(null, sheets), []);
 });
 
+/* ---------- recordes pessoais ---------- */
+
+const HIST = [
+  { id: 'r1', date: '2026-10-01', sets: [set(10, 1, 10, 40), set(11, 1, 12, 10)] },
+  { id: 'r2', date: '2026-10-08', sets: [set(10, 1, 8, 45), set(10, 2, 8, 42.5)] },
+  { id: 'r3', date: '2026-10-15', sets: [set(12, 1, 15, 20)] },
+  { id: 'r4', date: '2026-10-22', sets: [set(10, 1, 6, 47.5), set(10, 2, 8, 47.5), set(11, 1, 12, 10), set(12, 1, 15, 20)] }
+];
+
+test('workoutRecords marca o exercicio que passou da maior carga anterior', () => {
+  assert.deepEqual(core.workoutRecords(HIST, HIST[3]), [
+    { exerciseId: 10, exerciseName: 'Ex 10', load: 47.5, reps: 8, previous: 45 }
+  ]);
+  assert.deepEqual(core.workoutRecords(HIST, HIST[1]).map((r) => r.load), [45]);
+});
+
+test('workoutRecords: primeira vez nao e recorde, carga igual nao e recorde', () => {
+  assert.deepEqual(core.workoutRecords(HIST, HIST[0]), []);
+  assert.deepEqual(core.workoutRecords(HIST, HIST[2]), []);
+  const igual = { id: 'r5', date: '2026-10-29', sets: [set(10, 1, 10, 47.5)] };
+  assert.deepEqual(core.workoutRecords(HIST.concat([igual]), igual), []);
+});
+
+test('workoutRecords ignora treinos do mesmo dia ou posteriores e o proprio treino', () => {
+  const mesmoDia = { id: 'x', date: '2026-10-22', sets: [set(10, 1, 1, 100)] };
+  assert.deepEqual(core.workoutRecords(HIST.concat([mesmoDia]), HIST[3]).length, 1);
+  assert.deepEqual(core.workoutRecords(HIST, HIST[0]), []);
+  const editado = Object.assign({}, HIST[1], { date: '2026-10-30', sets: [set(10, 1, 8, 50)] });
+  assert.deepEqual(core.workoutRecords(HIST, editado)[0].previous, 47.5);
+  // a maior carga anterior vale mesmo quando aparece antes na lista
+  const novo = { id: 'n', date: '2026-11-01', sets: [set(10, 1, 5, 50)] };
+  assert.equal(core.workoutRecords([HIST[3], HIST[0]], novo)[0].previous, 47.5);
+});
+
+test('workoutRecords aceita lista ou treino ausentes', () => {
+  assert.deepEqual(core.workoutRecords(null, HIST[3]), []);
+  assert.deepEqual(core.workoutRecords(HIST, null), []);
+});
+
 /* ---------- evolução semanal ---------- */
 
 test('workoutVolume soma reps x carga e ignora o aquecimento', () => {
