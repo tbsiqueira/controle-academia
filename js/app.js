@@ -269,6 +269,7 @@ function renderWorkoutList() {
         '<button type="button" class="btn btn-link p-0 text-start text-decoration-none flex-grow-1 min-w-0" data-view-workout="' + esc(w.id) + '" aria-label="' + esc(name + ', ' + fmtBR(w.date)) + '">' +
         '<strong>' + esc(name) + '</strong>' +
         '</button>' +
+        '<button type="button" class="btn btn-sm btn-outline-secondary" data-share-workout="' + esc(w.id) + '" title="Exportar como texto" aria-label="Exportar como texto"><i class="bi bi-share"></i></button>' +
         '</div></div>';
     }).join('') +
     moreHtml;
@@ -290,6 +291,12 @@ function renderWorkoutList() {
     b.addEventListener('click', function () {
       state.viewingWorkoutId = b.getAttribute('data-view-workout');
       location.hash = '#/detail';
+    });
+  });
+
+  el.querySelectorAll('[data-share-workout]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      exportWorkoutText(b.getAttribute('data-share-workout'));
     });
   });
 }
