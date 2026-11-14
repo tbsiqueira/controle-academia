@@ -956,3 +956,13 @@ test('exerciseNamesText lista Biblioteca e catálogo sem repetir', () => {
   assert.match(text, /### Catálogo do app\n- Supino reto \(Peito\)\n$/);
   assert.match(core.exerciseNamesText(undefined, []), /### Minha biblioteca\n\(vazia\)/);
 });
+
+test('parseSheetImportText aceita a resposta da IA com ou sem cerca ```json', () => {
+  const json = '[{"name":"A","exercises":[{"name":"Remada","sets":3,"reps":12}]}]';
+  assert.equal(core.parseSheetImportText(json)[0].name, 'A');
+  assert.equal(core.parseSheetImportText('```json\n' + json + '\n```\n')[0].exercises[0].name, 'Remada');
+  assert.equal(core.parseSheetImportText('  ```\n' + json + '```')[0].name, 'A');
+  assert.throws(() => core.parseSheetImportText('Aqui está o JSON: ' + json), SyntaxError);
+  assert.throws(() => core.parseSheetImportText(''), SyntaxError);
+  assert.throws(() => core.parseSheetImportText('{"exercises":[{"name":"x"}]}'), /name/);
+});

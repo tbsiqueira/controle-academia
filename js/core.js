@@ -915,7 +915,13 @@
     });
   }
 
-  const NAME_STOPWORDS = ['a', 'o', 'e', 'ao', 'de', 'da', 'do', 'das', 'dos', 'com', 'no', 'na', 'em'];
+  // Texto colado (resposta da IA) -> fichas. A IA costuma cercar o JSON com ```json ... ```: tiramos a cerca.
+  // JSON quebrado lança SyntaxError; JSON válido fora do contrato lança Error com o motivo.
+  function parseSheetImportText(text) {
+    return parseSheetImport(JSON.parse(String(text).replace(/^\s*```(?:json)?|```\s*$/g, '')));
+  }
+
+  const NAME_STOPWORDS =['a', 'o', 'e', 'ao', 'de', 'da', 'do', 'das', 'dos', 'com', 'no', 'na', 'em'];
   function nameWords(value) {
     return normalizeText(value).split(/[^a-z0-9]+/).filter(function (w) {
       return w && NAME_STOPWORDS.indexOf(w) === -1;
@@ -1095,6 +1101,7 @@
     // compatibilidade de dados
     normalizeBackup: normalizeBackup,
     parseSheetImport: parseSheetImport,
+    parseSheetImportText: parseSheetImportText,
     suggestExercises: suggestExercises,
     exerciseNamesText: exerciseNamesText
   };

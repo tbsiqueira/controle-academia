@@ -47,7 +47,7 @@ Na parte de baixo da tela existem 5 abas:
 | **Treinar** | Registrar o treino de hoje |
 | **Fichas** | Montar seus treinos (fichas) e a biblioteca de exercícios |
 | **Calendário** | Quantas vezes você treinou no mês |
-| **Mais** | Metas, colinha, backup e configurações |
+| **Mais** | Metas, colinha, backup e o card **Debug** (atualizar app, apagar dados, dados de exemplo) |
 
 ---
 
@@ -95,6 +95,35 @@ Elevação pélvica 3×12-10-8 · Leg press 3×12 · Cadeira flexora 3×12 …
 ```
 
 > **Dica**: criar a ficha é trabalho de uma vez só. Depois disso, todo treino começa escolhendo ela.
+
+### Importar as fichas da professora com a IA
+
+Em vez de digitar ficha por ficha, dá para pedir a uma IA (ChatGPT, Claude…) que converta o plano da
+professora — inclusive um **PDF com vários treinos** — e colar o resultado no app.
+
+1. **Fichas → Pedir uma ficha para a IA**. A tela traz um texto pronto: as regras do formato (o "contrato",
+   também em [FICHA-JSON.md](FICHA-JSON.md)) e a lista dos exercícios que **já existem** no app (sua Biblioteca
+   + catálogo), para a IA usar os mesmos nomes e não duplicar.
+2. Toque em **Copiar** (ou **Compartilhar**), cole na IA, **anexe o PDF** (ou cole o plano em texto) e peça:
+   _"Converta o plano em anexo para o JSON do contrato acima, com uma ficha para cada treino. Responda só com o JSON."_
+3. Copie a resposta da IA.
+4. **Fichas → Importar ficha** → cole na caixa de texto → **Revisar**.
+5. A revisão mostra as fichas encontradas (ex.: _TREINO A — 6 exercícios_, _TREINO B — 5 exercícios_).
+   Exercícios cujo nome já existe no app são ligados sozinhos (sem diferenciar maiúscula/acento). Para cada nome
+   **sem par exato**, escolha um exercício parecido da lista ou **Criar novo** (vai para a Biblioteca, grupo
+   "Outros"). Quando a sugestão é bem parecida, ela já vem marcada; senão vem **Criar novo**.
+6. Toque em **Importar**. Todas as fichas entram de uma vez.
+
+Se o texto colado não for um JSON válido, nada é gravado e o app diz o que faltou. Se já existir uma ficha
+**ativa** com o mesmo nome, a nova ganha _" (importada)"_ no fim do nome.
+
+### Desativar uma ficha antiga
+
+Quando a professora troca o treino, não precisa excluir a ficha velha: na lista de **Fichas**, toque no ícone
+de **olho** para **desativar**. Ela vai para a seção **Desativadas** (mais apagada), **some do seletor do
+Treinar** e não perde nada — os treinos já registrados continuam iguais. Para voltar a usar, toque no olho de
+novo (**Reativar**). Uma ficha desativada pode ter o mesmo nome de uma ativa; para reativá-la, renomeie uma
+das duas.
 
 ---
 
@@ -155,21 +184,23 @@ Elevação pélvica                                    [3 séries]
 - **Timer de descanso:** o botão verde **Descanso** em cada exercício abre uma barra acima do menu com a contagem
   regressiva, **+15s** e **✕**. Quando o tempo acaba, o contador fica **laranja** em 0:00 até você fechar no **✕** (sem som nem vibração).
   O tempo padrão (90 s) muda em **Mais → Metas da semana → Descanso entre séries**.
-- **Ficha excluída:** ao editar um treino antigo cuja ficha foi excluída, a ficha aparece como
-  _"NOME (excluída)"_ e o nome continua guardado ao salvar.
+- **Ficha excluída ou desativada:** o seletor do **Treinar** só mostra as fichas ativas. Ao editar um treino
+  antigo cuja ficha foi excluída ou desativada, ela aparece como _"NOME (excluída)"_ ou _"NOME (inativa)"_ e
+  continua ligada ao treino ao salvar.
 
 ---
 
 ## 5. Vendo como foi o treino e a evolução
 
 **Lista do Início:** mostra o **mês atual e o anterior** (no mínimo 10 treinos), agrupados por mês, com o
-treino de **hoje em verde**. O botão **Ver meses anteriores** abre o resto. Com 2 ou mais fichas usadas,
-aparece o filtro **Todas as fichas** para ver só os treinos de uma ficha.
+treino de **hoje em verde**. Cada cartão é enxuto: o **bloco da data** e o **nome da ficha** (toque para abrir o
+treino) e, à direita, o botão de **compartilhar** o treino como texto. O botão **Ver meses anteriores** abre o
+resto. Com 2 ou mais fichas usadas, aparece o filtro **Todas as fichas** para ver só os treinos de uma ficha.
 
 **Recordes 🏆:** quando um treino passa da **maior carga que você já usou** num exercício (comparando com os
-treinos de datas anteriores), o cartão dele no Início ganha o selo amarelo **recorde** (ou _"2 recordes"_), e no
-resumo do treino o exercício mostra _"Recorde: 47,5 kg × 8 (antes: 45 kg)"_. A primeira vez que você faz um
-exercício e carga igual à anterior não contam. Vale para todo o histórico, inclusive treinos antigos.
+treinos de datas anteriores), o resumo do treino mostra no exercício _"Recorde: 47,5 kg × 8 (antes: 45 kg)"_.
+A primeira vez que você faz um exercício e carga igual à anterior não contam. Vale para todo o histórico,
+inclusive treinos antigos.
 
 **Evolução semanal:** na aba **Calendário**, abaixo do mês, o cartão **Evolução das últimas 8 semanas** mostra,
 por semana (no mesmo ciclo das metas): **volume** (soma de reps × carga, sem aquecimento), treinos feitos/meta
@@ -282,7 +313,7 @@ Exemplos prontos para copiar:
 
 Dá para gerar uma **mensagem de texto** com o treino do dia — pronta para WhatsApp, e-mail, etc.
 
-**Como:** Início → no treino desejado, toque no ícone **↗** (ou abra o treino e use **Exportar**).
+**Como:** Início → no cartão do treino, toque no ícone de **compartilhar** à direita (ou abra o treino e use **Exportar**).
 Depois escolha **Copiar** ou **Compartilhar** (no celular abre a folha de compartilhamento).
 
 **Exemplo do texto gerado:**
@@ -313,7 +344,7 @@ as observações e o cardio. Campos vazios são omitidos automaticamente.
 
 ## 11. Backup, restauração e apagar dados
 
-Tudo isso fica em **Mais → Dados**.
+Backup e importação ficam em **Mais → Dados**. Espaço usado, **Atualizar app**, **Apagar todos os dados** e os **dados de exemplo** ficam no card **Mais → Debug**, separados do uso normal.
 
 ### Exportar (backup)
 Toque em **Exportar** — o **mesmo botão** funciona nos dois aparelhos, e a dica embaixo dele diz o que vai acontecer:
@@ -343,21 +374,12 @@ Se passar de **7 dias** sem backup, o app mostra um aviso no **Início** com o b
 **Quando fazer:** de vez em quando por segurança, e sempre antes de trocar de celular ou limpar o navegador.
 
 ### Espaço usado e armazenamento protegido
-Abaixo do status do backup aparece **quanto espaço o app usa** (cada treino ocupa poucos KB — anos de treino
+No card **Debug** aparece **quanto espaço o app usa** (cada treino ocupa poucos KB — anos de treino
 cabem em poucos MB). Ao abrir, o app pede ao navegador para **proteger** os dados (não apagar quando o aparelho
 ficar sem espaço). O navegador decide sozinho: costuma aceitar quando o app está **instalado na tela inicial**.
 Se aparecer _"armazenamento não protegido"_, o app funciona igual — só mantenha o backup em dia. No iPhone,
 abra sempre pelo ícone da tela inicial: o Safari apaga dados de sites não visitados por 7 dias, mas não de apps
 instalados.
-
-### Ver dados (consulta, somente leitura)
-Ainda em **Mais → Dados → Ver dados** você vê o que o app guarda neste aparelho: **contagens** (treinos,
-exercícios, fichas, colinha), a lista de **treinos** (com ficha, nº de exercícios e séries), de **fichas**,
-da **biblioteca** (com "usado em" quais fichas) e suas metas/semana. Nessa tela também dá para **Copiar JSON**
-(cola em qualquer lugar) ou **Exportar backup** pelo caminho normal.
-
-É só consulta: **nada é alterado ali**. Serve para conferir, por exemplo, se um exercício antigo já ganhou
-o id do catálogo ou quantos treinos você tem registrados.
 
 ### Importar (restaurar)
 Toque em **Importar** → escolha o arquivo `.json` → confirme.
@@ -365,7 +387,7 @@ Os dados atuais são substituídos pelos do arquivo. Mudou de ideia? O botão
 **Desfazer** (aparece logo após importar) volta tudo como estava.
 
 ### Apagar todos os dados
-Toque em **Apagar todos os dados** — abre uma **tela própria** com o aviso do que será apagado
+Em **Mais → Debug**, toque em **Apagar todos os dados** — abre uma **tela própria** com o aviso do que será apagado
 (treinos, fichas, biblioteca, colinha e metas). Para confirmar, basta **marcar o checkbox**
 _"Quero realmente apagar todos os meus dados"_ e tocar em **Apagar tudo**.
 
@@ -373,12 +395,12 @@ _"Quero realmente apagar todos os meus dados"_ e tocar em **Apagar tudo**.
 antes, caso você queira guardar uma cópia.
 
 ### Atualizar app
-O botão **Atualizar app** limpa o cache e recarrega a versão mais nova. Use se algo parecer "travado" ou
+O botão **Atualizar app** (em **Mais → Debug**) limpa o cache e recarrega a versão mais nova. Use se algo parecer "travado" ou
 desatualizado (a versão atual aparece no rodapé desta tela, ex.: `v37`). Se o app não abrir de jeito nenhum,
 existe uma página de escape: abra o endereço do app terminando em `/reset.html`.
 
 ### Dados de exemplo (para conhecer o app)
-Ainda em **Mais**, no card **Dados de exemplo**, o botão **Carregar dados de exemplo** preenche o app com um
+Em **Mais → Debug**, o botão **Carregar dados de exemplo** preenche o app com um
 conjunto pronto:
 
 - **3 fichas** (TREINO A, B e C), cada uma com exercícios do catálogo **e 2 exercícios criados por você**;
@@ -421,6 +443,10 @@ Só se você tiver um backup JSON exportado. Vale a pena exportar de vez em quan
 **Preciso criar todos os exercícios?**
 Não. Use o **catálogo** (927 exercícios em português) e só crie os que a sua academia tem de específico.
 
+**Dá para montar as fichas a partir do PDF da professora?**
+Sim: peça para uma IA converter o PDF e cole o resultado em **Fichas → Importar ficha**. Passo a passo em
+[Importar as fichas da professora com a IA](#importar-as-fichas-da-professora-com-a-ia).
+
 **A semana pode começar em qualquer dia?**
 Sim — e é você que diz qual. Vá em **Mais → Metas da semana → Semana iniciada em**.
 
@@ -434,14 +460,16 @@ quem mantém o app — é uma evolução prevista.
 
 | Sintoma | Causa provável | Solução |
 |---|---|---|
-| Ícones aparecem como **quadradinhos** | Arquivos antigos em cache | **Mais → Atualizar app** |
-| O app parece **desatualizado** (não aparece uma tela nova) | Service worker com versão antiga | **Mais → Atualizar app** (limpa o cache e recarrega). Se o app não abrir, use a página de escape `/reset.html` |
+| Ícones aparecem como **quadradinhos** | Arquivos antigos em cache | **Mais → Debug → Atualizar app** |
+| O app parece **desatualizado** (não aparece uma tela nova) | Service worker com versão antiga | **Mais → Debug → Atualizar app** (limpa o cache e recarrega). Se o app não abrir, use a página de escape `/reset.html` |
 | **"Semana encerrada"** e as metas não avançam | Fim dos 7 dias | Toque em **Iniciar próxima semana** no aviso do Início |
 | Toquei em **Salvar** e não salvou | Nenhuma série/aquecimento/cardio preenchido | Preencha ao menos uma informação (o app avisa) |
 | Esqueci de registrar e quero lançar um treino de outro dia | — | Em **Treinar**, mude a **Data** |
-| A tela dá **zoom** ao tocar num campo de texto (iPhone) | Safari amplia quando o campo tem fonte menor que 16px | Corrigido nas versões novas; se ainda acontecer, use **Mais → Atualizar app** |
-| Exercícios que eu criei **sumiram da Biblioteca** | Bug corrigido na v27: o app escondia exercícios cujo nome também existia no catálogo | Use **Mais → Atualizar app** — seus exercícios nunca foram apagados |
+| A tela dá **zoom** ao tocar num campo de texto (iPhone) | Safari amplia quando o campo tem fonte menor que 16px | Corrigido nas versões novas; se ainda acontecer, use **Mais → Debug → Atualizar app** |
+| Exercícios que eu criei **sumiram da Biblioteca** | Bug corrigido na v27: o app escondia exercícios cujo nome também existia no catálogo | Use **Mais → Debug → Atualizar app** — seus exercícios nunca foram apagados |
 | Importei o backup errado | — | **Mais → Dados → Desfazer** (logo após importar) |
+| **Importar ficha** diz que o texto não é um JSON válido | A IA escreveu texto junto do JSON, ou só parte da resposta foi copiada | Copie a resposta **inteira** da IA (o bloco ` ```json ` pode vir junto) ou peça de novo: _"responda só com o JSON"_ |
+| Uma ficha antiga não aparece no **Treinar** | Ela está **desativada** | **Fichas** → seção **Desativadas** → ícone do olho (**Reativar**) |
 
 ---
 
@@ -453,7 +481,8 @@ quem mantém o app — é uma evolução prevista.
 - **Carga**: peso usado (kg) naquela série.
 - **Aquecimento**: série leve antes das séries de trabalho, para preparar o músculo e testar a carga.
 - **Ficha**: seu treino completo, o plano que você segue (ex.: TREINO A - inferiores).
-- **Tonelagem/volume**: soma de carga × reps. O app ainda **não** calcula (está previsto para uma fase futura).
+- **Tonelagem/volume**: soma de carga × reps (sem o aquecimento). Aparece por semana em **Calendário → Evolução das últimas 8 semanas**.
+- **JSON**: o formato de texto que a IA devolve com as fichas para você colar em **Fichas → Importar ficha**.
 - **PR**: *personal record* — sua melhor marca naquele exercício (maior carga registrada).
 
 ---

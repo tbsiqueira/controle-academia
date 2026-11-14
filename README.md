@@ -1,8 +1,9 @@
 # Meu Treino
 
 Aplicativo web instalável (**PWA**) para registrar treinos de academia: fichas com exercícios ordenados,
-aquecimento por exercício, séries com carga e RIR, metas semanais flexíveis, calendário de frequência e
-exportação do treino como texto para enviar à professora.
+aquecimento por exercício, séries com carga e RIR, metas semanais flexíveis, calendário de frequência,
+exportação do treino como texto para enviar à professora e **importação de fichas em JSON** (geradas por uma IA
+a partir do plano/PDF da professora, seguindo o contrato [FICHA-JSON.md](FICHA-JSON.md)).
 
 📖 **Como usar o app, passo a passo: [MANUAL.md](MANUAL.md)**
 
@@ -46,7 +47,7 @@ Os dois rodam automaticamente no GitHub Actions:
 
 **O que os testes cobrem:** toda a lógica pura (`js/core.js`) — datas, janela da semana, busca sem acentos,
 agrupamento de séries **por id**, aquecimento, histórico/PR, geração do texto exportado, backup
-(nome/status/lembrete/payload) e, principalmente, **compatibilidade de dados entre versões**: backups antigos
+(nome/status/lembrete/payload), importação de ficha em JSON (validação, sugestão de exercício parecido) e, principalmente, **compatibilidade de dados entre versões**: backups antigos
 (v1 com "tipos de treino", v2 com ficha de reps único) são normalizados sem perder nada, e a normalização
 é idempotente. Os arquivos de referência ficam em `tests/fixtures/`.
 
@@ -104,7 +105,7 @@ git push origin v2
 ```
 
 Acompanhe em **Actions → Publicar no GitHub Pages**. Leva ~1 minuto.
-No aparelho, feche e abra o app (ou use **Mais → Atualizar app**) para pegar a versão nova.
+No aparelho, feche e abra o app (ou use **Mais → Debug → Atualizar app**) para pegar a versão nova.
 
 ### Voltar para uma versão anterior
 
@@ -118,12 +119,13 @@ o Pages volta a publicar aquele conteúdo. (Ou envie uma tag nova a partir do co
 | `Tag "v1" is not allowed to deploy to github-pages due to environment protection rules` | O ambiente `github-pages` tem regras de deploy que **não incluem tags** (ex.: só existe a regra `main`, tipo *branch*) | **Settings → Environments → `github-pages` → Deployment branches and tags** → **Add deployment branch or tag rule** → **Ref type: `Tag`** + **Name pattern: `v*`** → *Add rule* (ou troque a política para **All branches and tags**). Depois **Actions → Publicar no GitHub Pages → Re-run all jobs** |
 | `Get Pages site failed` / `Pages site not found` | Pages não está com a fonte **GitHub Actions** | **Settings → Pages → Source: GitHub Actions** |
 | Falhou em "Rodar check.ps1" | versão inconsistente ou arquivo/id faltando | rode localmente `powershell -ExecutionPolicy Bypass -File .\check.ps1` e corrija antes de taguear |
-| Deploy "verde" mas o site não atualizou | cache do navegador/service worker | no aparelho: **Mais → Atualizar app**; no PC: Ctrl+F5 ou `/reset.html` |
+| Deploy "verde" mas o site não atualizou | cache do navegador/service worker | no aparelho: **Mais → Debug → Atualizar app**; no PC: Ctrl+F5 ou `/reset.html` |
 
 ### Publicar manualmente (emergência)
 
 Aba **Actions** → **Publicar no GitHub Pages** → **Run workflow** (publica o estado atual da branch
 selecionada). Use só quando precisar.
+
 ## Estrutura
 
 ```
@@ -151,6 +153,7 @@ serve.ps1                   servidor local de desenvolvimento
 test.ps1                    roda os testes unitários (Node)
 check.ps1                   verificações estáticas
 MANUAL.md                   manual do usuário (como usar, exemplos, FAQ)
+FICHA-JSON.md               contrato do JSON de ficha para a IA (servido pelo app e usado em #/ia)
 PLANO.md                    plano/requisitos e histórico de revisões
 ```
 
@@ -159,8 +162,8 @@ PLANO.md                    plano/requisitos e histórico de revisões
 `data/sample-data.json` é uma fixture com **3 fichas**, **12 treinos** (4 por ficha) e **6 exercícios criados
 pelo usuário** — cada ficha mistura exercícios do catálogo com **2 exercícios custom**.
 
-- **No app**: **Mais → Dados de exemplo → Carregar dados de exemplo**. Substitui os dados atuais e pode ser
-  desfeito pelo botão **Desfazer** (o estado anterior fica em memória). As datas ficam em `dayOffset`
+- **No app**: **Mais → Debug → Carregar dados de exemplo**. Substitui os dados atuais e pode ser
+  desfeito pelo botão **Desfazer** do card Dados (o estado anterior fica em memória). As datas ficam em `dayOffset`
   (dias em relação a hoje), então a demonstração está sempre recente.
 - **Nos testes**: `tests/sample-data.test.js` valida estrutura, integridade referencial, normalização de
   backup, migração de dados antigos e renomeação — é a rede de segurança contra quebra de dados entre versões.
@@ -185,7 +188,7 @@ Dois espaços de id, sem colisão: **biblioteca do usuário** = UUID (texto) e *
 | Store | Conteúdo |
 |---|---|
 | `workouts` | treinos: `date`, `sheetId`/`sheetName`, `cardioMinutes`, `notes`, `warmups[]`, `sets[]` |
-| `sheets` | fichas: `name` + `exercises[]` (`exerciseId`, `name`, `sets`, `reps[]` por série, `note`) |
+| `sheets` | fichas: `name`, `active` (false = desativada, fora do seletor do Treinar) + `exercises[]` (`exerciseId`, `name`, `sets`, `reps[]` por série, `note`) |
 | `exercises` | biblioteca do usuário: `name`, `group`, `correction`, `source` (`custom`) |
 | `settings` | metas semanais, início da semana, `lastBackupAt` (lembrete), preferências |
 | `colinha` | anotações de consulta rápida |

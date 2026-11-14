@@ -11,9 +11,9 @@
   <link rel="icon" href="icons/icon-16.png" sizes="16x16" type="image/png">
   <link rel="icon" href="icons/icon-32.png" sizes="32x32" type="image/png">
   <link rel="apple-touch-icon" href="icons/icon-180.png">
-  <link rel="stylesheet" href="vendor/bootstrap/bootstrap.min.css?v=58">
-  <link rel="stylesheet" href="vendor/bootstrap-icons/bootstrap-icons.min.css?v=58">
-  <link rel="stylesheet" href="css/styles.css?v=58">
+  <link rel="stylesheet" href="vendor/bootstrap/bootstrap.min.css?v=59">
+  <link rel="stylesheet" href="vendor/bootstrap-icons/bootstrap-icons.min.css?v=59">
+  <link rel="stylesheet" href="css/styles.css?v=59">
 </head>
 <body>
   <main class="container pb-nav">
@@ -95,20 +95,12 @@
       </div>
       <div id="eraseBody"></div>
     </section>
-    <!-- View data (read-only) -->
-    <section id="view-data" class="view d-none">
-      <div class="d-flex justify-content-between align-items-center mt-3 mb-3">
-        <h1 class="h4 mb-0"><i class="bi bi-database"></i> Ver dados</h1>
-        <a href="#/more" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-left"></i> Voltar</a>
-      </div>
-      <div id="dataBody"></div>
-    </section>
     <section id="view-ia" class="view d-none">
       <div class="d-flex justify-content-between align-items-center mt-3 mb-3">
         <h1 class="h4 mb-0"><i class="bi bi-robot"></i> Ficha pela IA</h1>
         <a href="#/exercises" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-left"></i> Voltar</a>
       </div>
-      <p class="small text-muted mb-2">Copie este texto e cole na IA (ChatGPT, Claude…) junto com o plano da professora.
+      <p class="small text-muted mb-2">Copie este texto e cole na IA (ChatGPT, Claude…) junto com o plano da professora (pode anexar o PDF com vários treinos: vira uma ficha para cada).
         Ele traz as regras do JSON e os nomes dos exercícios que já existem no app, para não duplicar.
         Depois copie o JSON da resposta e cole em <strong>Fichas → Importar ficha</strong>.</p>
       <textarea class="form-control font-monospace small mb-2" id="iaText" rows="16" readonly></textarea>
@@ -235,34 +227,31 @@
             <button class="btn btn-primary flex-fill" type="button" id="btnExport"><i class="bi bi-share"></i> Exportar</button>
             <button class="btn btn-outline-secondary flex-fill" type="button" id="btnImport"><i class="bi bi-upload"></i> Importar</button>
           </div>
-          <a href="#/data" class="btn btn-outline-secondary w-100 mb-1" id="btnViewData"><i class="bi bi-list-columns-reverse"></i> Ver dados</a>
           <p class="small text-muted mb-1" id="backupAction"></p>
           <p class="small text-muted mb-1" id="backupStatus"></p>
-          <p class="small text-muted mb-2" id="storageInfo"></p>
-          <div class="d-flex gap-2 mb-2">
-            <button class="btn btn-outline-warning d-none flex-fill" type="button" id="btnUndoImport"><i class="bi bi-arrow-counterclockwise"></i> Desfazer</button>
-            <button class="btn btn-outline-secondary flex-fill" type="button" id="btnForceUpdate" title="Limpa o cache e recarrega a versão mais nova"><i class="bi bi-arrow-repeat"></i> Atualizar app</button>
-            <input type="file" id="importFile" accept="application/json,.json" class="d-none">
-          </div>
-          <a href="#/erase" class="btn btn-outline-danger w-100" id="btnEraseAll"><i class="bi bi-trash"></i> Apagar todos os dados</a>
+          <button class="btn btn-outline-warning d-none w-100 mt-1" type="button" id="btnUndoImport"><i class="bi bi-arrow-counterclockwise"></i> Desfazer</button>
+          <input type="file" id="importFile" accept="application/json,.json" class="d-none">
         </div>
       </div>
 
       <div class="card mb-3">
-        <div class="card-header fw-semibold"><i class="bi bi-stars"></i> Dados de exemplo</div>
+        <div class="card-header fw-semibold"><i class="bi bi-bug"></i> Debug</div>
         <div class="card-body">
-          <p class="text-muted small mb-2">
+          <p class="small text-muted mb-2" id="storageInfo"></p>
+          <button class="btn btn-outline-secondary w-100 mb-2" type="button" id="btnForceUpdate" title="Limpa o cache e recarrega a versão mais nova"><i class="bi bi-arrow-repeat"></i> Atualizar app</button>
+          <a href="#/erase" class="btn btn-outline-danger w-100 mb-3" id="btnEraseAll"><i class="bi bi-trash"></i> Apagar todos os dados</a>
+          <p class="text-muted small mb-2"><strong>Dados de exemplo:</strong>
             Carrega 3 fichas de exemplo com <strong>12 treinos</strong> já registrados (4 por ficha),
             misturando exercícios do catálogo e exercícios criados por você.
             Serve para conhecer o app e para testar a importação entre versões.
-            <strong>Substitui</strong> os dados atuais — dá para desfazer logo abaixo.
+            <strong>Substitui</strong> os dados atuais — dá para desfazer no card Dados (botão Desfazer).
           </p>
           <button class="btn btn-outline-primary w-100" type="button" id="btnLoadSample"><i class="bi bi-stars"></i> Carregar dados de exemplo</button>
           <p class="small text-muted mt-2 mb-0" id="sampleStatus"></p>
         </div>
       </div>
 
-      <p class="text-center text-muted small">Meu Treino <span id="appVersion">v58</span> · dados 100% locais · catálogo: gugeldev/exercicios-bd-ptbr (CC0)</p>
+      <p class="text-center text-muted small">Meu Treino <span id="appVersion">v59</span> · dados 100% locais · catálogo: gugeldev/exercicios-bd-ptbr (CC0)</p>
     </section>
   </main>
 
@@ -439,9 +428,9 @@
     </div>
   </div>
 
-  <script src="vendor/bootstrap/bootstrap.bundle.min.js?v=58"></script>
-  <script src="js/db.js?v=58"></script>
-  <script src="js/core.js?v=58"></script>
-  <script src="js/app.js?v=58"></script>
+  <script src="vendor/bootstrap/bootstrap.bundle.min.js?v=59"></script>
+  <script src="js/db.js?v=59"></script>
+  <script src="js/core.js?v=59"></script>
+  <script src="js/app.js?v=59"></script>
 </body>
 </html>
