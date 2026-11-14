@@ -893,6 +893,68 @@
     };
   }
 
+  // Ficha importada em JSON (formato em FICHA-JSON.md): um objeto { name, exercises }, uma lista
+  // deles, ou { fichas: [...] }. Devolve [{ name, exercises }] já normalizado ou lança Error com o motivo.
+  function parseSheetImport(payload) {
+    const list = Array.isArray(payload) ? payload : (payload && Array.isArray(payload.fichas) ? payload.fichas : [payload]);
+    if (!list.length) throw new Error('Nenhuma ficha no arquivo.');
+    return list.map(function (s, i) {
+      const where = 'Ficha ' + (i + 1);
+      if (!s || typeof s !== 'object') throw new Error(where + ': formato inválido.');
+      const name = typeof s.name === 'string' ? s.name.trim() : '';
+      if (!name) throw new Error(where + ': falta o "name".');
+      if (!Array.isArray(s.exercises) || !s.exercises.length) throw new Error('"' + name + '": falta a lista "exercises".');
+      const exercises = s.exercises.map(function (item, j) {
+        const exName = item && typeof item.name === 'string' ? item.name.trim() : '';
+        if (!exName) throw new Error('"' + name + '", exercício ' + (j + 1) + ': falta o "name".');
+        const normalized = normalizeSheetItem({ name: exName, sets: item.sets, reps: item.reps, note: typeof item.note === 'string' ? item.note.trim() : '' });
+        normalized.reps = normalized.reps.slice(0, normalized.sets);
+        return normalized;
+      });
+      return { name: name, exercises: exercises };
+    });
+  }
+
+  const NAME_STOPWORDS = ['a', 'o', 'e', 'ao', 'de', 'da', 'do', 'das', 'dos', 'com', 'no', 'na', 'em'];
+  function nameWords(value) {
+    return normalizeText(value).split(/[^a-z0-9]+/).filter(function (w) {
+      return w && NAME_STOPWORDS.indexOf(w) === -1;
+    });
+  }
+
+  // Exercícios parecidos com um nome (palavras em comum / tamanho do nome maior).
+  // Empate fica na ordem da lista: passe a Biblioteca antes do catálogo. minScore (0..1) corta os fracos.
+  function suggestExercises(name, list, limit, minScore) {
+    const query = nameWords(name);
+    return (list || []).map(function (e, i) {
+      const words = nameWords(e.name);
+      const hits = query.filter(function (w) { return words.indexOf(w) !== -1; }).length;
+      return { e: e, i: i, score: hits ? hits / Math.max(query.length, words.length) : 0 };
+    }).filter(function (r) { return r.score > 0 && r.score >= (minScore || 0); })
+      .sort(function (a, b) { return (b.score - a.score) || (a.i - b.i); })
+      .slice(0, limit || 5)
+      .map(function (r) { return r.e; });
+  }
+
+  // Lista de nomes (Biblioteca + catálogo, sem repetir) para colar na IA junto com FICHA-JSON.md.
+  function exerciseNamesText(library, catalog) {
+    const seen = {};
+    function lines(list) {
+      return (list || []).filter(function (e) {
+        const key = normalizeText(e && e.name);
+        if (!key || seen[key]) return false;
+        seen[key] = true;
+        return true;
+      }).map(function (e) { return '- ' + e.name + (e.group ? ' (' + e.group + ')' : ''); });
+    }
+    const lib = lines(library);
+    const cat = lines(catalog);
+    return '## Exercícios que já existem no app\n\n' +
+      'Quando um exercício do plano for um destes, use o nome EXATAMENTE como está aqui, sem o grupo entre parênteses.\n\n' +
+      '### Minha biblioteca\n' + (lib.length ? lib.join('\n') : '(vazia)') + '\n\n' +
+      '### Catálogo do app\n' + cat.join('\n') + '\n';
+  }
+
   function normalizeWorkout(w) {
     const workout = Object.assign({}, w);
 
@@ -1031,6 +1093,9 @@
     historyTarget: historyTarget,
     countExercises: countExercises,
     // compatibilidade de dados
-    normalizeBackup: normalizeBackup
+    normalizeBackup: normalizeBackup,
+    parseSheetImport: parseSheetImport,
+    suggestExercises: suggestExercises,
+    exerciseNamesText: exerciseNamesText
   };
 });

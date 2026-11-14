@@ -28,6 +28,7 @@ Mapa de **cada funcionalidade do app** para os testes que a cobrem. Serve para r
 | Evolução semanal (volume, treinos, cardio) | `core.js`: `workoutVolume`, `weeklyTotals` | `form-and-progress.test.js` (aquecimento fora do volume, treino inválido) |
 | Texto do treino para enviar à professora | `core.js`: `workoutAsText` | `core.test.js`, `core-edge-cases.test.js` (nome atual, série sem número, treino vazio) |
 | Fichas: criar/editar/excluir, itens, migração por nome | `core.js`: `normalizeSheet*`, `linkSheetItemsToExercises` | `core.test.js`, `core-edge-cases.test.js` |
+| Importar ficha em JSON (contrato `FICHA-JSON.md`, sugestão de exercício parecido, lista para a IA) | `core.js`: `parseSheetImport`, `suggestExercises`, `exerciseNamesText` | `core.test.js` (formatos aceitos, reps, erros, ordem das sugestões, nomes sem repetir) |
 | Biblioteca do usuário × catálogo | `core.js`: `isUserExercise`, `libraryExercises`, `exercisesNeedingRepair` | `core.test.js`, `core-edge-cases.test.js` |
 | Backup: nome do arquivo, status e lembrete | `core.js`: `backupFileName`, `backupStatus` | `core.test.js`, `core-edge-cases.test.js` |
 | Backup: exportar/compartilhar (um arquivo só) | `core.js`: `backupAction`, `backupSharePayload`, `isBackupPayload`, `backupHint` | `core.test.js` (payload sem `text`/`title`; evento de clique não vira backup) |

@@ -899,3 +899,60 @@ test('catalogo mantem ids unicos, contiguos e estaveis entre versoes', () => {
     assert.ok(i.sourceId, 'todo exercicio guarda o sourceId de origem');
   });
 });
+
+/* ---------- importar ficha (FICHA-JSON.md) ---------- */
+
+test('parseSheetImport aceita uma ficha, lista ou { fichas }', () => {
+  const one = { name: ' TREINO A ', exercises: [{ name: 'Agachamento livre', sets: 4, reps: [12, 10, 8, 8], note: 'desce devagar' }] };
+  const parsed = core.parseSheetImport(one);
+  assert.equal(parsed.length, 1);
+  assert.equal(parsed[0].name, 'TREINO A');
+  assert.deepEqual(parsed[0].exercises[0], { exerciseId: null, name: 'Agachamento livre', sets: 4, reps: [12, 10, 8, 8], note: 'desce devagar' });
+  assert.equal(core.parseSheetImport([one, one]).length, 2);
+  assert.equal(core.parseSheetImport({ fichas: [one] }).length, 1);
+});
+
+test('parseSheetImport: reps único vale para todas as séries; sobra é cortada', () => {
+  const [s] = core.parseSheetImport({ name: 'B', exercises: [{ name: 'Remada', sets: 3, reps: 12 }, { name: 'Supino', sets: 2, reps: [10, 8, 6] }] });
+  assert.deepEqual(s.exercises[0].reps, [12, 12, 12]);
+  assert.deepEqual(s.exercises[1].reps, [10, 8]);
+});
+
+test('parseSheetImport recusa ficha sem nome, sem exercícios ou exercício sem nome', () => {
+  assert.throws(() => core.parseSheetImport({ exercises: [{ name: 'x' }] }), /name/);
+  assert.throws(() => core.parseSheetImport({ name: 'A', exercises: [] }), /exercises/);
+  assert.throws(() => core.parseSheetImport({ name: 'A', exercises: [{ sets: 3 }] }), /exercício 1/);
+  assert.throws(() => core.parseSheetImport([]), /Nenhuma/);
+});
+
+test('parseSheetImport recusa entrada vazia ou exercício nulo', () => {
+  assert.throws(() => core.parseSheetImport(null), /formato/);
+  assert.throws(() => core.parseSheetImport({ name: 'A', exercises: [null] }), /exercício 1/);
+});
+
+/* ---------- sugestão de exercício parecido (importar ficha) ---------- */
+
+test('suggestExercises ordena pelo mais parecido e, no empate, pela ordem da lista', () => {
+  const list = [
+    { id: 'lib1', name: 'Leg Press Unilateral Horizontal' },
+    { id: 'lib2', name: 'Leg Press 45°' },
+    { id: 9, name: 'Leg Press 45º' },
+    { id: 8, name: 'Supino reto' }
+  ];
+  assert.deepEqual(core.suggestExercises('Leg press 45', list).map(e => e.id), ['lib2', 9, 'lib1']);
+  assert.deepEqual(core.suggestExercises('leg press', list, 1).map(e => e.id), ['lib2']);
+  assert.deepEqual(core.suggestExercises('Remada de cavalinho', list), []);
+  assert.deepEqual(core.suggestExercises('de com', list), []);
+  assert.deepEqual(core.suggestExercises('x', undefined), []);
+  assert.deepEqual(core.suggestExercises('leg press', list, 5, 0.6).map(e => e.id), ['lib2', 9]);
+});
+
+test('exerciseNamesText lista Biblioteca e catálogo sem repetir', () => {
+  const text = core.exerciseNamesText(
+    [{ name: 'Agachamento livre', group: 'Pernas' }, { name: 'Remada X' }, null, { name: '  ' }],
+    [{ name: 'agachamento LIVRE', group: 'Pernas' }, { name: 'Supino reto', group: 'Peito' }]
+  );
+  assert.match(text, /### Minha biblioteca\n- Agachamento livre \(Pernas\)\n- Remada X\n/);
+  assert.match(text, /### Catálogo do app\n- Supino reto \(Peito\)\n$/);
+  assert.match(core.exerciseNamesText(undefined, []), /### Minha biblioteca\n\(vazia\)/);
+});

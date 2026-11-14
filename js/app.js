@@ -100,7 +100,7 @@ function navigate() {
   if (view) view.classList.remove('d-none');
 
   document.querySelectorAll('.bottom-nav a').forEach(function (a) {
-    const activeHash = (viewName === 'detail' || viewName === 'exercise') ? '#/dashboard' : ((viewName === 'erase' || viewName === 'data') ? '#/more' : hash);
+    const activeHash = (viewName === 'detail' || viewName === 'exercise') ? '#/dashboard' : viewName === 'ia' ? '#/exercises' : ((viewName === 'erase' || viewName === 'data') ? '#/more' : hash);
     a.classList.toggle('active', a.getAttribute('href') === activeHash);
   });
 
@@ -113,6 +113,7 @@ function navigate() {
   if (viewName === 'exercises') renderSheetsAndExercises();
   if (viewName === 'calendar') renderCalendar();
   if (viewName === 'more') renderMore();
+  if (viewName === 'ia') guard(renderIa)();
 }
 
 /* ---------- week logic ---------- */
@@ -1384,46 +1385,52 @@ function renderSheetsAndExercises() {
 function renderSheets() {
   const el = document.getElementById('sheetsList');
   const list = activeSheets();
+  const inactive = state.sheets.filter(function (s) { return s.active === false; });
 
-  if (!list.length) {
-    el.innerHTML = '<p class="text-muted"><i class="bi bi-clipboard2-plus"></i> Nenhuma ficha cadastrada. Crie uma ficha (ex.: TREINO A - inferiores) e adicione os exercícios dela.</p>';
-    return;
-  }
+  el.innerHTML = (list.length
+    ? list.map(sheetCard).join('')
+    : '<p class="text-muted"><i class="bi bi-clipboard2-plus"></i> Nenhuma ficha ativa. Crie uma ficha (ex.: TREINO A - inferiores) e adicione os exercícios dela.</p>') +
+    (inactive.length
+      ? '<h6 class="text-muted mt-3"><i class="bi bi-eye-slash"></i> Desativadas (não aparecem no Treinar)</h6>' +
+        '<div class="opacity-50">' + inactive.map(sheetCard).join('') + '</div>'
+      : '');
+}
 
-  el.innerHTML = list.map(function (s) {
-    const items = s.exercises || [];
+function sheetCard(s) {
+  const off = s.active === false;
+  const items = s.exercises || [];
 
-    const exercisesHtml = items.length
-      ? '<ul class="list-unstyled sheet-items mb-0">' + items.map(function (item, i) {
-          const reps = Array.isArray(item.reps)
-            ? item.reps.filter(function (r) { return r !== null && r !== undefined && r !== ''; }).join('-')
-            : '';
-          const setCount = parseInt(item.sets, 10) || (reps ? reps.split('-').length : 0);
-          const detail = reps ? (setCount + '×' + reps) : (setCount ? setCount + ' séries' : '');
+  const exercisesHtml = items.length
+    ? '<ul class="list-unstyled sheet-items mb-0">' + items.map(function (item, i) {
+        const reps = Array.isArray(item.reps)
+          ? item.reps.filter(function (r) { return r !== null && r !== undefined && r !== ''; }).join('-')
+          : '';
+        const setCount = parseInt(item.sets, 10) || (reps ? reps.split('-').length : 0);
+        const detail = reps ? (setCount + '×' + reps) : (setCount ? setCount + ' séries' : '');
 
-          return '<li>' +
-            '<span class="sheet-item-idx">' + (i + 1) + '</span>' +
-            '<span class="sheet-item-name">' + esc(labelOf(item)) + '</span>' +
-            (detail ? '<span class="sheet-item-detail">' + esc(detail) + '</span>' : '') +
-            (item.note ? '<span class="sheet-item-note text-truncate">' + esc(item.note) + '</span>' : '') +
-            '</li>';
-        }).join('') + '</ul>'
-      : '<p class="text-muted small mb-0 mt-1">sem exercícios ainda — toque em ✏️ para adicionar</p>';
+        return '<li>' +
+          '<span class="sheet-item-idx">' + (i + 1) + '</span>' +
+          '<span class="sheet-item-name">' + esc(labelOf(item)) + '</span>' +
+          (detail ? '<span class="sheet-item-detail">' + esc(detail) + '</span>' : '') +
+          (item.note ? '<span class="sheet-item-note text-truncate">' + esc(item.note) + '</span>' : '') +
+          '</li>';
+      }).join('') + '</ul>'
+    : '<p class="text-muted small mb-0 mt-1">sem exercícios ainda — toque em ✏️ para adicionar</p>';
 
-    return '<div class="card mb-2"><div class="card-body py-2">' +
-      '<div class="d-flex justify-content-between align-items-start">' +
-      '<div class="me-2">' +
-      '<strong><i class="bi bi-clipboard2-pulse text-primary"></i> ' + esc(s.name) + '</strong> ' +
-      '<span class="badge text-bg-light">' + items.length + (items.length === 1 ? ' exercício' : ' exercícios') + '</span>' +
-      '</div>' +
-      '<div class="d-flex gap-1">' +
-      '<button type="button" class="btn btn-sm btn-outline-primary" onclick="openSheetEditor(\'' + s.id + '\')" aria-label="Editar ficha"><i class="bi bi-pencil"></i></button>' +
-      '<button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteSheet(\'' + s.id + '\')" aria-label="Excluir ficha"><i class="bi bi-trash"></i></button>' +
-      '</div>' +
-      '</div>' +
-      exercisesHtml +
-      '</div></div>';
-  }).join('');
+  return '<div class="card mb-2"><div class="card-body py-2">' +
+    '<div class="d-flex justify-content-between align-items-start">' +
+    '<div class="me-2">' +
+    '<strong><i class="bi bi-clipboard2-pulse text-primary"></i> ' + esc(s.name) + '</strong> ' +
+    '<span class="badge text-bg-light">' + items.length + (items.length === 1 ? ' exercício' : ' exercícios') + '</span>' +
+    '</div>' +
+    '<div class="d-flex gap-1">' +
+    '<button type="button" class="btn btn-sm btn-outline-primary" onclick="openSheetEditor(\'' + s.id + '\')" aria-label="Editar ficha"><i class="bi bi-pencil"></i></button>' +
+    '<button type="button" class="btn btn-sm btn-outline-secondary" onclick="toggleSheetActive(\'' + s.id + '\')" aria-label="' + (off ? 'Reativar' : 'Desativar') + ' ficha" title="' + (off ? 'Reativar' : 'Desativar') + '"><i class="bi ' + (off ? 'bi-eye' : 'bi-eye-slash') + '"></i></button>' +
+    '<button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteSheet(\'' + s.id + '\')" aria-label="Excluir ficha"><i class="bi bi-trash"></i></button>' +
+    '</div>' +
+    '</div>' +
+    exercisesHtml +
+    '</div></div>';
 }
 
 function sheetNameExists(name, ignoreId) {
@@ -1665,17 +1672,17 @@ async function saveSheetEditor() {
   }
 
   const id = document.getElementById('sheetId').value;
-  if (sheetNameExists(name, id)) {
+  const existing = id ? findSheet(id) : null;
+  // Nome único só entre as ativas: uma desativada pode ter o mesmo nome de uma ativa.
+  if ((!existing || existing.active !== false) && sheetNameExists(name, id)) {
     alert('Já existe uma ficha com esse nome.');
     return;
   }
 
-  const existing = id ? findSheet(id) : null;
-
   const sheet = {
     id: id || uid(),
     name: name,
-    active: true,
+    active: existing ? existing.active !== false : true,
     exercises: state.sheetExercises.map(function (item) {
       const rawReps = Array.isArray(item.reps) ? item.reps : [];
       const count = Math.max(1, parseInt(item.sets, 10) || rawReps.length || 3);
@@ -1699,6 +1706,114 @@ async function saveSheetEditor() {
   state.sheets = await dbAll('sheets');
   bootstrap.Modal.getInstance(document.getElementById('sheetEditorModal')).hide();
   refreshAfterSheetChange();
+}
+
+// Desativar esconde a ficha do seletor do Treinar sem apagar nada; reativar traz de volta.
+async function toggleSheetActive(id) {
+  const sheet = findSheet(id);
+  if (!sheet) return;
+  if (sheet.active === false && sheetNameExists(sheet.name, sheet.id)) {
+    alert('Já existe uma ficha ativa com esse nome. Renomeie uma delas antes de reativar.');
+    return;
+  }
+  await dbPut('sheets', Object.assign({}, sheet, { active: sheet.active === false, updatedAt: new Date().toISOString() }));
+  state.sheets = await dbAll('sheets');
+  refreshAfterSheetChange();
+}
+
+// Exercícios que a importação pode usar: Biblioteca (ativos) antes do catálogo.
+function importCandidates() {
+  return state.exercises.filter(function (e) { return e.active !== false; }).concat(state.catalog || []);
+}
+
+function exactExercise(name) {
+  const key = normalizeText(name);
+  return importCandidates().find(function (e) { return normalizeText(e.name) === key; }) || null;
+}
+
+// Lê o arquivo, valida e abre a revisão: nomes sem par exato pedem escolha (parecido ou criar novo).
+async function importSheetFile(file) {
+  let sheets;
+  try {
+    // A IA costuma cercar o JSON com ```json ... ```: tiramos a cerca antes de ler.
+    sheets = parseSheetImport(JSON.parse((await file.text()).replace(/^\s*```(?:json)?|```\s*$/g, '')));
+  } catch (e) {
+    alert('Não deu para importar a ficha.\n\n' + (e instanceof SyntaxError ? 'Arquivo JSON inválido.' : e.message));
+    return;
+  }
+
+  await loadCatalog();
+  const unmatched = [];
+  sheets.forEach(function (s) {
+    s.exercises.forEach(function (item) {
+      if (!exactExercise(item.name) && !unmatched.some(function (n) { return normalizeText(n) === normalizeText(item.name); })) {
+        unmatched.push(item.name);
+      }
+    });
+  });
+  state.pendingImport = { sheets: sheets, unmatched: unmatched };
+
+  const summary = '<ul class="small mb-3">' + sheets.map(function (s) {
+    return '<li><strong>' + esc(s.name) + '</strong> — ' + s.exercises.length + (s.exercises.length === 1 ? ' exercício' : ' exercícios') + '</li>';
+  }).join('') + '</ul>';
+
+  const review = unmatched.length
+    ? '<p class="small mb-2"><i class="bi bi-question-circle text-primary"></i> Estes nomes não existem no app. Escolha um exercício parecido para não duplicar, ou crie um novo:</p>' +
+      unmatched.map(function (name, i) {
+        const candidates = importCandidates();
+        const strong = suggestExercises(name, candidates, 1, 0.5)[0];
+        const options = suggestExercises(name, candidates, 6).map(function (e) {
+          return '<option value="' + esc(e.id) + '"' + (e === strong ? ' selected' : '') + '>' + esc(e.name) + (typeof e.id === 'number' ? ' (catálogo)' : ' (biblioteca)') + '</option>';
+        }).join('');
+        return '<div class="mb-2"><label class="form-label small fw-semibold mb-1" for="imp-' + i + '">' + esc(name) + '</label>' +
+          '<select class="form-select form-select-sm" id="imp-' + i + '">' +
+          '<option value=""' + (strong ? '' : ' selected') + '>➕ Criar novo: ' + esc(name) + '</option>' + options + '</select></div>';
+      }).join('')
+    : '<p class="small text-success mb-0"><i class="bi bi-check-circle"></i> Todos os exercícios já existem no app.</p>';
+
+  document.getElementById('sheetImportBody').innerHTML = summary + review;
+  bootstrap.Modal.getOrCreateInstance(document.getElementById('sheetImportModal')).show();
+}
+
+async function confirmSheetImport() {
+  const pending = state.pendingImport;
+  state.pendingImport = null;   // antes dos awaits: toque duplo não grava duas vezes
+  if (!pending) return;
+
+  const chosen = {};
+  pending.unmatched.forEach(function (name, i) {
+    const id = document.getElementById('imp-' + i).value;
+    chosen[normalizeText(name)] = id ? importCandidates().find(function (e) { return String(e.id) === id; }) : null;
+  });
+
+  for (let i = 0; i < pending.sheets.length; i++) {
+    const s = pending.sheets[i];
+    const exercises = [];
+    for (let j = 0; j < s.exercises.length; j++) {
+      const item = s.exercises[j];
+      const found = exactExercise(item.name) || chosen[normalizeText(item.name)] || await findOrCreateExercise(item.name);
+      exercises.push(Object.assign({}, item, { exerciseId: found.id, name: found.name }));
+    }
+    let name = s.name;
+    while (sheetNameExists(name, null)) name += ' (importada)';
+    const now = new Date().toISOString();
+    await dbPut('sheets', { id: uid(), name: name, active: true, exercises: exercises, createdAt: now, updatedAt: now });
+    state.sheets = await dbAll('sheets');
+  }
+
+  bootstrap.Modal.getInstance(document.getElementById('sheetImportModal')).hide();
+  refreshAfterSheetChange();
+  renderExercises();
+}
+
+/* ---------- contrato para a IA (#/ia) ---------- */
+
+async function renderIa() {
+  const area = document.getElementById('iaText');
+  area.value = 'Carregando…';
+  const response = await fetch('FICHA-JSON.md');
+  const contract = await response.text();
+  area.value = contract + '\n\n' + exerciseNamesText(libraryExercises(state.exercises), await loadCatalog());
 }
 
 async function deleteSheet(id) {
@@ -2003,8 +2118,8 @@ function exportWorkoutText(id) {
   bootstrap.Modal.getOrCreateInstance(document.getElementById('exportModal')).show();
 }
 
-async function copyExportText() {
-  const area = document.getElementById('exportText');
+async function copyExportText(areaId) {
+  const area = document.getElementById(areaId);
   const text = area.value;
 
   try {
@@ -2017,8 +2132,8 @@ async function copyExportText() {
   }
 }
 
-async function shareExportText() {
-  const text = document.getElementById('exportText').value;
+async function shareExportText(areaId) {
+  const text = document.getElementById(areaId).value;
 
   if (navigator.share) {
     try {
@@ -2029,7 +2144,7 @@ async function shareExportText() {
     }
   }
 
-  copyExportText();
+  copyExportText(areaId);
 }
 
 function appVersionLabel() {
@@ -2496,6 +2611,11 @@ function bindEvents() {
   document.getElementById('restStop').addEventListener('click', stopRest);
 
   document.getElementById('btnNewSheet').addEventListener('click', function () { openSheetEditor(null); });
+  document.getElementById('btnImportSheet').addEventListener('click', function () { document.getElementById('importSheetFile').click(); });
+  document.getElementById('importSheetFile').addEventListener('change', function () {
+    if (this.files && this.files[0]) guard(importSheetFile)(this.files[0]);
+    this.value = '';
+  });
   document.getElementById('sheetEditorSave').addEventListener('click', guard(saveSheetEditor));
   document.getElementById('btnSheetAddExercise').addEventListener('click', guard(toggleSheetPicker));
   document.getElementById('sheetPickerSearch').addEventListener('input', function () {
@@ -2531,8 +2651,11 @@ function bindEvents() {
   document.getElementById('btnWeekToday').addEventListener('click', guard(startWeekToday));
 
   document.getElementById('btnExport').addEventListener('click', guard(exportBackup));
-  document.getElementById('exportCopy').addEventListener('click', guard(copyExportText));
-  document.getElementById('exportShare').addEventListener('click', guard(shareExportText));
+  document.getElementById('exportCopy').addEventListener('click', function () { guard(copyExportText)('exportText'); });
+  document.getElementById('iaCopy').addEventListener('click', function () { guard(copyExportText)('iaText'); });
+  document.getElementById('exportShare').addEventListener('click', function () { guard(shareExportText)('exportText'); });
+  document.getElementById('iaShare').addEventListener('click', function () { guard(shareExportText)('iaText'); });
+  document.getElementById('sheetImportConfirm').addEventListener('click', guard(confirmSheetImport));
   document.getElementById('btnForceUpdate').addEventListener('click', guard(forceUpdate));
   document.getElementById('btnImport').addEventListener('click', function () {
     document.getElementById('importFile').click();

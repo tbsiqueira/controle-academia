@@ -11,9 +11,9 @@
   <link rel="icon" href="icons/icon-16.png" sizes="16x16" type="image/png">
   <link rel="icon" href="icons/icon-32.png" sizes="32x32" type="image/png">
   <link rel="apple-touch-icon" href="icons/icon-180.png">
-  <link rel="stylesheet" href="vendor/bootstrap/bootstrap.min.css?v=52">
-  <link rel="stylesheet" href="vendor/bootstrap-icons/bootstrap-icons.min.css?v=52">
-  <link rel="stylesheet" href="css/styles.css?v=52">
+  <link rel="stylesheet" href="vendor/bootstrap/bootstrap.min.css?v=53">
+  <link rel="stylesheet" href="vendor/bootstrap-icons/bootstrap-icons.min.css?v=53">
+  <link rel="stylesheet" href="css/styles.css?v=53">
 </head>
 <body>
   <main class="container pb-nav">
@@ -103,6 +103,20 @@
       </div>
       <div id="dataBody"></div>
     </section>
+    <section id="view-ia" class="view d-none">
+      <div class="d-flex justify-content-between align-items-center mt-3 mb-3">
+        <h1 class="h4 mb-0"><i class="bi bi-robot"></i> Ficha pela IA</h1>
+        <a href="#/exercises" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-left"></i> Voltar</a>
+      </div>
+      <p class="small text-muted mb-2">Copie este texto e cole na IA (ChatGPT, Claude…) junto com o plano da professora.
+        Ele traz as regras do JSON e os nomes dos exercícios que já existem no app, para não duplicar.
+        Salve a resposta como <code>ficha.json</code> e use <strong>Importar ficha</strong>.</p>
+      <textarea class="form-control font-monospace small mb-2" id="iaText" rows="16" readonly></textarea>
+      <div class="d-flex gap-2">
+        <button type="button" class="btn btn-outline-primary flex-fill" id="iaCopy"><i class="bi bi-clipboard"></i> Copiar</button>
+        <button type="button" class="btn btn-primary flex-fill" id="iaShare"><i class="bi bi-send"></i> Compartilhar</button>
+      </div>
+    </section>
     <!-- Sheets & exercises -->
     <section id="view-exercises" class="view d-none">
       <h1 class="h4 mt-3 mb-3"><i class="bi bi-card-checklist"></i> Fichas e exercícios</h1>
@@ -120,7 +134,12 @@
             exercícios, cada um com o número de séries, as reps de cada série e a observação da professora.
             Ao <strong>Treinar</strong>, você escolhe a ficha e os exercícios entram automaticamente no formulário.
           </div>
-          <button class="btn btn-primary w-100 mb-3" type="button" id="btnNewSheet"><i class="bi bi-plus-circle"></i> Nova ficha</button>
+          <div class="d-flex gap-2 mb-3">
+            <button class="btn btn-primary flex-fill" type="button" id="btnNewSheet"><i class="bi bi-plus-circle"></i> Nova ficha</button>
+            <button class="btn btn-outline-primary flex-fill" type="button" id="btnImportSheet"><i class="bi bi-filetype-json"></i> Importar ficha</button>
+            <input type="file" id="importSheetFile" accept="application/json,.json" class="d-none">
+          </div>
+          <a href="#/ia" class="btn btn-sm btn-link w-100 mb-2"><i class="bi bi-robot"></i> Pedir uma ficha para a IA (contrato + exercícios)</a>
           <div id="sheetsList"></div>
         </div>
         <div class="tab-pane fade" id="tabExercises">
@@ -244,7 +263,7 @@
         </div>
       </div>
 
-      <p class="text-center text-muted small">Meu Treino <span id="appVersion">v52</span> · dados 100% locais · catálogo: gugeldev/exercicios-bd-ptbr (CC0)</p>
+      <p class="text-center text-muted small">Meu Treino <span id="appVersion">v53</span> · dados 100% locais · catálogo: gugeldev/exercicios-bd-ptbr (CC0)</p>
     </section>
   </main>
 
@@ -380,6 +399,22 @@
   </div>
 
   <!-- Export as text modal -->
+  <div class="modal fade" id="sheetImportModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-fullscreen-sm-down">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title"><i class="bi bi-filetype-json"></i> Importar ficha</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+        </div>
+        <div class="modal-body" id="sheetImportBody"></div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary flex-fill" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-primary flex-fill" id="sheetImportConfirm"><i class="bi bi-check-lg"></i> Importar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="modal fade" id="exportModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-fullscreen-sm-down">
       <div class="modal-content">
@@ -399,9 +434,9 @@
     </div>
   </div>
 
-  <script src="vendor/bootstrap/bootstrap.bundle.min.js?v=52"></script>
-  <script src="js/db.js?v=52"></script>
-  <script src="js/core.js?v=52"></script>
-  <script src="js/app.js?v=52"></script>
+  <script src="vendor/bootstrap/bootstrap.bundle.min.js?v=53"></script>
+  <script src="js/db.js?v=53"></script>
+  <script src="js/core.js?v=53"></script>
+  <script src="js/app.js?v=53"></script>
 </body>
 </html>
