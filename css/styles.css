@@ -435,3 +435,7 @@ body:has(.rest-bar:not(.d-none)) .pb-nav {
   background: #fef3c7;
   color: #92400e;
 }
+
+/* Treinar: cartões de exercício alternam roxo/verde claro para não se perder entre eles */
+#workoutExercises > .card:nth-child(odd) { background: #f3efff; }
+#workoutExercises > .card:nth-child(even) { background: #ecfdf3; }
