@@ -4,7 +4,7 @@
    Online = always the freshest files; offline = last cached version.
    No user data ever leaves the device. */
 
-const CACHE_NAME = 'meu-treino-v54';
+const CACHE_NAME = 'meu-treino-v55';
 
 const ASSETS = [
   './',

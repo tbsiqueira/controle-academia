@@ -243,11 +243,7 @@ function renderWorkoutList() {
     '<span class="badge text-bg-secondary">' + filtered.length + '</span></h6>' +
     filterHtml +
     shown.map(function (w) {
-      const setCount = (w.sets || []).length;
-      const exerciseCount = countExercises(w);
       const name = sheetLabel(w, state.sheets) || 'Treino';
-      const recordCount = workoutRecords(state.workouts, w).length;
-      const warm = warmupSummary(w.warmups);
       const p = dateParts(w.date, today);
       const monthKey = p ? p.monthKey : '';
 
@@ -272,16 +268,7 @@ function renderWorkoutList() {
         dateBlock +
         '<button type="button" class="btn btn-link p-0 text-start text-decoration-none flex-grow-1 min-w-0" data-view-workout="' + esc(w.id) + '" aria-label="' + esc(name + ', ' + fmtBR(w.date)) + '">' +
         '<strong>' + esc(name) + '</strong>' +
-        (recordCount ? ' <span class="badge pr-badge"><i class="bi bi-trophy-fill"></i> ' + (recordCount === 1 ? 'recorde' : recordCount + ' recordes') + '</span>' : '') +
-        '<br>' +
-        '<small class="text-muted">' + exerciseCount + (exerciseCount === 1 ? ' exercício' : ' exercícios') +
-        (setCount ? ' · ' + setCount + (setCount === 1 ? ' série' : ' séries') : '') +
-        (toNum(w.cardioMinutes) > 0 ? ' · ' + toNum(w.cardioMinutes) + ' min cardio' : '') +
-        (warm ? ' · ' + esc(warm) : '') + '</small>' +
         '</button>' +
-        '<div class="d-flex gap-1">' +
-        '<button type="button" class="btn btn-sm btn-outline-secondary" data-share-workout="' + esc(w.id) + '" title="Exportar como texto" aria-label="Exportar como texto"><i class="bi bi-share"></i></button>' +
-        '</div>' +
         '</div></div>';
     }).join('') +
     moreHtml;
@@ -303,12 +290,6 @@ function renderWorkoutList() {
     b.addEventListener('click', function () {
       state.viewingWorkoutId = b.getAttribute('data-view-workout');
       location.hash = '#/detail';
-    });
-  });
-
-  el.querySelectorAll('[data-share-workout]').forEach(function (b) {
-    b.addEventListener('click', function () {
-      exportWorkoutText(b.getAttribute('data-share-workout'));
     });
   });
 }
