@@ -70,7 +70,7 @@ Campos que não estão nesta tabela são ignorados.
 - Mostra uma revisão antes de gravar: para cada nome sem par exato, sugere os exercícios
   mais parecidos; você escolhe um deles ou "Criar novo" (vai para a Biblioteca, grupo "Outros").
 - Se já existe uma ficha **ativa** com o mesmo nome, a nova ganha " (importada)" no fim.
-- Arquivo inválido: nada é gravado e o app diz qual campo está faltando.
+- JSON inválido: nada é gravado e o app diz qual campo está faltando.
 
 ## Como pedir para a IA
 
@@ -83,4 +83,5 @@ contrato com a lista dos exercícios que já existem (sua Biblioteca + catálogo
 > Plano:
 > (cole o plano)
 
-Salve a resposta como `ficha.json` e importe em **Fichas → Importar ficha**.
+Copie o JSON da resposta, abra **Fichas → Importar ficha**, cole na caixa de texto e toque
+em **Revisar**.

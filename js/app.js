@@ -1732,13 +1732,28 @@ function exactExercise(name) {
 }
 
 // Lê o arquivo, valida e abre a revisão: nomes sem par exato pedem escolha (parecido ou criar novo).
-async function importSheetFile(file) {
+function setImportButton(label) {
+  document.getElementById('sheetImportConfirm').innerHTML = '<i class="bi bi-check-lg"></i> ' + label;
+}
+
+// Passo 1: caixa de texto para colar o JSON.
+function openSheetImport() {
+  state.pendingImport = null;
+  document.getElementById('sheetImportText').value = '';
+  document.getElementById('sheetImportPaste').classList.remove('d-none');
+  document.getElementById('sheetImportBody').innerHTML = '';
+  setImportButton('Revisar');
+  bootstrap.Modal.getOrCreateInstance(document.getElementById('sheetImportModal')).show();
+}
+
+// Passo 2: valida o texto e mostra a revisão (o botão vira "Importar").
+async function reviewSheetImport() {
   let sheets;
   try {
     // A IA costuma cercar o JSON com ```json ... ```: tiramos a cerca antes de ler.
-    sheets = parseSheetImport(JSON.parse((await file.text()).replace(/^\s*```(?:json)?|```\s*$/g, '')));
+    sheets = parseSheetImport(JSON.parse(document.getElementById('sheetImportText').value.replace(/^\s*```(?:json)?|```\s*$/g, '')));
   } catch (e) {
-    alert('Não deu para importar a ficha.\n\n' + (e instanceof SyntaxError ? 'Arquivo JSON inválido.' : e.message));
+    alert('Não deu para importar a ficha.\n\n' + (e instanceof SyntaxError ? 'O texto não é um JSON válido. Copie a resposta inteira da IA.' : e.message));
     return;
   }
 
@@ -1772,7 +1787,8 @@ async function importSheetFile(file) {
     : '<p class="small text-success mb-0"><i class="bi bi-check-circle"></i> Todos os exercícios já existem no app.</p>';
 
   document.getElementById('sheetImportBody').innerHTML = summary + review;
-  bootstrap.Modal.getOrCreateInstance(document.getElementById('sheetImportModal')).show();
+  document.getElementById('sheetImportPaste').classList.add('d-none');
+  setImportButton('Importar');
 }
 
 async function confirmSheetImport() {
@@ -2611,11 +2627,7 @@ function bindEvents() {
   document.getElementById('restStop').addEventListener('click', stopRest);
 
   document.getElementById('btnNewSheet').addEventListener('click', function () { openSheetEditor(null); });
-  document.getElementById('btnImportSheet').addEventListener('click', function () { document.getElementById('importSheetFile').click(); });
-  document.getElementById('importSheetFile').addEventListener('change', function () {
-    if (this.files && this.files[0]) guard(importSheetFile)(this.files[0]);
-    this.value = '';
-  });
+  document.getElementById('btnImportSheet').addEventListener('click', openSheetImport);
   document.getElementById('sheetEditorSave').addEventListener('click', guard(saveSheetEditor));
   document.getElementById('btnSheetAddExercise').addEventListener('click', guard(toggleSheetPicker));
   document.getElementById('sheetPickerSearch').addEventListener('input', function () {
@@ -2655,7 +2667,9 @@ function bindEvents() {
   document.getElementById('iaCopy').addEventListener('click', function () { guard(copyExportText)('iaText'); });
   document.getElementById('exportShare').addEventListener('click', function () { guard(shareExportText)('exportText'); });
   document.getElementById('iaShare').addEventListener('click', function () { guard(shareExportText)('iaText'); });
-  document.getElementById('sheetImportConfirm').addEventListener('click', guard(confirmSheetImport));
+  document.getElementById('sheetImportConfirm').addEventListener('click', function () {
+    guard(state.pendingImport ? confirmSheetImport : reviewSheetImport)();
+  });
   document.getElementById('btnForceUpdate').addEventListener('click', guard(forceUpdate));
   document.getElementById('btnImport').addEventListener('click', function () {
     document.getElementById('importFile').click();
