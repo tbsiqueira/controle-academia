@@ -25,6 +25,8 @@
   --mt-shadow: 0 6px 24px rgba(40, 60, 10, 0.06);
   --mt-primary: var(--mt-lime-deep);
   --mt-nav-height: 64px;
+  /* Espaço da barra de início do iPhone embaixo do menu: só o bastante para o texto não encostar nela */
+  --mt-nav-safe: max(7px, calc(env(safe-area-inset-bottom, 0px) - 20px));
 
   /* Bootstrap: fonte, cores de texto e de destaque */
   --bs-body-font-family: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
@@ -67,7 +69,7 @@ body {
 .pb-nav {
   display: flow-root;   /* a margem do título não vaza para fora do main */
   padding-top: env(safe-area-inset-top, 0px);
-  padding-bottom: calc(var(--mt-nav-height) + env(safe-area-inset-bottom, 0px) + 24px);
+  padding-bottom: calc(var(--mt-nav-height) + var(--mt-nav-safe) + 24px);
 }
 
 .view {
@@ -134,8 +136,8 @@ body {
   bottom: 0;
   z-index: 1030;
   display: flex;
-  height: calc(var(--mt-nav-height) + env(safe-area-inset-bottom, 0px));
-  padding: 7px 10px calc(7px + env(safe-area-inset-bottom, 0px));
+  height: calc(var(--mt-nav-height) + var(--mt-nav-safe));
+  padding: 7px 10px var(--mt-nav-safe);
   background: var(--mt-card);
   border-radius: 24px 24px 0 0;
   box-shadow: 0 -6px 24px rgba(40, 60, 10, 0.08);
@@ -919,7 +921,7 @@ details.info-hint p {
   position: fixed;
   left: 12px;
   right: 12px;
-  bottom: calc(var(--mt-nav-height) + 8px + env(safe-area-inset-bottom, 0px));
+  bottom: calc(var(--mt-nav-height) + 8px + var(--mt-nav-safe));
   z-index: 1031;
   background: var(--mt-ink);
   color: #ffffff;
@@ -997,7 +999,7 @@ details.info-hint p {
 
 /* Com o timer aberto, a página ganha espaço extra para a barra não cobrir o último campo */
 body:has(.rest-bar:not(.d-none)) .pb-nav {
-  padding-bottom: calc(var(--mt-nav-height) + env(safe-area-inset-bottom, 0px) + 100px);
+  padding-bottom: calc(var(--mt-nav-height) + var(--mt-nav-safe) + 100px);
 }
 
 /* ---------- Como foi o treino / evolução ---------- */
