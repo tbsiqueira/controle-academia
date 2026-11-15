@@ -1823,6 +1823,7 @@ function renderCalendar() {
 
   document.getElementById('calendarTotal').innerHTML = '<i class="bi bi-calendar-check"></i> ' + total + (total === 1 ? ' treino' : ' treinos') + ' em ' + monthNames[m] + '.';
   renderWeeklyProgress();
+  renderBodyWeight();
 }
 
 /* ---------- evolução semanal (volume, treinos, cardio) ---------- */
@@ -1865,6 +1866,36 @@ function renderWeeklyProgress() {
         '</div>';
     }).join('') +
     '</div></div>';
+}
+
+/* ---------- peso corporal (um número por dia, guardado junto com as metas) ---------- */
+
+function renderBodyWeight() {
+  const dateEl = document.getElementById('bodyWeightDate');
+  if (!dateEl.value) dateEl.value = todayISO();
+  const weights = state.settings.bodyWeights || {};
+  document.getElementById('bodyWeightValue').value = formatDecimal(weights[dateEl.value], commaDecimal);
+
+  const rows = bodyWeightRows(weights, 8);
+  document.getElementById('bodyWeightList').innerHTML = rows.length
+    ? rows.map(function (r) {
+        const diff = r.diff
+          ? ' <span class="text-muted">(' + (r.diff > 0 ? '+' : '−') + esc(formatDecimal(Math.abs(r.diff), commaDecimal)) + ')</span>'
+          : '';
+        return '<div class="mb-2">' +
+          '<div class="d-flex justify-content-between small"><span>' + fmtBR(r.date) + '</span>' +
+          '<span><strong>' + esc(formatDecimal(r.weight, commaDecimal)) + ' kg</strong>' + diff + '</span></div>' +
+          '<div class="progress" style="height: 10px"><div class="progress-bar" style="width: ' + r.pct + '%"></div></div>' +
+          '</div>';
+      }).join('')
+    : '<p class="text-muted small mb-0">Nenhum peso registrado ainda.</p>';
+}
+
+async function saveBodyWeight() {
+  const date = document.getElementById('bodyWeightDate').value || todayISO();
+  state.settings.bodyWeights = setBodyWeight(state.settings.bodyWeights, date, document.getElementById('bodyWeightValue').value);
+  await dbPut('settings', state.settings);
+  renderBodyWeight();
 }
 
 /* ---------- colinha ---------- */
@@ -2441,6 +2472,9 @@ function bindEvents() {
 
   document.getElementById('calPrev').addEventListener('click', function () { changeMonth(-1); });
   document.getElementById('calNext').addEventListener('click', function () { changeMonth(1); });
+
+  document.getElementById('btnSaveBodyWeight').addEventListener('click', guard(saveBodyWeight));
+  document.getElementById('bodyWeightDate').addEventListener('change', renderBodyWeight);
 
   document.getElementById('btnAddColinha').addEventListener('click', function () { openColinhaForm(null); });
   document.getElementById('colinhaSave').addEventListener('click', guard(saveColinha));

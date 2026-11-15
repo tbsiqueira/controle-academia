@@ -59,6 +59,7 @@ Mapa de **cada funcionalidade do app** para os testes que a cobrem. Serve para r
 | Remover a última série de um exercício no Treinar | `core.js`: `setHasData` (botão "− série" no `app.js`: `removeFormSet`) | `features.test.js` (série em branco × preenchida, nunca remove a única, confirma antes) |
 | Marcar a série como feita inicia o descanso (botão no número da série) | `core.js`: `setRowHtml` (ação no `app.js`: `toggleSetDone`) | `features.test.js` (botão, estado feito, acessibilidade, carga continua larga, `done` não vai para o treino salvo, sem som/vibração) |
 | Calendário: tocar no dia abre o treino daquele dia | `core.js`: `workoutsByDate` (link no `app.js`: `renderCalendar`) | `features.test.js` (agrupa por dia, mais recente primeiro, sem data fica de fora, link `#/detail/<id>`) |
+| Peso corporal (um número por dia, com barras e variação) | `core.js`: `setBodyWeight`, `bodyWeightRows`, `cleanBodyWeights` (em `settings.bodyWeights`; tela no `app.js`) | `features.test.js` (um por dia, vírgula, apagar com vazio, variação, limite, validação no backup, backups antigos intactos, banco sem versão nova) |
 
 ## Limites conhecidos
 

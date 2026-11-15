@@ -169,6 +169,24 @@
       <div class="cal-grid" id="calendarGrid"></div>
       <p class="text-muted mt-2" id="calendarTotal"></p>
       <div id="weeklyProgress"></div>
+      <div class="card mt-3">
+        <div class="card-body">
+          <h2 class="h6 mb-2"><i class="bi bi-speedometer2 text-primary"></i> Peso corporal</h2>
+          <div class="row g-2">
+            <div class="col-6">
+              <label class="form-label small text-muted mb-1" for="bodyWeightDate">Dia</label>
+              <input type="date" class="form-control" id="bodyWeightDate">
+            </div>
+            <div class="col-6">
+              <label class="form-label small text-muted mb-1" for="bodyWeightValue">Peso (kg)</label>
+              <input type="text" inputmode="decimal" autocomplete="off" class="form-control" id="bodyWeightValue" placeholder="72,5">
+            </div>
+          </div>
+          <button class="btn btn-primary w-100 mt-2" type="button" id="btnSaveBodyWeight"><i class="bi bi-check-lg"></i> Salvar peso</button>
+          <div class="form-text">Um peso por dia. Para apagar um dia, salve com o campo vazio.</div>
+          <div id="bodyWeightList" class="mt-3"></div>
+        </div>
+      </div>
     </section>
 
     <!-- More -->

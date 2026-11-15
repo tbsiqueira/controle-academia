@@ -216,3 +216,71 @@ test('calendario: dia com treino vira link para #/detail/<id>; dia vazio continu
   assert.doesNotMatch(body, /w\.date\.indexOf/, 'nao quebra mais com treino sem data');
   assert.match(CSS, /a\.cal-cell \{/);
 });
+
+/* ---------- peso corporal ---------- */
+
+test('setBodyWeight grava um peso por dia (aceita virgula) e nao altera o mapa recebido', () => {
+  const antes = { '2026-10-01': 72 };
+  const depois = core.setBodyWeight(antes, '2026-10-03', '72,5');
+  assert.deepEqual(depois, { '2026-10-01': 72, '2026-10-03': 72.5 });
+  assert.deepEqual(antes, { '2026-10-01': 72 });
+  assert.deepEqual(core.setBodyWeight(depois, '2026-10-03', '71.8'), { '2026-10-01': 72, '2026-10-03': 71.8 }, 'mesmo dia substitui');
+  assert.deepEqual(core.setBodyWeight(undefined, '2026-10-03', 70), { '2026-10-03': 70 }, 'primeiro registro');
+});
+
+test('setBodyWeight: campo vazio ou invalido apaga o registro daquele dia', () => {
+  const mapa = { '2026-10-01': 72, '2026-10-03': 72.5 };
+  ['', '   ', 'abc', 0, -5, 900, null].forEach((valor) => {
+    assert.deepEqual(core.setBodyWeight(mapa, '2026-10-03', valor), { '2026-10-01': 72 }, String(valor));
+  });
+  assert.deepEqual(core.setBodyWeight(mapa, 'ontem', 70), mapa, 'data invalida nao grava nada');
+});
+
+test('bodyWeightRows: mais recente primeiro, diferenca para o registro anterior e barra entre 30 e 100', () => {
+  const linhas = core.bodyWeightRows({ '2026-10-01': 74, '2026-10-08': 73, '2026-10-15': 72 }, 8);
+  assert.deepEqual(linhas.map((r) => r.date), ['2026-10-15', '2026-10-08', '2026-10-01']);
+  assert.deepEqual(linhas.map((r) => r.weight), [72, 73, 74]);
+  assert.deepEqual(linhas.map((r) => r.diff), [-1, -1, null], 'o primeiro registro nao tem com o que comparar');
+  assert.deepEqual(linhas.map((r) => r.pct), [30, 65, 100]);
+});
+
+test('bodyWeightRows: limite, peso igual, arredondamento e lista vazia', () => {
+  const muitos = {};
+  for (let d = 1; d <= 12; d++) muitos['2026-10-' + String(d).padStart(2, '0')] = 70 + d / 10;
+  const linhas = core.bodyWeightRows(muitos, 8);
+  assert.equal(linhas.length, 8);
+  assert.equal(linhas[7].date, '2026-10-05');
+  assert.equal(linhas[7].diff, 0.1, 'o ultimo mostrado compara com um registro que ficou fora da lista');
+  assert.equal(core.bodyWeightRows(muitos).length, 8, 'limite padrao');
+
+  assert.deepEqual(core.bodyWeightRows({ '2026-10-01': 72, '2026-10-02': 72 }, 8).map((r) => r.pct), [100, 100]);
+  assert.equal(core.bodyWeightRows({ '2026-10-01': 72 }, 8)[0].diff, null);
+  assert.deepEqual(core.bodyWeightRows({}, 8), []);
+  assert.deepEqual(core.bodyWeightRows(undefined, 8), []);
+});
+
+test('peso corporal entra no backup e e validado na importacao', () => {
+  const b = core.normalizeBackup({ settings: { weekAnchor: '2026-10-05', bodyWeights: {
+    '2026-10-01': 72.5, '2026-10-02': '73,1', '<img src=x>': 70, '2026-10-03': 'abc', '2026-10-04': 9999
+  } } });
+  assert.deepEqual(b.settings.bodyWeights, { '2026-10-01': 72.5, '2026-10-02': 73.1 });
+  assert.deepEqual(core.normalizeBackup(b).settings.bodyWeights, b.settings.bodyWeights, 'idempotente');
+});
+
+test('backups antigos (sem peso corporal) continuam iguais: o campo nao e inventado', () => {
+  const antigo = JSON.parse(read('tests/fixtures/backup-v1.json'));
+  const b = core.normalizeBackup(antigo.data || antigo);
+  assert.equal('bodyWeights' in b.settings, false);
+  assert.deepEqual(core.bodyWeightRows(b.settings.bodyWeights, 8), []);
+});
+
+test('tela do peso corporal: campos no Calendario, salva nas configuracoes (sem store novo no banco)', () => {
+  ['bodyWeightDate', 'bodyWeightValue', 'btnSaveBodyWeight', 'bodyWeightList'].forEach((id) => {
+    assert.ok(HTML.indexOf('id="' + id + '"') !== -1, id);
+  });
+  assert.match(HTML, /id="bodyWeightValue"[^>]*|inputmode="decimal"[^>]*id="bodyWeightValue"/);
+  const save = APP.slice(APP.indexOf('async function saveBodyWeight'), APP.indexOf('/* ---------- colinha ---------- */'));
+  assert.match(save, /state\.settings\.bodyWeights = setBodyWeight\(/);
+  assert.match(save, /dbPut\('settings', state\.settings\)/);
+  assert.match(read('js/db.js'), /const DB_VERSION = 2;/, 'versao do banco intacta');
+});

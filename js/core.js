@@ -619,6 +619,50 @@
     return map;
   }
 
+  /* ---------- peso corporal ---------- */
+
+  // Fica em settings.bodyWeights = { "YYYY-MM-DD": kg }: sem store novo no banco (nada de migração)
+  // e já entra no backup junto com as metas.
+
+  // Só datas válidas com peso entre 0 e 500 kg (o backup pode ter sido editado à mão).
+  function cleanBodyWeights(map) {
+    const out = {};
+    Object.keys(map || {}).forEach(function (date) {
+      const kg = toNum(map[date]);
+      if (ISO_DATE.test(date) && kg > 0 && kg <= 500) out[date] = kg;
+    });
+    return out;
+  }
+
+  // Novo mapa com o peso do dia. Valor vazio ou inválido apaga o registro daquele dia.
+  function setBodyWeight(map, date, value) {
+    const next = cleanBodyWeights(map);
+    next[date] = value;
+    return cleanBodyWeights(next);
+  }
+
+  // Últimos registros (mais recente primeiro): peso, diferença para o registro anterior e
+  // largura da barra (30–100%, entre o menor e o maior peso mostrados, para a variação aparecer).
+  function bodyWeightRows(map, limit) {
+    const clean = cleanBodyWeights(map);
+    const dates = Object.keys(clean).sort().reverse();
+    const shown = dates.slice(0, limit || 8);
+    const values = shown.map(function (d) { return clean[d]; });
+    const min = Math.min.apply(null, values);
+    const max = Math.max.apply(null, values);
+
+    return shown.map(function (date, i) {
+      const kg = clean[date];
+      const previous = dates[i + 1];
+      return {
+        date: date,
+        weight: kg,
+        diff: previous ? Math.round((kg - clean[previous]) * 10) / 10 : null,
+        pct: max === min ? 100 : Math.round(30 + 70 * (kg - min) / (max - min))
+      };
+    });
+  }
+
   /* ---------- evolução semanal ---------- */
 
   // Volume (tonelagem) de um treino: soma de reps × carga das séries de trabalho.
@@ -1134,6 +1178,7 @@
     settings.weeklyCardioTarget = (settings.weeklyCardioTarget === undefined || settings.weeklyCardioTarget === null)
       ? 120
       : toNum(settings.weeklyCardioTarget);
+    if (settings.bodyWeights) settings.bodyWeights = cleanBodyWeights(settings.bodyWeights);
     return settings;
   }
 
@@ -1250,6 +1295,9 @@
     fmtThousands: fmtThousands,
     workoutSummary: workoutSummary,
     weeklyTotals: weeklyTotals,
+    cleanBodyWeights: cleanBodyWeights,
+    setBodyWeight: setBodyWeight,
+    bodyWeightRows: bodyWeightRows,
     // exportação
     workoutAsText: workoutAsText,
     sheetLabel: sheetLabel,
