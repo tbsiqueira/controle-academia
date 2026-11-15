@@ -1828,9 +1828,7 @@ async function deleteSheet(id) {
 /* ---------- calendar ---------- */
 
 function changeMonth(delta) {
-  const d = state.calendarCursor || new Date();
-  d.setMonth(d.getMonth() + delta);
-  state.calendarCursor = new Date(d.getFullYear(), d.getMonth(), 1);
+  state.calendarCursor = shiftMonth(state.calendarCursor || new Date(), delta);
   renderCalendar();
 }
 

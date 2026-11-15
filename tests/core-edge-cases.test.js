@@ -517,3 +517,20 @@ test('regressao: historico de exercicio do catalogo aberto pelo clique', () => {
   assert.equal(core.previousWarmupFields(treinos, alvo).reps, '', 'sem aquecimento registrado');
   assert.equal(core.countExercises({ sets: [{ exerciseId: '887' }, { exerciseId: 887 }] }), 1, 'texto e numero contam como o mesmo exercicio');
 });
+/* ---------- calendário: trocar de mês ---------- */
+
+test('shiftMonth nao pula nem repete mes quando hoje e dia 29, 30 ou 31', () => {
+  // regressao: setMonth() em 31/out voltava para outubro; em 31/jan pulava para marco
+  assert.equal(core.fmtDate(core.shiftMonth(new Date(2026, 9, 31), -1)), '2026-09-01');
+  assert.equal(core.fmtDate(core.shiftMonth(new Date(2027, 0, 31), 1)), '2027-02-01');
+  assert.equal(core.fmtDate(core.shiftMonth(new Date(2027, 0, 29), 1)), '2027-02-01');
+  assert.equal(core.fmtDate(core.shiftMonth(new Date(2026, 4, 31), 1)), '2026-06-01');
+});
+
+test('shiftMonth atravessa o ano e nao altera a data recebida', () => {
+  assert.equal(core.fmtDate(core.shiftMonth(new Date(2026, 11, 15), 1)), '2027-01-01');
+  assert.equal(core.fmtDate(core.shiftMonth(new Date(2026, 0, 15), -1)), '2025-12-01');
+  const cursor = new Date(2026, 9, 31);
+  core.shiftMonth(cursor, -1);
+  assert.equal(core.fmtDate(cursor), '2026-10-31');
+});

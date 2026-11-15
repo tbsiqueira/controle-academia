@@ -39,6 +39,12 @@
     return fmtDate(d);
   }
 
+  // Primeiro dia do mês que fica `delta` meses depois (ou antes) da data.
+  // Sempre parte do dia 1: setMonth() num dia 31 pula ou repete um mês.
+  function shiftMonth(date, delta) {
+    return new Date(date.getFullYear(), date.getMonth() + delta, 1);
+  }
+
   function fmtBR(iso) {
     if (!iso) return '—';
     const p = String(iso).split('-');
@@ -1030,6 +1036,7 @@
     todayISO: todayISO,
     addDaysISO: addDaysISO,
     fmtBR: fmtBR,
+    shiftMonth: shiftMonth,
     dateParts: dateParts,
     // texto e números
     esc: esc,
