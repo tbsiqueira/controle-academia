@@ -433,6 +433,26 @@
     }, 0);
   }
 
+  // 1RM estimado (a carga que daria para levantar uma vez), fórmula de Epley: carga × (1 + reps/30).
+  // Uma repetição é a própria carga; sem carga ou sem reps não há estimativa (0).
+  // shortcut: Epley perde precisão acima de ~12 reps; serve para comparar treinos, não como carga-alvo.
+  function estimate1RM(load, reps) {
+    const kg = toNum(load);
+    const n = toNum(reps);
+    if (kg <= 0 || n <= 0) return 0;
+    return n === 1 ? kg : Math.round(kg * (1 + n / 30) * 10) / 10;
+  }
+
+  // Maior 1RM estimado do exercício num treino: mostra progresso mesmo quando a carga não subiu
+  // (mais reps com a mesma carga).
+  function best1RMForExercise(workout, target) {
+    let best = 0;
+    ((workout && workout.sets) || []).forEach(function (s) {
+      if (exerciseMatches(s, target)) best = Math.max(best, estimate1RM(s.load, s.reps));
+    });
+    return best;
+  }
+
   /* ---------- recordes pessoais ---------- */
 
   // Exercícios em que este treino bateu o recorde de carga, comparando só com treinos de
@@ -1273,6 +1293,8 @@
     sessionsForExercise: sessionsForExercise,
     bestSetForExercise: bestSetForExercise,
     maxBestLoad: maxBestLoad,
+    estimate1RM: estimate1RM,
+    best1RMForExercise: best1RMForExercise,
     // recordes
     workoutRecords: workoutRecords,
     // formulário, descanso, Início e evolução

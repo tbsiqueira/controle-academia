@@ -284,3 +284,55 @@ test('tela do peso corporal: campos no Calendario, salva nas configuracoes (sem 
   assert.match(save, /dbPut\('settings', state\.settings\)/);
   assert.match(read('js/db.js'), /const DB_VERSION = 2;/, 'versao do banco intacta');
 });
+
+/* ---------- 1RM estimado ---------- */
+
+test('estimate1RM usa Epley: carga x (1 + reps/30), com uma casa decimal', () => {
+  assert.equal(core.estimate1RM(100, 10), 133.3);
+  assert.equal(core.estimate1RM(60, 5), 70);
+  assert.equal(core.estimate1RM(40, 30), 80);
+  assert.equal(core.estimate1RM(100, 1), 100, 'uma repeticao e a propria carga');
+  assert.equal(core.estimate1RM('27,5', '12'), 38.5, 'aceita o texto do formulario');
+});
+
+test('estimate1RM sem carga ou sem reps nao estima nada', () => {
+  assert.equal(core.estimate1RM(0, 10), 0, 'peso do corpo');
+  assert.equal(core.estimate1RM(null, 10), 0);
+  assert.equal(core.estimate1RM(100, 0), 0);
+  assert.equal(core.estimate1RM(100, null), 0);
+  assert.equal(core.estimate1RM(-20, 10), 0);
+});
+
+test('best1RMForExercise: mais reps com a mesma carga tambem e progresso', () => {
+  const alvo = { exerciseId: 'e1', exerciseName: 'Supino' };
+  const serie = (reps, load, id) => ({ exerciseId: id || 'e1', exerciseName: 'Supino', number: 1, reps: reps, load: load });
+  const semana1 = { id: 'w1', date: '2026-10-01', sets: [serie(8, 60)] };
+  const semana2 = { id: 'w2', date: '2026-10-08', sets: [serie(10, 60)] };
+
+  assert.equal(core.bestSetForExercise(semana1, alvo).load, core.bestSetForExercise(semana2, alvo).load, 'a carga nao mudou');
+  assert.ok(core.best1RMForExercise(semana2, alvo) > core.best1RMForExercise(semana1, alvo));
+  assert.equal(core.best1RMForExercise(semana1, alvo), 76);
+  assert.equal(core.best1RMForExercise(semana2, alvo), 80);
+});
+
+test('best1RMForExercise pega a melhor serie do exercicio e ignora os outros', () => {
+  const alvo = { exerciseId: 'e1', exerciseName: 'Supino' };
+  const treino = { sets: [
+    { exerciseId: 'e1', number: 1, reps: 12, load: 50 },   // 70
+    { exerciseId: 'e1', number: 2, reps: 6, load: 60 },    // 72
+    { exerciseId: 'e2', number: 1, reps: 10, load: 200 }
+  ] };
+  assert.equal(core.best1RMForExercise(treino, alvo), 72, 'nem sempre e a serie mais pesada nem a de mais reps');
+  assert.equal(core.best1RMForExercise({ sets: [{ exerciseId: 'e1', reps: 20, load: null }] }, alvo), 0);
+  assert.equal(core.best1RMForExercise({ sets: [] }, alvo), 0);
+  assert.equal(core.best1RMForExercise({}, alvo), 0);
+  assert.equal(core.best1RMForExercise(null, alvo), 0);
+});
+
+test('evolucao do exercicio mostra o 1RM estimado so quando existe (app.js)', () => {
+  const body = APP.slice(APP.indexOf('function renderExerciseHistory'), APP.indexOf('/* ---------- workout draft'));
+  assert.match(body, /rm: best1RMForExercise\(w, target\)/);
+  assert.match(body, /topRM > 0 \?/, 'exercicio sem carga nao ganha "1RM 0 kg"');
+  assert.match(body, /r\.rm > 0 \?/);
+  assert.match(body, /prLoad > 0 \?/, 'o selo de PR continua condicionado a carga real');
+});

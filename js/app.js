@@ -423,8 +423,9 @@ function renderExerciseHistory() {
   }
 
   const rows = sessions.map(function (w) {
-    return { workout: w, best: bestSetForExercise(w, target) };
+    return { workout: w, best: bestSetForExercise(w, target), rm: best1RMForExercise(w, target) };
   });
+  const topRM = rows.reduce(function (max, r) { return Math.max(max, r.rm); }, 0);
 
   const prLoad = maxBestLoad(sessions, target);
   const maxLoad = prLoad || 1;   // só para a largura das barras (evita dividir por zero)
@@ -441,7 +442,10 @@ function renderExerciseHistory() {
   let html = '<div class="card mb-3"><div class="card-body py-2 d-flex justify-content-between align-items-center">' +
     '<span class="small text-muted">' + trendIcon + ' ' + sessions.length + (sessions.length === 1 ? ' treino' : ' treinos') + ' com este exercício</span>' +
     (prLoad > 0 ? '<span class="badge text-bg-warning"><i class="bi bi-trophy"></i> PR ' + formatDecimal(prLoad, commaDecimal) + ' kg</span>' : '') +
-    '</div></div>';
+    '</div>' +
+    (topRM > 0 ? '<div class="card-body pt-0 pb-2 small text-muted"><i class="bi bi-calculator"></i> 1RM estimado: <strong>' + formatDecimal(topRM, commaDecimal) + ' kg</strong>' +
+      ' — a carga que daria para levantar uma vez, calculada pela melhor série.</div>' : '') +
+    '</div>';
 
   html += '<h6 class="text-muted"><i class="bi bi-bar-chart-line"></i> Melhor série por dia</h6>';
   html += rows.slice(0, 12).map(function (r) {
@@ -449,7 +453,8 @@ function renderExerciseHistory() {
     const reps = r.best ? r.best.reps : 0;
     const pct = Math.max(4, Math.round((load / maxLoad) * 100));
     return '<div class="mb-2">' +
-      '<div class="d-flex justify-content-between small"><span>' + fmtBR(r.workout.date) + '</span><strong>' + formatDecimal(load, commaDecimal) + ' kg × ' + reps + '</strong></div>' +
+      '<div class="d-flex justify-content-between small"><span>' + fmtBR(r.workout.date) + '</span><span><strong>' + formatDecimal(load, commaDecimal) + ' kg × ' + reps + '</strong>' +
+      (r.rm > 0 ? ' <span class="text-muted">· 1RM ' + formatDecimal(r.rm, commaDecimal) + '</span>' : '') + '</span></div>' +
       '<div class="progress" style="height: 10px"><div class="progress-bar" style="width: ' + pct + '%"></div></div>' +
       '</div>';
   }).join('');
