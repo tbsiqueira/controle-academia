@@ -46,7 +46,7 @@ Na parte de baixo da tela existem 5 abas:
 | **Início** | Sua semana: metas, botão para começar a próxima ficha, treinos recentes |
 | **Treinar** | Registrar o treino de hoje |
 | **Fichas** | Montar seus treinos (fichas) e a biblioteca de exercícios |
-| **Calendário** | Quantas vezes você treinou no mês, evolução semanal e peso corporal |
+| **Calendário** | Quantas vezes você treinou no mês, evolução semanal |
 | **Mais** | Metas, colinha, backup e, em **Opções avançadas**, o card **Debug** (atualizar app, apagar dados, dados de exemplo) |
 
 ---
@@ -280,13 +280,6 @@ Aba **Calendário**:
 - Embaixo: total de treinos do mês.
 
 É a visão rápida de constância: "esse mês eu treinei quantas vezes?"
-
-### Peso corporal (v61)
-
-No fim da aba **Calendário**, o card **Peso corporal** guarda **um peso por dia**: escolha o **Dia**, digite o
-**Peso (kg)** (vírgula aceita, ex.: `72,5`) e toque em **Salvar peso**. Salvar de novo no mesmo dia troca o valor;
-para apagar um dia, salve com o campo vazio. A lista mostra os últimos 8 registros com barras e a diferença para o
-anterior. O peso vai junto no **backup**.
 
 ---
 

@@ -771,3 +771,8 @@ test('"ultima vez", cargas e aquecimento sugeridos vem do treino mais recente do
     assert.deepEqual(core.sessionsForExercise(lista, alvo).map((w) => w.id), ['noite', 'manha']);
   });
 });
+
+test('normalizeBackup ignora campos desconhecidos (ex.: peso corporal de versoes antigas) sem erro', () => {
+  const backup = core.normalizeBackup({ settings: { weekAnchor: '2026-10-05', bodyWeights: { '2026-10-01': 72.5 } } });
+  assert.equal(backup.settings.weekAnchor, '2026-10-05');
+});
