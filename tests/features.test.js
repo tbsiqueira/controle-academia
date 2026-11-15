@@ -358,3 +358,18 @@ test('erros, validacoes e confirmacoes continuam bloqueando (alert/confirm)', ()
   });
   assert.ok((APP.match(/confirm\(/g) || []).length >= 10, 'perguntas antes de apagar/substituir continuam');
 });
+
+/* ---------- área de toque dos botões de ícone ---------- */
+
+test('botoes pequenos so com icone tem pelo menos 44px de area de toque', () => {
+  const rule = CSS.slice(CSS.indexOf('.btn-sm[aria-label] {'), CSS.indexOf('}', CSS.indexOf('.btn-sm[aria-label] {')));
+  assert.match(rule, /min-width: 44px;/);
+  assert.match(rule, /min-height: 44px;/);
+});
+
+test('todo botao pequeno so com icone tem aria-label (e por ele que a regra de 44px pega)', () => {
+  const fontes = APP + read('js/core.js') + HTML;
+  const botoes = fontes.match(/<button[^>]*class="btn btn-sm[^>]*>(?:' \+\s*)?<i class="bi [^"]*"><\/i><\/button>/g) || [];
+  assert.ok(botoes.length >= 8, 'achou os botoes de icone (' + botoes.length + ')');
+  botoes.forEach((b) => assert.match(b, /aria-label="/, b.slice(0, 120)));
+});
