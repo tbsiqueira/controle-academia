@@ -60,7 +60,7 @@ test('workoutSummary bate com os dados de exemplo (mesmo volume da evolucao sema
 test('card do Inicio mostra o resumo e a contagem de recordes (app.js)', () => {
   const body = APP.slice(APP.indexOf('function renderWorkoutList'), APP.indexOf('/* ---------- referências por id'));
   assert.match(body, /workoutSummary\(w\)/);
-  assert.match(body, /workoutRecords\(state\.workouts, w\)\.length/);
+  assert.match(body, /recordCounts\(state\.workouts\)/, 'recordes numa passada só, não por card');
   assert.match(body, /esc\(summary\)/, 'o resumo e escapado');
   assert.match(CSS, /\.pr-count \{/);
 });

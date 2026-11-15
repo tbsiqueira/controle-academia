@@ -261,14 +261,13 @@ function renderWorkoutList() {
   }
 
   let currentMonth = null;
+  const recordsById = recordCounts(state.workouts);
   el.innerHTML = '<div class="section-head"><h2>' + (state.workoutFilter ? 'Treinos da ficha' : 'Histórico') + '</h2>' +
     '<span class="chip">' + filtered.length + (filtered.length === 1 ? ' treino' : ' treinos') + '</span></div>' +
     filterHtml +
     shown.map(function (w) {
       const name = sheetLabel(w, state.sheets) || 'Treino';
-      // shortcut: recordes calculados por card mostrado (cada um varre o histórico); trocar por uma
-      // passada única se a lista com "Ver meses anteriores" ficar lenta com milhares de treinos.
-      const records = workoutRecords(state.workouts, w).length;
+      const records = recordsById[w.id] || 0;
       const summary = workoutSummary(w);
       const p = dateParts(w.date, today);
       const monthKey = p ? p.monthKey : '';

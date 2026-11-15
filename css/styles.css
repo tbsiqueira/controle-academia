@@ -337,8 +337,16 @@ body {
   font-weight: 500;
 }
 
-textarea.form-control {
+/* Textareas: fundo branco e borda visível, para não sumir no fundo do card/página */
+textarea.form-control,
+textarea.form-control:focus {
   font-weight: 500;
+  background-color: #ffffff;
+  border: 1.5px solid #d3dbc7;
+}
+
+textarea.form-control:focus {
+  border-color: var(--mt-lime-deep);
 }
 
 .form-label {
@@ -1329,7 +1337,6 @@ a.cal-cell {
 }
 
 #iaText {
-  background: var(--mt-card);
   box-shadow: var(--mt-shadow);
 }
 

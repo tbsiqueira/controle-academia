@@ -486,6 +486,48 @@
     return records;
   }
 
+  // Quantos recordes cada treino bateu ({ id: n }), numa passada só pelo histórico.
+  // Mesmo resultado de workoutRecords(workouts, w).length para cada w (ids únicos), mas sem
+  // varrer o histórico inteiro por treino: com centenas de treinos o Início travava.
+  // Mantém a regra do exerciseMatches: id com id; sem id de um dos lados, compara o nome.
+  function recordCounts(workouts) {
+    const list = (workouts || []).filter(function (w) { return w && w.date != null; })
+      .sort(function (a, b) { return a.date < b.date ? -1 : (a.date > b.date ? 1 : 0); });
+    const byId = Object.create(null);        // maior carga por id
+    const noIdByName = Object.create(null);  // maior carga das séries sem id, por nome
+    const byName = Object.create(null);      // maior carga de todas as séries, por nome
+    const counts = {};
+    (workouts || []).forEach(function (w) { if (w) counts[w.id] = 0; });
+
+    let i = 0;
+    while (i < list.length) {
+      let j = i;
+      while (j < list.length && list[j].date === list[i].date) j++;
+      // treinos do mesmo dia comparam só com dias anteriores: conta tudo antes de somar o dia
+      for (let k = i; k < j; k++) {
+        const w = list[k];
+        groupSets(w.sets, []).forEach(function (g) {
+          const today = bestSetForExercise(w, g);
+          const previous = g.exerciseId
+            ? Math.max(byId[String(g.exerciseId)] || 0, noIdByName[g.exerciseName] || 0)
+            : (byName[g.exerciseName] || 0);
+          if (previous > 0 && today.load > previous) counts[w.id]++;
+        });
+      }
+      for (let k = i; k < j; k++) {
+        (list[k].sets || []).forEach(function (s) {
+          const load = toNum(s.load);
+          const name = s.exerciseName || '(sem nome)';
+          if (s.exerciseId) byId[String(s.exerciseId)] = Math.max(byId[String(s.exerciseId)] || 0, load);
+          else noIdByName[name] = Math.max(noIdByName[name] || 0, load);
+          byName[name] = Math.max(byName[name] || 0, load);
+        });
+      }
+      i = j;
+    }
+    return counts;
+  }
+
   /* ---------- formulário: última sessão, repetir treino, rascunho ---------- */
 
   // Mais recente primeiro. No mesmo dia, desempata pelo horário em que o treino foi criado:
@@ -1297,6 +1339,7 @@
     best1RMForExercise: best1RMForExercise,
     // recordes
     workoutRecords: workoutRecords,
+    recordCounts: recordCounts,
     // formulário, descanso, Início e evolução
     byDateDesc: byDateDesc,
     lastSessionForExercise: lastSessionForExercise,

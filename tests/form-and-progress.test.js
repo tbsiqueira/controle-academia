@@ -172,6 +172,32 @@ test('workoutRecords ignora treinos do mesmo dia ou posteriores e o proprio trei
   assert.equal(core.workoutRecords([HIST[3], HIST[0]], novo)[0].previous, 47.5);
 });
 
+test('recordCounts da o mesmo que workoutRecords para cada treino (ids e nomes misturados)', () => {
+  // gerador fixo (sem Math.random) para o teste ser repetível
+  let seed = 7;
+  const rnd = (n) => { seed = (seed * 16807) % 2147483647; return seed % n; };
+  const ex = [
+    { exerciseId: 1, exerciseName: 'Supino' }, { exerciseId: null, exerciseName: 'Supino' },
+    { exerciseId: 2, exerciseName: 'Remada' }, { exerciseId: null, exerciseName: 'Remada' },
+    { exerciseId: 3, exerciseName: 'Supino' }, { exerciseId: null, exerciseName: '' }
+  ];
+  const lista = [];
+  for (let i = 0; i < 120; i++) {
+    const sets = [];
+    for (let k = rnd(4); k >= 0; k--) {
+      const e = ex[rnd(ex.length)];
+      sets.push({ exerciseId: e.exerciseId, exerciseName: e.exerciseName, number: k + 1, reps: rnd(12), load: rnd(5) ? rnd(30) * 2.5 : '' });
+    }
+    lista.push({ id: 'w' + i, date: '2026-0' + (1 + rnd(9)) + '-1' + rnd(10), sets: rnd(15) ? sets : undefined });
+  }
+  lista.push({ id: 'semData', sets: [{ exerciseId: 1, exerciseName: 'Supino', load: 500 }] });
+  const counts = core.recordCounts(lista);
+  lista.forEach((w) => assert.equal(counts[w.id], core.workoutRecords(lista, w).length, w.id));
+  assert.ok(Object.values(counts).some((n) => n > 0), 'o teste precisa ter recordes de verdade');
+  assert.deepEqual(core.recordCounts(null), {});
+  assert.deepEqual(core.recordCounts([null, HIST[0]]), { r1: 0 });
+});
+
 test('workoutRecords aceita lista ou treino ausentes', () => {
   assert.deepEqual(core.workoutRecords(null, HIST[3]), []);
   assert.deepEqual(core.workoutRecords(HIST, null), []);
