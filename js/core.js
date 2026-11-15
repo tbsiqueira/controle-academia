@@ -984,6 +984,8 @@
     delete workout.typeId;
     delete workout.typeName;
 
+    // Data fora do formato vira "sem data" (o treino não se perde, só sai do calendário).
+    workout.date = ISO_DATE.test(String(w.date)) ? w.date : '';
     workout.cardioMinutes = toNum(w.cardioMinutes);
     workout.notes = w.notes || '';
     workout.warmups = (w.warmups || []).map(normalizeWarmup).filter(Boolean);
@@ -1003,12 +1005,21 @@
 
   function normalizeSettings(s) {
     const settings = Object.assign({ id: 'app' }, s || {});
-    settings.weekAnchor = settings.weekAnchor || todayISO();
+    settings.weekAnchor = ISO_DATE.test(String(settings.weekAnchor)) ? settings.weekAnchor : todayISO();
     settings.weeklyWorkoutTarget = toNum(settings.weeklyWorkoutTarget) || 3;
     settings.weeklyCardioTarget = (settings.weeklyCardioTarget === undefined || settings.weeklyCardioTarget === null)
       ? 120
       : toNum(settings.weeklyCardioTarget);
     return settings;
+  }
+
+  const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
+
+  // O arquivo de backup pode ter sido editado à mão ou vir de outra pessoa, e o id vai
+  // parar em atributos onclick do HTML. Só entram ids com letras, números, "-" e "_"
+  // (é tudo o que o app já gerou: UUID, "id-123-abc", "w1", inteiro do catálogo).
+  function hasSafeId(record) {
+    return !!record && !!record.id && /^[\w-]+$/.test(String(record.id));
   }
 
   // Converte qualquer backup (v1 ou atual) para o formato atual, sem perder dados.
@@ -1028,11 +1039,11 @@
     });
 
     return {
-      workouts: (source.workouts || []).filter(function (w) { return w && w.id; }).map(normalizeWorkout),
-      sheets: rawSheets.filter(function (s) { return s && s.id; }).map(normalizeSheet),
-      exercises: (source.exercises || []).filter(function (e) { return e && e.id; }).map(normalizeExercise),
+      workouts: (source.workouts || []).filter(hasSafeId).map(normalizeWorkout),
+      sheets: rawSheets.filter(hasSafeId).map(normalizeSheet),
+      exercises: (source.exercises || []).filter(hasSafeId).map(normalizeExercise),
       settings: normalizeSettings(source.settings),
-      colinha: (source.colinha || []).filter(function (c) { return c && c.id; })
+      colinha: (source.colinha || []).filter(hasSafeId)
     };
   }
 

@@ -558,3 +558,61 @@ test('maxBestLoad devolve a maior carga entre os treinos do exercicio', () => {
   assert.equal(core.maxBestLoad(treinos, alvo), 42.5);
   assert.equal(core.maxBestLoad([treinos[1]], alvo), 0.5, 'carga menor que 1 kg nao vira 1');
 });
+
+/* ---------- backup importado: ids e datas vindos de fora ---------- */
+
+test('normalizeBackup descarta registros com id que quebraria o HTML (aspas, espacos, tags)', () => {
+  const ruim = "x');alert(1);//";
+  const b = core.normalizeBackup({
+    workouts: [{ id: 'w1', date: '2026-10-01' }, { id: ruim, date: '2026-10-02' }, null, { date: '2026-10-03' }],
+    sheets: [{ id: 's1', name: 'A' }, { id: 'a b', name: 'B' }],
+    exercises: [{ id: 'e1', name: 'Supino' }, { id: '<img src=x>', name: 'X' }],
+    colinha: [{ id: 'c1', title: 'RIR' }, { id: 'c"2', title: 'Y' }]
+  });
+  assert.deepEqual(b.workouts.map((w) => w.id), ['w1']);
+  assert.deepEqual(b.sheets.map((s) => s.id), ['s1']);
+  assert.deepEqual(b.exercises.map((e) => e.id), ['e1']);
+  assert.deepEqual(b.colinha.map((c) => c.id), ['c1']);
+});
+
+test('normalizeBackup mantem todos os formatos de id que o app ja gerou', () => {
+  const ids = ['3f2b8c1e-9a4d-4e7b-8c21-0a1b2c3d4e5f', 'id-1760000000000-a3f9c2', 'w1', 'sample_sheet_a', 12];
+  const b = core.normalizeBackup({
+    workouts: ids.map((id) => ({ id: id, date: '2026-10-01' })),
+    exercises: ids.map((id) => ({ id: id, name: 'E' })),
+    workoutTypes: ids.map((id) => ({ id: id, name: 'T' }))   // v1
+  });
+  assert.deepEqual(b.workouts.map((w) => w.id), ids);
+  assert.deepEqual(b.exercises.map((e) => e.id), ids);
+  assert.deepEqual(b.sheets.map((s) => s.id), ids);
+});
+
+test('normalizeBackup: treino com data invalida fica "sem data" em vez de quebrar o calendario', () => {
+  const b = core.normalizeBackup({
+    workouts: [
+      { id: 'w1', date: '2026-10-01', sets: [{ exerciseName: 'Supino', reps: 10, load: 40 }] },
+      { id: 'w2', sets: [{ exerciseName: 'Supino', reps: 8, load: 45 }] },
+      { id: 'w3', date: '<b>01/10/2026</b>' },
+      { id: 'w4', date: 20261001 }
+    ]
+  });
+  assert.deepEqual(b.workouts.map((w) => w.date), ['2026-10-01', '', '', '']);
+  assert.equal(b.workouts[1].sets[0].load, 45, 'o treino sem data continua com as series');
+  assert.equal(core.dateParts(b.workouts[1].date), null);
+  assert.equal(core.fmtBR(b.workouts[1].date), '—');
+});
+
+test('normalizeBackup: inicio da semana invalido volta para hoje; valido e preservado', () => {
+  assert.equal(core.normalizeBackup({ settings: { weekAnchor: '<img src=x onerror=alert(1)>' } }).settings.weekAnchor, core.todayISO());
+  assert.equal(core.normalizeBackup({ settings: {} }).settings.weekAnchor, core.todayISO());
+  assert.equal(core.normalizeBackup({ settings: { weekAnchor: '2026-10-05' } }).settings.weekAnchor, '2026-10-05');
+});
+
+test('normalizeBackup continua idempotente depois da validacao de ids e datas', () => {
+  const uma = core.normalizeBackup({
+    workouts: [{ id: 'w1', date: '2026-10-01' }, { id: 'w2' }],
+    sheets: [{ id: 's1', name: 'A', exercises: [{ name: 'Supino', sets: 3, reps: [12, 10, 8] }] }],
+    settings: { weekAnchor: '2026-10-05' }
+  });
+  assert.deepEqual(core.normalizeBackup(uma), uma);
+});
