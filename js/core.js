@@ -175,11 +175,12 @@
     });
   }
 
-  function warmupLine(warm) {
+  // useComma: mostra a carga com vírgula (pt-BR), igual ao campo do formulário.
+  function warmupLine(warm, useComma) {
     if (!warm) return '';
     const parts = [];
     if (warm.reps !== null && warm.reps !== undefined && warm.reps !== '') parts.push(warm.reps + ' reps');
-    if (warm.load !== null && warm.load !== undefined && warm.load !== '') parts.push(warm.load + ' kg');
+    if (warm.load !== null && warm.load !== undefined && warm.load !== '') parts.push(formatDecimal(warm.load, useComma) + ' kg');
     if (warm.rir !== null && warm.rir !== undefined && warm.rir !== '') parts.push('RIR ' + warm.rir);
     return parts.join(' · ');
   }
@@ -191,23 +192,23 @@
 
   /* ---------- séries ---------- */
 
-  function setLine(s) {
+  function setLine(s, useComma) {
     const parts = [];
     parts.push((s.reps === null || s.reps === undefined) ? '—' : s.reps + ' reps');
-    if (s.load !== null && s.load !== undefined) parts.push(s.load + ' kg');
+    if (s.load !== null && s.load !== undefined) parts.push(formatDecimal(s.load, useComma) + ' kg');
     if (s.rir !== null && s.rir !== undefined) parts.push('RIR ' + s.rir);
     return parts.join(' · ');
   }
 
   // Lista (ul) das séries, no mesmo estilo da lista de exercícios das fichas.
-  function setsSummaryLines(sets) {
+  function setsSummaryLines(sets, useComma) {
     const ordered = (sets || []).slice().sort(function (a, b) { return toNum(a.number) - toNum(b.number); });
     if (!ordered.length) return '';
 
     return '<ul class="list-unstyled sheet-items mb-0">' + ordered.map(function (s) {
       return '<li>' +
         '<span class="sheet-item-idx">' + esc(s.number || '?') + '</span>' +
-        '<span class="sheet-item-detail">' + esc(setLine(s)) + '</span>' +
+        '<span class="sheet-item-detail">' + esc(setLine(s, useComma)) + '</span>' +
         (s.note ? '<span class="sheet-item-note text-truncate">' + esc(s.note) + '</span>' : '') +
         '</li>';
     }).join('') + '</ul>';
@@ -635,7 +636,7 @@
 
   /* ---------- exportar treino como texto ---------- */
 
-  function workoutAsText(workout, sheets, exercises) {
+  function workoutAsText(workout, sheets, exercises, useComma) {
     const lines = [];
     lines.push('MEU TREINO — ' + fmtBR(workout.date));
 
@@ -648,10 +649,10 @@
     groups.forEach(function (g, i) {
       lines.push((i + 1) + '. ' + exerciseLabel(g, exercises) + (g.note ? ' (obs.: ' + g.note + ')' : ''));
 
-      if (warmupHasData(g.warmup)) lines.push('   Aquecimento: ' + warmupLine(g.warmup));
+      if (warmupHasData(g.warmup)) lines.push('   Aquecimento: ' + warmupLine(g.warmup, useComma));
 
       g.sets.slice().sort(function (a, b) { return toNum(a.number) - toNum(b.number); }).forEach(function (s) {
-        let line = '   Série ' + (s.number || '?') + ': ' + setLine(s);
+        let line = '   Série ' + (s.number || '?') + ': ' + setLine(s, useComma);
         if (s.note) line += ' (' + s.note + ')';
         lines.push(line);
       });

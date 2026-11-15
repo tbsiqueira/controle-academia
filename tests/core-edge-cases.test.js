@@ -638,3 +638,34 @@ test('nextWeekAnchor pula as semanas perdidas de uma vez, mantendo o dia da sema
 test('nextWeekAnchor sempre avanca pelo menos 7 dias', () => {
   assert.equal(core.nextWeekAnchor('2026-10-01', '2026-10-03'), '2026-10-08');
 });
+
+/* ---------- carga com vírgula fora do formulário ---------- */
+
+test('setLine e warmupLine mostram a carga com virgula quando pedido (igual ao formulario)', () => {
+  // regressao: o formulario mostrava "27,5" e o resumo/historico/texto mostravam "27.5 kg"
+  assert.equal(core.setLine({ reps: 12, load: 27.5, rir: 2 }, true), '12 reps · 27,5 kg · RIR 2');
+  assert.equal(core.warmupLine({ reps: 15, load: 16.2, rir: 3 }, true), '15 reps · 16,2 kg · RIR 3');
+  assert.equal(core.setLine({ reps: 12, load: 40, rir: null }, true), '12 reps · 40 kg', 'inteiro nao ganha virgula');
+  assert.equal(core.setLine({ reps: 5, load: 0 }, true), '5 reps · 0 kg');
+});
+
+test('sem o parametro o formato antigo (ponto) nao muda', () => {
+  assert.equal(core.setLine({ reps: 12, load: 27.5, rir: 2 }), '12 reps · 27.5 kg · RIR 2');
+  assert.equal(core.warmupLine({ reps: 15, load: 16.2, rir: 3 }), '15 reps · 16.2 kg · RIR 3');
+  assert.equal(core.setLine({ reps: 12, load: '27,5' }), '12 reps · 27.5 kg', 'carga antiga guardada como texto');
+});
+
+test('setsSummaryLines e workoutAsText repassam a virgula para series e aquecimento', () => {
+  const treino = {
+    date: '2026-10-08',
+    sets: [{ exerciseName: 'Supino', number: 1, reps: 10, load: 42.5, rir: 1 }],
+    warmups: [{ exerciseName: 'Supino', reps: 15, load: 22.5, rir: 3 }]
+  };
+  assert.ok(core.setsSummaryLines(treino.sets, true).indexOf('42,5 kg') !== -1);
+  assert.ok(core.setsSummaryLines(treino.sets).indexOf('42.5 kg') !== -1);
+
+  const comVirgula = core.workoutAsText(treino, [], [], true);
+  assert.ok(comVirgula.indexOf('Aquecimento: 15 reps · 22,5 kg · RIR 3') !== -1);
+  assert.ok(comVirgula.indexOf('Série 1: 10 reps · 42,5 kg · RIR 1') !== -1);
+  assert.ok(core.workoutAsText(treino, [], []).indexOf('42.5 kg') !== -1, 'sem o parametro continua com ponto');
+});

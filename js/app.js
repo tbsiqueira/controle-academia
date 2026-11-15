@@ -365,8 +365,8 @@ function renderWorkoutDetail() {
       '</button>' +
       (g.note ? '<div class="small text-muted"><i class="bi bi-info-circle"></i> ' + esc(g.note) + '</div>' : '') +
       prLine(records, g) +
-      (warmupHasData(g.warmup) ? '<div class="small text-muted"><i class="bi bi-fire"></i> Aquecimento: ' + esc(warmupLine(g.warmup)) + '</div>' : '') +
-      (g.sets.length ? setsSummaryLines(g.sets) : '<div class="small text-muted mt-1">Sem séries de trabalho.</div>') +
+      (warmupHasData(g.warmup) ? '<div class="small text-muted"><i class="bi bi-fire"></i> Aquecimento: ' + esc(warmupLine(g.warmup, commaDecimal)) + '</div>' : '') +
+      (g.sets.length ? setsSummaryLines(g.sets, commaDecimal) : '<div class="small text-muted mt-1">Sem séries de trabalho.</div>') +
       '</div></div>';
   }).join('');
 
@@ -416,7 +416,7 @@ function renderExerciseHistory() {
 
   let html = '<div class="card mb-3"><div class="card-body py-2 d-flex justify-content-between align-items-center">' +
     '<span class="small text-muted">' + trendIcon + ' ' + sessions.length + (sessions.length === 1 ? ' treino' : ' treinos') + ' com este exercício</span>' +
-    (prLoad > 0 ? '<span class="badge text-bg-warning"><i class="bi bi-trophy"></i> PR ' + prLoad + ' kg</span>' : '') +
+    (prLoad > 0 ? '<span class="badge text-bg-warning"><i class="bi bi-trophy"></i> PR ' + formatDecimal(prLoad, commaDecimal) + ' kg</span>' : '') +
     '</div></div>';
 
   html += '<h6 class="text-muted"><i class="bi bi-bar-chart-line"></i> Melhor série por dia</h6>';
@@ -425,7 +425,7 @@ function renderExerciseHistory() {
     const reps = r.best ? r.best.reps : 0;
     const pct = Math.max(4, Math.round((load / maxLoad) * 100));
     return '<div class="mb-2">' +
-      '<div class="d-flex justify-content-between small"><span>' + fmtBR(r.workout.date) + '</span><strong>' + load + ' kg × ' + reps + '</strong></div>' +
+      '<div class="d-flex justify-content-between small"><span>' + fmtBR(r.workout.date) + '</span><strong>' + formatDecimal(load, commaDecimal) + ' kg × ' + reps + '</strong></div>' +
       '<div class="progress" style="height: 10px"><div class="progress-bar" style="width: ' + pct + '%"></div></div>' +
       '</div>';
   }).join('');
@@ -441,8 +441,8 @@ function renderExerciseHistory() {
       '<strong>' + fmtBR(w.date) + '</strong>' +
       (sheetName ? '<span class="badge text-bg-light">' + esc(sheetName) + '</span>' : '') +
       '</div>' +
-      (warmupHasData(warm) ? '<div class="small text-muted"><i class="bi bi-fire"></i> Aquecimento: ' + esc(warmupLine(warm)) + '</div>' : '') +
-      (sets.length ? setsSummaryLines(sets) : '<div class="small text-muted mt-1">Sem séries de trabalho.</div>') +
+      (warmupHasData(warm) ? '<div class="small text-muted"><i class="bi bi-fire"></i> Aquecimento: ' + esc(warmupLine(warm, commaDecimal)) + '</div>' : '') +
+      (sets.length ? setsSummaryLines(sets, commaDecimal) : '<div class="small text-muted mt-1">Sem séries de trabalho.</div>') +
       '</div></div>';
   }).join('');
 
@@ -2106,7 +2106,7 @@ function exportWorkoutText(id) {
   const workout = id ? state.workouts.find(function (w) { return w.id === id; }) : null;
   if (!workout) return;
 
-  document.getElementById('exportText').value = workoutAsText(workout, state.sheets, allExercises());
+  document.getElementById('exportText').value = workoutAsText(workout, state.sheets, allExercises(), commaDecimal);
   bootstrap.Modal.getOrCreateInstance(document.getElementById('exportModal')).show();
 }
 

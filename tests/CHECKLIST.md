@@ -48,6 +48,7 @@ Mapa de **cada funcionalidade do app** para os testes que a cobrem. Serve para r
 | Iniciar próxima semana (pula as semanas perdidas de uma vez) | `core.js`: `nextWeekAnchor` | `core-edge-cases.test.js` (1 semana, 3 semanas paradas, virada do ano, mesmo dia da semana) |
 | Formulário do Treinar: linha da série (carga larga, número como texto) | `core.js`: `setRowHtml`, `setHeaderHtml` | `form-and-progress.test.js` (colunas 1-2-3-2-4, "102,5" cabe, handlers `setField`, teclados, escape) |
 | Remover exercício do treino em andamento (confirma se há algo preenchido) | `core.js`: `groupHasData` (pergunta no `app.js`: `removeFormExercise`) | `form-and-progress.test.js` (série/aquecimento preenchidos, RIR 0, em branco, confirmação antes do `splice`) |
+| Carga com vírgula também no resumo, histórico e texto exportado | `core.js`: `setLine`, `warmupLine`, `setsSummaryLines`, `workoutAsText` (parâmetro `useComma`) | `core-edge-cases.test.js` (vírgula quando pedido; sem o parâmetro o formato antigo não muda) |
 
 ## Limites conhecidos
 
