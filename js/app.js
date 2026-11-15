@@ -810,6 +810,7 @@ function renderFormSets() {
       group.sets.map(function (s, setIdx) { return setRowHtml(exIdx, setIdx, s, commaDecimal); }).join('') +
       '<div class="d-flex gap-1 mt-1">' +
       '<button type="button" class="btn btn-sm btn-outline-secondary" onclick="addFormSet(' + exIdx + ')"><i class="bi bi-plus"></i> série</button>' +
+      '<button type="button" class="btn btn-sm btn-outline-secondary" onclick="removeFormSet(' + exIdx + ')"' + (group.sets.length <= 1 ? ' disabled' : '') + '><i class="bi bi-dash"></i> série</button>' +
       '<button type="button" class="btn btn-sm btn-outline-success ms-auto" onclick="startRest()"><i class="bi bi-stopwatch"></i> Descanso ' + fmtClock(restSecondsOf(state.settings)) + '</button>' +
       '</div>' +
       '</div></div>';
@@ -835,6 +836,18 @@ function addFormSet(exIdx) {
   const group = state.formSets[exIdx];
   if (!group) return;
   group.sets.push({ number: group.sets.length + 1, reps: '', load: '', rir: '', note: '' });
+  renderFormSets();
+  scheduleDraftSave();
+}
+
+// Tira a ÚLTIMA série do exercício (a ficha pede 4 e hoje só deu para fazer 3, ou um toque a mais
+// no "+ série"). Sempre sobra pelo menos uma; pergunta antes se ela tem algo preenchido.
+function removeFormSet(exIdx) {
+  const group = state.formSets[exIdx];
+  if (!group || group.sets.length <= 1) return;
+  const last = group.sets[group.sets.length - 1];
+  if (setHasData(last) && !confirm('Remover a série ' + last.number + ' de "' + labelOf(group) + '"?')) return;
+  group.sets.pop();
   renderFormSets();
   scheduleDraftSave();
 }

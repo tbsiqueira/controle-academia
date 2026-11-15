@@ -56,6 +56,7 @@ Mapa de **cada funcionalidade do app** para os testes que a cobrem. Serve para r
 | Busca de exercício (seletor do treino, da ficha e do cadastro) | `core.js`: `pickerHtml` (os três `render*Results` do `app.js`) | `picker.test.js` (Biblioteca × catálogo, busca sem acento, Criar, limites, escape, handlers existem e aceitam id como texto, código morto não voltou) |
 | Resumo no card do Início (exercícios · volume · cardio · recordes) | `core.js`: `workoutSummary`, `fmtThousands` (+ `workoutRecords`) | `features.test.js` (linha completa, partes zeradas, singular, dados de exemplo, card usa o resumo) |
 | Começar o treino em um toque (botão "Treinar: <ficha>" no Início) | `core.js`: `nextSheet` (botão e carga da ficha no `app.js`) | `features.test.js` (próxima ficha em ordem alfabética, volta ao início, ficha desativada/excluída, sem fichas, dados v1) |
+| Remover a última série de um exercício no Treinar | `core.js`: `setHasData` (botão "− série" no `app.js`: `removeFormSet`) | `features.test.js` (série em branco × preenchida, nunca remove a única, confirma antes) |
 
 ## Limites conhecidos
 

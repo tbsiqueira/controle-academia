@@ -111,3 +111,30 @@ test('Inicio tem o botao "Treinar: <ficha>" e o Treinar carrega a ficha escolhid
   assert.match(form, /if \(quickSheet && !draft && !editing\)/, 'nunca por cima de um rascunho ou de uma edicao');
   assert.match(form, /state\.pendingSheetId = null;/, 'vale para uma abertura so');
 });
+
+/* ---------- remover uma série ---------- */
+
+test('setHasData: serie com qualquer campo preenchido tem dado; em branco nao', () => {
+  const vazio = { number: 3, reps: '', load: '', rir: '', note: '' };
+  assert.equal(core.setHasData(vazio), false, 'o numero da serie nao conta como dado');
+  assert.equal(core.setHasData({ number: 3, reps: null, load: undefined }), false);
+  assert.equal(core.setHasData(Object.assign({}, vazio, { reps: 12 })), true);
+  assert.equal(core.setHasData(Object.assign({}, vazio, { load: '27,5' })), true);
+  assert.equal(core.setHasData(Object.assign({}, vazio, { rir: 0 })), true);
+  assert.equal(core.setHasData(Object.assign({}, vazio, { note: 'caiu' })), true);
+});
+
+test('groupHasData continua igual depois de reaproveitar setHasData', () => {
+  assert.equal(core.groupHasData({ sets: [{ reps: '', load: '' }, { reps: '', load: 40 }] }), true);
+  assert.equal(core.groupHasData({ warmup: { reps: '', load: '', rir: '' }, sets: [{ reps: '', load: '' }] }), false);
+  assert.equal(core.groupHasData({ warmup: { reps: 15 }, sets: [] }), true);
+});
+
+test('Treinar tem o botao "- serie": tira a ultima, nunca a unica, e confirma se tem dado', () => {
+  const body = APP.slice(APP.indexOf('function removeFormSet'), APP.indexOf('function removeFormExercise'));
+  assert.match(body, /group\.sets\.length <= 1\) return;/, 'sempre sobra uma serie');
+  assert.match(body, /setHasData\(last\) && !confirm\(/);
+  assert.ok(body.indexOf('confirm(') < body.indexOf('.pop()'), 'pergunta antes de remover');
+  assert.match(body, /scheduleDraftSave\(\)/, 'o rascunho acompanha');
+  assert.match(APP, /onclick="removeFormSet\(' \+ exIdx \+ '\)"' \+ \(group\.sets\.length <= 1 \? ' disabled' : ''\)/);
+});
