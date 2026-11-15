@@ -147,7 +147,7 @@ tests/CHECKLIST.md          mapa funcionalidade -> testes
 tests/fixtures/             backups de versões antigas usados nos testes
 vendor/                     Bootstrap 5 + Bootstrap Icons (locais, sem CDN)
 manifest.webmanifest        manifest do PWA
-sw.js                       service worker (network-first, com fallback offline)
+sw.js                       service worker (cache-first nos arquivos ?v=N, network-first no resto, com fallback offline)
 reset.html                  página de escape: desregistra o service worker e limpa o cache
 serve.ps1                   servidor local de desenvolvimento
 test.ps1                    roda os testes unitários (Node)

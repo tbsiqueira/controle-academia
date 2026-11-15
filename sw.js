@@ -1,7 +1,7 @@
 'use strict';
 
-/* Service worker: network-first with offline fallback.
-   Online = always the freshest files; offline = last cached version.
+/* Service worker: cache-first for versioned assets (?v=N), network-first for the rest
+   (index.html, catalog), always with offline fallback.
    No user data ever leaves the device. */
 
 const CACHE_NAME = 'meu-treino-v59';
@@ -45,6 +45,8 @@ self.addEventListener('activate', (event) => {
   );
 });
 
+const DEV_HOSTS = ['localhost', '127.0.0.1', '[::1]'];
+
 function putInCache(key, response) {
   if (response && response.status === 200) {
     const clone = response.clone();
@@ -75,11 +77,17 @@ self.addEventListener('fetch', (event) => {
 
   // Versioned assets (?v=) are cached under their exact URL;
   // everything else (fonts with ?hash) is cached by path only.
-  const key = url.searchParams.has('v') ? request.url : (url.origin + url.pathname);
+  const versioned = url.searchParams.has('v');
+  const key = versioned ? request.url : (url.origin + url.pathname);
+  const fromNetwork = () => fetch(request).then((response) => putInCache(key, response));
 
-  event.respondWith(
-    fetch(request)
-      .then((response) => putInCache(key, response))
-      .catch(() => fromCache(key, request))
-  );
+  // Versioned assets never change under the same URL, so the cache answers first:
+  // on weak gym wifi the app opens without waiting for the network to give up.
+  // Not on localhost, where files are edited without bumping the version.
+  if (versioned && !DEV_HOSTS.includes(url.hostname)) {
+    event.respondWith(caches.match(key).then((hit) => hit || fromNetwork()));
+    return;
+  }
+
+  event.respondWith(fromNetwork().catch(() => fromCache(key, request)));
 });
