@@ -1801,24 +1801,26 @@ function renderCalendar() {
   const firstDow = new Date(y, m, 1).getDay();
   const daysInMonth = new Date(y, m + 1, 0).getDate();
 
-  const counts = {};
-  state.workouts.forEach(function (w) {
-    if (w.date.indexOf(prefix) === 0) counts[w.date] = (counts[w.date] || 0) + 1;
-  });
+  const byDate = workoutsByDate(state.workouts);
+  let total = 0;
 
   const cells = [];
   const today = todayISO();
   for (let i = 0; i < firstDow; i++) cells.push('<div class="cal-cell empty"></div>');
   for (let day = 1; day <= daysInMonth; day++) {
     const iso = prefix + '-' + pad2(day);
-    const count = counts[iso] || 0;
+    const dayWorkouts = byDate[iso] || [];
+    const count = dayWorkouts.length;
+    total += count;
     const classes = 'cal-cell' + (count ? ' has-workout' : '') + (iso === today ? ' today' : '');
-    cells.push('<div class="' + classes + '">' + day + (count ? '<span class="cal-badge">' + count + '</span>' : '') + '</div>');
+    // Dia com treino é um link para o treino (com dois no dia, abre o mais recente).
+    cells.push(count
+      ? '<a class="' + classes + '" href="#/detail/' + esc(dayWorkouts[0].id) + '" aria-label="' + esc('Abrir treino de ' + fmtBR(iso) + (count > 1 ? ' (' + count + ' treinos no dia)' : '')) + '">' + day + '<span class="cal-badge">' + count + '</span></a>'
+      : '<div class="' + classes + '">' + day + '</div>');
   }
 
   document.getElementById('calendarGrid').innerHTML = cells.join('');
 
-  const total = Object.keys(counts).reduce(function (sum, k) { return sum + counts[k]; }, 0);
   document.getElementById('calendarTotal').innerHTML = '<i class="bi bi-calendar-check"></i> ' + total + (total === 1 ? ' treino' : ' treinos') + ' em ' + monthNames[m] + '.';
   renderWeeklyProgress();
 }

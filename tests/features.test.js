@@ -184,3 +184,35 @@ test('fim do descanso continua sem som, vibracao nem animacao (so cor)', () => {
   const rule = CSS.slice(CSS.indexOf('.set-done {'), CSS.indexOf('}', CSS.indexOf('.set-done {')));
   assert.doesNotMatch(rule, /animation|transition/);
 });
+
+/* ---------- calendário: tocar no dia abre o treino ---------- */
+
+test('workoutsByDate agrupa por dia, com o treino mais recente do dia primeiro', () => {
+  const manha = { id: 'manha', date: '2026-10-08', createdAt: '2026-10-08T08:00:00.000Z' };
+  const noite = { id: 'noite', date: '2026-10-08', createdAt: '2026-10-08T20:00:00.000Z' };
+  const outro = { id: 'outro', date: '2026-10-10' };
+  const original = [manha, outro, noite];
+  const mapa = core.workoutsByDate(original);
+
+  assert.deepEqual(Object.keys(mapa).sort(), ['2026-10-08', '2026-10-10']);
+  assert.deepEqual(mapa['2026-10-08'].map((w) => w.id), ['noite', 'manha'], 'o link do dia abre o mais recente');
+  assert.deepEqual(mapa['2026-10-10'].map((w) => w.id), ['outro']);
+  assert.deepEqual(original.map((w) => w.id), ['manha', 'outro', 'noite'], 'nao reordena a lista do app');
+});
+
+test('workoutsByDate ignora treino sem data valida e aceita lista vazia', () => {
+  const mapa = core.workoutsByDate([{ id: 'a', date: '' }, { id: 'b' }, { id: 'c', date: '08/10/2026' }, { id: 'd', date: '2026-10-08' }]);
+  assert.deepEqual(Object.keys(mapa), ['2026-10-08']);
+  assert.deepEqual(core.workoutsByDate([]), {});
+  assert.deepEqual(core.workoutsByDate(null), {});
+});
+
+test('calendario: dia com treino vira link para #/detail/<id>; dia vazio continua sem link', () => {
+  const body = APP.slice(APP.indexOf('function renderCalendar'), APP.indexOf('/* ---------- evolução semanal (volume'));
+  assert.match(body, /workoutsByDate\(state\.workouts\)/);
+  assert.match(body, /href="#\/detail\/' \+ esc\(dayWorkouts\[0\]\.id\)/);
+  assert.match(body, /aria-label="' \+ esc\('Abrir treino de '/);
+  assert.match(body, /: '<div class="' \+ classes \+ '">' \+ day \+ '<\/div>'/);
+  assert.doesNotMatch(body, /w\.date\.indexOf/, 'nao quebra mais com treino sem data');
+  assert.match(CSS, /a\.cal-cell \{/);
+});

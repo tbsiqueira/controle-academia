@@ -607,6 +607,18 @@
     return Object.keys(seen).sort(function (a, b) { return a.localeCompare(b, 'pt-BR'); });
   }
 
+  /* ---------- calendário ---------- */
+
+  // Treinos por dia: { "2026-10-08": [mais recente, ...] }. Treino sem data válida fica de fora.
+  function workoutsByDate(workouts) {
+    const map = {};
+    (workouts || []).slice().sort(byDateDesc).forEach(function (w) {
+      if (!ISO_DATE.test(String(w.date))) return;
+      (map[w.date] = map[w.date] || []).push(w);
+    });
+    return map;
+  }
+
   /* ---------- evolução semanal ---------- */
 
   // Volume (tonelagem) de um treino: soma de reps × carga das séries de trabalho.
@@ -1233,6 +1245,7 @@
     recentCutoff: recentCutoff,
     visibleWorkoutCount: visibleWorkoutCount,
     sheetFilterOptions: sheetFilterOptions,
+    workoutsByDate: workoutsByDate,
     workoutVolume: workoutVolume,
     fmtThousands: fmtThousands,
     workoutSummary: workoutSummary,
