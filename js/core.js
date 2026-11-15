@@ -151,6 +151,14 @@
     return { anchor: anchor, end: addDaysISO(anchor, 6) };
   }
 
+  // Início da próxima semana de metas: avança de 7 em 7 dias (sempre pelo menos uma vez)
+  // até a janela alcançar hoje. Quem ficou 3 semanas sem abrir o app não precisa tocar 3 vezes.
+  function nextWeekAnchor(anchorISO, todayIso) {
+    let anchor = addDaysISO(anchorISO, 7);
+    while (addDaysISO(anchor, 6) < todayIso) anchor = addDaysISO(anchor, 7);
+    return anchor;
+  }
+
   function isValidWorkout(w) {
     const hasSet = (w.sets || []).some(function (s) {
       return toNum(s.reps) > 0 || toNum(s.load) > 0;
@@ -1067,6 +1075,7 @@
     // configurações e semana
     defaultSettings: defaultSettings,
     weekWindow: weekWindow,
+    nextWeekAnchor: nextWeekAnchor,
     isValidWorkout: isValidWorkout,
     // dados de exemplo
     materializeSampleData: materializeSampleData,

@@ -132,7 +132,7 @@ function weekStats() {
 }
 
 async function confirmNextWeek() {
-  state.settings.weekAnchor = addDaysISO(state.settings.weekAnchor, 7);
+  state.settings.weekAnchor = nextWeekAnchor(state.settings.weekAnchor, todayISO());
   await dbPut('settings', state.settings);
   renderDashboard();
 }

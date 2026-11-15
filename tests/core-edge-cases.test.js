@@ -616,3 +616,25 @@ test('normalizeBackup continua idempotente depois da validacao de ids e datas', 
   });
   assert.deepEqual(core.normalizeBackup(uma), uma);
 });
+
+/* ---------- semana de metas: iniciar a próxima ---------- */
+
+test('nextWeekAnchor avanca uma semana quando a anterior acabou de encerrar', () => {
+  // janela 01–07/out; hoje 08/out -> proxima janela 08–14/out
+  assert.equal(core.nextWeekAnchor('2026-10-01', '2026-10-08'), '2026-10-08');
+  assert.equal(core.nextWeekAnchor('2026-10-01', '2026-10-14'), '2026-10-08');
+});
+
+test('nextWeekAnchor pula as semanas perdidas de uma vez, mantendo o dia da semana', () => {
+  // regressao: depois de 3 semanas parado era preciso tocar 3 vezes no botao
+  const anchor = core.nextWeekAnchor('2026-10-01', '2026-10-25');
+  assert.equal(anchor, '2026-10-22');
+  const janela = core.weekWindow(anchor);
+  assert.ok(janela.anchor <= '2026-10-25' && '2026-10-25' <= janela.end, 'hoje cai dentro da nova janela');
+  assert.equal(core.parseDate(anchor).getDay(), core.parseDate('2026-10-01').getDay());
+  assert.equal(core.nextWeekAnchor('2026-12-20', '2027-01-15'), '2027-01-10', 'atravessa o ano');
+});
+
+test('nextWeekAnchor sempre avanca pelo menos 7 dias', () => {
+  assert.equal(core.nextWeekAnchor('2026-10-01', '2026-10-03'), '2026-10-08');
+});
