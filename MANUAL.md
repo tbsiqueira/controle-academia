@@ -204,8 +204,8 @@ Elevação pélvica                                    [3 séries]
 ## 5. Vendo como foi o treino e a evolução
 
 **Lista do Início:** mostra o **mês atual e o anterior** (no mínimo 10 treinos), agrupados por mês, com o
-treino de **hoje em verde-limão**. Cada cartão é enxuto: o **bloco da data** e o **nome da ficha** — toque em qualquer
-lugar do cartão para abrir o treino (o **compartilhar** fica dentro dele). Embaixo do nome vem um resumo
+treino de **hoje em verde-limão**. Cada cartão é enxuto: o **bloco da data** e o **nome da ficha** (toque para abrir o
+treino) e, à direita, o botão de **compartilhar** o treino como texto. Embaixo do nome vem um resumo
 (ex.: _"6 exercícios · 4.320 kg · 30 min cardio"_) e, se houver, quantos **recordes 🏆** o treino bateu. O botão **Ver meses anteriores** abre o
 resto. Com 2 ou mais fichas usadas, aparecem pílulas de filtro (**Todas**, uma por ficha) para ver só os treinos de uma ficha.
 
@@ -338,7 +338,7 @@ Exemplos prontos para copiar:
 
 Dá para gerar uma **mensagem de texto** com o treino do dia — pronta para WhatsApp, e-mail, etc.
 
-**Como:** Início → toque no treino e use o botão de **compartilhar** (ao lado de **Editar treino**).
+**Como:** Início → no cartão do treino, toque no ícone de **compartilhar** à direita (ou abra o treino e use o **compartilhar** ao lado de **Editar treino**).
 Depois escolha **Copiar** ou **Compartilhar** (no celular abre a folha de compartilhamento).
 
 **Exemplo do texto gerado:**

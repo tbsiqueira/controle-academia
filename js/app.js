@@ -291,15 +291,16 @@ function renderWorkoutList() {
         : '<div class="workout-date" aria-hidden="true"><span class="workout-date-day">—</span></div>';
 
       return header +
-        '<div class="card mb-2"><button type="button" class="workout-row" data-view-workout="' + esc(w.id) + '" aria-label="' + esc(name + ', ' + fmtBR(w.date) + (summary ? ', ' + summary : '') + (records ? ', ' + records + (records === 1 ? ' recorde' : ' recordes') : '')) + '">' +
+        '<div class="card mb-2 d-flex flex-row align-items-center pe-3"><button type="button" class="workout-row" data-view-workout="' + esc(w.id) + '" aria-label="' + esc(name + ', ' + fmtBR(w.date) + (summary ? ', ' + summary : '') + (records ? ', ' + records + (records === 1 ? ' recorde' : ' recordes') : '')) + '">' +
         dateBlock +
         '<span class="min-w-0"><strong>' + esc(name) + '</strong>' +
         ((summary || records) ? '<span class="d-block small text-muted">' + esc(summary) +
           (records ? (summary ? ' · ' : '') + '<span class="pr-count"><i class="bi bi-trophy-fill"></i> ' + records + '</span>' : '') +
           '</span>' : '') +
         '</span>' +
-        '<i class="bi bi-chevron-right" aria-hidden="true"></i>' +
-        '</button></div>';
+        '</button>' +
+        '<button type="button" class="btn btn-sm btn-outline-secondary" data-share-workout="' + esc(w.id) + '" title="Exportar como texto" aria-label="Exportar como texto"><i class="bi bi-share"></i></button>' +
+        '</div>';
     }).join('') +
     moreHtml;
 
@@ -318,6 +319,12 @@ function renderWorkoutList() {
   el.querySelectorAll('[data-view-workout]').forEach(function (b) {
     b.addEventListener('click', function () {
       location.hash = '#/detail/' + b.getAttribute('data-view-workout');
+    });
+  });
+
+  el.querySelectorAll('[data-share-workout]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      exportWorkoutText(b.getAttribute('data-share-workout'));
     });
   });
 
