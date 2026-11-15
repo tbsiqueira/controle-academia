@@ -149,8 +149,7 @@
       id: 'app',
       weekAnchor: todayISO(),
       weeklyWorkoutTarget: 3,
-      weeklyCardioTarget: 120,
-      tonnageVisible: false
+      weeklyCardioTarget: 120
     };
   }
 
@@ -192,11 +191,6 @@
     if (warm.load !== null && warm.load !== undefined && warm.load !== '') parts.push(formatDecimal(warm.load, useComma) + ' kg');
     if (warm.rir !== null && warm.rir !== undefined && warm.rir !== '') parts.push('RIR ' + warm.rir);
     return parts.join(' · ');
-  }
-
-  function warmupSummary(warmups) {
-    if (!warmups || !warmups.length) return '';
-    return warmups.length === 1 ? '1 aquecimento' : warmups.length + ' aquecimentos';
   }
 
   /* ---------- séries ---------- */
@@ -313,23 +307,6 @@
       exerciseId: (group && group.exerciseId) || null,
       exerciseName: (group && group.exerciseName) || ''
     };
-  }
-
-  // Quantos EXERCÍCIOS o treino tem: conta cada exercício uma vez (id-first), juntando
-  // as séries de trabalho com o aquecimento do mesmo exercício.
-  function countExercises(workout) {
-    const w = workout || {};
-    const vistos = {};
-    let total = 0;
-
-    (w.sets || []).concat(w.warmups || []).forEach(function (entry) {
-      const key = exerciseKey(entry);
-      if (vistos[key]) return;
-      vistos[key] = true;
-      total++;
-    });
-
-    return total;
   }
 
   // Agrupa as séries planas do treino por exercício (id-first, na ordem em que aparecem),
@@ -796,6 +773,38 @@
     return { workouts: updated, changed: changed };
   }
 
+  /* ---------- busca de exercício (seletor do treino, da ficha e do cadastro) ---------- */
+
+  // Lista de resultados da busca: "Criar …", Biblioteca (quando pedida e com resultado) e Catálogo.
+  // fn = nomes das funções do app.js chamadas no toque: { create, library, catalog }.
+  // Sem fn.library a Biblioteca fica de fora (cadastro de exercício: só o catálogo interessa).
+  function pickerHtml(query, library, catalog, fn) {
+    const q = String(query || '').trim();
+    const lower = normalizeText(q);
+
+    function matches(list, limit) {
+      return (list || []).filter(function (e) {
+        return !lower || normalizeText(e.name).indexOf(lower) !== -1;
+      }).slice(0, limit);
+    }
+
+    function row(e, handler) {
+      return '<button type="button" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" onclick="' + handler + "('" + esc(e.id) + "')\">" +
+        '<span>' + esc(e.name) + '</span><span class="badge text-bg-light">' + esc(e.group || '') + '</span></button>';
+    }
+
+    const lib = fn.library ? matches(libraryExercises(library), 30) : [];
+    const cat = matches(catalog, 50);
+
+    return (q ? '<button type="button" class="list-group-item list-group-item-action text-primary fw-semibold" onclick="' + fn.create + '()">' +
+        '<i class="bi bi-plus-circle"></i> Criar "' + esc(q) + '"</button>' : '') +
+      (lib.length ? '<div class="px-2 py-1 small text-muted fw-semibold">Biblioteca</div>' +
+        lib.map(function (e) { return row(e, fn.library); }).join('') : '') +
+      '<div class="px-2 py-1 small text-muted fw-semibold">Catálogo (pt-BR)</div>' +
+      (cat.length ? cat.map(function (e) { return row(e, fn.catalog); }).join('')
+        : '<div class="list-group-item small text-muted">Nada encontrado.</div>');
+  }
+
   /* ---------- backup ---------- */
 
   // Nome do arquivo com data e hora, para diferenciar backups do mesmo dia.
@@ -887,13 +896,6 @@
   function libraryExercises(exercises) {
     return (exercises || []).filter(function (e) {
       return e && e.active !== false && isUserExercise(e);
-    });
-  }
-
-  // Marcações antigas de 'catalog' feitas sem comprovação (sem catalogId) precisam ser desfeitas.
-  function exercisesNeedingRepair(exercises) {
-    return (exercises || []).filter(function (e) {
-      return e && e.source === 'catalog' && !e.catalogId;
     });
   }
 
@@ -1157,12 +1159,11 @@
     // biblioteca
     isUserExercise: isUserExercise,
     libraryExercises: libraryExercises,
-    exercisesNeedingRepair: exercisesNeedingRepair,
+    pickerHtml: pickerHtml,
     fixLibrarySources: fixLibrarySources,
     // aquecimento e séries
     warmupHasData: warmupHasData,
     warmupLine: warmupLine,
-    warmupSummary: warmupSummary,
     setLine: setLine,
     setsSummaryLines: setsSummaryLines,
     setHeaderHtml: setHeaderHtml,
@@ -1201,7 +1202,6 @@
     exerciseKey: exerciseKey,
     hasExercise: hasExercise,
     historyTarget: historyTarget,
-    countExercises: countExercises,
     // compatibilidade de dados
     normalizeBackup: normalizeBackup,
     normalizeSheetItem: normalizeSheetItem,

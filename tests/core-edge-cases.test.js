@@ -178,11 +178,9 @@ test('backupStatus respeita limite e data informados', () => {
   assert.equal(info.overdue, true, 'limite de 1 dia');
 });
 
-test('libraryExercises e exercisesNeedingRepair aceitam lista ausente', () => {
+test('libraryExercises aceita lista ausente', () => {
   assert.deepEqual(core.libraryExercises(), []);
-  assert.deepEqual(core.exercisesNeedingRepair(), []);
   assert.deepEqual(core.libraryExercises([null, { id: 'e1', name: 'X', source: 'catalog', catalogId: 3 }]), []);
-  assert.deepEqual(core.exercisesNeedingRepair([null, { id: 'e1', name: 'X' }]), []);
 });
 
 test('normalizacao descarta itens invalidos e completa campos ausentes', () => {
@@ -459,39 +457,6 @@ test('lastLoadsForExercise ordena tres treinos (comparador nos dois sentidos)', 
   assert.deepEqual(core.lastLoadsForExercise(treinos.slice().reverse(), 'X'), { 1: 20 });
 });
 
-test('countExercises conta cada exercicio uma vez (series + aquecimento)', () => {
-  assert.equal(core.countExercises(), 0);
-  assert.equal(core.countExercises({}), 0);
-
-  const treino = {
-    sets: [
-      { exerciseId: 5, exerciseName: 'Remada baixa', number: 1, reps: 10, load: 30 },
-      { exerciseId: 5, exerciseName: 'Nome antigo', number: 2, reps: 8, load: 35 },
-      { exerciseId: 6, exerciseName: 'Leg press 45', number: 1, reps: 12, load: 100 },
-      { exerciseName: 'Esteira inclinada', number: 1, reps: 1, load: 0 }
-    ],
-    warmups: [
-      { exerciseId: 5, exerciseName: 'Remada baixa', reps: 15, load: 20, rir: 3 },
-      { exerciseId: 7, exerciseName: 'So aquecimento', reps: 10, load: 10, rir: 2 }
-    ]
-  };
-
-  assert.equal(core.countExercises(treino), 4, 'Remada (2 series + aquecimento) conta 1 vez');
-  assert.equal(core.countExercises({ sets: treino.sets }), 3, 'sem aquecimentos, sobram 3 exercicios');
-
-  assert.equal(core.countExercises({ sets: [
-    { exerciseId: 1, exerciseName: 'Rosca', reps: 10 },
-    { exerciseId: 2, exerciseName: 'Rosca', reps: 10 }
-  ] }), 2, 'mesmo nome com ids diferentes = exercicios diferentes');
-
-  assert.equal(core.countExercises({ sets: [
-    { exerciseName: 'Rosca', reps: 10 },
-    { exerciseName: 'Rosca', reps: 8 }
-  ] }), 1, 'registros antigos sem id com o mesmo nome contam uma vez');
-
-  assert.equal(core.countExercises({ sets: [{ reps: 10 }] }), 1, 'exercicio sem nome conta como um');
-});
-
 test('id em texto e numero sao o mesmo exercicio (data-* devolve texto)', () => {
   assert.equal(core.exerciseMatches({ exerciseId: 887, exerciseName: 'Puxada' }, { exerciseId: '887', exerciseName: 'Puxada' }), true);
   assert.equal(core.exerciseMatches({ exerciseId: '887' }, { exerciseId: 887 }), true);
@@ -515,7 +480,7 @@ test('regressao: historico de exercicio do catalogo aberto pelo clique', () => {
   assert.deepEqual(core.lastLoadsForExercise(treinos, alvo), { 1: 45 });
   assert.equal(core.bestSetForExercise(treinos[0], alvo).load, 40);
   assert.equal(core.previousWarmupFields(treinos, alvo).reps, '', 'sem aquecimento registrado');
-  assert.equal(core.countExercises({ sets: [{ exerciseId: '887' }, { exerciseId: 887 }] }), 1, 'texto e numero contam como o mesmo exercicio');
+  assert.equal(core.groupSets([{ exerciseId: '887' }, { exerciseId: 887 }], []).length, 1, 'texto e numero contam como o mesmo exercicio');
 });
 /* ---------- calendário: trocar de mês ---------- */
 

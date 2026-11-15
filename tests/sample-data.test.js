@@ -166,7 +166,7 @@ test('fixture: o contador do card conta exercicios (nao series)', () => {
   const data = sample.data;
 
   data.workouts.forEach(function (w) {
-    const exercicios = core.countExercises(w);
+    const exercicios = core.groupSets(w.sets, w.warmups).length;
     const series = (w.sets || []).length;
 
     assert.ok(exercicios >= 5, w.id + ': pelo menos 5 exercicios no treino');

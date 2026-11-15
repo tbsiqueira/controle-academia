@@ -97,11 +97,6 @@ body {
   color: var(--mt-primary) !important;
 }
 
-/* Workout set rows */
-.set-header div {
-  font-size: 0.72rem;
-}
-
 /* Calendar */
 .cal-grid {
   display: grid;

@@ -1019,10 +1019,6 @@ async function deleteViewedWorkout() {
 
 /* ---------- exercise picker ---------- */
 
-async function openExercisePicker() {
-  await openExercisePickerModal();
-}
-
 async function openExercisePickerModal() {
   await loadCatalog().catch(function () {});
   document.getElementById('pickerTitle').textContent = 'Escolher exercício';
@@ -1038,41 +1034,8 @@ function hideExercisePicker() {
 }
 
 function renderPickerResults(query) {
-  const q = (query || '').trim();
-  state.pickerQuery = q;
-  const lower = normalizeText(q);
-  const el = document.getElementById('pickerResults');
-
-  const fichas = state.exercises.filter(function (e) {
-    return e.active !== false && isUserExercise(e) && (!lower || normalizeText(e.name).indexOf(lower) !== -1);
-  }).slice(0, 30);
-
-  const catalog = (state.catalog || []).filter(function (e) {
-    return !lower || normalizeText(e.name).indexOf(lower) !== -1;
-  }).slice(0, 50);
-
-  let html = '';
-
-  if (q) {
-    html += '<button type="button" class="list-group-item list-group-item-action text-primary fw-semibold" onclick="createExerciseFromPicker()">' +
-      '<i class="bi bi-plus-circle"></i> Criar "' + esc(q) + '"</button>';
-  }
-
-  html += '<div class="px-2 py-1 small text-muted fw-semibold">Biblioteca</div>';
-  if (!fichas.length) html += '<div class="list-group-item small text-muted">Nenhum exercício cadastrado.</div>';
-  html += fichas.map(function (e) {
-    return '<button type="button" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" onclick="pickLibraryExercise(\'' + e.id + '\')">' +
-      '<span>' + esc(e.name) + '</span><span class="badge text-bg-light">' + esc(e.group || '') + '</span></button>';
-  }).join('');
-
-  html += '<div class="px-2 py-1 small text-muted fw-semibold mt-2">Catálogo (pt-BR)</div>';
-  if (!catalog.length) html += '<div class="list-group-item small text-muted">Nada encontrado.</div>';
-  html += catalog.map(function (e) {
-    return '<button type="button" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" onclick="pickCatalogExercise(' + e.id + ')">' +
-      '<span>' + esc(e.name) + '</span><span class="badge text-bg-light">' + esc(e.group || '') + '</span></button>';
-  }).join('');
-
-  el.innerHTML = html;
+  state.pickerQuery = (query || '').trim();
+  document.getElementById('pickerResults').innerHTML = pickerHtml(query, state.exercises, state.catalog, { create: 'createExerciseFromPicker', library: 'pickLibraryExercise', catalog: 'pickCatalogExercise' });
 }
 
 function pickLibraryExercise(id) {
@@ -1120,32 +1083,8 @@ function toggleFichaCatalog() {
 }
 
 function renderFichaCatalogResults(query) {
-  const q = (query || '').trim();
-  state.fichaQuery = q;
-  const lower = normalizeText(q);
-  const el = document.getElementById('fichaCatalogResults');
-
-  const catalog = (state.catalog || []).filter(function (e) {
-    return !lower || normalizeText(e.name).indexOf(lower) !== -1;
-  }).slice(0, 50);
-
-  let html = '';
-
-  if (q) {
-    html += '<button type="button" class="list-group-item list-group-item-action text-primary fw-semibold" onclick="createExerciseFromFichaSearch()">' +
-      '<i class="bi bi-plus-circle"></i> Criar "' + esc(q) + '"</button>';
-  }
-
-  if (!catalog.length) {
-    html += '<div class="list-group-item small text-muted">Nada encontrado no catálogo.</div>';
-  }
-
-  html += catalog.map(function (e) {
-    return '<button type="button" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" onclick="pickCatalogForFicha(' + e.id + ')">' +
-      '<span>' + esc(e.name) + '</span><span class="badge text-bg-light">' + esc(e.group || '') + '</span></button>';
-  }).join('');
-
-  el.innerHTML = html;
+  state.fichaQuery = (query || '').trim();
+  document.getElementById('fichaCatalogResults').innerHTML = pickerHtml(query, null, state.catalog, { create: 'createExerciseFromFichaSearch', catalog: 'pickCatalogForFicha' });
 }
 
 async function ensureLibraryExercise(name, group, source) {
@@ -1568,42 +1507,8 @@ async function toggleSheetPicker() {
 }
 
 function renderSheetPickerResults(query) {
-  const q = (query || '').trim();
-  state.sheetPickerQuery = q;
-  const lower = normalizeText(q);
-  const el = document.getElementById('sheetPickerResults');
-
-  const library = state.exercises.filter(function (e) {
-    return e.active !== false && isUserExercise(e) && (!lower || normalizeText(e.name).indexOf(lower) !== -1);
-  }).slice(0, 20);
-
-  const catalog = (state.catalog || []).filter(function (e) {
-    return !lower || normalizeText(e.name).indexOf(lower) !== -1;
-  }).slice(0, 50);
-
-  let html = '';
-
-  if (q) {
-    html += '<button type="button" class="list-group-item list-group-item-action text-primary fw-semibold" onclick="createExerciseFromSheetPicker()">' +
-      '<i class="bi bi-plus-circle"></i> Criar "' + esc(q) + '"</button>';
-  }
-
-  if (library.length) {
-    html += '<div class="px-2 py-1 small text-muted fw-semibold">Biblioteca</div>';
-    html += library.map(function (e) {
-      return '<button type="button" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" onclick="pickSheetLibraryExercise(\'' + e.id + '\')">' +
-        '<span>' + esc(e.name) + '</span><span class="badge text-bg-light">' + esc(e.group || '') + '</span></button>';
-    }).join('');
-  }
-
-  html += '<div class="px-2 py-1 small text-muted fw-semibold">Catálogo (pt-BR)</div>';
-  if (!catalog.length) html += '<div class="list-group-item small text-muted">Nada encontrado.</div>';
-  html += catalog.map(function (e) {
-    return '<button type="button" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" onclick="pickSheetCatalogExercise(' + e.id + ')">' +
-      '<span>' + esc(e.name) + '</span><span class="badge text-bg-light">' + esc(e.group || '') + '</span></button>';
-  }).join('');
-
-  el.innerHTML = html;
+  state.sheetPickerQuery = (query || '').trim();
+  document.getElementById('sheetPickerResults').innerHTML = pickerHtml(query, state.exercises, state.catalog, { create: 'createExerciseFromSheetPicker', library: 'pickSheetLibraryExercise', catalog: 'pickSheetCatalogExercise' });
 }
 
 function pickSheetLibraryExercise(id) {
@@ -2423,7 +2328,7 @@ async function undoImport() {
 function bindEvents() {
   window.addEventListener('hashchange', navigate);
 
-  document.getElementById('btnAddExercise').addEventListener('click', guard(openExercisePicker));
+  document.getElementById('btnAddExercise').addEventListener('click', guard(openExercisePickerModal));
   document.getElementById('workoutSave').addEventListener('click', guard(saveWorkout));
   document.getElementById('workoutDelete').addEventListener('click', guard(deleteWorkout));
   document.getElementById('workoutCancel').addEventListener('click', cancelWorkout);

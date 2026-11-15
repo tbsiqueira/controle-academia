@@ -53,7 +53,7 @@ Stores:
 - `workouts`: `{ id, date (YYYY-MM-DD), sheetId, sheetName (snapshot), cardioMinutes, notes, warmups[] { exerciseId, exerciseName, reps, load, rir }, sets[], createdAt, updatedAt }`
   - `sets[]`: `{ exerciseId, exerciseName (cópia do nome na época), exerciseNote (observação da ficha), number, reps, load, rir, note }`
 - `exercises`: `{ id, name, group, correction, active, createdAt, updatedAt }` (biblioteca; sem carga/RIR — esses pertencem ao treino)
-- `settings`: `{ id: 'app', weekAnchor (YYYY-MM-DD), weeklyWorkoutTarget, weeklyCardioTarget, tonnageVisible }`
+- `settings`: `{ id: 'app', weekAnchor (YYYY-MM-DD), weeklyWorkoutTarget, weeklyCardioTarget }`
 - `colinha`: `{ id, title, content, order }`
 
 ## 6. Telas

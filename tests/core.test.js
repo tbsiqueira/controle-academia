@@ -172,13 +172,6 @@ test('warmupHasData detecta aquecimento preenchido', () => {
   assert.equal(core.warmupHasData(null), false);
 });
 
-test('warmupSummary conta os aquecimentos', () => {
-  assert.equal(core.warmupSummary([]), '');
-  assert.equal(core.warmupSummary(null), '');
-  assert.equal(core.warmupSummary([{}]), '1 aquecimento');
-  assert.equal(core.warmupSummary([{}, {}]), '2 aquecimentos');
-});
-
 test('setsSummaryLines devolve lista ordenada por serie e escapa a observacao', () => {
   const html = core.setsSummaryLines([
     { number: 2, reps: 10, load: 27, rir: 1, note: '' },
@@ -727,16 +720,6 @@ test('libraryExercises lista os exercicios do usuario e ignora inativos', () => 
   assert.deepEqual(list.map(function (e) { return e.id; }), ['a', 'b']);
 });
 
-test('exercisesNeedingRepair aponta so as marcacoes sem comprovacao', () => {
-  const need = core.exercisesNeedingRepair([
-    { id: 'a', source: 'catalog' },
-    { id: 'b', source: 'catalog', catalogId: 5 },
-    { id: 'c', source: 'custom' },
-    { id: 'd' }
-  ]);
-  assert.deepEqual(need.map(function (e) { return e.id; }), ['a']);
-});
-
 test('regressao: exercicio do usuario com nome igual ao do catalogo continua visivel', () => {
   const catalog = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data', 'exercises.json'), 'utf8'));
   const nomeDoCatalogo = catalog.exercises[0].name;
@@ -744,7 +727,7 @@ test('regressao: exercicio do usuario com nome igual ao do catalogo continua vis
 
   assert.equal(core.isUserExercise(meu), true);
   assert.equal(core.libraryExercises([meu]).length, 1);
-  assert.deepEqual(core.exercisesNeedingRepair([meu]), []);
+  assert.equal(core.fixLibrarySources([meu]).changed, 0);
 });
 
 /* ---------- compatibilidade de dados entre versoes ---------- */

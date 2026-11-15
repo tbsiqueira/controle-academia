@@ -16,7 +16,7 @@ Mapa de **cada funcionalidade do app** para os testes que a cobrem. Serve para r
 | Números com vírgula (bug do iPhone) | `core.js`: `parseLocalNumber`, `toNum`, `toNumOrNull`, `formatDecimal` | `core.test.js` (inclui regressão da carga `27,5`) |
 | Busca sem acentos | `core.js`: `normalizeText` | `core.test.js` |
 | Escapar HTML (XSS no que vem do banco) | `core.js`: `esc` | `core.test.js`, `setsSummaryLines` |
-| Aquecimento (reps/carga/RIR) | `core.js`: `warmupHasData`, `warmupLine`, `warmupSummary`, `previousWarmupFields` | `core.test.js`, `core-edge-cases.test.js` |
+| Aquecimento (reps/carga/RIR) | `core.js`: `warmupHasData`, `warmupLine`, `previousWarmupFields` | `core.test.js`, `core-edge-cases.test.js` |
 | Séries e agrupamento **por id** | `core.js`: `setLine`, `setsSummaryLines`, `groupSets`, `exerciseKey` | `core.test.js`, `core-edge-cases.test.js` (mesmo nome/ids diferentes, só aquecimento, registro sem nome) |
 | Histórico por exercício (gráfico, PR, tendência) | `core.js`: `workoutRecords`, `lastLoadsForExercise`, `lastWarmupForExercise`, `sessionsForExercise`, `bestSetForExercise`, `exerciseMatches` | `core.test.js`, `core-edge-cases.test.js` (renomear não perde histórico; nomes iguais não se misturam; ordenação), `form-and-progress.test.js` (recordes: primeira vez e carga igual não contam) |
 | Nome **atual** de exercício e de ficha (sem nome congelado) | `core.js`: `exerciseLabel`, `sheetLabel`, `exerciseTarget` | `core.test.js`, `core-edge-cases.test.js` |
@@ -29,7 +29,7 @@ Mapa de **cada funcionalidade do app** para os testes que a cobrem. Serve para r
 | Texto do treino para enviar à professora | `core.js`: `workoutAsText` | `core.test.js`, `core-edge-cases.test.js` (nome atual, série sem número, treino vazio) |
 | Fichas: criar/editar/excluir, itens, migração por nome | `core.js`: `normalizeSheet*`, `linkSheetItemsToExercises` | `core.test.js`, `core-edge-cases.test.js` |
 | Importar ficha em JSON (contrato `FICHA-JSON.md`, sugestão de exercício parecido, lista para a IA) | `core.js`: `parseSheetImportText`, `parseSheetImport`, `suggestExercises`, `exerciseNamesText` | `core.test.js` (cerca ```json, JSON quebrado, formatos aceitos, reps, erros, ordem das sugestões, nomes sem repetir) |
-| Biblioteca do usuário × catálogo | `core.js`: `isUserExercise`, `libraryExercises`, `exercisesNeedingRepair` | `core.test.js`, `core-edge-cases.test.js` |
+| Biblioteca do usuário × catálogo | `core.js`: `isUserExercise`, `libraryExercises`, `fixLibrarySources` | `core.test.js`, `core-edge-cases.test.js` |
 | Backup: nome do arquivo, status e lembrete | `core.js`: `backupFileName`, `backupStatus` | `core.test.js`, `core-edge-cases.test.js` |
 | Backup: exportar/compartilhar (um arquivo só) | `core.js`: `backupAction`, `backupSharePayload`, `isBackupPayload`, `backupHint` | `core.test.js` (payload sem `text`/`title`; evento de clique não vira backup) |
 | Backup: importar e compatibilidade entre versões | `core.js`: `normalizeBackup`, `normalizeWorkout`, `normalizeSet`, `normalizeWarmup`, `normalizeSettings` | `core.test.js` + `tests/fixtures/backup-v1.json`, `backup-v2-sheets.json` |
@@ -53,6 +53,7 @@ Mapa de **cada funcionalidade do app** para os testes que a cobrem. Serve para r
 | Não repetir o mesmo exercício no treino nem na ficha | `core.js`: `hasExercise` (avisos no `app.js`: `addExerciseToForm`, `addSheetExercise`) | `core-edge-cases.test.js` (por id, id do catálogo como texto, item de ficha com `name`, registro antigo sem id; prova do agrupamento que motivou o bloqueio) |
 | Ficha: no máximo 20 séries por exercício (editor, importação e backup) | `core.js`: `normalizeSheetItem` (usado também por `saveSheetEditor` no `app.js`) | `core-edge-cases.test.js` (500 vira 20, lista de reps longa, formato v2, fichas normais intactas) |
 | Dois treinos no mesmo dia: o mais recente vem primeiro | `core.js`: `byDateDesc` (usado em toda ordenação por data) | `core-edge-cases.test.js` (qualquer ordem de entrada, sem `createdAt`, "última vez"/cargas/aquecimento do treino mais novo) |
+| Busca de exercício (seletor do treino, da ficha e do cadastro) | `core.js`: `pickerHtml` (os três `render*Results` do `app.js`) | `picker.test.js` (Biblioteca × catálogo, busca sem acento, Criar, limites, escape, handlers existem e aceitam id como texto, código morto não voltou) |
 
 ## Limites conhecidos
 
