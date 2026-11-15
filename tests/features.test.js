@@ -394,3 +394,13 @@ test('backup (Exportar/Importar/Desfazer) continua a vista, fora das opcoes avan
     assert.ok(antes.indexOf('id="' + id + '"') !== -1, id);
   });
 });
+
+/* ---------- campos do aquecimento com nome para leitor de tela ---------- */
+
+test('os tres campos do aquecimento tem aria-label (placeholder some quando o campo e preenchido)', () => {
+  const body = APP.slice(APP.indexOf('function renderFormSets'), APP.indexOf('function setWarmupField'));
+  ['Reps do aquecimento', 'Peso do aquecimento', 'RIR do aquecimento'].forEach((label) => {
+    assert.ok(body.indexOf('aria-label="' + label + '"') !== -1, label);
+  });
+  assert.equal((body.match(/oninput="setWarmupField\(/g) || []).length, 3, 'os tres continuam ligados ao setWarmupField');
+});

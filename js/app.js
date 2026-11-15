@@ -806,9 +806,9 @@ function renderFormSets() {
       '<div class="border rounded bg-light p-1 mb-1">' +
       '<div class="small text-muted mb-1"><i class="bi bi-fire"></i> Aquecimento</div>' +
       '<div class="row g-1">' +
-      '<div class="col-4"><input type="number" min="0" inputmode="numeric" class="form-control form-control-sm" value="' + esc(warm.reps) + '" placeholder="reps" oninput="setWarmupField(' + exIdx + ",'reps',this.value)\"></div>" +
+      '<div class="col-4"><input type="number" min="0" inputmode="numeric" class="form-control form-control-sm" value="' + esc(warm.reps) + '" placeholder="reps" aria-label="Reps do aquecimento" oninput="setWarmupField(' + exIdx + ",'reps',this.value)\"></div>" +
       '<div class="col-4"><input type="text" inputmode="decimal" autocomplete="off" min="0" class="form-control form-control-sm" value="' + esc(formatDecimal(warm.load, commaDecimal)) + '" placeholder="peso" aria-label="Peso do aquecimento" oninput="setWarmupField(' + exIdx + ",'load',this.value)\"></div>" +
-      '<div class="col-4"><input type="number" min="0" inputmode="numeric" class="form-control form-control-sm" value="' + esc(warm.rir) + '" placeholder="RIR" oninput="setWarmupField(' + exIdx + ",'rir',this.value)\"></div>" +
+      '<div class="col-4"><input type="number" min="0" inputmode="numeric" class="form-control form-control-sm" value="' + esc(warm.rir) + '" placeholder="RIR" aria-label="RIR do aquecimento" oninput="setWarmupField(' + exIdx + ",'rir',this.value)\"></div>" +
       '</div>' +
       '</div>' +
       setHeaderHtml() +
