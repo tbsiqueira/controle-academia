@@ -190,9 +190,7 @@ function renderWeek() {
 
 function renderWorkoutList() {
   const el = document.getElementById('recentWorkouts');
-  const workouts = state.workouts.slice().sort(function (a, b) {
-    return a.date < b.date ? 1 : -1;
-  });
+  const workouts = state.workouts.slice().sort(byDateDesc);
 
   if (!workouts.length) {
     el.innerHTML = '<p class="text-muted"><i class="bi bi-emoji-smile"></i> Nenhum treino registrado ainda. Toque em <strong>Treinar</strong> para começar.</p>';

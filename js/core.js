@@ -393,7 +393,7 @@
   function lastLoadsForExercise(workouts, target) {
     const sorted = (workouts || []).filter(function (w) {
       return (w.sets || []).some(function (s) { return exerciseMatches(s, target); });
-    }).sort(function (a, b) { return a.date < b.date ? 1 : -1; });
+    }).sort(byDateDesc);
 
     if (!sorted.length) return {};
     const last = sorted[0];
@@ -407,7 +407,7 @@
   function lastWarmupForExercise(workouts, target) {
     const sorted = (workouts || []).filter(function (w) {
       return (w.warmups || []).some(function (x) { return exerciseMatches(x, target); });
-    }).sort(function (a, b) { return a.date < b.date ? 1 : -1; });
+    }).sort(byDateDesc);
 
     if (!sorted.length) return null;
     const last = sorted[0];
@@ -428,7 +428,7 @@
     return (workouts || []).filter(function (w) {
       return (w.sets || []).some(function (s) { return exerciseMatches(s, target); }) ||
         (w.warmups || []).some(function (x) { return exerciseMatches(x, target); });
-    }).sort(function (a, b) { return a.date < b.date ? 1 : -1; });
+    }).sort(byDateDesc);
   }
 
   function bestSetForExercise(workout, target) {
@@ -487,8 +487,13 @@
 
   /* ---------- formulário: última sessão, repetir treino, rascunho ---------- */
 
+  // Mais recente primeiro. No mesmo dia, desempata pelo horário em que o treino foi criado:
+  // sem isso, com dois treinos no dia, "Última vez" podia pegar qualquer um dos dois.
   function byDateDesc(a, b) {
-    return a.date < b.date ? 1 : -1;
+    if (a.date !== b.date) return a.date < b.date ? 1 : -1;
+    const ca = a.createdAt || '';
+    const cb = b.createdAt || '';
+    return ca < cb ? 1 : (ca > cb ? -1 : 0);
   }
 
   function blankIfNull(v) {
@@ -1173,6 +1178,7 @@
     // recordes
     workoutRecords: workoutRecords,
     // formulário, descanso, Início e evolução
+    byDateDesc: byDateDesc,
     lastSessionForExercise: lastSessionForExercise,
     lastSessionLine: lastSessionLine,
     lastWorkoutForSheet: lastWorkoutForSheet,

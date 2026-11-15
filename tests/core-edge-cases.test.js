@@ -767,3 +767,42 @@ test('salvar a ficha no editor usa a mesma normalizacao (com o mesmo limite)', (
   assert.match(body, /normalizeSheetItem\(\{/);
   assert.match(body, /clean\.reps\.slice\(0, clean\.sets\)/);
 });
+
+/* ---------- dois treinos no mesmo dia ---------- */
+
+function doisNoMesmoDia() {
+  const serie = (load) => [{ exerciseId: 'e1', exerciseName: 'Supino', number: 1, reps: 10, load: load }];
+  const manha = { id: 'manha', date: '2026-10-08', createdAt: '2026-10-08T08:00:00.000Z', sheetId: 's1', sets: serie(40), warmups: [{ exerciseId: 'e1', reps: 15, load: 20 }] };
+  const noite = { id: 'noite', date: '2026-10-08', createdAt: '2026-10-08T20:00:00.000Z', sheetId: 's1', sets: serie(45), warmups: [{ exerciseId: 'e1', reps: 12, load: 25 }] };
+  const antes = { id: 'antes', date: '2026-10-01', createdAt: '2026-10-09T10:00:00.000Z', sheetId: 's1', sets: serie(30) };
+  return { manha: manha, noite: noite, antes: antes };
+}
+
+test('byDateDesc: no mesmo dia vem primeiro o treino criado por ultimo, em qualquer ordem de entrada', () => {
+  const t = doisNoMesmoDia();
+  const ordens = [[t.manha, t.noite, t.antes], [t.noite, t.manha, t.antes], [t.antes, t.noite, t.manha], [t.antes, t.manha, t.noite]];
+  ordens.forEach((lista) => {
+    assert.deepEqual(lista.slice().sort(core.byDateDesc).map((w) => w.id), ['noite', 'manha', 'antes']);
+  });
+});
+
+test('byDateDesc: a data continua mandando (createdAt so desempata) e registros antigos sem createdAt nao quebram', () => {
+  const t = doisNoMesmoDia();
+  assert.ok(core.byDateDesc(t.antes, t.manha) > 0, 'data mais antiga vai para o fim mesmo criada depois');
+  const semHora = [{ id: 'a', date: '2026-10-08' }, { id: 'b', date: '2026-10-08' }];
+  assert.equal(core.byDateDesc(semHora[0], semHora[1]), 0, 'empate de verdade devolve 0 (ordenacao estavel)');
+  assert.deepEqual(semHora.slice().sort(core.byDateDesc).map((w) => w.id), ['a', 'b']);
+  assert.deepEqual([semHora[0], t.noite].sort(core.byDateDesc).map((w) => w.id), ['noite', 'a']);
+});
+
+test('"ultima vez", cargas e aquecimento sugeridos vem do treino mais recente do dia', () => {
+  const t = doisNoMesmoDia();
+  const alvo = { exerciseId: 'e1', exerciseName: 'Supino' };
+  [[t.manha, t.noite], [t.noite, t.manha]].forEach((lista) => {
+    assert.equal(core.lastSessionForExercise(lista, alvo).sets[0].load, 45);
+    assert.deepEqual(core.lastLoadsForExercise(lista, alvo), { 1: 45 });
+    assert.equal(core.lastWarmupForExercise(lista, alvo).load, 25);
+    assert.equal(core.lastWorkoutForSheet(lista, 's1').id, 'noite');
+    assert.deepEqual(core.sessionsForExercise(lista, alvo).map((w) => w.id), ['noite', 'manha']);
+  });
+});
