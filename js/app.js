@@ -101,6 +101,7 @@ function navigate() {
 
   const view = document.getElementById('view-' + viewName);
   if (view) view.classList.remove('d-none');
+  document.body.classList.toggle('is-training', viewName === 'workout');
 
   document.querySelectorAll('.bottom-nav a').forEach(function (a) {
     const activeHash = (viewName === 'detail' || viewName === 'exercise') ? '#/dashboard' : viewName === 'ia' ? '#/exercises' : (viewName === 'erase' ? '#/more' : hash);
@@ -159,7 +160,10 @@ function renderQuickStart() {
     el.innerHTML = '';
     return;
   }
-  el.innerHTML = '<button type="button" class="btn btn-primary w-100 mb-3"><i class="bi bi-play-fill"></i> Treinar: ' + esc(sheet.name) + '</button>';
+  el.innerHTML = '<button type="button" class="cta" aria-label="Treinar: ' + esc(sheet.name) + '">' +
+    '<span class="cta-play" aria-hidden="true"><i class="bi bi-play-fill"></i></span>' +
+    '<span><b>Treinar agora</b><span class="cta-sub">' + esc(sheet.name) + '</span></span>' +
+    '<i class="bi bi-arrow-right" aria-hidden="true"></i></button>';
   el.querySelector('button').addEventListener('click', function () {
     state.pendingSheetId = sheet.id;
     location.hash = '#/workout';
@@ -180,7 +184,7 @@ function renderWeek() {
   } else if (today < range.anchor) {
     banner.innerHTML = '<div class="alert alert-info py-2">A semana começa em <strong>' + fmtBR(range.anchor) + '</strong>.</div>';
   } else {
-    banner.innerHTML = '<div class="alert alert-success py-2">Semana ativa: <strong>' + fmtBR(range.anchor) + ' – ' + fmtBR(range.end) + '</strong></div>';
+    banner.innerHTML = '';
   }
 
   const btn = document.getElementById('btnConfirmWeek');
@@ -190,18 +194,22 @@ function renderWeek() {
   const workoutPct = Math.min(100, Math.round((stats.workouts / Math.max(1, state.settings.weeklyWorkoutTarget)) * 100));
   const cardioPct = Math.min(100, Math.round((stats.cardio / Math.max(1, state.settings.weeklyCardioTarget)) * 100));
 
+  const goalHit = stats.workouts >= state.settings.weeklyWorkoutTarget;
+
   document.getElementById('weekProgress').innerHTML =
-    '<div class="card mb-3">' +
-    '<div class="card-body py-3">' +
-    '<div class="d-flex justify-content-around text-center mb-2">' +
-    '<div><div class="display-6 fw-bold">' + stats.workouts + '/' + state.settings.weeklyWorkoutTarget + '</div><small class="text-muted"><i class="bi bi-check2-circle"></i> treinos</small></div>' +
-    '<div><div class="display-6 fw-bold">' + stats.cardio + '/' + state.settings.weeklyCardioTarget + '</div><small class="text-muted"><i class="bi bi-heart-pulse"></i> min cardio</small></div>' +
+    '<div class="card mb-3 week-card"><div class="card-body">' +
+    '<div class="week-head">' +
+    '<div><span class="stat-label mt-0">Semana ativa</span><strong>' + fmtBR(range.anchor).slice(0, 5) + ' – ' + fmtBR(range.end).slice(0, 5) + '</strong></div>' +
+    (goalHit ? '<span class="chip"><i class="bi bi-check2"></i> Meta batida</span>' : '') +
     '</div>' +
-    '<div class="progress mb-1" style="height: 8px" role="progressbar" aria-label="Meta de treinos" aria-valuenow="' + workoutPct + '" aria-valuemin="0" aria-valuemax="100">' +
-    '<div class="progress-bar" style="width: ' + workoutPct + '%"></div></div>' +
-    '<div class="progress" style="height: 8px" role="progressbar" aria-label="Meta de cardio" aria-valuenow="' + cardioPct + '" aria-valuemin="0" aria-valuemax="100">' +
-    '<div class="progress-bar bg-info" style="width: ' + cardioPct + '%"></div></div>' +
-    '</div></div>';
+    '<div class="week-stats">' +
+    '<div class="week-stat"><div class="stat-big">' + stats.workouts + '<small>/' + state.settings.weeklyWorkoutTarget + '</small></div><span class="stat-label">treinos</span>' +
+    '<div class="progress" role="progressbar" aria-label="Meta de treinos" aria-valuenow="' + workoutPct + '" aria-valuemin="0" aria-valuemax="100">' +
+    '<div class="progress-bar" style="width: ' + workoutPct + '%"></div></div></div>' +
+    '<div class="week-stat"><div class="stat-big">' + stats.cardio + '<small>/' + state.settings.weeklyCardioTarget + '</small></div><span class="stat-label">min cardio</span>' +
+    '<div class="progress" role="progressbar" aria-label="Meta de cardio" aria-valuenow="' + cardioPct + '" aria-valuemin="0" aria-valuemax="100">' +
+    '<div class="progress-bar bg-dark" style="width: ' + cardioPct + '%"></div></div></div>' +
+    '</div></div></div>';
 }
 
 
@@ -237,12 +245,11 @@ function renderWorkoutList() {
   });
 
   const filterHtml = options.length > 1
-    ? '<select class="form-select form-select-sm mb-2" id="workoutFilter" aria-label="Filtrar treinos por ficha">' +
-      '<option value="">Todas as fichas</option>' +
-      options.map(function (o) {
-        return '<option value="' + esc(o) + '"' + (o === state.workoutFilter ? ' selected' : '') + '>' + esc(o) + '</option>';
+    ? '<div class="chip-row" id="workoutFilter" role="group" aria-label="Filtrar treinos por ficha">' +
+      [''].concat(options).map(function (o) {
+        return '<button type="button" data-filter="' + esc(o) + '" aria-pressed="' + (o === state.workoutFilter ? 'true' : 'false') + '">' + esc(o || 'Todas') + '</button>';
       }).join('') +
-      '</select>'
+      '</div>'
     : '';
 
   let moreHtml = '';
@@ -255,9 +262,8 @@ function renderWorkoutList() {
   }
 
   let currentMonth = null;
-  el.innerHTML = '<h6 class="mt-2"><i class="bi bi-clock-history text-primary"></i> ' +
-    (state.workoutFilter ? 'Treinos da ficha' : 'Todos os treinos') + ' ' +
-    '<span class="badge text-bg-secondary">' + filtered.length + '</span></h6>' +
+  el.innerHTML = '<div class="section-head"><h2>' + (state.workoutFilter ? 'Treinos da ficha' : 'Histórico') + '</h2>' +
+    '<span class="chip">' + filtered.length + (filtered.length === 1 ? ' treino' : ' treinos') + '</span></div>' +
     filterHtml +
     shown.map(function (w) {
       const name = sheetLabel(w, state.sheets) || 'Treino';
@@ -273,7 +279,7 @@ function renderWorkoutList() {
         currentMonth = monthKey;
         const count = monthCounts[monthKey];
         header = '<div class="workout-month">' + esc(p ? p.monthLabel : 'Sem data') +
-          ' <span class="text-muted">· ' + count + (count === 1 ? ' treino' : ' treinos') + '</span></div>';
+          ' · ' + count + (count === 1 ? ' treino' : ' treinos') + '</div>';
       }
 
       const dateBlock = p
@@ -285,27 +291,25 @@ function renderWorkoutList() {
         : '<div class="workout-date" aria-hidden="true"><span class="workout-date-day">—</span></div>';
 
       return header +
-        '<div class="card mb-2' + (p && p.relative === 'hoje' ? ' workout-today' : '') + '"><div class="card-body py-2 d-flex align-items-center gap-2">' +
+        '<div class="card mb-2"><button type="button" class="workout-row" data-view-workout="' + esc(w.id) + '" aria-label="' + esc(name + ', ' + fmtBR(w.date) + (summary ? ', ' + summary : '') + (records ? ', ' + records + (records === 1 ? ' recorde' : ' recordes') : '')) + '">' +
         dateBlock +
-        '<button type="button" class="btn btn-link p-0 text-start text-decoration-none flex-grow-1 min-w-0" data-view-workout="' + esc(w.id) + '" aria-label="' + esc(name + ', ' + fmtBR(w.date) + (summary ? ', ' + summary : '') + (records ? ', ' + records + (records === 1 ? ' recorde' : ' recordes') : '')) + '">' +
-        '<strong>' + esc(name) + '</strong>' +
+        '<span class="min-w-0"><strong>' + esc(name) + '</strong>' +
         ((summary || records) ? '<span class="d-block small text-muted">' + esc(summary) +
           (records ? (summary ? ' · ' : '') + '<span class="pr-count"><i class="bi bi-trophy-fill"></i> ' + records + '</span>' : '') +
           '</span>' : '') +
-        '</button>' +
-        '<button type="button" class="btn btn-sm btn-outline-secondary" data-share-workout="' + esc(w.id) + '" title="Exportar como texto" aria-label="Exportar como texto"><i class="bi bi-share"></i></button>' +
-        '</div></div>';
+        '</span>' +
+        '<i class="bi bi-chevron-right" aria-hidden="true"></i>' +
+        '</button></div>';
     }).join('') +
     moreHtml;
 
-  const filterSel = document.getElementById('workoutFilter');
-  if (filterSel) {
-    filterSel.addEventListener('change', function () {
-      state.workoutFilter = this.value;
+  el.querySelectorAll('[data-filter]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      state.workoutFilter = b.getAttribute('data-filter');
       state.showAllWorkouts = false;
       renderWorkoutList();
     });
-  }
+  });
   const showAll = document.getElementById('btnShowAllWorkouts');
   if (showAll) showAll.addEventListener('click', function () { state.showAllWorkouts = true; renderWorkoutList(); });
   const showLess = document.getElementById('btnShowLessWorkouts');
@@ -317,11 +321,6 @@ function renderWorkoutList() {
     });
   });
 
-  el.querySelectorAll('[data-share-workout]').forEach(function (b) {
-    b.addEventListener('click', function () {
-      exportWorkoutText(b.getAttribute('data-share-workout'));
-    });
-  });
 }
 
 /* ---------- referências por id (nome sempre atual) ---------- */
@@ -364,17 +363,26 @@ function renderWorkoutDetail() {
   }
 
   const sheetName = sheetLabel(workout, state.sheets);
-  let html = '<div class="card mb-3"><div class="card-body py-2">' +
-    '<div class="d-flex justify-content-between align-items-center">' +
-    '<strong><i class="bi bi-calendar-event text-primary"></i> ' + fmtBR(workout.date) + '</strong>' +
-    (sheetName ? '<span class="badge text-bg-light">' + esc(sheetName) + '</span>' : '') +
-    '</div>' +
-    (toNum(workout.cardioMinutes) > 0 ? '<div class="small text-muted mt-1"><i class="bi bi-heart-pulse"></i> Cardio: ' + toNum(workout.cardioMinutes) + ' min</div>' : '') +
-    (workout.notes ? '<div class="small text-muted mt-1"><i class="bi bi-journal-text"></i> ' + esc(workout.notes) + '</div>' : '') +
-    '</div></div>';
-
   const groups = groupSets(workout.sets, workout.warmups);
   const records = workoutRecords(state.workouts, workout);
+  const p = dateParts(workout.date, todayISO());
+
+  let html = '<div class="card mb-3"><div class="card-body">' +
+    '<div class="detail-hero">' +
+    (p ? '<div class="workout-date' + (p.relative === 'hoje' ? ' is-today' : '') + '" aria-hidden="true">' +
+      '<span class="workout-date-weekday">' + esc(p.relative || p.weekday) + '</span>' +
+      '<span class="workout-date-day">' + esc(p.day) + '</span>' +
+      '<span class="workout-date-month">' + esc(p.month) + '</span></div>' : '') +
+    '<div class="min-w-0"><strong class="d-block">' + esc(sheetName || 'Treino') + '</strong>' +
+    '<span class="small text-muted">' + fmtBR(workout.date) + '</span></div>' +
+    '</div>' +
+    '<div class="detail-stats">' +
+    '<div><b>' + fmtThousands(workoutVolume(workout)) + '</b><span>kg volume</span></div>' +
+    '<div><b>' + toNum(workout.cardioMinutes) + '</b><span>min cardio</span></div>' +
+    '<div><b>' + records.length + '</b><span>' + (records.length === 1 ? 'recorde' : 'recordes') + '</span></div>' +
+    '</div>' +
+    (workout.notes ? '<div class="small text-muted mt-3"><i class="bi bi-journal-text"></i> ' + esc(workout.notes) + '</div>' : '') +
+    '</div></div>';
 
   if (!groups.length) {
     html += '<p class="text-muted">Este treino não tem exercícios registrados.</p>';
@@ -382,12 +390,13 @@ function renderWorkoutDetail() {
 
   html += groups.map(function (g, i) {
     const alvo = historyTarget(g);
-    return '<div class="card mb-2"><div class="card-body p-2">' +
-      '<button type="button" class="btn btn-link p-0 text-decoration-none d-flex justify-content-between align-items-center w-100" data-open-exercise="' + esc(alvo.exerciseId || '') + '" data-open-exercise-name="' + esc(alvo.exerciseName) + '">' +
-      '<strong><span class="badge text-bg-primary me-1">' + (i + 1) + '</span> ' + esc(labelOf(g)) + '</strong>' +
-      '<i class="bi bi-chevron-right text-muted"></i>' +
+    return '<div class="card mb-2"><div class="card-body">' +
+      '<button type="button" class="ex-link" data-open-exercise="' + esc(alvo.exerciseId || '') + '" data-open-exercise-name="' + esc(alvo.exerciseName) + '">' +
+      '<span class="ex-num">' + (i + 1) + '</span>' +
+      '<span class="ex-title">' + esc(labelOf(g)) + '</span>' +
+      '<i class="bi bi-chevron-right" aria-hidden="true"></i>' +
       '</button>' +
-      (g.note ? '<div class="small text-muted"><i class="bi bi-info-circle"></i> ' + esc(g.note) + '</div>' : '') +
+      (g.note ? '<div class="small text-muted mb-2"><i class="bi bi-info-circle"></i> ' + esc(g.note) + '</div>' : '') +
       prLine(records, g) +
       (warmupHasData(g.warmup) ? '<div class="small text-muted"><i class="bi bi-fire"></i> Aquecimento: ' + esc(warmupLine(g.warmup, commaDecimal)) + '</div>' : '') +
       (g.sets.length ? setsSummaryLines(g.sets, commaDecimal) : '<div class="small text-muted mt-1">Sem séries de trabalho.</div>') +
@@ -412,7 +421,7 @@ function renderWorkoutDetail() {
 function renderExerciseHistory() {
   const target = { exerciseId: state.viewingExerciseId || null, exerciseName: state.viewingExerciseName || '' };
   const name = labelOf(target);
-  document.getElementById('exerciseHistoryTitle').innerHTML = '<i class="bi bi-graph-up text-primary"></i> ' + esc(name);
+  document.getElementById('exerciseHistoryTitle').textContent = name;
 
   const el = document.getElementById('exerciseHistory');
   const sessions = sessionsForExercise(state.workouts, target);
@@ -439,15 +448,16 @@ function renderExerciseHistory() {
       : (last < prev ? '<i class="bi bi-arrow-down-right text-danger"></i>' : '<i class="bi bi-dash text-muted"></i>');
   }
 
-  let html = '<div class="card mb-3"><div class="card-body py-2 d-flex justify-content-between align-items-center">' +
-    '<span class="small text-muted">' + trendIcon + ' ' + sessions.length + (sessions.length === 1 ? ' treino' : ' treinos') + ' com este exercício</span>' +
-    (prLoad > 0 ? '<span class="badge text-bg-warning"><i class="bi bi-trophy"></i> PR ' + formatDecimal(prLoad, commaDecimal) + ' kg</span>' : '') +
+  let html = '<div class="card mb-3"><div class="card-body history-head">' +
+    (prLoad > 0 ? '<div><span class="stat-label mt-0">Carga máxima</span><div class="stat-big">' + formatDecimal(prLoad, commaDecimal) + '<small> kg</small></div></div>'
+      : '<div><span class="stat-label mt-0">Sem carga registrada</span></div>') +
+    '<span class="chip">' + trendIcon + ' ' + sessions.length + (sessions.length === 1 ? ' treino' : ' treinos') + '</span>' +
     '</div>' +
     (topRM > 0 ? '<div class="card-body pt-0 pb-2 small text-muted"><i class="bi bi-calculator"></i> 1RM estimado: <strong>' + formatDecimal(topRM, commaDecimal) + ' kg</strong>' +
       ' — a carga que daria para levantar uma vez, calculada pela melhor série.</div>' : '') +
     '</div>';
 
-  html += '<h6 class="text-muted"><i class="bi bi-bar-chart-line"></i> Melhor série por dia</h6>';
+  html += '<div class="section-head"><h2>Melhor série por dia</h2></div><div class="card mb-3"><div class="card-body">';
   html += rows.slice(0, 12).map(function (r) {
     const load = r.best ? r.best.load : 0;
     const reps = r.best ? r.best.reps : 0;
@@ -457,9 +467,9 @@ function renderExerciseHistory() {
       (r.rm > 0 ? ' <span class="text-muted">· 1RM ' + formatDecimal(r.rm, commaDecimal) + '</span>' : '') + '</span></div>' +
       '<div class="progress" style="height: 10px"><div class="progress-bar" style="width: ' + pct + '%"></div></div>' +
       '</div>';
-  }).join('');
+  }).join('') + '</div></div>';
 
-  html += '<h6 class="text-muted mt-3"><i class="bi bi-clock-history"></i> Histórico</h6>';
+  html += '<div class="section-head"><h2>Histórico</h2></div>';
   html += rows.slice(0, 20).map(function (r) {
     const w = r.workout;
     const warm = (w.warmups || []).find(function (x) { return exerciseMatches(x, target); });
@@ -664,7 +674,7 @@ function renderRepeatLast(sheetId) {
     el.innerHTML = '';
     return;
   }
-  el.innerHTML = '<button type="button" class="btn btn-sm btn-outline-primary mt-2 w-100" id="btnRepeatLast">' +
+  el.innerHTML = '<button type="button" class="btn btn-dashed mt-2 w-100" id="btnRepeatLast">' +
     '<i class="bi bi-arrow-repeat"></i> Repetir o último treino desta ficha (' + fmtBR(last.date) + ')</button>';
   document.getElementById('btnRepeatLast').addEventListener('click', function () {
     repeatLastWorkout(last);
@@ -785,6 +795,7 @@ function renderWorkoutForm() {
 
 function renderFormSets() {
   const el = document.getElementById('workoutExercises');
+  renderWorkoutProgress();
   if (!state.formSets.length) {
     el.innerHTML = '<p class="text-muted">Adicione exercícios ao treino.</p>';
     return;
@@ -793,33 +804,62 @@ function renderFormSets() {
   el.innerHTML = state.formSets.map(function (group, exIdx) {
     const warm = group.warmup || {};
     const last = lastSessionForExercise(state.workouts, refOf(group), state.editingWorkoutId);
-    return '<div class="card mb-2"><div class="card-body p-2">' +
-      '<div class="d-flex justify-content-between align-items-center mb-1">' +
-      '<strong><i class="bi bi-activity text-primary"></i> ' + esc(labelOf(group)) + '</strong>' +
-      '<div class="d-flex align-items-center gap-1">' +
-      '<span class="badge text-bg-light">' + group.sets.length + (group.sets.length === 1 ? ' série' : ' séries') + '</span>' +
+    return '<div class="card mb-2"><div class="card-body">' +
+      '<div class="ex-head">' +
+      '<span class="ex-num">' + (exIdx + 1) + '</span>' +
+      '<h2 class="ex-title">' + esc(labelOf(group)) +
+      '<small>' + group.sets.length + (group.sets.length === 1 ? ' série' : ' séries') + ' · descanso ' + fmtClock(restSecondsOf(state.settings)) + '</small></h2>' +
       '<button type="button" class="btn btn-sm btn-outline-danger" onclick="removeFormExercise(' + exIdx + ')" aria-label="Remover exercício"><i class="bi bi-trash"></i></button>' +
       '</div>' +
-      '</div>' +
-      (group.note ? '<div class="small text-muted mb-1"><i class="bi bi-info-circle"></i> ' + esc(group.note) + '</div>' : '') +
-      (last ? '<div class="small last-session mb-1"><i class="bi bi-clock-history"></i> <span class="fw-semibold">Última vez (' + fmtBR(last.date) + '):</span> ' + esc(lastSessionLine(last, commaDecimal)) + '</div>' : '') +
-      '<div class="border rounded bg-light p-1 mb-1">' +
-      '<div class="small text-muted mb-1"><i class="bi bi-fire"></i> Aquecimento</div>' +
-      '<div class="row g-1">' +
-      '<div class="col-4"><input type="number" min="0" inputmode="numeric" class="form-control form-control-sm" value="' + esc(warm.reps) + '" placeholder="reps" aria-label="Reps do aquecimento" oninput="setWarmupField(' + exIdx + ",'reps',this.value)\"></div>" +
-      '<div class="col-4"><input type="text" inputmode="decimal" autocomplete="off" min="0" class="form-control form-control-sm" value="' + esc(formatDecimal(warm.load, commaDecimal)) + '" placeholder="peso" aria-label="Peso do aquecimento" oninput="setWarmupField(' + exIdx + ",'load',this.value)\"></div>" +
-      '<div class="col-4"><input type="number" min="0" inputmode="numeric" class="form-control form-control-sm" value="' + esc(warm.rir) + '" placeholder="RIR" aria-label="RIR do aquecimento" oninput="setWarmupField(' + exIdx + ",'rir',this.value)\"></div>" +
-      '</div>' +
-      '</div>' +
+      (group.note ? '<div class="small text-muted mb-2"><i class="bi bi-info-circle"></i> ' + esc(group.note) + '</div>' : '') +
+      (last ? '<div class="small last-session mb-2"><i class="bi bi-clock-history"></i> <span class="fw-semibold">Última vez (' + fmtBR(last.date) + '):</span> ' + esc(lastSessionLine(last, commaDecimal)) + '</div>' : '') +
       setHeaderHtml() +
+      '<div class="row g-1 mb-1 align-items-center">' +
+      '<div class="col-2"><span class="warm-tag" title="Aquecimento"><i class="bi bi-fire" aria-hidden="true"></i></span></div>' +
+      '<div class="col-2"><input type="number" min="0" inputmode="numeric" class="form-control form-control-sm" value="' + esc(warm.reps) + '" placeholder="reps" aria-label="Reps do aquecimento" oninput="setWarmupField(' + exIdx + ",'reps',this.value)\"></div>" +
+      '<div class="col-3"><input type="text" inputmode="decimal" autocomplete="off" min="0" class="form-control form-control-sm" value="' + esc(formatDecimal(warm.load, commaDecimal)) + '" placeholder="peso" aria-label="Peso do aquecimento" oninput="setWarmupField(' + exIdx + ",'load',this.value)\"></div>" +
+      '<div class="col-2"><input type="number" min="0" inputmode="numeric" class="form-control form-control-sm" value="' + esc(warm.rir) + '" placeholder="RIR" aria-label="RIR do aquecimento" oninput="setWarmupField(' + exIdx + ",'rir',this.value)\"></div>" +
+      '<div class="col-3"></div>' +
+      '</div>' +
       group.sets.map(function (s, setIdx) { return setRowHtml(exIdx, setIdx, s, commaDecimal); }).join('') +
-      '<div class="d-flex gap-1 mt-1">' +
+      '<div class="d-flex gap-2 mt-2">' +
       '<button type="button" class="btn btn-sm btn-outline-secondary" onclick="addFormSet(' + exIdx + ')"><i class="bi bi-plus"></i> série</button>' +
       '<button type="button" class="btn btn-sm btn-outline-secondary" onclick="removeFormSet(' + exIdx + ')"' + (group.sets.length <= 1 ? ' disabled' : '') + '><i class="bi bi-dash"></i> série</button>' +
-      '<button type="button" class="btn btn-sm btn-outline-success ms-auto" onclick="startRest()"><i class="bi bi-stopwatch"></i> Descanso ' + fmtClock(restSecondsOf(state.settings)) + '</button>' +
+      '<button type="button" class="btn btn-sm rest-btn ms-auto" onclick="startRest()"><i class="bi bi-stopwatch"></i> Descanso ' + fmtClock(restSecondsOf(state.settings)) + '</button>' +
       '</div>' +
       '</div></div>';
   }).join('');
+}
+
+// Conta só as séries marcadas como feitas: cargas e reps já vêm preenchidas da ficha/último treino.
+function renderWorkoutProgress() {
+  const el = document.getElementById('workoutProgress');
+  if (!el) return;
+  const groups = state.formSets;
+  if (!groups.length) {
+    el.innerHTML = '';
+    return;
+  }
+  let setsTotal = 0;
+  let setsDone = 0;
+  let volume = 0;
+  let exercisesDone = 0;
+  groups.forEach(function (g) {
+    const done = g.sets.filter(function (s) { return s.done; });
+    setsTotal += g.sets.length;
+    setsDone += done.length;
+    if (g.sets.length && done.length === g.sets.length) exercisesDone++;
+    done.forEach(function (s) { volume += toNum(s.reps) * toNum(s.load); });
+  });
+  const pct = Math.round((exercisesDone / groups.length) * 100);
+  el.innerHTML = '<div class="card mb-3"><div class="card-body workout-hero">' +
+    '<div class="workout-ring" style="background: conic-gradient(var(--mt-lime) ' + pct + '%, #e8eedf 0)" role="img" aria-label="' + exercisesDone + ' de ' + groups.length + ' exercícios concluídos">' +
+    '<b>' + exercisesDone + '/' + groups.length + '</b></div>' +
+    '<div class="workout-hero-stats">' +
+    '<div><b>' + setsDone + '/' + setsTotal + '</b><span>séries feitas</span></div>' +
+    '<div><b>' + fmtThousands(volume) + ' kg</b><span>volume feito</span></div>' +
+    '<div><b>' + toNum(document.getElementById('workoutCardio').value) + ' min</b><span>cardio</span></div>' +
+    '</div></div></div>';
 }
 
 function setWarmupField(exIdx, field, value) {
@@ -834,6 +874,7 @@ function setField(exIdx, setIdx, field, value) {
   const group = state.formSets[exIdx];
   if (!group || !group.sets[setIdx]) return;
   group.sets[setIdx][field] = value;
+  if (group.sets[setIdx].done) renderWorkoutProgress();
   scheduleDraftSave();
 }
 
@@ -1221,7 +1262,7 @@ function sheetsUsingExercise(exercise) {
 }
 
 function fillLibraryGroupFilter() {
-  const sel = document.getElementById('libraryGroupFilter');
+  const row = document.getElementById('libraryGroupFilter');
   const groups = [];
 
   state.exercises.forEach(function (e) {
@@ -1231,11 +1272,12 @@ function fillLibraryGroupFilter() {
   });
   groups.sort(function (a, b) { return a.localeCompare(b, 'pt'); });
 
-  let html = '<option value="">Todos os grupos</option>';
-  groups.forEach(function (g) {
-    html += '<option value="' + esc(g) + '"' + (state.libraryGroup === g ? ' selected' : '') + '>' + esc(g) + '</option>';
-  });
-  sel.innerHTML = html;
+  if (state.libraryGroup && groups.indexOf(state.libraryGroup) === -1) state.libraryGroup = '';
+  row.innerHTML = groups.length > 1
+    ? [''].concat(groups).map(function (g) {
+        return '<button type="button" data-group="' + esc(g) + '" aria-pressed="' + ((state.libraryGroup || '') === g ? 'true' : 'false') + '">' + esc(g || 'Todos') + '</button>';
+      }).join('')
+    : '';
 }
 
 function renderExercises() {
@@ -1915,7 +1957,7 @@ function renderColinhaList() {
   }
 
   el.innerHTML = list.map(function (c) {
-    return '<div class="d-flex justify-content-between align-items-center py-1 border-bottom">' +
+    return '<div class="d-flex justify-content-between align-items-center gap-2 colinha-item">' +
       '<div class="me-2"><strong>' + esc(c.title) + '</strong><br><small class="text-muted">' + esc(c.content) + '</small></div>' +
       '<div class="d-flex gap-1">' +
       '<button type="button" class="btn btn-sm btn-outline-primary" onclick="openColinhaForm(\'' + c.id + '\')" aria-label="Editar colinha"><i class="bi bi-pencil"></i></button>' +
@@ -2210,12 +2252,11 @@ function renderBackupReminder() {
     return;
   }
 
-  el.innerHTML = '<div class="alert alert-warning py-2">' +
-    '<div><i class="bi bi-cloud-arrow-up"></i> <strong>Backup pendente.</strong> ' + esc(info.label) +
-    ' Guarde uma cópia para não perder seus treinos.</div>' +
-    '<div class="d-flex gap-2 mt-2">' +
-    '<button type="button" class="btn btn-sm btn-primary flex-fill" id="reminderBackup"><i class="bi bi-share"></i> Fazer backup</button>' +
-    '<button type="button" class="btn btn-sm btn-outline-secondary" id="reminderDismiss">Depois</button>' +
+  el.innerHTML = '<div class="card mb-3"><div class="card-body notice-card">' +
+    '<span class="notice-icon" aria-hidden="true"><i class="bi bi-cloud-arrow-up"></i></span>' +
+    '<p class="flex-grow-1"><strong>Backup pendente</strong>' + esc(info.label) + '</p>' +
+    '<button type="button" class="btn btn-sm btn-primary" id="reminderBackup">Fazer</button>' +
+    '<button type="button" class="btn btn-sm btn-outline-secondary" id="reminderDismiss" title="Depois" aria-label="Lembrar depois"><i class="bi bi-x-lg"></i></button>' +
     '</div></div>';
 
   document.getElementById('reminderBackup').addEventListener('click', guard(exportBackup));
@@ -2447,6 +2488,7 @@ function bindEvents() {
     document.getElementById(id).addEventListener('input', scheduleDraftSave);
     document.getElementById(id).addEventListener('change', scheduleDraftSave);
   });
+  document.getElementById('workoutCardio').addEventListener('input', renderWorkoutProgress);
   // Celular: ao trocar de app ou bloquear a tela, grava o rascunho na hora.
   document.addEventListener('visibilitychange', function () {
     if (document.visibilityState === 'hidden') flushDraft();
@@ -2464,8 +2506,10 @@ function bindEvents() {
   });
 
   document.getElementById('btnNewExercise').addEventListener('click', function () { openExerciseForm(null); });
-  document.getElementById('libraryGroupFilter').addEventListener('change', function () {
-    state.libraryGroup = this.value;
+  document.getElementById('libraryGroupFilter').addEventListener('click', function (e) {
+    const b = e.target.closest('[data-group]');
+    if (!b) return;
+    state.libraryGroup = b.getAttribute('data-group');
     renderExercises();
   });
   document.getElementById('librarySearch').addEventListener('input', function () {

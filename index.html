@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#7c3aed">
+  <meta name="theme-color" content="#f4f8ee">
   <meta name="description" content="Meu Treino — registre seus treinos de academia, metas semanais e desempenho. Dados 100% locais.">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; font-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'">
   <title>Meu Treino</title>
@@ -11,9 +11,9 @@
   <link rel="icon" href="icons/icon-16.png" sizes="16x16" type="image/png">
   <link rel="icon" href="icons/icon-32.png" sizes="32x32" type="image/png">
   <link rel="apple-touch-icon" href="icons/icon-180.png">
-  <link rel="stylesheet" href="vendor/bootstrap/bootstrap.min.css?v=61">
-  <link rel="stylesheet" href="vendor/bootstrap-icons/bootstrap-icons.min.css?v=61">
-  <link rel="stylesheet" href="css/styles.css?v=61">
+  <link rel="stylesheet" href="vendor/bootstrap/bootstrap.min.css?v=62">
+  <link rel="stylesheet" href="vendor/bootstrap-icons/bootstrap-icons.min.css?v=62">
+  <link rel="stylesheet" href="css/styles.css?v=62">
 </head>
 <body>
   <main class="container pb-nav">
@@ -32,6 +32,7 @@
     <section id="view-workout" class="view d-none">
       <h1 class="h4 mt-3 mb-3" id="workoutTitle">Treinar</h1>
       <div id="draftNotice"></div>
+      <div id="workoutProgress"></div>
       <div class="card mb-3">
         <div class="card-body">
           <div class="mb-2">
@@ -56,25 +57,25 @@
       </div>
 
       <div id="workoutExercises"></div>
-      <button class="btn btn-outline-primary w-100 mb-2" type="button" id="btnAddExercise"><i class="bi bi-plus-circle"></i> Adicionar exercício</button>
+      <button class="btn btn-dashed w-100 mb-3" type="button" id="btnAddExercise"><i class="bi bi-plus-circle"></i> Adicionar exercício</button>
 
-      <div class="d-flex gap-2 mb-3">
-        <button class="btn btn-outline-secondary flex-fill" type="button" id="workoutCancel"><i class="bi bi-x-lg"></i> Cancelar</button>
+      <div class="d-flex gap-2 mb-3 workout-actions">
+        <button class="btn btn-outline-secondary flex-fill" type="button" id="workoutCancel" title="Cancelar" aria-label="Cancelar"><i class="bi bi-x-lg"></i></button>
         <button class="btn btn-outline-primary d-none btn-icon" type="button" id="workoutExport" title="Exportar como texto" aria-label="Exportar como texto"><i class="bi bi-share"></i></button>
         <button class="btn btn-outline-danger d-none btn-icon" type="button" id="workoutDelete" title="Excluir" aria-label="Excluir treino"><i class="bi bi-trash"></i></button>
-        <button class="btn btn-primary flex-fill" type="button" id="workoutSave"><i class="bi bi-check-lg"></i> Salvar</button>
+        <button class="btn btn-primary flex-fill" type="button" id="workoutSave"><i class="bi bi-check-lg"></i> Salvar treino</button>
       </div>
     </section>
 
     <!-- Workout detail (read-only) -->
     <section id="view-detail" class="view d-none">
-      <div class="d-flex justify-content-between align-items-center mt-3 mb-3">
-        <h1 class="h4 mb-0"><i class="bi bi-eye"></i> Como foi o treino</h1>
-        <button class="btn btn-sm btn-outline-secondary" type="button" id="detailBack"><i class="bi bi-arrow-left"></i> Voltar</button>
+      <div class="page-head">
+        <button class="btn-back" type="button" id="detailBack" aria-label="Voltar"><i class="bi bi-arrow-left"></i></button>
+        <h1 class="h4">Como foi o treino</h1>
       </div>
       <div id="detailBody"></div>
       <div class="d-flex gap-2 mb-3">
-        <button class="btn btn-primary flex-fill" type="button" id="detailEdit"><i class="bi bi-pencil"></i> Editar</button>
+        <button class="btn btn-dark flex-fill" type="button" id="detailEdit"><i class="bi bi-pencil"></i> Editar treino</button>
         <button class="btn btn-outline-secondary btn-icon" type="button" id="detailExport" title="Exportar como texto" aria-label="Exportar como texto"><i class="bi bi-share"></i></button>
         <button class="btn btn-outline-danger btn-icon" type="button" id="detailDelete" title="Excluir" aria-label="Excluir treino"><i class="bi bi-trash"></i></button>
       </div>
@@ -82,37 +83,37 @@
 
     <!-- Exercise history -->
     <section id="view-exercise" class="view d-none">
-      <div class="d-flex justify-content-between align-items-center mt-3 mb-3">
-        <h1 class="h4 mb-0" id="exerciseHistoryTitle"><i class="bi bi-graph-up"></i> Evolução</h1>
-        <button class="btn btn-sm btn-outline-secondary" type="button" id="exerciseBack"><i class="bi bi-arrow-left"></i> Voltar</button>
+      <div class="page-head">
+        <button class="btn-back" type="button" id="exerciseBack" aria-label="Voltar"><i class="bi bi-arrow-left"></i></button>
+        <h1 class="h4" id="exerciseHistoryTitle">Evolução</h1>
       </div>
       <div id="exerciseHistory"></div>
     </section>
     <!-- Erase all data -->
     <section id="view-erase" class="view d-none">
-      <div class="d-flex justify-content-between align-items-center mt-3 mb-3">
-        <h1 class="h4 mb-0"><i class="bi bi-trash"></i> Apagar dados</h1>
-        <a href="#/more" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-left"></i> Voltar</a>
+      <div class="page-head">
+        <a href="#/more" class="btn-back" aria-label="Voltar"><i class="bi bi-arrow-left"></i></a>
+        <h1 class="h4">Apagar dados</h1>
       </div>
       <div id="eraseBody"></div>
     </section>
     <section id="view-ia" class="view d-none">
-      <div class="d-flex justify-content-between align-items-center mt-3 mb-3">
-        <h1 class="h4 mb-0"><i class="bi bi-robot"></i> Ficha pela IA</h1>
-        <a href="#/exercises" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-left"></i> Voltar</a>
+      <div class="page-head">
+        <a href="#/exercises" class="btn-back" aria-label="Voltar"><i class="bi bi-arrow-left"></i></a>
+        <h1 class="h4">Ficha pela IA</h1>
       </div>
-      <p class="small text-muted mb-2">Copie este texto e cole na IA (ChatGPT, Claude…) junto com o plano da professora (pode anexar o PDF com vários treinos: vira uma ficha para cada).
+      <p class="small text-muted mb-3">Copie este texto e cole na IA (ChatGPT, Claude…) junto com o plano da professora (pode anexar o PDF com vários treinos: vira uma ficha para cada).
         Ele traz as regras do JSON e os nomes dos exercícios que já existem no app, para não duplicar.
         Depois copie o JSON da resposta e cole em <strong>Fichas → Importar ficha</strong>.</p>
-      <textarea class="form-control font-monospace small mb-2" id="iaText" rows="16" readonly></textarea>
+      <textarea class="form-control font-monospace small mb-3" id="iaText" rows="16" readonly></textarea>
       <div class="d-flex gap-2">
-        <button type="button" class="btn btn-outline-primary flex-fill" id="iaCopy"><i class="bi bi-clipboard"></i> Copiar</button>
-        <button type="button" class="btn btn-primary flex-fill" id="iaShare"><i class="bi bi-send"></i> Compartilhar</button>
+        <button type="button" class="btn btn-primary flex-fill" id="iaCopy"><i class="bi bi-clipboard"></i> Copiar</button>
+        <button type="button" class="btn btn-outline-secondary flex-fill" id="iaShare"><i class="bi bi-send"></i> Compartilhar</button>
       </div>
     </section>
     <!-- Sheets & exercises -->
     <section id="view-exercises" class="view d-none">
-      <h1 class="h4 mt-3 mb-3"><i class="bi bi-card-checklist"></i> Fichas e exercícios</h1>
+      <h1 class="h4 mt-3 mb-3"><i class="bi bi-card-checklist"></i> Fichas</h1>
 
       <ul class="nav nav-pills nav-fill mb-3">
         <li class="nav-item"><button class="nav-link active" id="tabSheetsBtn" data-bs-toggle="pill" data-bs-target="#tabSheets" type="button">Fichas</button></li>
@@ -121,35 +122,31 @@
 
       <div class="tab-content">
         <div class="tab-pane fade show active" id="tabSheets">
-          <div class="alert alert-light border small py-2 mb-3">
-            <i class="bi bi-info-circle text-primary"></i>
-            <strong>Ficha</strong> é o seu treino completo (ex.: TREINO A - inferiores): uma lista ordenada de
+          <details class="info-hint">
+            <summary><i class="bi bi-info-circle"></i> O que é uma ficha?</summary>
+            <p><strong>Ficha</strong> é o seu treino completo (ex.: TREINO A - inferiores): uma lista ordenada de
             exercícios, cada um com o número de séries, as reps de cada série e a observação da professora.
-            Ao <strong>Treinar</strong>, você escolhe a ficha e os exercícios entram automaticamente no formulário.
-          </div>
-          <div class="d-flex gap-2 mb-3">
+            Ao <strong>Treinar</strong>, você escolhe a ficha e os exercícios entram automaticamente no formulário.</p>
+          </details>
+          <div class="d-flex gap-2 mb-2">
             <button class="btn btn-primary flex-fill" type="button" id="btnNewSheet"><i class="bi bi-plus-circle"></i> Nova ficha</button>
-            <button class="btn btn-outline-primary flex-fill" type="button" id="btnImportSheet"><i class="bi bi-filetype-json"></i> Importar ficha</button>
+            <button class="btn btn-outline-secondary flex-fill" type="button" id="btnImportSheet"><i class="bi bi-filetype-json"></i> Importar</button>
           </div>
-          <a href="#/ia" class="btn btn-sm btn-link w-100 mb-2"><i class="bi bi-robot"></i> Pedir uma ficha para a IA (contrato + exercícios)</a>
+          <a href="#/ia" class="btn btn-dashed w-100 mb-3"><i class="bi bi-stars"></i> Pedir uma ficha para a IA</a>
           <div id="sheetsList"></div>
         </div>
         <div class="tab-pane fade" id="tabExercises">
-          <div class="alert alert-light border small py-2 mb-3">
-            <i class="bi bi-info-circle text-primary"></i>
-            <strong>Biblioteca</strong> são os exercícios que <strong>você criou</strong> (nome, grupo muscular e observação).
+          <details class="info-hint">
+            <summary><i class="bi bi-info-circle"></i> O que entra na biblioteca?</summary>
+            <p><strong>Biblioteca</strong> são os exercícios que <strong>você criou</strong> (nome, grupo muscular e observação).
             Os exercícios do <strong>catálogo</strong> não entram nesta lista, porque já estão no catálogo — ao escolher um deles,
-            basta usá-lo direto na ficha ou no treino. Use o filtro e a busca para achar rápido.
+            basta usá-lo direto na ficha ou no treino. Use o filtro e a busca para achar rápido.</p>
+          </details>
+          <div class="d-flex gap-2 mb-3">
+            <input type="search" class="form-control" id="librarySearch" placeholder="Buscar exercício..." aria-label="Buscar exercício">
+            <button class="btn btn-primary btn-icon" type="button" id="btnNewExercise" title="Novo exercício" aria-label="Novo exercício"><i class="bi bi-plus-lg"></i></button>
           </div>
-          <button class="btn btn-primary w-100 mb-2" type="button" id="btnNewExercise"><i class="bi bi-plus-circle"></i> Novo exercício</button>
-          <div class="row g-1 mb-3">
-            <div class="col-6">
-              <select class="form-select form-select-sm" id="libraryGroupFilter" aria-label="Filtrar por grupo"></select>
-            </div>
-            <div class="col-6">
-              <input type="search" class="form-control form-control-sm" id="librarySearch" placeholder="Buscar exercício...">
-            </div>
-          </div>
+          <div class="chip-row" id="libraryGroupFilter" role="group" aria-label="Filtrar por grupo"></div>
           <div id="exercisesList"></div>
         </div>
       </div>
@@ -158,20 +155,22 @@
     <!-- Calendar -->
     <section id="view-calendar" class="view d-none">
       <h1 class="h4 mt-3 mb-3"><i class="bi bi-calendar3"></i> Frequência</h1>
-      <div class="d-flex justify-content-between align-items-center mb-2">
-        <button class="btn btn-sm btn-outline-primary" type="button" id="calPrev" aria-label="Mes anterior"><i class="bi bi-chevron-left"></i></button>
+      <div class="card"><div class="card-body">
+      <div class="cal-nav">
+        <button class="btn btn-sm btn-outline-secondary" type="button" id="calPrev" aria-label="Mes anterior"><i class="bi bi-chevron-left"></i></button>
         <strong id="calMonthLabel"></strong>
-        <button class="btn btn-sm btn-outline-primary" type="button" id="calNext" aria-label="Proximo mes"><i class="bi bi-chevron-right"></i></button>
+        <button class="btn btn-sm btn-outline-secondary" type="button" id="calNext" aria-label="Proximo mes"><i class="bi bi-chevron-right"></i></button>
       </div>
       <div class="cal-grid cal-header">
         <div>D</div><div>S</div><div>T</div><div>Q</div><div>Q</div><div>S</div><div>S</div>
       </div>
       <div class="cal-grid" id="calendarGrid"></div>
-      <p class="text-muted mt-2" id="calendarTotal"></p>
+      <p class="text-muted small mt-3 mb-0" id="calendarTotal"></p>
+      </div></div>
       <div id="weeklyProgress"></div>
       <div class="card mt-3">
         <div class="card-body">
-          <h2 class="h6 mb-2"><i class="bi bi-speedometer2 text-primary"></i> Peso corporal</h2>
+          <h2 class="h6 fw-bold mb-3"><i class="bi bi-speedometer2 text-primary"></i> Peso corporal</h2>
           <div class="row g-2">
             <div class="col-6">
               <label class="form-label small text-muted mb-1" for="bodyWeightDate">Dia</label>
@@ -217,7 +216,7 @@
           </div>
           <div class="d-flex gap-2 mt-2">
             <button class="btn btn-primary flex-fill" type="button" id="btnSaveSettings">Salvar metas</button>
-            <button class="btn btn-outline-primary flex-fill" type="button" id="btnWeekToday">Iniciar semana</button>
+            <button class="btn btn-outline-secondary flex-fill" type="button" id="btnWeekToday">Iniciar semana</button>
           </div>
         </div>
       </div>
@@ -234,7 +233,7 @@
         <div class="card-header fw-semibold"><i class="bi bi-journal-text"></i> Colinha</div>
         <div class="card-body">
           <div id="colinhaList"></div>
-          <button class="btn btn-outline-primary w-100 mt-2" type="button" id="btnAddColinha"><i class="bi bi-plus"></i> Nova colinha</button>
+          <button class="btn btn-dashed w-100 mt-2" type="button" id="btnAddColinha"><i class="bi bi-plus"></i> Nova colinha</button>
         </div>
       </div>
 
@@ -243,7 +242,7 @@
         <div class="card-body">
           <p class="text-muted small">Seus dados ficam apenas neste aparelho (IndexedDB). Guarde uma cópia no backup para não perder nada — e para levar os treinos de um aparelho para outro.</p>
           <div class="d-flex gap-2 mb-1">
-            <button class="btn btn-primary flex-fill" type="button" id="btnExport"><i class="bi bi-share"></i> Exportar</button>
+            <button class="btn btn-dark flex-fill" type="button" id="btnExport"><i class="bi bi-share"></i> Exportar</button>
             <button class="btn btn-outline-secondary flex-fill" type="button" id="btnImport"><i class="bi bi-upload"></i> Importar</button>
           </div>
           <p class="small text-muted mb-1" id="backupAction"></p>
@@ -274,7 +273,7 @@
       </div>
       </details>
 
-      <p class="text-center text-muted small">Meu Treino <span id="appVersion">v61</span> · dados 100% locais · catálogo: gugeldev/exercicios-bd-ptbr (CC0)</p>
+      <p class="text-center text-muted small">Meu Treino <span id="appVersion">v62</span> · dados 100% locais · catálogo: gugeldev/exercicios-bd-ptbr (CC0)</p>
     </section>
   </main>
 
@@ -458,9 +457,9 @@
     </div>
   </div>
 
-  <script src="vendor/bootstrap/bootstrap.bundle.min.js?v=61"></script>
-  <script src="js/db.js?v=61"></script>
-  <script src="js/core.js?v=61"></script>
-  <script src="js/app.js?v=61"></script>
+  <script src="vendor/bootstrap/bootstrap.bundle.min.js?v=62"></script>
+  <script src="js/db.js?v=62"></script>
+  <script src="js/core.js?v=62"></script>
+  <script src="js/app.js?v=62"></script>
 </body>
 </html>
