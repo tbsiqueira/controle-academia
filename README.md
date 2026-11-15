@@ -131,7 +131,7 @@ selecionada). Use só quando precisar.
 
 ```
 index.html                  app shell (telas, modais)
-css/styles.css              estilos (tema, navegação inferior, calendário, botões)
+css/styles.css              estilos (tema verde-limão, navegação inferior, calendário, botões)
 js/core.js                  lógica pura (datas, semana, agrupamento por id, histórico, exportação, backups)
 js/app.js                   lógica do app (telas, fichas, treinos, histórico, backup)
 js/db.js                    camada IndexedDB (workouts, exercises, sheets, settings, colinha)
@@ -146,7 +146,7 @@ tests/module.test.js        registro do core no navegador (sem module.exports)
 tests/sample-data.test.js   testes da fixture de exemplo
 tests/CHECKLIST.md          mapa funcionalidade -> testes
 tests/fixtures/             backups de versões antigas usados nos testes
-vendor/                     Bootstrap 5 + Bootstrap Icons (locais, sem CDN)
+vendor/                     Bootstrap 5 + Bootstrap Icons + fonte Plus Jakarta Sans (OFL), locais, sem CDN
 manifest.webmanifest        manifest do PWA
 sw.js                       service worker (cache-first nos arquivos ?v=N, network-first no resto, com fallback offline)
 reset.html                  página de escape: desregistra o service worker e limpa o cache

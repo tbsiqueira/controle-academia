@@ -131,7 +131,7 @@ das duas.
 
 ### O caminho rápido
 
-> **Atalho (v61):** no **Início**, o botão **Treinar: TREINO B** já abre o Treinar com a **próxima ficha** da
+> **Atalho (v61):** no **Início**, o botão escuro **Treinar agora** (com o nome da ficha embaixo) já abre o Treinar com a **próxima ficha** da
 > sequência (a que vem depois da última que você fez, em ordem alfabética: A → B → C → A). Ele some enquanto
 > houver um treino em andamento.
 
@@ -176,7 +176,10 @@ Elevação pélvica                                    [3 séries]
 - **Cada exercício entra uma vez só** no treino e na ficha: o buscador não deixa repetir.
 - **Marcar série como feita:** toque no **número da série** — ela fica marcada e o **timer de descanso** já começa.
   Toque de novo para desmarcar. A marca é só um guia durante o treino; não fica gravada no treino salvo.
-- **Errou algo?** Toque em **Cancelar** — nada é salvo e você volta para a tela anterior.
+- **Errou algo?** Toque no **✕** da barra de baixo (ao lado de **Salvar treino**) — nada é salvo e você volta para a tela anterior.
+- **Barra de baixo (v62):** no Treinar, o menu dá lugar a uma barra fixa com **✕** e **Salvar treino**, sempre à mão.
+  No topo, um cartão mostra quantos **exercícios** já foram concluídos (todas as séries marcadas), as **séries feitas**,
+  o **volume feito** (só das séries marcadas) e o **cardio**.
 - **Precisa editar um treino já salvo?** Início → toque no treino → **Editar**.
 
 ### Ajudas durante o treino (v51)
@@ -185,11 +188,11 @@ Elevação pélvica                                    [3 séries]
   Se o celular fechar o app (ou você trocar de aba), ao voltar em **Treinar** o treino reaparece com o aviso
   _"Rascunho recuperado"_, e o **Início** mostra o cartão **Treino em andamento** com **Continuar** e
   **Descartar**. O rascunho some quando você **Salva** ou **Cancela**. Ele não entra no backup.
-- **Última vez:** cada exercício mostra, em lilás, o que você fez da última vez
+- **Última vez:** cada exercício mostra, num quadro verde-claro, o que você fez da última vez
   (ex.: _"Última vez (08/11/2026): 27 kg × 12 (RIR 2) · 27 kg × 10"_), para decidir se sobe a carga.
 - **Repetir o último treino desta ficha:** ao escolher a ficha, aparece esse botão. Ele preenche o treino com os
   mesmos exercícios, reps e cargas da última vez; RIR e observações ficam em branco.
-- **Timer de descanso:** o botão verde **Descanso** em cada exercício abre uma barra acima do menu com a contagem
+- **Timer de descanso:** o botão escuro **Descanso** em cada exercício abre um cartão acima da barra de baixo com a contagem
   regressiva, **+15s** e **✕**. Quando o tempo acaba, o contador fica **laranja** em 0:00 até você fechar no **✕** (sem som nem vibração).
   O tempo padrão (90 s) muda em **Mais → Metas da semana → Descanso entre séries**.
 - **Ficha excluída ou desativada:** o seletor do **Treinar** só mostra as fichas ativas. Ao editar um treino
@@ -201,10 +204,10 @@ Elevação pélvica                                    [3 séries]
 ## 5. Vendo como foi o treino e a evolução
 
 **Lista do Início:** mostra o **mês atual e o anterior** (no mínimo 10 treinos), agrupados por mês, com o
-treino de **hoje em verde**. Cada cartão é enxuto: o **bloco da data** e o **nome da ficha** (toque para abrir o
-treino) e, à direita, o botão de **compartilhar** o treino como texto. Embaixo do nome vem um resumo
+treino de **hoje em verde-limão**. Cada cartão é enxuto: o **bloco da data** e o **nome da ficha** — toque em qualquer
+lugar do cartão para abrir o treino (o **compartilhar** fica dentro dele). Embaixo do nome vem um resumo
 (ex.: _"6 exercícios · 4.320 kg · 30 min cardio"_) e, se houver, quantos **recordes 🏆** o treino bateu. O botão **Ver meses anteriores** abre o
-resto. Com 2 ou mais fichas usadas, aparece o filtro **Todas as fichas** para ver só os treinos de uma ficha.
+resto. Com 2 ou mais fichas usadas, aparecem pílulas de filtro (**Todas**, uma por ficha) para ver só os treinos de uma ficha.
 
 **Recordes 🏆:** quando um treino passa da **maior carga que você já usou** num exercício (comparando com os
 treinos de datas anteriores), o resumo do treino mostra no exercício _"Recorde: 47,5 kg × 8 (antes: 45 kg)"_.
@@ -216,7 +219,7 @@ por semana (no mesmo ciclo das metas): **volume** (soma de reps × carga, sem aq
 (verde quando bateu a meta) e minutos de cardio.
 
 **Ver um treino (somente leitura):**
-Início → **toque no treino** na lista *Todos os treinos*. Aparece o resumo do dia: ficha, cardio,
+Início → **toque no treino** na lista *Histórico*. Aparece o resumo do dia (volume, cardio e recordes em destaque), ficha,
 observações e cada exercício com aquecimento, séries e cargas. Nessa tela: **Editar**, **Exportar** e **Excluir**.
 
 **Ver a evolução de um exercício:**
@@ -335,7 +338,7 @@ Exemplos prontos para copiar:
 
 Dá para gerar uma **mensagem de texto** com o treino do dia — pronta para WhatsApp, e-mail, etc.
 
-**Como:** Início → no cartão do treino, toque no ícone de **compartilhar** à direita (ou abra o treino e use **Exportar**).
+**Como:** Início → toque no treino e use o botão de **compartilhar** (ao lado de **Editar treino**).
 Depois escolha **Copiar** ou **Compartilhar** (no celular abre a folha de compartilhamento).
 
 **Exemplo do texto gerado:**
@@ -390,8 +393,8 @@ aparelhos salvavam um arquivo `.txt` extra. Se ainda aparecer um `.txt` com "bac
 
 ### Status e lembrete de backup
 Logo abaixo dos botões aparece **quando foi o último backup** (ex.: _"Último backup: 12/10/2026 13:35 (há 3 dias)"_).
-Se passar de **7 dias** sem backup, o app mostra um aviso no **Início** com o botão **Fazer backup** — e um
-**Depois** para dispensar naquela sessão.
+Se passar de **7 dias** sem backup, o app mostra um aviso no **Início** com o botão **Fazer** — e um
+**✕** para dispensar naquela sessão.
 
 **Quando fazer:** de vez em quando por segurança, e sempre antes de trocar de celular ou limpar o navegador.
 
