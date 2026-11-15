@@ -390,6 +390,14 @@
     return best;
   }
 
+  // Maior carga já registrada no exercício; 0 quando ele nunca teve carga (peso do corpo).
+  function maxBestLoad(workouts, target) {
+    return (workouts || []).reduce(function (max, w) {
+      const best = bestSetForExercise(w, target);
+      return (best && best.load > max) ? best.load : max;
+    }, 0);
+  }
+
   /* ---------- recordes pessoais ---------- */
 
   // Exercícios em que este treino bateu o recorde de carga, comparando só com treinos de
@@ -1081,6 +1089,7 @@
     previousWarmupFields: previousWarmupFields,
     sessionsForExercise: sessionsForExercise,
     bestSetForExercise: bestSetForExercise,
+    maxBestLoad: maxBestLoad,
     // recordes
     workoutRecords: workoutRecords,
     // formulário, descanso, Início e evolução

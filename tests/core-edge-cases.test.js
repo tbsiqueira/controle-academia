@@ -534,3 +534,27 @@ test('shiftMonth atravessa o ano e nao altera a data recebida', () => {
   core.shiftMonth(cursor, -1);
   assert.equal(core.fmtDate(cursor), '2026-10-31');
 });
+
+/* ---------- PR na tela de evolução ---------- */
+
+test('maxBestLoad e 0 para exercicio sem carga (nao inventa "PR 1 kg")', () => {
+  const flexao = { exerciseId: 'e1', exerciseName: 'Flexao' };
+  const treinos = [
+    { id: 'w1', date: '2026-10-01', sets: [{ exerciseId: 'e1', exerciseName: 'Flexao', number: 1, reps: 20, load: null }] },
+    { id: 'w2', date: '2026-10-03', sets: [{ exerciseId: 'e1', exerciseName: 'Flexao', number: 1, reps: 22, load: 0 }] },
+    { id: 'w3', date: '2026-10-05', sets: [], warmups: [{ exerciseId: 'e1', exerciseName: 'Flexao', reps: 10 }] }
+  ];
+  assert.equal(core.maxBestLoad(treinos, flexao), 0);
+  assert.equal(core.maxBestLoad([], flexao), 0);
+  assert.equal(core.maxBestLoad(null, flexao), 0);
+});
+
+test('maxBestLoad devolve a maior carga entre os treinos do exercicio', () => {
+  const alvo = { exerciseId: 'e1', exerciseName: 'Supino' };
+  const treinos = [
+    { id: 'w1', date: '2026-10-01', sets: [{ exerciseId: 'e1', number: 1, reps: 10, load: 40 }, { exerciseId: 'e1', number: 2, reps: 8, load: 42.5 }] },
+    { id: 'w2', date: '2026-10-03', sets: [{ exerciseId: 'e1', number: 1, reps: 10, load: 0.5 }, { exerciseId: 'e2', number: 1, reps: 10, load: 200 }] }
+  ];
+  assert.equal(core.maxBestLoad(treinos, alvo), 42.5);
+  assert.equal(core.maxBestLoad([treinos[1]], alvo), 0.5, 'carga menor que 1 kg nao vira 1');
+});

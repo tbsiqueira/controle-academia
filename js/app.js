@@ -402,7 +402,8 @@ function renderExerciseHistory() {
     return { workout: w, best: bestSetForExercise(w, target) };
   });
 
-  const maxLoad = Math.max.apply(null, rows.map(function (r) { return r.best ? r.best.load : 0; }).concat([1]));
+  const prLoad = maxBestLoad(sessions, target);
+  const maxLoad = prLoad || 1;   // só para a largura das barras (evita dividir por zero)
 
   const withLoad = rows.filter(function (r) { return r.best; });
   let trendIcon = '<i class="bi bi-dash text-muted"></i>';
@@ -415,7 +416,7 @@ function renderExerciseHistory() {
 
   let html = '<div class="card mb-3"><div class="card-body py-2 d-flex justify-content-between align-items-center">' +
     '<span class="small text-muted">' + trendIcon + ' ' + sessions.length + (sessions.length === 1 ? ' treino' : ' treinos') + ' com este exercício</span>' +
-    '<span class="badge text-bg-warning"><i class="bi bi-trophy"></i> PR ' + maxLoad + ' kg</span>' +
+    (prLoad > 0 ? '<span class="badge text-bg-warning"><i class="bi bi-trophy"></i> PR ' + prLoad + ' kg</span>' : '') +
     '</div></div>';
 
   html += '<h6 class="text-muted"><i class="bi bi-bar-chart-line"></i> Melhor série por dia</h6>';

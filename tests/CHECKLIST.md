@@ -42,6 +42,7 @@ Mapa de **cada funcionalidade do app** para os testes que a cobrem. Serve para r
 | Telas da importação de ficha (colar, revisão, botão Revisar → Importar), desativar/reativar ficha, tela #/ia, card Debug | `js/app.js` | `check.ps1` (ids e handlers) + lógica do `core.js` (`parseSheetImportText`, `suggestExercises`, `exerciseNamesText`, `normalizeSheet` mantém `active: false`) |
 | Importar/desfazer/dados de exemplo sem risco de perder tudo (apaga e grava numa transação só) | `db.js`: `dbReplaceAll` (usado por `restoreAll` no `app.js`) | `db.test.js` (IndexedDB falso: uma transação, `clear` antes do `put`, `abort` em registro inválido) |
 | Calendário: trocar de mês (inclusive nos dias 29–31) | `core.js`: `shiftMonth` | `core-edge-cases.test.js` (31/out ‹ vai para setembro; 31/jan › vai para fevereiro; virada do ano) |
+| Selo de PR na evolução do exercício (some quando não há carga) | `core.js`: `maxBestLoad` | `core-edge-cases.test.js` (peso do corpo = 0, sem "PR 1 kg"; maior carga; carga < 1 kg) |
 
 ## Limites conhecidos
 
