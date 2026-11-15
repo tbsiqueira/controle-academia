@@ -213,6 +213,34 @@
     }).join('') + '</ul>';
   }
 
+  /* ---------- formulário do Treinar: linha de uma série ---------- */
+
+  // Larguras (grade de 12 do Bootstrap). O número da série é só texto numa coluna estreita,
+  // para sobrar espaço para a carga: "102,5" não cabia quando as duas tinham a mesma largura.
+  const SET_COLS = { number: 'col-1', reps: 'col-2', load: 'col-3', rir: 'col-2', note: 'col-4' };
+
+  function setHeaderHtml() {
+    return '<div class="row g-1 text-center fw-semibold small text-muted mb-1">' +
+      '<div class="' + SET_COLS.number + '">#</div><div class="' + SET_COLS.reps + '">reps</div>' +
+      '<div class="' + SET_COLS.load + '">carga</div><div class="' + SET_COLS.rir + '">RIR</div>' +
+      '<div class="' + SET_COLS.note + '">obs</div>' +
+      '</div>';
+  }
+
+  // Os campos chamam setField(exercício, série, campo, valor), definido no app.js.
+  function setRowHtml(exIdx, setIdx, s, useComma) {
+    function field(name) {
+      return ' oninput="setField(' + exIdx + ',' + setIdx + ",'" + name + "',this.value)\"";
+    }
+    return '<div class="row g-1 mb-1 align-items-center">' +
+      '<div class="' + SET_COLS.number + ' text-center small fw-semibold text-muted">' + esc(s.number) + '</div>' +
+      '<div class="' + SET_COLS.reps + '"><input type="number" inputmode="numeric" class="form-control form-control-sm" value="' + esc(s.reps) + '" aria-label="Reps da série ' + esc(s.number) + '"' + field('reps') + '></div>' +
+      '<div class="' + SET_COLS.load + '"><input type="text" inputmode="decimal" autocomplete="off" class="form-control form-control-sm" value="' + esc(formatDecimal(s.load, useComma)) + '" aria-label="Carga da série ' + esc(s.number) + '"' + field('load') + '></div>' +
+      '<div class="' + SET_COLS.rir + '"><input type="number" inputmode="numeric" class="form-control form-control-sm" value="' + esc(s.rir) + '" aria-label="RIR da série ' + esc(s.number) + '"' + field('rir') + '></div>' +
+      '<div class="' + SET_COLS.note + '"><input type="text" class="form-control form-control-sm" value="' + esc(s.note) + '" aria-label="Observação da série ' + esc(s.number) + '"' + field('note') + '></div>' +
+      '</div>';
+  }
+
   /* ---------- referência por id (evita nome congelado) ---------- */
 
   // Normaliza a referência de um exercício. Aceita { exerciseId, exerciseName }
@@ -1102,6 +1130,8 @@
     warmupSummary: warmupSummary,
     setLine: setLine,
     setsSummaryLines: setsSummaryLines,
+    setHeaderHtml: setHeaderHtml,
+    setRowHtml: setRowHtml,
     groupSets: groupSets,
     // histórico
     lastLoadsForExercise: lastLoadsForExercise,

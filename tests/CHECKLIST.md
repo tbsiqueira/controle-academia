@@ -46,6 +46,7 @@ Mapa de **cada funcionalidade do app** para os testes que a cobrem. Serve para r
 | Backup importado não confia no arquivo (ids e datas) | `core.js`: `normalizeBackup` (`hasSafeId`), `normalizeWorkout`, `normalizeSettings` | `core-edge-cases.test.js` (id com aspas/tags é descartado; formatos antigos de id mantidos; data inválida vira "sem data"; início da semana inválido; idempotência) |
 | Service worker: `?v=N` sai do cache primeiro (abre rápido com sinal fraco); resto é rede primeiro | `sw.js` | `sw.test.js` (cache e rede falsos: produção × localhost, offline, versão nova = URL nova, o que não é interceptado) |
 | Iniciar próxima semana (pula as semanas perdidas de uma vez) | `core.js`: `nextWeekAnchor` | `core-edge-cases.test.js` (1 semana, 3 semanas paradas, virada do ano, mesmo dia da semana) |
+| Formulário do Treinar: linha da série (carga larga, número como texto) | `core.js`: `setRowHtml`, `setHeaderHtml` | `form-and-progress.test.js` (colunas 1-2-3-2-4, "102,5" cabe, handlers `setField`, teclados, escape) |
 
 ## Limites conhecidos
 

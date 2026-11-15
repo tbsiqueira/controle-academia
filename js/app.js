@@ -746,17 +746,6 @@ function renderWorkoutForm() {
   renderFormSets();
 }
 
-function setRow(exIdx, setIdx, s) {
-  return '<div class="row g-1 mb-1 align-items-center">' +
-    '<div class="col-2"><input type="text" inputmode="numeric" class="form-control form-control-sm text-center" value="' + esc(s.number) + '" readonly tabindex="-1"></div>' +
-    '<div class="col-2"><input type="number" inputmode="numeric" class="form-control form-control-sm" value="' + esc(s.reps) + '" aria-label="Reps da série ' + esc(s.number) + '" oninput="setField(' + exIdx + ',' + setIdx + ",'reps',this.value)\"></div>" +
-    '<div class="col-2"><input type="text" inputmode="decimal" autocomplete="off" class="form-control form-control-sm" value="' + esc(formatDecimal(s.load, commaDecimal)) + '" aria-label="Carga da série ' + esc(s.number) + '" oninput="setField(' + exIdx + ',' + setIdx + ",'load',this.value)\"></div>" +
-    '<div class="col-2"><input type="number" inputmode="numeric" class="form-control form-control-sm" value="' + esc(s.rir) + '" aria-label="RIR da série ' + esc(s.number) + '" oninput="setField(' + exIdx + ',' + setIdx + ",'rir',this.value)\"></div>" +
-    '<div class="col-4"><input type="text" class="form-control form-control-sm" value="' + esc(s.note) + '" aria-label="Observação da série ' + esc(s.number) + '" oninput="setField(' + exIdx + ',' + setIdx + ",'note',this.value)\"></div>" +
-    '</div>';
-}
-
-
 function renderFormSets() {
   const el = document.getElementById('workoutExercises');
   if (!state.formSets.length) {
@@ -785,10 +774,8 @@ function renderFormSets() {
       '<div class="col-4"><input type="number" min="0" inputmode="numeric" class="form-control form-control-sm" value="' + esc(warm.rir) + '" placeholder="RIR" oninput="setWarmupField(' + exIdx + ",'rir',this.value)\"></div>" +
       '</div>' +
       '</div>' +
-      '<div class="row g-1 text-center fw-semibold small text-muted mb-1">' +
-      '<div class="col-2">série</div><div class="col-2">reps</div><div class="col-2">carga</div><div class="col-2">RIR</div><div class="col-4">obs</div>' +
-      '</div>' +
-      group.sets.map(function (s, setIdx) { return setRow(exIdx, setIdx, s); }).join('') +
+      setHeaderHtml() +
+      group.sets.map(function (s, setIdx) { return setRowHtml(exIdx, setIdx, s, commaDecimal); }).join('') +
       '<div class="d-flex gap-1 mt-1">' +
       '<button type="button" class="btn btn-sm btn-outline-secondary" onclick="addFormSet(' + exIdx + ')"><i class="bi bi-plus"></i> série</button>' +
       '<button type="button" class="btn btn-sm btn-outline-success ms-auto" onclick="startRest()"><i class="bi bi-stopwatch"></i> Descanso ' + fmtClock(restSecondsOf(state.settings)) + '</button>' +

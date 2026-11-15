@@ -203,3 +203,44 @@ test('weeklyTotals soma treinos, volume e cardio por janela de 7 dias', () => {
     { start: '2026-11-08', end: '2026-11-14', workouts: 0, volume: 0, cardio: 0 }
   ]);
 });
+
+/* ---------- formulário do Treinar: linha de uma série ---------- */
+
+function colSizes(html) {
+  return (html.match(/class="col-(\d+)/g) || []).map((c) => Number(c.replace(/\D/g, '')));
+}
+
+test('setRowHtml da mais largura para a carga do que para o numero da serie', () => {
+  const html = core.setRowHtml(0, 0, { number: 1, reps: 12, load: 102.5, rir: 2, note: '' }, true);
+  // regressao: numero e carga eram col-2 cada; "102,5" ficava cortado em telas de 375px
+  assert.doesNotMatch(html, /readonly/, 'o numero da serie nao e mais um campo');
+  assert.match(html, /<div class="col-1[^"]*">1<\/div>/);
+  assert.match(html, /<div class="col-3"><input type="text" inputmode="decimal" autocomplete="off"[^>]*value="102,5"/);
+  assert.deepEqual(colSizes(html), [1, 2, 3, 2, 4]);
+  assert.equal(colSizes(html).reduce((a, b) => a + b, 0), 12, 'a linha ocupa a grade inteira');
+});
+
+test('setHeaderHtml usa as mesmas colunas da linha', () => {
+  const header = core.setHeaderHtml();
+  assert.deepEqual(colSizes(header), colSizes(core.setRowHtml(0, 0, { number: 1 }, false)));
+  ['reps', 'carga', 'RIR', 'obs'].forEach((label) => assert.ok(header.indexOf('>' + label + '<') !== -1, label));
+});
+
+test('setRowHtml liga cada campo ao setField certo e mantem os teclados numericos', () => {
+  const html = core.setRowHtml(2, 1, { number: 2, reps: 10, load: 27.5, rir: 1, note: 'ok' }, false);
+  ['reps', 'load', 'rir', 'note'].forEach((campo) => {
+    assert.ok(html.indexOf('oninput="setField(2,1,\'' + campo + '\',this.value)"') !== -1, campo);
+  });
+  assert.equal((html.match(/<input /g) || []).length, 4);
+  assert.match(html, /type="number" inputmode="numeric"[^>]*value="10"[^>]*aria-label="Reps da série 2"/);
+  assert.match(html, /value="27.5"[^>]*aria-label="Carga da série 2"/);
+  assert.match(html, /value="1"[^>]*aria-label="RIR da série 2"/);
+  assert.match(html, /value="ok"[^>]*aria-label="Observação da série 2"/);
+});
+
+test('setRowHtml escapa o que o usuario digitou e aceita campos vazios', () => {
+  const html = core.setRowHtml(0, 0, { number: 1, reps: '', load: '', rir: '', note: '"><b>x' }, true);
+  assert.ok(html.indexOf('<b>') === -1);
+  assert.ok(html.indexOf('&quot;&gt;&lt;b&gt;x') !== -1);
+  assert.equal((html.match(/value=""/g) || []).length, 3);
+});
