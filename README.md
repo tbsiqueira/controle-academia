@@ -1,7 +1,8 @@
 # Meu Treino
 
 Aplicativo web instalável (**PWA**) para registrar treinos de academia: fichas com exercícios ordenados,
-aquecimento por exercício, séries com carga e RIR, metas semanais flexíveis, calendário de frequência,
+aquecimento por exercício, séries com carga e RIR, recordes e 1RM estimado, metas semanais flexíveis,
+calendário de frequência com evolução semanal e peso corporal,
 exportação do treino como texto para enviar à professora e **importação de fichas em JSON** (geradas por uma IA
 a partir do plano/PDF da professora, seguindo o contrato [FICHA-JSON.md](FICHA-JSON.md)).
 
@@ -190,7 +191,7 @@ Dois espaços de id, sem colisão: **biblioteca do usuário** = UUID (texto) e *
 | `workouts` | treinos: `date`, `sheetId`/`sheetName`, `cardioMinutes`, `notes`, `warmups[]`, `sets[]` |
 | `sheets` | fichas: `name`, `active` (false = desativada, fora do seletor do Treinar) + `exercises[]` (`exerciseId`, `name`, `sets`, `reps[]` por série, `note`) |
 | `exercises` | biblioteca do usuário: `name`, `group`, `correction`, `source` (`custom`) |
-| `settings` | metas semanais, início da semana, `lastBackupAt` (lembrete), preferências |
+| `settings` | metas semanais, início da semana, `lastBackupAt` (lembrete), preferências e `bodyWeights` (`{ "YYYY-MM-DD": kg }`, um peso por dia — sem store próprio, para não exigir migração) |
 | `colinha` | anotações de consulta rápida |
 
 Nos treinos, cada série/aquecimento tem `exerciseId` + `exerciseName` (cópia). Fichas antigas ganham o

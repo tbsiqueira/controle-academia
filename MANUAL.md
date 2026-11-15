@@ -43,11 +43,11 @@ Na parte de baixo da tela existem 5 abas:
 
 | Aba | Para que serve |
 |---|---|
-| **Início** | Sua semana: metas, treinos recentes |
+| **Início** | Sua semana: metas, botão para começar a próxima ficha, treinos recentes |
 | **Treinar** | Registrar o treino de hoje |
 | **Fichas** | Montar seus treinos (fichas) e a biblioteca de exercícios |
-| **Calendário** | Quantas vezes você treinou no mês |
-| **Mais** | Metas, colinha, backup e o card **Debug** (atualizar app, apagar dados, dados de exemplo) |
+| **Calendário** | Quantas vezes você treinou no mês, evolução semanal e peso corporal |
+| **Mais** | Metas, colinha, backup e, em **Opções avançadas**, o card **Debug** (atualizar app, apagar dados, dados de exemplo) |
 
 ---
 
@@ -131,6 +131,10 @@ das duas.
 
 ### O caminho rápido
 
+> **Atalho (v61):** no **Início**, o botão **Treinar: TREINO B** já abre o Treinar com a **próxima ficha** da
+> sequência (a que vem depois da última que você fez, em ordem alfabética: A → B → C → A). Ele some enquanto
+> houver um treino em andamento.
+
 1. Aba **Treinar**.
 2. **Data**: já vem com hoje (mude se estiver registrando um treino de outro dia).
 3. **Ficha de treino**: escolha `TREINO A - inferiores`
@@ -167,7 +171,11 @@ Elevação pélvica                                    [3 séries]
 - **Série que ficar em branco é ignorada** — se você fez só 2 das 3 séries, pode deixar a terceira vazia e salvar.
 - **Quer treinar algo fora da ficha?** Toque em **Adicionar exercício** (o mesmo buscador da ficha).
 - **Não achou o exercício no catálogo?** Digite o nome e toque em **`Criar "..."`**.
-- **Quer mais séries?** **+ série**. Quer tirar um exercício? Ícone da lixeira no cartão dele.
+- **Quer mais séries?** **+ série** (até 20 por exercício). Sobrou uma? **− série** tira a última (pede confirmação se
+  ela já tiver dados). Quer tirar um exercício? Ícone da lixeira no cartão dele.
+- **Cada exercício entra uma vez só** no treino e na ficha: o buscador não deixa repetir.
+- **Marcar série como feita:** toque no **número da série** — ela fica marcada e o **timer de descanso** já começa.
+  Toque de novo para desmarcar. A marca é só um guia durante o treino; não fica gravada no treino salvo.
 - **Errou algo?** Toque em **Cancelar** — nada é salvo e você volta para a tela anterior.
 - **Precisa editar um treino já salvo?** Início → toque no treino → **Editar**.
 
@@ -194,7 +202,8 @@ Elevação pélvica                                    [3 séries]
 
 **Lista do Início:** mostra o **mês atual e o anterior** (no mínimo 10 treinos), agrupados por mês, com o
 treino de **hoje em verde**. Cada cartão é enxuto: o **bloco da data** e o **nome da ficha** (toque para abrir o
-treino) e, à direita, o botão de **compartilhar** o treino como texto. O botão **Ver meses anteriores** abre o
+treino) e, à direita, o botão de **compartilhar** o treino como texto. Embaixo do nome vem um resumo
+(ex.: _"6 exercícios · 4.320 kg · 30 min cardio"_) e, se houver, quantos **recordes 🏆** o treino bateu. O botão **Ver meses anteriores** abre o
 resto. Com 2 ou mais fichas usadas, aparece o filtro **Todas as fichas** para ver só os treinos de uma ficha.
 
 **Recordes 🏆:** quando um treino passa da **maior carga que você já usou** num exercício (comparando com os
@@ -233,6 +242,11 @@ Histórico
 Isso responde a pergunta "estou evoluindo?" sem planilha: a **seta ↑/↓/**–** compara a última sessão com a
 anterior, e as **barras** mostram a melhor série de cada dia.
 
+**1RM estimado (v61):** a tela do exercício também mostra o **1RM estimado** — a carga que daria para levantar
+uma vez, calculada pela melhor série (fórmula de Epley: carga × (1 + reps/30)). Ele sobe quando você faz mais
+reps com a mesma carga, então mostra progresso mesmo quando o peso não mudou. Acima de ~12 reps a estimativa
+perde precisão: use para comparar treinos, não como carga-alvo.
+
 ---
 
 ## 6. Metas da semana (como funciona a "semana")
@@ -258,11 +272,19 @@ No Início você acompanha as barras: `2/3 treinos` e `60/120 min cardio`.
 Aba **Calendário**:
 
 - Dias com treino ficam destacados, com um **número** mostrando quantos treinos naquele dia;
+- **Toque num dia com treino** para abrir o treino daquele dia (com dois no mesmo dia, abre o mais recente);
 - O **dia de hoje** aparece com contorno;
 - Use **‹ ›** para navegar entre os meses;
 - Embaixo: total de treinos do mês.
 
 É a visão rápida de constância: "esse mês eu treinei quantas vezes?"
+
+### Peso corporal (v61)
+
+No fim da aba **Calendário**, o card **Peso corporal** guarda **um peso por dia**: escolha o **Dia**, digite o
+**Peso (kg)** (vírgula aceita, ex.: `72,5`) e toque em **Salvar peso**. Salvar de novo no mesmo dia troca o valor;
+para apagar um dia, salve com o campo vazio. A lista mostra os últimos 8 registros com barras e a diferença para o
+anterior. O peso vai junto no **backup**.
 
 ---
 
