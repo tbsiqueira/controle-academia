@@ -344,7 +344,7 @@ as observações e o cardio. Campos vazios são omitidos automaticamente.
 
 ## 11. Backup, restauração e apagar dados
 
-Backup e importação ficam em **Mais → Dados**. Espaço usado, **Atualizar app**, **Apagar todos os dados** e os **dados de exemplo** ficam no card **Mais → Debug**, separados do uso normal.
+Backup e importação ficam em **Mais → Dados**. Espaço usado, **Atualizar app**, **Apagar todos os dados** e os **dados de exemplo** ficam no card **Mais → Opções avançadas → Debug**, separados do uso normal.
 
 ### Exportar (backup)
 Toque em **Exportar** — o **mesmo botão** funciona nos dois aparelhos, e a dica embaixo dele diz o que vai acontecer:
@@ -387,7 +387,7 @@ Os dados atuais são substituídos pelos do arquivo. Mudou de ideia? O botão
 **Desfazer** (aparece logo após importar) volta tudo como estava.
 
 ### Apagar todos os dados
-Em **Mais → Debug**, toque em **Apagar todos os dados** — abre uma **tela própria** com o aviso do que será apagado
+Em **Mais → Opções avançadas → Debug**, toque em **Apagar todos os dados** — abre uma **tela própria** com o aviso do que será apagado
 (treinos, fichas, biblioteca, colinha e metas). Para confirmar, basta **marcar o checkbox**
 _"Quero realmente apagar todos os meus dados"_ e tocar em **Apagar tudo**.
 
@@ -395,12 +395,12 @@ _"Quero realmente apagar todos os meus dados"_ e tocar em **Apagar tudo**.
 antes, caso você queira guardar uma cópia.
 
 ### Atualizar app
-O botão **Atualizar app** (em **Mais → Debug**) limpa o cache e recarrega a versão mais nova. Use se algo parecer "travado" ou
+O botão **Atualizar app** (em **Mais → Opções avançadas → Debug**) limpa o cache e recarrega a versão mais nova. Use se algo parecer "travado" ou
 desatualizado (a versão atual aparece no rodapé desta tela, ex.: `v37`). Se o app não abrir de jeito nenhum,
 existe uma página de escape: abra o endereço do app terminando em `/reset.html`.
 
 ### Dados de exemplo (para conhecer o app)
-Em **Mais → Debug**, o botão **Carregar dados de exemplo** preenche o app com um
+Em **Mais → Opções avançadas → Debug**, o botão **Carregar dados de exemplo** preenche o app com um
 conjunto pronto:
 
 - **3 fichas** (TREINO A, B e C), cada uma com exercícios do catálogo **e 2 exercícios criados por você**;
@@ -460,13 +460,13 @@ quem mantém o app — é uma evolução prevista.
 
 | Sintoma | Causa provável | Solução |
 |---|---|---|
-| Ícones aparecem como **quadradinhos** | Arquivos antigos em cache | **Mais → Debug → Atualizar app** |
-| O app parece **desatualizado** (não aparece uma tela nova) | Service worker com versão antiga | **Mais → Debug → Atualizar app** (limpa o cache e recarrega). Se o app não abrir, use a página de escape `/reset.html` |
+| Ícones aparecem como **quadradinhos** | Arquivos antigos em cache | **Mais → Opções avançadas → Debug → Atualizar app** |
+| O app parece **desatualizado** (não aparece uma tela nova) | Service worker com versão antiga | **Mais → Opções avançadas → Debug → Atualizar app** (limpa o cache e recarrega). Se o app não abrir, use a página de escape `/reset.html` |
 | **"Semana encerrada"** e as metas não avançam | Fim dos 7 dias | Toque em **Iniciar próxima semana** no aviso do Início |
 | Toquei em **Salvar** e não salvou | Nenhuma série/aquecimento/cardio preenchido | Preencha ao menos uma informação (o app avisa) |
 | Esqueci de registrar e quero lançar um treino de outro dia | — | Em **Treinar**, mude a **Data** |
-| A tela dá **zoom** ao tocar num campo de texto (iPhone) | Safari amplia quando o campo tem fonte menor que 16px | Corrigido nas versões novas; se ainda acontecer, use **Mais → Debug → Atualizar app** |
-| Exercícios que eu criei **sumiram da Biblioteca** | Bug corrigido na v27: o app escondia exercícios cujo nome também existia no catálogo | Use **Mais → Debug → Atualizar app** — seus exercícios nunca foram apagados |
+| A tela dá **zoom** ao tocar num campo de texto (iPhone) | Safari amplia quando o campo tem fonte menor que 16px | Corrigido nas versões novas; se ainda acontecer, use **Mais → Opções avançadas → Debug → Atualizar app** |
+| Exercícios que eu criei **sumiram da Biblioteca** | Bug corrigido na v27: o app escondia exercícios cujo nome também existia no catálogo | Use **Mais → Opções avançadas → Debug → Atualizar app** — seus exercícios nunca foram apagados |
 | Importei o backup errado | — | **Mais → Dados → Desfazer** (logo após importar) |
 | **Importar ficha** diz que o texto não é um JSON válido | A IA escreveu texto junto do JSON, ou só parte da resposta foi copiada | Copie a resposta **inteira** da IA (o bloco ` ```json ` pode vir junto) ou peça de novo: _"responda só com o JSON"_ |
 | Uma ficha antiga não aparece no **Treinar** | Ela está **desativada** | **Fichas** → seção **Desativadas** → ícone do olho (**Reativar**) |

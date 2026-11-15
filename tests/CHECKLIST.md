@@ -63,6 +63,7 @@ Mapa de **cada funcionalidade do app** para os testes que a cobrem. Serve para r
 | 1RM estimado na evolução do exercício (Epley) | `core.js`: `estimate1RM`, `best1RMForExercise` | `features.test.js` (fórmula, 1 rep, sem carga/reps, mais reps com a mesma carga = progresso, melhor série do exercício) |
 | Avisos de sucesso somem sozinhos (toast); erros e perguntas continuam bloqueando | `index.html`: `#appToast`; `app.js`: `showToast` | `features.test.js` (5 mensagens de sucesso viraram toast, erros continuam `alert`, texto puro) |
 | Área de toque de 44px nos botões só com ícone | `css/styles.css`: `.btn-sm[aria-label]` | `features.test.js` (regra presente; todo botão de ícone tem `aria-label`) |
+| Card Debug fechado por padrão (atrás de "Opções avançadas") | `index.html`: `<details>` | `features.test.js` (começa fechado, contém atualizar/apagar/exemplo, backup continua à vista) |
 
 ## Limites conhecidos
 

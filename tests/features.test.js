@@ -373,3 +373,24 @@ test('todo botao pequeno so com icone tem aria-label (e por ele que a regra de 4
   assert.ok(botoes.length >= 8, 'achou os botoes de icone (' + botoes.length + ')');
   botoes.forEach((b) => assert.match(b, /aria-label="/, b.slice(0, 120)));
 });
+
+/* ---------- card Debug fechado por padrão ---------- */
+
+test('Debug (atualizar, apagar tudo, dados de exemplo) fica dentro de um <details> fechado', () => {
+  const inicio = HTML.indexOf('<details');
+  const fim = HTML.indexOf('</details>');
+  assert.ok(inicio !== -1 && fim > inicio);
+  assert.doesNotMatch(HTML.slice(inicio, HTML.indexOf('>', inicio)), /\bopen\b/, 'comeca fechado');
+  const dentro = HTML.slice(inicio, fim);
+  ['btnForceUpdate', 'btnEraseAll', 'btnLoadSample', 'sampleStatus', 'storageInfo'].forEach((id) => {
+    assert.ok(dentro.indexOf('id="' + id + '"') !== -1, id + ' dentro das opcoes avancadas');
+  });
+  assert.match(dentro, /<summary[^>]*>[^<]*apagar dados/i, 'o resumo diz o que tem dentro');
+});
+
+test('backup (Exportar/Importar/Desfazer) continua a vista, fora das opcoes avancadas', () => {
+  const antes = HTML.slice(0, HTML.indexOf('<details'));
+  ['btnExport', 'btnImport', 'btnUndoImport', 'backupStatus'].forEach((id) => {
+    assert.ok(antes.indexOf('id="' + id + '"') !== -1, id);
+  });
+});
