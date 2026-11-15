@@ -87,11 +87,11 @@ data/exercises.json (catálogo embutido de exercícios, pt-BR, CC0)
 data/sample-data.json (dados de exemplo: 3 fichas, 12 treinos, 6 exercícios custom)
 tools/build-sample-data.ps1 + tools/sample-data-content.json (gerador reprodutível da fixture)
 README.md (como rodar, publicar no GitHub Pages, estrutura, versionamento)
-MANUAL.md (documentação de uso: exemplos, FAQ, problemas comuns, glossário)
+documentation/MANUAL.md (documentação de uso: exemplos, FAQ, problemas comuns, glossário)
 .gitattributes / .nojekyll (higiene do repositório e do GitHub Pages)
 .github/workflows/deploy.yml (testes + verificação e deploy no Pages ao enviar uma tag v*)
 .github/workflows/tests.yml (testes unitários e verificações a cada push na main / PR)
-PLANO.md
+documentation/PLANO.md
 ```
 - Service worker: cache-first para o "shell" do app; **nenhum dado é enviado a servidor**.
 - Privacidade: sem analytics, sem chamadas externas; `Content-Security-Policy` no `index.html`.

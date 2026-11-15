@@ -6,7 +6,7 @@ calendário de frequência com evolução semanal,
 exportação do treino como texto para enviar à professora e **importação de fichas em JSON** (geradas por uma IA
 a partir do plano/PDF da professora, seguindo o contrato [FICHA-JSON.md](FICHA-JSON.md)).
 
-📖 **Como usar o app, passo a passo: [MANUAL.md](MANUAL.md)**
+📖 **Como usar o app, passo a passo: [documentation/MANUAL.md](documentation/MANUAL.md)**
 
 **Todos os dados ficam apenas no seu aparelho** (IndexedDB). Não existe backend, conta, login, analytics
 ou qualquer chamada externa. O backup é feito por arquivo JSON (exportar/importar).
@@ -153,9 +153,9 @@ reset.html                  página de escape: desregistra o service worker e li
 serve.ps1                   servidor local de desenvolvimento
 test.ps1                    roda os testes unitários (Node)
 check.ps1                   verificações estáticas
-MANUAL.md                   manual do usuário (como usar, exemplos, FAQ)
+documentation/MANUAL.md     manual do usuário (como usar, exemplos, FAQ)
 FICHA-JSON.md               contrato do JSON de ficha para a IA (servido pelo app e usado em #/ia)
-PLANO.md                    plano/requisitos e histórico de revisões
+documentation/PLANO.md      plano/requisitos e histórico de revisões
 ```
 
 ## Dados de exemplo (fixture)

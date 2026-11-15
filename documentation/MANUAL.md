@@ -102,7 +102,7 @@ Em vez de digitar ficha por ficha, dá para pedir a uma IA (ChatGPT, Claude…) 
 professora — inclusive um **PDF com vários treinos** — e colar o resultado no app.
 
 1. **Fichas → Pedir uma ficha para a IA**. A tela traz um texto pronto: as regras do formato (o "contrato",
-   também em [FICHA-JSON.md](FICHA-JSON.md)) e a lista dos exercícios que **já existem** no app (sua Biblioteca
+   também em [FICHA-JSON.md](../FICHA-JSON.md)) e a lista dos exercícios que **já existem** no app (sua Biblioteca
    + catálogo), para a IA usar os mesmos nomes e não duplicar.
 2. Toque em **Copiar** (ou **Compartilhar**), cole na IA, **anexe o PDF** (ou cole o plano em texto) e peça:
    _"Converta o plano em anexo para o JSON do contrato acima, com uma ficha para cada treino. Responda só com o JSON."_
