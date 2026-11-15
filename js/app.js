@@ -87,7 +87,10 @@ async function loadCatalog() {
 
 function navigate() {
   const hash = location.hash || '#/dashboard';
-  const viewName = hash.replace('#/', '') || 'dashboard';
+  const route = parseRoute(hash);
+  const viewName = route.view;
+  // #/detail/<id>: o id vem do endereço, então recarregar a página mantém o treino aberto.
+  if (viewName === 'detail' && route.id) state.viewingWorkoutId = route.id;
 
   flushDraft();   // grava o que foi digitado agora há pouco antes de sair do formulário
   if (viewName !== 'workout') state.editingWorkoutId = null;
@@ -288,8 +291,7 @@ function renderWorkoutList() {
 
   el.querySelectorAll('[data-view-workout]').forEach(function (b) {
     b.addEventListener('click', function () {
-      state.viewingWorkoutId = b.getAttribute('data-view-workout');
-      location.hash = '#/detail';
+      location.hash = '#/detail/' + b.getAttribute('data-view-workout');
     });
   });
 
@@ -998,8 +1000,7 @@ function cancelWorkout() {
   state.editingWorkoutId = null;
 
   if (editingId) {
-    state.viewingWorkoutId = editingId;
-    location.hash = '#/detail';
+    location.hash = '#/detail/' + editingId;
   } else {
     location.hash = '#/dashboard';
   }

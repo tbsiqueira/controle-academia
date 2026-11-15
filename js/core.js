@@ -74,6 +74,15 @@
     };
   }
 
+  /* ---------- navegação ---------- */
+
+  // "#/detail/abc" -> { view: 'detail', id: 'abc' }. Com o id no endereço, o treino aberto
+  // sobrevive a recarregar a página (antes o id ficava só na memória).
+  function parseRoute(hash) {
+    const parts = String(hash || '').replace(/^#\/?/, '').split('/');
+    return { view: parts[0] || 'dashboard', id: parts[1] || '' };
+  }
+
   /* ---------- texto e números ---------- */
 
   function esc(value) {
@@ -1101,6 +1110,7 @@
     addDaysISO: addDaysISO,
     fmtBR: fmtBR,
     shiftMonth: shiftMonth,
+    parseRoute: parseRoute,
     dateParts: dateParts,
     // texto e números
     esc: esc,

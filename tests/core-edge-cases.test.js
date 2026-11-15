@@ -669,3 +669,31 @@ test('setsSummaryLines e workoutAsText repassam a virgula para series e aquecime
   assert.ok(comVirgula.indexOf('Série 1: 10 reps · 42,5 kg · RIR 1') !== -1);
   assert.ok(core.workoutAsText(treino, [], []).indexOf('42.5 kg') !== -1, 'sem o parametro continua com ponto');
 });
+
+/* ---------- navegação: id do treino no endereço ---------- */
+
+test('parseRoute le a tela e o id do endereco', () => {
+  assert.deepEqual(core.parseRoute('#/detail/3f2b8c1e-9a4d-4e7b-8c21-0a1b2c3d4e5f'), { view: 'detail', id: '3f2b8c1e-9a4d-4e7b-8c21-0a1b2c3d4e5f' });
+  assert.deepEqual(core.parseRoute('#/detail/id-1760000000000-a3f9c2'), { view: 'detail', id: 'id-1760000000000-a3f9c2' });
+});
+
+test('parseRoute mantem os enderecos antigos funcionando (sem id)', () => {
+  ['dashboard', 'workout', 'detail', 'exercise', 'erase', 'ia', 'exercises', 'calendar', 'more'].forEach((view) => {
+    assert.deepEqual(core.parseRoute('#/' + view), { view: view, id: '' });
+  });
+});
+
+test('parseRoute sem endereco abre o Inicio', () => {
+  assert.deepEqual(core.parseRoute(''), { view: 'dashboard', id: '' });
+  assert.deepEqual(core.parseRoute('#/'), { view: 'dashboard', id: '' });
+  assert.deepEqual(core.parseRoute('#'), { view: 'dashboard', id: '' });
+  assert.deepEqual(core.parseRoute(null), { view: 'dashboard', id: '' });
+  assert.deepEqual(core.parseRoute(undefined), { view: 'dashboard', id: '' });
+});
+
+test('app.js abre o treino sempre com o id no endereco', () => {
+  const app = require('node:fs').readFileSync(require('node:path').join(__dirname, '..', 'js', 'app.js'), 'utf8');
+  assert.doesNotMatch(app, /location\.hash = '#\/detail';/, 'nenhum #/detail sem id');
+  assert.equal((app.match(/location\.hash = '#\/detail\/' \+/g) || []).length, 2, 'lista do Inicio e Cancelar da edicao');
+  assert.match(app, /viewName === 'detail' && route\.id\) state\.viewingWorkoutId = route\.id/);
+});
