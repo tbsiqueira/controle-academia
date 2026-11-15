@@ -4,20 +4,20 @@
    (index.html, catalog), always with offline fallback.
    No user data ever leaves the device. */
 
-const CACHE_NAME = 'meu-treino-v63';
+const CACHE_NAME = 'meu-treino-v64';
 
 const ASSETS = [
   './',
   './index.html',
   './reset.html',
-  './css/styles.css?v=63',
-  './vendor/bootstrap/bootstrap.min.css?v=63',
-  './vendor/bootstrap/bootstrap.bundle.min.js?v=63',
-  './vendor/bootstrap-icons/bootstrap-icons.min.css?v=63',
+  './css/styles.css?v=64',
+  './vendor/bootstrap/bootstrap.min.css?v=64',
+  './vendor/bootstrap/bootstrap.bundle.min.js?v=64',
+  './vendor/bootstrap-icons/bootstrap-icons.min.css?v=64',
   './vendor/fonts/plus-jakarta-sans.woff2',
-  './js/db.js?v=63',
-  './js/app.js?v=63',
-  './js/core.js?v=63',
+  './js/db.js?v=64',
+  './js/app.js?v=64',
+  './js/core.js?v=64',
   './manifest.webmanifest',
   './data/exercises.json',
   './FICHA-JSON.md',
