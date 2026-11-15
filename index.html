@@ -102,14 +102,20 @@
         <a href="#/exercises" class="btn-back" aria-label="Voltar"><i class="bi bi-arrow-left"></i></a>
         <h1 class="h4">Ficha pela IA</h1>
       </div>
-      <p class="small text-muted mb-3">Copie este texto e cole na IA (ChatGPT, Claude…) junto com o plano da professora (pode anexar o PDF com vários treinos: vira uma ficha para cada).
-        Ele traz as regras do JSON e os nomes dos exercícios que já existem no app, para não duplicar.
-        Depois copie o JSON da resposta e cole em <strong>Fichas → Importar ficha</strong>.</p>
-      <textarea class="form-control font-monospace small mb-3" id="iaText" rows="16" readonly></textarea>
-      <div class="d-flex gap-2">
-        <button type="button" class="btn btn-primary flex-fill" id="iaCopy"><i class="bi bi-clipboard"></i> Copiar</button>
+      <div class="card mb-3"><div class="card-body">
+        <ol class="steps">
+          <li><span><strong>Copie o texto</strong> no botão abaixo.<small>Ele traz as regras e os exercícios que você já tem, para não duplicar.</small></span></li>
+          <li><span><strong>Cole na IA</strong> (ChatGPT, Claude…) junto com o plano da professora.<small>Pode anexar o PDF: cada treino vira uma ficha.</small></span></li>
+          <li><span><strong>Copie a resposta</strong> da IA inteira.</span></li>
+          <li><span><strong>Cole em Fichas → Importar</strong> e confira.</span></li>
+        </ol>
+      </div></div>
+      <div class="d-flex gap-2 mb-3">
+        <button type="button" class="btn btn-primary flex-fill" id="iaCopy"><i class="bi bi-clipboard"></i> Copiar texto</button>
         <button type="button" class="btn btn-outline-secondary flex-fill" id="iaShare"><i class="bi bi-send"></i> Compartilhar</button>
       </div>
+      <label class="form-label" for="iaText">Texto que vai para a IA</label>
+      <textarea class="form-control font-monospace" id="iaText" rows="10" readonly></textarea>
     </section>
     <!-- Sheets & exercises -->
     <section id="view-exercises" class="view d-none">
@@ -425,8 +431,13 @@
         </div>
         <div class="modal-body">
           <div id="sheetImportPaste">
-            <label class="form-label small text-muted" for="sheetImportText">Cole aqui o JSON da ficha (a resposta da IA):</label>
-            <textarea class="form-control font-monospace small" id="sheetImportText" rows="12" placeholder='{ "name": "TREINO A", "exercises": [ ... ] }'></textarea>
+            <ol class="steps mb-3">
+              <li><span><strong>Copie a resposta da IA</strong> inteira.<small>Não tem uma? Feche aqui e use <strong>Pedir uma ficha para a IA</strong>.</small></span></li>
+              <li><span><strong>Cole no campo abaixo.</strong></span></li>
+              <li><span><strong>Toque em Revisar</strong> e confira os exercícios antes de importar.</span></li>
+            </ol>
+            <label class="form-label" for="sheetImportText">Resposta da IA</label>
+            <textarea class="form-control font-monospace" id="sheetImportText" rows="9" placeholder="Cole aqui o texto que a IA respondeu"></textarea>
           </div>
           <div id="sheetImportBody"></div>
         </div>

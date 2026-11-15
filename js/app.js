@@ -1765,23 +1765,24 @@ async function reviewSheetImport() {
   });
   state.pendingImport = { sheets: sheets, unmatched: unmatched };
 
-  const summary = '<ul class="small mb-3">' + sheets.map(function (s) {
-    return '<li><strong>' + esc(s.name) + '</strong> — ' + s.exercises.length + (s.exercises.length === 1 ? ' exercício' : ' exercícios') + '</li>';
-  }).join('') + '</ul>';
+  const summary = '<p class="fw-bold mb-2">' + (sheets.length === 1 ? 'Ficha encontrada' : sheets.length + ' fichas encontradas') + '</p>' +
+    '<div class="card mb-3"><div class="card-body py-2"><ul class="list-unstyled sheet-items mb-0">' + sheets.map(function (s) {
+      return '<li><span class="sheet-item-name">' + esc(s.name) + '</span><span class="sheet-item-detail ms-auto">' + s.exercises.length + (s.exercises.length === 1 ? ' exercício' : ' exercícios') + '</span></li>';
+    }).join('') + '</ul></div></div>';
 
   const review = unmatched.length
-    ? '<p class="small mb-2"><i class="bi bi-question-circle text-primary"></i> Estes nomes não existem no app. Escolha um exercício parecido para não duplicar, ou crie um novo:</p>' +
+    ? '<p class="mb-3"><i class="bi bi-question-circle text-primary"></i> <strong>Estes nomes não existem no app.</strong> Escolha um exercício parecido para não duplicar, ou crie um novo:</p>' +
       unmatched.map(function (name, i) {
         const candidates = importCandidates();
         const strong = suggestExercises(name, candidates, 1, 0.5)[0];
         const options = suggestExercises(name, candidates, 6).map(function (e) {
           return '<option value="' + esc(e.id) + '"' + (e === strong ? ' selected' : '') + '>' + esc(e.name) + (typeof e.id === 'number' ? ' (catálogo)' : ' (biblioteca)') + '</option>';
         }).join('');
-        return '<div class="mb-2"><label class="form-label small fw-semibold mb-1" for="imp-' + i + '">' + esc(name) + '</label>' +
-          '<select class="form-select form-select-sm" id="imp-' + i + '">' +
+        return '<div class="mb-3"><label class="form-label import-name" for="imp-' + i + '">' + esc(name) + '</label>' +
+          '<select class="form-select" id="imp-' + i + '">' +
           '<option value=""' + (strong ? '' : ' selected') + '>➕ Criar novo: ' + esc(name) + '</option>' + options + '</select></div>';
       }).join('')
-    : '<p class="small text-success mb-0"><i class="bi bi-check-circle"></i> Todos os exercícios já existem no app.</p>';
+    : '<p class="mb-0"><i class="bi bi-check-circle-fill text-success"></i> Todos os exercícios já existem no app.</p>';
 
   document.getElementById('sheetImportBody').innerHTML = summary + review;
   document.getElementById('sheetImportPaste').classList.add('d-none');

@@ -1283,13 +1283,65 @@ a.cal-cell {
   padding-top: 0;
 }
 
-/* Texto para a IA: caixa escura, como código */
+/* Passos numerados (Ficha pela IA, Importar ficha) */
+.steps {
+  list-style: none;
+  counter-reset: step;
+  display: grid;
+  gap: 14px;
+  padding: 0;
+  margin: 0;
+}
+
+.steps li {
+  counter-increment: step;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+.steps li::before {
+  content: counter(step);
+  flex: 0 0 auto;
+  width: 30px;
+  height: 30px;
+  border-radius: 10px;
+  background: var(--mt-lime);
+  color: var(--mt-ink);
+  font-weight: 800;
+  font-size: 0.85rem;
+  display: grid;
+  place-items: center;
+}
+
+.steps li small {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.82rem;
+  color: var(--mt-muted);
+}
+
+/* Revisão da importação: nome vindo da IA, acima do seletor */
+.form-label.import-name {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--mt-ink);
+}
+
+/* Texto para a IA e resposta colada: campo claro, monoespaçado, fácil de ler */
 #iaText,
 #sheetImportText {
-  background: var(--mt-ink);
-  color: #dfe8d2;
-  border-radius: 18px;
+  font-size: 0.85rem;
   font-weight: 400;
+  line-height: 1.5;
+  border-radius: 18px;
+}
+
+#iaText {
+  background: var(--mt-card);
+  box-shadow: var(--mt-shadow);
 }
 
 /* iOS dá zoom automático ao focar um campo com fonte menor que 16px.
