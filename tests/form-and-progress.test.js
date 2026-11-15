@@ -244,3 +244,31 @@ test('setRowHtml escapa o que o usuario digitou e aceita campos vazios', () => {
   assert.ok(html.indexOf('&quot;&gt;&lt;b&gt;x') !== -1);
   assert.equal((html.match(/value=""/g) || []).length, 3);
 });
+
+/* ---------- remover exercício do formulário ---------- */
+
+test('groupHasData: exercicio com qualquer coisa preenchida pede confirmacao antes de remover', () => {
+  const vazio = { reps: '', load: '', rir: '', note: '' };
+  assert.equal(core.groupHasData({ sets: [vazio, Object.assign({}, vazio, { reps: '12' })] }), true);
+  assert.equal(core.groupHasData({ sets: [Object.assign({}, vazio, { load: '27,5' })] }), true);
+  assert.equal(core.groupHasData({ sets: [Object.assign({}, vazio, { rir: 0 })] }), true, 'RIR 0 e dado');
+  assert.equal(core.groupHasData({ sets: [Object.assign({}, vazio, { note: 'caiu' })] }), true);
+  assert.equal(core.groupHasData({ warmup: { reps: 15, load: '', rir: '' }, sets: [vazio] }), true, 'so aquecimento');
+  // carregado da ficha (reps previstas) ou do ultimo treino (cargas) tambem conta
+  assert.equal(core.groupHasData({ warmup: { reps: '', load: '', rir: '' }, sets: [{ number: 1, reps: 12, load: 40, rir: '', note: '' }] }), true);
+});
+
+test('groupHasData: exercicio em branco sai sem perguntar', () => {
+  assert.equal(core.groupHasData({ warmup: { reps: '', load: '', rir: '' }, sets: [{ number: 1, reps: '', load: '', rir: '', note: '' }] }), false);
+  assert.equal(core.groupHasData({ sets: [{ number: 1, reps: null, load: undefined }] }), false);
+  assert.equal(core.groupHasData({ sets: [] }), false);
+  assert.equal(core.groupHasData({}), false);
+  assert.equal(core.groupHasData(null), false);
+});
+
+test('removeFormExercise (app.js) confirma antes de apagar um exercicio com dados', () => {
+  const app = require('node:fs').readFileSync(require('node:path').join(__dirname, '..', 'js', 'app.js'), 'utf8');
+  const body = app.slice(app.indexOf('function removeFormExercise'), app.indexOf('/* ---------- rest timer'));
+  assert.match(body, /groupHasData\(group\) && !confirm\(/);
+  assert.ok(body.indexOf('confirm(') < body.indexOf('splice('), 'pergunta antes de remover');
+});

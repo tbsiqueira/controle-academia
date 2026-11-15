@@ -808,6 +808,10 @@ function addFormSet(exIdx) {
 }
 
 function removeFormExercise(exIdx) {
+  const group = state.formSets[exIdx];
+  if (!group) return;
+  // Um toque errado na lixeira apagava o exercício inteiro, sem volta.
+  if (groupHasData(group) && !confirm('Remover "' + labelOf(group) + '" do treino?\n\nO que foi preenchido neste exercício será perdido.')) return;
   state.formSets.splice(exIdx, 1);
   renderFormSets();
   scheduleDraftSave();

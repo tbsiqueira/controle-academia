@@ -531,6 +531,14 @@
     });
   }
 
+  // O exercício do formulário tem algo que se perderia ao remover (série ou aquecimento preenchido)?
+  function groupHasData(group) {
+    const g = group || {};
+    return warmupHasData(g.warmup) || (g.sets || []).some(function (s) {
+      return [s.reps, s.load, s.rir, s.note].some(function (v) { return blankIfNull(v) !== ''; });
+    });
+  }
+
   // Rascunho do treino em andamento: vale a pena guardar/oferecer só se tem algo preenchido.
   function draftHasContent(draft) {
     if (!draft) return false;
@@ -1148,6 +1156,7 @@
     lastWorkoutForSheet: lastWorkoutForSheet,
     formFromWorkout: formFromWorkout,
     draftHasContent: draftHasContent,
+    groupHasData: groupHasData,
     restSecondsOf: restSecondsOf,
     fmtClock: fmtClock,
     recentCutoff: recentCutoff,
