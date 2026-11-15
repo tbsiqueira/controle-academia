@@ -871,6 +871,10 @@ function tickRest() {
 
 function addExerciseToForm(opts) {
   const ref = { exerciseId: opts.exerciseId || null, exerciseName: opts.exerciseName || 'Exercício' };
+  if (hasExercise(state.formSets, ref)) {
+    alert('"' + (labelOf(ref) || ref.exerciseName) + '" já está neste treino. Use o botão "+ série" dele para fazer mais séries.');
+    return;
+  }
   const lastLoads = lastLoadsForExercise(state.workouts, ref);
   const setCount = Math.max(1, parseInt(opts.sets, 10) || 3);
   const sets = [];
@@ -1535,6 +1539,10 @@ function removeSheetExercise(idx) {
 }
 
 function addSheetExercise(opts) {
+  if (hasExercise(state.sheetExercises, opts)) {
+    alert('"' + opts.name + '" já está nesta ficha. Aumente o número de séries dele.');
+    return;
+  }
   state.sheetExercises.push({
     exerciseId: opts.exerciseId || null,
     name: opts.name,

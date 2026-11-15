@@ -291,6 +291,14 @@
     return (e.exerciseName || '(sem nome)') === (t.exerciseName || '(sem nome)');
   }
 
+  // O exercício já está na lista? Vale para o formulário do treino (exerciseName) e para os
+  // itens da ficha (name). O mesmo exercício duas vezes num treino vira um grupo só ao salvar
+  // (séries embaralhadas e um aquecimento perdido), então o app não deixa repetir.
+  function hasExercise(list, ref) {
+    const target = exerciseTarget(ref);
+    return (list || []).some(function (item) { return exerciseMatches(exerciseTarget(item), target); });
+  }
+
   // Chave de agrupamento: id quando existe, nome como fallback (dados antigos).
   // Normalizada como texto pelo mesmo motivo do exerciseMatches.
   function exerciseKey(entry) {
@@ -1182,6 +1190,7 @@
     exerciseLabel: exerciseLabel,
     exerciseMatches: exerciseMatches,
     exerciseKey: exerciseKey,
+    hasExercise: hasExercise,
     historyTarget: historyTarget,
     countExercises: countExercises,
     // compatibilidade de dados

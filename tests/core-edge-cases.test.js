@@ -697,3 +697,43 @@ test('app.js abre o treino sempre com o id no endereco', () => {
   assert.equal((app.match(/location\.hash = '#\/detail\/' \+/g) || []).length, 2, 'lista do Inicio e Cancelar da edicao');
   assert.match(app, /viewName === 'detail' && route\.id\) state\.viewingWorkoutId = route\.id/);
 });
+
+/* ---------- mesmo exercício duas vezes no treino / na ficha ---------- */
+
+test('regressao: o mesmo exercicio duas vezes num treino salvo vira um grupo so (por isso o app bloqueia)', () => {
+  const sets = [1, 2, 3, 1, 2, 3].map((n) => ({ exerciseId: 'e1', exerciseName: 'Agachamento', number: n, reps: 10, load: 50 }));
+  const grupos = core.groupSets(sets, [
+    { exerciseId: 'e1', exerciseName: 'Agachamento', reps: 15, load: 20 },
+    { exerciseId: 'e1', exerciseName: 'Agachamento', reps: 12, load: 30 }
+  ]);
+  assert.equal(grupos.length, 1);
+  assert.equal(grupos[0].sets.length, 6);
+  assert.deepEqual(grupos[0].warmup, { reps: 12, load: 30, rir: undefined }, 'um dos aquecimentos se perde');
+});
+
+test('hasExercise acha o exercicio ja presente no formulario do treino (por id)', () => {
+  const form = [{ exerciseId: 'e1', exerciseName: 'Agachamento', sets: [] }, { exerciseId: 12, exerciseName: 'Leg press 45', sets: [] }];
+  assert.equal(core.hasExercise(form, { exerciseId: 'e1', exerciseName: 'Agachamento livre' }), true, 'mesmo id, nome renomeado');
+  assert.equal(core.hasExercise(form, { exerciseId: '12', exerciseName: 'Leg press 45' }), true, 'id do catalogo como texto');
+  assert.equal(core.hasExercise(form, { exerciseId: 'e2', exerciseName: 'Agachamento' }), false, 'mesmo nome, exercicio diferente');
+  assert.equal(core.hasExercise(form, { exerciseId: 'e9', exerciseName: 'Cadeira extensora' }), false);
+});
+
+test('hasExercise funciona com itens de ficha (campo name) e com registros antigos sem id', () => {
+  const ficha = [{ exerciseId: 'e1', name: 'Agachamento', sets: 3 }, { exerciseId: null, name: 'Puxada frente', sets: 3 }];
+  assert.equal(core.hasExercise(ficha, { exerciseId: 'e1', name: 'Agachamento' }), true);
+  assert.equal(core.hasExercise(ficha, { exerciseId: 'e7', name: 'Puxada frente' }), true, 'item antigo sem id casa pelo nome');
+  assert.equal(core.hasExercise(ficha, { exerciseId: 'e7', name: 'Remada baixa' }), false);
+});
+
+test('hasExercise com lista vazia ou ausente', () => {
+  assert.equal(core.hasExercise([], { exerciseId: 'e1', exerciseName: 'X' }), false);
+  assert.equal(core.hasExercise(null, { exerciseId: 'e1', exerciseName: 'X' }), false);
+  assert.equal(core.hasExercise([{ exerciseId: 'e1', exerciseName: 'X' }], null), false);
+});
+
+test('app.js recusa repetir exercicio no treino e na ficha', () => {
+  const app = require('node:fs').readFileSync(require('node:path').join(__dirname, '..', 'js', 'app.js'), 'utf8');
+  assert.match(app, /if \(hasExercise\(state\.formSets, ref\)\)/);
+  assert.match(app, /if \(hasExercise\(state\.sheetExercises, opts\)\)/);
+});
