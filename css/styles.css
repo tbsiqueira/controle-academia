@@ -81,7 +81,7 @@ body {
   font-size: 1.6rem;
   font-weight: 800;
   letter-spacing: -0.02em;
-  margin-top: 2.5rem !important;
+  margin-top: 1.25rem !important;
 }
 
 .view h1 i {
@@ -93,7 +93,7 @@ body {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin: 2.25rem 0 1rem;
+  margin: 1rem 0 1rem;
 }
 
 .page-head h1 {
@@ -899,34 +899,15 @@ details.info-hint p {
   color: var(--mt-lime);
 }
 
-/* Barra de ações do Treinar: fica presa embaixo, no lugar da navegação */
-.workout-actions {
-  position: fixed;
-  left: 12px;
-  right: 12px;
-  bottom: calc(12px + env(safe-area-inset-bottom, 0px));
-  z-index: 1030;
-  display: flex;
-  gap: 8px;
-  padding: 8px;
-  margin: 0 !important;
-  background: var(--mt-card);
-  border-radius: 26px;
-  box-shadow: 0 10px 30px rgba(40, 60, 10, 0.14);
-}
-
+/* Ações do Treinar: no fim do treino, sem flutuar sobre os exercícios */
 .workout-actions .btn {
-  min-height: 48px;
+  min-height: 52px;
 }
 
 .workout-actions #workoutCancel {
-  flex: 0 0 48px !important;
-  width: 48px;
+  flex: 0 0 52px !important;
+  width: 52px;
   padding: 0;
-}
-
-body.is-training .bottom-nav {
-  display: none;
 }
 
 /* Timer de descanso: cartão escuro flutuando acima da barra de baixo */
@@ -1392,7 +1373,6 @@ a.cal-cell {
   }
 
   .bottom-nav,
-  .workout-actions,
   .rest-bar {
     left: 50%;
     right: auto;

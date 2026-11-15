@@ -176,9 +176,8 @@ Elevação pélvica                                    [3 séries]
 - **Cada exercício entra uma vez só** no treino e na ficha: o buscador não deixa repetir.
 - **Marcar série como feita:** toque no **número da série** — ela fica marcada e o **timer de descanso** já começa.
   Toque de novo para desmarcar. A marca é só um guia durante o treino; não fica gravada no treino salvo.
-- **Errou algo?** Toque no **✕** da barra de baixo (ao lado de **Salvar treino**) — nada é salvo e você volta para a tela anterior.
-- **Barra de baixo (v62):** no Treinar, o menu dá lugar a uma barra fixa com **✕** e **Salvar treino**, sempre à mão.
-  No topo, um cartão mostra quantos **exercícios** já foram concluídos (todas as séries marcadas), as **séries feitas**,
+- **Errou algo?** Toque no **✕** ao lado de **Salvar treino**, no fim do treino — nada é salvo e você volta para a tela anterior.
+- **Progresso (v62):** no topo do Treinar, um cartão mostra quantos **exercícios** já foram concluídos (todas as séries marcadas), as **séries feitas**,
   o **volume feito** (só das séries marcadas) e o **cardio**.
 - **Precisa editar um treino já salvo?** Início → toque no treino → **Editar**.
 
@@ -192,7 +191,7 @@ Elevação pélvica                                    [3 séries]
   (ex.: _"Última vez (08/11/2026): 27 kg × 12 (RIR 2) · 27 kg × 10"_), para decidir se sobe a carga.
 - **Repetir o último treino desta ficha:** ao escolher a ficha, aparece esse botão. Ele preenche o treino com os
   mesmos exercícios, reps e cargas da última vez; RIR e observações ficam em branco.
-- **Timer de descanso:** o botão escuro **Descanso** em cada exercício abre um cartão acima da barra de baixo com a contagem
+- **Timer de descanso:** o botão escuro **Descanso** em cada exercício abre um cartão acima do menu com a contagem
   regressiva, **+15s** e **✕**. Quando o tempo acaba, o contador fica **laranja** em 0:00 até você fechar no **✕** (sem som nem vibração).
   O tempo padrão (90 s) muda em **Mais → Metas da semana → Descanso entre séries**.
 - **Ficha excluída ou desativada:** o seletor do **Treinar** só mostra as fichas ativas. Ao editar um treino

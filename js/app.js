@@ -101,7 +101,6 @@ function navigate() {
 
   const view = document.getElementById('view-' + viewName);
   if (view) view.classList.remove('d-none');
-  document.body.classList.toggle('is-training', viewName === 'workout');
 
   document.querySelectorAll('.bottom-nav a').forEach(function (a) {
     const activeHash = (viewName === 'detail' || viewName === 'exercise') ? '#/dashboard' : viewName === 'ia' ? '#/exercises' : (viewName === 'erase' ? '#/more' : hash);
