@@ -2367,27 +2367,13 @@ async function restoreAll(data) {
   // normalizeBackup converte backups antigos (v1) para o formato atual sem perder dados.
   const normalized = normalizeBackup(data);
 
-  await dbClear('workouts');
-  await dbClear('exercises');
-  await dbClear('sheets');
-  await dbClear('settings');
-  await dbClear('colinha');
-
-  const db = await openDb();
-  const tx = db.transaction(STORES, 'readwrite');
-  const stores = {};
-  STORES.forEach(function (name) { stores[name] = tx.objectStore(name); });
-
-  normalized.workouts.forEach(function (v) { stores.workouts.put(v); });
-  normalized.exercises.forEach(function (v) { stores.exercises.put(v); });
-  normalized.sheets.forEach(function (v) { stores.sheets.put(v); });
-  normalized.colinha.forEach(function (v) { stores.colinha.put(v); });
-  stores.settings.put(Object.assign({}, normalized.settings, { id: APP_SETTINGS_ID }));
-
-  await new Promise(function (resolve, reject) {
-    tx.oncomplete = resolve;
-    tx.onerror = function () { reject(tx.error); };
-    tx.onabort = function () { reject(tx.error); };
+  // Apagar e gravar na MESMA transação: se algo falhar, os dados antigos não se perdem.
+  await dbReplaceAll({
+    workouts: normalized.workouts,
+    exercises: normalized.exercises,
+    sheets: normalized.sheets,
+    colinha: normalized.colinha,
+    settings: [Object.assign({}, normalized.settings, { id: APP_SETTINGS_ID })]
   });
 }
 

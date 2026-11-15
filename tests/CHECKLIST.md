@@ -40,6 +40,7 @@ Mapa de **cada funcionalidade do app** para os testes que a cobrem. Serve para r
 | PWA: versão consistente, precache, offline | `index.html`, `sw.js`, `manifest.webmanifest` | `check.ps1` (13 verificações) |
 | Exportar/importar/apagar dentro do app (telas) | `js/app.js` | `check.ps1` (ids e handlers) + lógica do `core.js` |
 | Telas da importação de ficha (colar, revisão, botão Revisar → Importar), desativar/reativar ficha, tela #/ia, card Debug | `js/app.js` | `check.ps1` (ids e handlers) + lógica do `core.js` (`parseSheetImportText`, `suggestExercises`, `exerciseNamesText`, `normalizeSheet` mantém `active: false`) |
+| Importar/desfazer/dados de exemplo sem risco de perder tudo (apaga e grava numa transação só) | `db.js`: `dbReplaceAll` (usado por `restoreAll` no `app.js`) | `db.test.js` (IndexedDB falso: uma transação, `clear` antes do `put`, `abort` em registro inválido) |
 
 ## Limites conhecidos
 

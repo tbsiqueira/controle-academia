@@ -105,6 +105,34 @@ async function dbDelete(storeName, id) {
   return dbRequest(tx.objectStore(storeName).delete(id));
 }
 
+// Troca TODO o conteúdo do banco em UMA transação: se qualquer gravação falhar, o navegador
+// desfaz tudo e os dados antigos continuam lá. records = { workouts: [...], sheets: [...], ... }
+async function dbReplaceAll(records) {
+  const db = await openDb();
+  const tx = db.transaction(STORES, 'readwrite');
+  const done = new Promise((resolve, reject) => {
+    tx.oncomplete = resolve;
+    tx.onerror = () => reject(tx.error);
+    tx.onabort = () => reject(tx.error);
+  });
+
+  try {
+    STORES.forEach((name) => {
+      const store = tx.objectStore(name);
+      store.clear();
+      (records[name] || []).forEach((value) => store.put(value));
+    });
+  } catch (err) {
+    // put() com registro inválido lança na hora e NÃO aborta sozinho: sem o abort()
+    // os clear() já pedidos seriam gravados e o banco ficaria vazio.
+    done.catch(() => {});
+    tx.abort();
+    throw err;
+  }
+
+  return done;
+}
+
 async function dbClear(storeName) {
   const db = await openDb();
   const tx = db.transaction(storeName, 'readwrite');
