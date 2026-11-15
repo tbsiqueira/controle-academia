@@ -51,6 +51,7 @@ Mapa de **cada funcionalidade do app** para os testes que a cobrem. Serve para r
 | Carga com vírgula também no resumo, histórico e texto exportado | `core.js`: `setLine`, `warmupLine`, `setsSummaryLines`, `workoutAsText` (parâmetro `useComma`) | `core-edge-cases.test.js` (vírgula quando pedido; sem o parâmetro o formato antigo não muda) |
 | Treino aberto sobrevive a recarregar a página (`#/detail/<id>`) | `core.js`: `parseRoute` (usado pelo `navigate` no `app.js`) | `core-edge-cases.test.js` (id no endereço, endereços antigos sem id, endereço vazio, app sempre navega com id) |
 | Não repetir o mesmo exercício no treino nem na ficha | `core.js`: `hasExercise` (avisos no `app.js`: `addExerciseToForm`, `addSheetExercise`) | `core-edge-cases.test.js` (por id, id do catálogo como texto, item de ficha com `name`, registro antigo sem id; prova do agrupamento que motivou o bloqueio) |
+| Ficha: no máximo 20 séries por exercício (editor, importação e backup) | `core.js`: `normalizeSheetItem` (usado também por `saveSheetEditor` no `app.js`) | `core-edge-cases.test.js` (500 vira 20, lista de reps longa, formato v2, fichas normais intactas) |
 
 ## Limites conhecidos
 

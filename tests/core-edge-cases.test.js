@@ -737,3 +737,33 @@ test('app.js recusa repetir exercicio no treino e na ficha', () => {
   assert.match(app, /if \(hasExercise\(state\.formSets, ref\)\)/);
   assert.match(app, /if \(hasExercise\(state\.sheetExercises, opts\)\)/);
 });
+
+/* ---------- ficha: limite de séries ---------- */
+
+test('normalizeSheetItem limita as series a 20 (o editor so desenha 20 campos)', () => {
+  // regressao: digitar 500 (ou a IA responder 500) criava 500 linhas no Treinar
+  assert.equal(core.normalizeSheetItem({ name: 'Supino', sets: 500, reps: [] }).sets, 20);
+  assert.equal(core.normalizeSheetItem({ name: 'Supino', sets: '1000000' }).reps.length, 20);
+  const longo = core.normalizeSheetItem({ name: 'Supino', reps: new Array(50).fill(10) });
+  assert.equal(longo.sets, 20);
+  assert.equal(longo.reps.length, 20);
+  assert.equal(core.normalizeSheetItem({ name: 'Supino', sets: 30, reps: 12 }).reps.length, 20, 'formato v2 (reps unico)');
+  assert.equal(core.parseSheetImport({ name: 'A', exercises: [{ name: 'Supino', sets: 99, reps: [12] }] })[0].exercises[0].sets, 20);
+});
+
+test('normalizeSheetItem nao mexe em fichas normais (1 a 20 series)', () => {
+  assert.deepEqual(core.normalizeSheetItem({ exerciseId: 'e1', name: 'Supino', sets: 3, reps: [12, 10, 8], note: 'pausa' }),
+    { exerciseId: 'e1', name: 'Supino', sets: 3, reps: [12, 10, 8], note: 'pausa' });
+  assert.equal(core.normalizeSheetItem({ name: 'Supino', sets: 20, reps: [] }).sets, 20);
+  assert.equal(core.normalizeSheetItem({ name: 'Supino', sets: 0, reps: [] }).sets, 3, 'vazio/zero continua virando 3');
+  assert.equal(core.normalizeSheetItem({ name: 'Supino', sets: -4 }).sets, 1);
+  assert.deepEqual(core.normalizeSheetItem({ name: 'Supino', sets: 4, reps: ['12', '', undefined] }).reps, [12, null, null, null]);
+  assert.equal(core.normalizeSheetItem(null), null);
+});
+
+test('salvar a ficha no editor usa a mesma normalizacao (com o mesmo limite)', () => {
+  const app = require('node:fs').readFileSync(require('node:path').join(__dirname, '..', 'js', 'app.js'), 'utf8');
+  const body = app.slice(app.indexOf('async function saveSheetEditor'), app.indexOf('async function toggleSheetActive'));
+  assert.match(body, /normalizeSheetItem\(\{/);
+  assert.match(body, /clean\.reps\.slice\(0, clean\.sets\)/);
+});

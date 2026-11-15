@@ -1672,19 +1672,16 @@ async function saveSheetEditor() {
     name: name,
     active: existing ? existing.active !== false : true,
     exercises: state.sheetExercises.map(function (item) {
-      const rawReps = Array.isArray(item.reps) ? item.reps : [];
-      const count = Math.max(1, parseInt(item.sets, 10) || rawReps.length || 3);
-      const reps = [];
-      for (let i = 0; i < count; i++) {
-        reps.push(toNumOrNull(rawReps[i]));
-      }
-      return {
-        exerciseId: item.exerciseId || null,
+      // Mesma normalização da importação: séries entre 1 e 20, uma rep (ou null) por série.
+      const clean = normalizeSheetItem({
+        exerciseId: item.exerciseId,
         name: labelOf(item),
-        sets: count,
-        reps: reps,
+        sets: item.sets,
+        reps: Array.isArray(item.reps) ? Array.from(item.reps) : [],
         note: (item.note || '').trim()
-      };
+      });
+      clean.reps = clean.reps.slice(0, clean.sets);
+      return clean;
     }),
     createdAt: existing ? existing.createdAt : new Date().toISOString(),
     updatedAt: new Date().toISOString()

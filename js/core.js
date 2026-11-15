@@ -933,14 +933,17 @@
     };
   }
 
+  // Mesmo limite do editor de ficha (que desenha no máximo 20 campos de reps).
+  const MAX_SETS = 20;
+
   function normalizeSheetItem(item) {
     if (!item) return null;
 
     const raw = item;
     const legacySingle = !Array.isArray(raw.reps) && raw.reps !== undefined && raw.reps !== null && raw.reps !== '';
-    let reps = Array.isArray(raw.reps) ? raw.reps.slice() : [];
+    let reps = Array.isArray(raw.reps) ? raw.reps.slice(0, MAX_SETS) : [];
 
-    const sets = Math.max(1, parseInt(raw.sets, 10) || reps.length || 3);
+    const sets = Math.min(MAX_SETS, Math.max(1, parseInt(raw.sets, 10) || reps.length || 3));
 
     if (legacySingle) {
       // v2: a ficha guardava um único valor de reps (ex.: 3x12) -> vale para todas as séries.
@@ -1195,6 +1198,7 @@
     countExercises: countExercises,
     // compatibilidade de dados
     normalizeBackup: normalizeBackup,
+    normalizeSheetItem: normalizeSheetItem,
     parseSheetImport: parseSheetImport,
     parseSheetImportText: parseSheetImportText,
     suggestExercises: suggestExercises,
