@@ -61,6 +61,7 @@ Mapa de **cada funcionalidade do app** para os testes que a cobrem. Serve para r
 | Calendário: tocar no dia abre o treino daquele dia | `core.js`: `workoutsByDate` (link no `app.js`: `renderCalendar`) | `features.test.js` (agrupa por dia, mais recente primeiro, sem data fica de fora, link `#/detail/<id>`) |
 | Peso corporal (um número por dia, com barras e variação) | `core.js`: `setBodyWeight`, `bodyWeightRows`, `cleanBodyWeights` (em `settings.bodyWeights`; tela no `app.js`) | `features.test.js` (um por dia, vírgula, apagar com vazio, variação, limite, validação no backup, backups antigos intactos, banco sem versão nova) |
 | 1RM estimado na evolução do exercício (Epley) | `core.js`: `estimate1RM`, `best1RMForExercise` | `features.test.js` (fórmula, 1 rep, sem carga/reps, mais reps com a mesma carga = progresso, melhor série do exercício) |
+| Avisos de sucesso somem sozinhos (toast); erros e perguntas continuam bloqueando | `index.html`: `#appToast`; `app.js`: `showToast` | `features.test.js` (5 mensagens de sucesso viraram toast, erros continuam `alert`, texto puro) |
 
 ## Limites conhecidos
 

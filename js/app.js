@@ -2025,14 +2025,14 @@ async function saveSettingsForm() {
   state.settings.weekAnchor = document.getElementById('setWeekAnchor').value || todayISO();
   state.settings.restSeconds = restSecondsOf({ restSeconds: document.getElementById('setRestSeconds').value });
   await dbPut('settings', state.settings);
-  alert('Metas salvas.');
+  showToast('Metas salvas.');
 }
 
 async function startWeekToday() {
   state.settings.weekAnchor = todayISO();
   await dbPut('settings', state.settings);
   renderMore();
-  alert('Semana iniciada hoje (' + fmtBR(todayISO()) + ').');
+  showToast('Semana iniciada hoje (' + fmtBR(todayISO()) + ').');
 }
 
 /* ---------- export / import ---------- */
@@ -2119,11 +2119,11 @@ async function copyExportText(areaId) {
 
   try {
     await navigator.clipboard.writeText(text);
-    alert('Texto copiado!');
+    showToast('Texto copiado!');
   } catch (e) {
     area.select();
     document.execCommand('copy');
-    alert('Texto copiado!');
+    showToast('Texto copiado!');
   }
 }
 
@@ -2140,6 +2140,13 @@ async function shareExportText(areaId) {
   }
 
   copyExportText(areaId);
+}
+
+// Aviso de sucesso que some sozinho. Erros, validações e perguntas continuam em alert/confirm,
+// porque esses a pessoa precisa ler antes de seguir.
+function showToast(message) {
+  document.getElementById('appToastBody').textContent = message;
+  bootstrap.Toast.getOrCreateInstance(document.getElementById('appToast'), { delay: 3000 }).show();
 }
 
 function appVersionLabel() {
@@ -2351,7 +2358,7 @@ async function importData(file) {
 
   await loadState();
   await linkSheetItems();
-  alert('Backup importado! Para desfazer, use "Desfazer importação" em Mais → Dados.');
+  showToast('Backup importado. Para desfazer: Mais → Dados → Desfazer.');
   location.hash = '#/dashboard';
   renderDashboard();
 }
@@ -2413,7 +2420,7 @@ async function undoImport() {
   await restoreAll(snapshot);
   state.lastImportSnapshot = null;
   await loadState();
-  alert('Dados anteriores restaurados.');
+  showToast('Dados anteriores restaurados.');
   renderMore();
 }
 

@@ -336,3 +336,25 @@ test('evolucao do exercicio mostra o 1RM estimado so quando existe (app.js)', ()
   assert.match(body, /r\.rm > 0 \?/);
   assert.match(body, /prLoad > 0 \?/, 'o selo de PR continua condicionado a carga real');
 });
+
+/* ---------- avisos de sucesso sem toque extra (toast) ---------- */
+
+test('index.html tem o aviso que some sozinho, anunciado para leitor de tela', () => {
+  assert.match(HTML, /<div id="appToast" class="toast[^"]*" role="status" aria-live="polite"/);
+  assert.match(HTML, /id="appToastBody"/);
+});
+
+test('mensagens de sucesso usam showToast e nao pedem mais um toque em OK', () => {
+  ['Metas salvas.', 'Semana iniciada hoje (', 'Texto copiado!', 'Backup importado', 'Dados anteriores restaurados.'].forEach((msg) => {
+    assert.ok(APP.indexOf("showToast('" + msg) !== -1, msg + ' virou toast');
+    assert.ok(APP.indexOf("alert('" + msg) === -1, msg + ' nao e mais alert');
+  });
+  assert.match(APP, /getElementById\('appToastBody'\)\.textContent = message;/, 'texto puro (sem HTML)');
+});
+
+test('erros, validacoes e confirmacoes continuam bloqueando (alert/confirm)', () => {
+  ['Arquivo JSON inválido.', 'Informe o nome da ficha.', 'Preencha pelo menos uma série', "Erro: '"].forEach((msg) => {
+    assert.ok(APP.indexOf("alert('" + msg) !== -1, msg);
+  });
+  assert.ok((APP.match(/confirm\(/g) || []).length >= 10, 'perguntas antes de apagar/substituir continuam');
+});

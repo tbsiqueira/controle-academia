@@ -286,6 +286,13 @@
     <div class="rest-progress"><div id="restProgress"></div></div>
   </div>
 
+  <!-- Aviso rápido de sucesso: some sozinho, sem precisar tocar em OK -->
+  <div class="toast-container position-fixed top-0 start-50 translate-middle-x p-3">
+    <div id="appToast" class="toast text-bg-success border-0" role="status" aria-live="polite" aria-atomic="true">
+      <div class="toast-body text-center fw-semibold" id="appToastBody"></div>
+    </div>
+  </div>
+
   <!-- Bottom navigation -->
   <nav class="bottom-nav" aria-label="Navegação principal">
     <a href="#/dashboard" class="nav-link active"><i class="bi bi-house"></i><span>Início</span></a>
