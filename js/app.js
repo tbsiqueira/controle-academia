@@ -145,8 +145,25 @@ async function confirmNextWeek() {
 function renderDashboard() {
   renderDraftBanner();
   renderWeek();
+  renderQuickStart();
   renderBackupReminder();
   renderWorkoutList();
+}
+
+// Botão "Treinar: <ficha>" no Início: abre o Treinar já com a próxima ficha carregada.
+// Com um treino em andamento ele some (o aviso do rascunho já tem o "Continuar").
+function renderQuickStart() {
+  const el = document.getElementById('quickStart');
+  const sheet = draftHasContent(state.draft) ? null : nextSheet(state.workouts, state.sheets);
+  if (!sheet) {
+    el.innerHTML = '';
+    return;
+  }
+  el.innerHTML = '<button type="button" class="btn btn-primary w-100 mb-3"><i class="bi bi-play-fill"></i> Treinar: ' + esc(sheet.name) + '</button>';
+  el.querySelector('button').addEventListener('click', function () {
+    state.pendingSheetId = sheet.id;
+    location.hash = '#/workout';
+  });
 }
 
 function renderWeek() {
@@ -751,6 +768,14 @@ function renderWorkoutForm() {
   document.getElementById('workoutDelete').classList.toggle('d-none', !editing);
   document.getElementById('workoutExport').classList.toggle('d-none', !editing);
   renderFormSets();
+
+  // Veio do botão "Treinar: <ficha>" do Início: seleciona a ficha e carrega os exercícios dela.
+  const quickSheet = state.pendingSheetId ? findSheet(state.pendingSheetId) : null;
+  state.pendingSheetId = null;
+  if (quickSheet && !draft && !editing) {
+    renderSheetOptions(quickSheet.id);
+    loadSheetIntoForm(quickSheet);
+  }
 }
 
 function renderFormSets() {

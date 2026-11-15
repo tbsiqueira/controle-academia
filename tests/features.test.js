@@ -64,3 +64,50 @@ test('card do Inicio mostra o resumo e a contagem de recordes (app.js)', () => {
   assert.match(body, /esc\(summary\)/, 'o resumo e escapado');
   assert.match(CSS, /\.pr-count \{/);
 });
+
+/* ---------- começar o treino de hoje em um toque ---------- */
+
+const FICHAS = [
+  { id: 'sc', name: 'TREINO C - corpo inteiro', active: true },
+  { id: 'sa', name: 'TREINO A - inferiores', active: true },
+  { id: 'sb', name: 'TREINO B - superiores', active: true }
+];
+
+test('nextSheet sugere a ficha seguinte a ultima usada, em ordem alfabetica, e da a volta', () => {
+  const treino = (sheetId, date) => ({ id: sheetId + date, date: date, sheetId: sheetId });
+  assert.equal(core.nextSheet([treino('sa', '2026-10-01')], FICHAS).id, 'sb');
+  assert.equal(core.nextSheet([treino('sa', '2026-10-01'), treino('sb', '2026-10-03')], FICHAS).id, 'sc');
+  assert.equal(core.nextSheet([treino('sc', '2026-10-05'), treino('sb', '2026-10-03')], FICHAS).id, 'sa', 'depois da ultima volta para a primeira');
+  assert.equal(core.nextSheet([treino('sb', '2026-10-03'), treino('sc', '2026-10-01')], FICHAS).id, 'sc', 'vale a data, nao a ordem da lista');
+});
+
+test('nextSheet sem historico (ou com a ultima ficha excluida/desativada) comeca pela primeira', () => {
+  assert.equal(core.nextSheet([], FICHAS).id, 'sa');
+  assert.equal(core.nextSheet(null, FICHAS).id, 'sa');
+  assert.equal(core.nextSheet([{ id: 'w1', date: '2026-10-01', sheetId: 'apagada' }], FICHAS).id, 'sa');
+  assert.equal(core.nextSheet([{ id: 'w1', date: '2026-10-01', sheetId: null }], FICHAS).id, 'sa', 'treino sem ficha nao conta');
+
+  const comInativa = FICHAS.map((f) => (f.id === 'sb' ? Object.assign({}, f, { active: false }) : f));
+  assert.equal(core.nextSheet([{ id: 'w1', date: '2026-10-01', sheetId: 'sa' }], comInativa).id, 'sc', 'pula a desativada');
+  assert.equal(core.nextSheet([{ id: 'w1', date: '2026-10-01', sheetId: 'sb' }], comInativa).id, 'sa');
+});
+
+test('nextSheet: sem ficha ativa nao sugere nada; uma ficha so e sempre ela; aceita dados antigos', () => {
+  assert.equal(core.nextSheet([], []), null);
+  assert.equal(core.nextSheet([], null), null);
+  assert.equal(core.nextSheet([], [null, { id: 's1', name: 'A', active: false }]), null);
+  const uma = [{ id: 's1', name: 'Unica' }];
+  assert.equal(core.nextSheet([{ id: 'w1', date: '2026-10-01', sheetId: 's1' }], uma).id, 's1');
+  // v1: treino guardava typeId; id numerico x texto
+  assert.equal(core.nextSheet([{ id: 'w1', date: '2026-10-01', typeId: 1 }], [{ id: '1', name: 'A' }, { id: '2', name: 'B' }]).id, '2');
+});
+
+test('Inicio tem o botao "Treinar: <ficha>" e o Treinar carrega a ficha escolhida', () => {
+  assert.match(HTML, /<div id="quickStart"><\/div>/);
+  const quick = APP.slice(APP.indexOf('function renderQuickStart'), APP.indexOf('function renderWeek()'));
+  assert.match(quick, /draftHasContent\(state\.draft\) \? null : nextSheet\(state\.workouts, state\.sheets\)/, 'some com treino em andamento');
+  assert.match(quick, /esc\(sheet\.name\)/);
+  const form = APP.slice(APP.indexOf('function renderWorkoutForm'), APP.indexOf('function renderFormSets'));
+  assert.match(form, /if \(quickSheet && !draft && !editing\)/, 'nunca por cima de um rascunho ou de uma edicao');
+  assert.match(form, /state\.pendingSheetId = null;/, 'vale para uma abertura so');
+});

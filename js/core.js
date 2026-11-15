@@ -513,6 +513,20 @@
     return sorted[0] || null;
   }
 
+  // Ficha sugerida para o próximo treino: a que vem depois da última usada, em ordem alfabética
+  // (TREINO A -> B -> C -> A). Sem histórico, ou se a última ficha não está mais ativa, é a primeira.
+  function nextSheet(workouts, sheets) {
+    const active = (sheets || []).filter(function (s) { return s && s.active !== false; })
+      .sort(function (a, b) { return String(a.name).localeCompare(String(b.name), 'pt-BR'); });
+    if (!active.length) return null;
+
+    const last = (workouts || []).filter(function (w) { return w.sheetId || w.typeId; }).sort(byDateDesc)[0];
+    const lastId = last ? String(last.sheetId || last.typeId) : '';
+    let index = -1;
+    active.forEach(function (s, i) { if (String(s.id) === lastId) index = i; });
+    return active[(index + 1) % active.length];
+  }
+
   // Formulário a partir de um treino anterior: mesmos exercícios, reps e cargas.
   // RIR e observações ficam em branco (são do treino de hoje).
   function formFromWorkout(workout) {
@@ -1202,6 +1216,7 @@
     lastSessionForExercise: lastSessionForExercise,
     lastSessionLine: lastSessionLine,
     lastWorkoutForSheet: lastWorkoutForSheet,
+    nextSheet: nextSheet,
     formFromWorkout: formFromWorkout,
     draftHasContent: draftHasContent,
     groupHasData: groupHasData,
