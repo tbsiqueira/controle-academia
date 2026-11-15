@@ -430,3 +430,10 @@ body:has(.rest-bar:not(.d-none)) .pb-nav {
   background: #fef3c7;
   color: #92400e;
 }
+
+/* Recordes no card do Início (mesma cor da linha de recorde do treino) */
+.pr-count {
+  color: #92400e;
+  font-weight: 600;
+  white-space: nowrap;
+}

@@ -596,6 +596,25 @@
     }, 0);
   }
 
+  // 12400 -> "12.400" (milhar com ponto, pt-BR). Feito à mão para não depender do idioma do aparelho.
+  function fmtThousands(n) {
+    return String(Math.round(toNum(n))).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  }
+
+  // Resumo de um treino para o card do Início: "5 exercícios · 12.400 kg · 30 min cardio".
+  // Partes zeradas ficam de fora; treino sem nada devolve ''.
+  function workoutSummary(workout) {
+    const w = workout || {};
+    const parts = [];
+    const exercises = groupSets(w.sets, w.warmups).length;
+    const volume = workoutVolume(w);
+    const cardio = toNum(w.cardioMinutes);
+    if (exercises) parts.push(exercises + (exercises === 1 ? ' exercício' : ' exercícios'));
+    if (volume > 0) parts.push(fmtThousands(volume) + ' kg');
+    if (cardio > 0) parts.push(cardio + ' min cardio');
+    return parts.join(' · ');
+  }
+
   // Totais das últimas `count` semanas (janelas de 7 dias como as metas), da mais antiga para a atual.
   function weeklyTotals(workouts, anchorIso, count) {
     const out = [];
@@ -1192,6 +1211,8 @@
     visibleWorkoutCount: visibleWorkoutCount,
     sheetFilterOptions: sheetFilterOptions,
     workoutVolume: workoutVolume,
+    fmtThousands: fmtThousands,
+    workoutSummary: workoutSummary,
     weeklyTotals: weeklyTotals,
     // exportação
     workoutAsText: workoutAsText,

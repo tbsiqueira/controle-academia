@@ -244,6 +244,10 @@ function renderWorkoutList() {
     filterHtml +
     shown.map(function (w) {
       const name = sheetLabel(w, state.sheets) || 'Treino';
+      // shortcut: recordes calculados por card mostrado (cada um varre o histórico); trocar por uma
+      // passada única se a lista com "Ver meses anteriores" ficar lenta com milhares de treinos.
+      const records = workoutRecords(state.workouts, w).length;
+      const summary = workoutSummary(w);
       const p = dateParts(w.date, today);
       const monthKey = p ? p.monthKey : '';
 
@@ -266,8 +270,11 @@ function renderWorkoutList() {
       return header +
         '<div class="card mb-2' + (p && p.relative === 'hoje' ? ' workout-today' : '') + '"><div class="card-body py-2 d-flex align-items-center gap-2">' +
         dateBlock +
-        '<button type="button" class="btn btn-link p-0 text-start text-decoration-none flex-grow-1 min-w-0" data-view-workout="' + esc(w.id) + '" aria-label="' + esc(name + ', ' + fmtBR(w.date)) + '">' +
+        '<button type="button" class="btn btn-link p-0 text-start text-decoration-none flex-grow-1 min-w-0" data-view-workout="' + esc(w.id) + '" aria-label="' + esc(name + ', ' + fmtBR(w.date) + (summary ? ', ' + summary : '') + (records ? ', ' + records + (records === 1 ? ' recorde' : ' recordes') : '')) + '">' +
         '<strong>' + esc(name) + '</strong>' +
+        ((summary || records) ? '<span class="d-block small text-muted">' + esc(summary) +
+          (records ? (summary ? ' · ' : '') + '<span class="pr-count"><i class="bi bi-trophy-fill"></i> ' + records + '</span>' : '') +
+          '</span>' : '') +
         '</button>' +
         '<button type="button" class="btn btn-sm btn-outline-secondary" data-share-workout="' + esc(w.id) + '" title="Exportar como texto" aria-label="Exportar como texto"><i class="bi bi-share"></i></button>' +
         '</div></div>';
