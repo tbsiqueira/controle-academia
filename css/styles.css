@@ -46,13 +46,15 @@
   --bs-focus-ring-color: rgba(200, 245, 60, 0.6);
 }
 
-html, body {
-  background: var(--mt-bg);
+/* O degradê fica no fundo da página inteira (html), não no body: assim ele começa
+   colado na barra de status, sem uma linha reta onde o body começa. */
+html {
+  background: radial-gradient(120% 420px at 50% -120px, #e6f8b8 0%, var(--mt-bg) 100%) no-repeat, var(--mt-bg);
 }
 
 body {
   min-height: 100vh;
-  background: radial-gradient(120% 420px at 50% -120px, #e6f8b8 0%, var(--mt-bg) 100%) no-repeat, var(--mt-bg);
+  background: transparent;
   color: var(--mt-ink);
 }
 
@@ -63,6 +65,7 @@ body {
 
 /* viewport-fit=cover estende a página até a barra de status do iPhone: reserva esse espaço em cima */
 .pb-nav {
+  display: flow-root;   /* a margem do título não vaza para fora do main */
   padding-top: env(safe-area-inset-top, 0px);
   padding-bottom: calc(var(--mt-nav-height) + env(safe-area-inset-bottom, 0px) + 24px);
 }
