@@ -81,7 +81,7 @@ body {
   font-size: 1.6rem;
   font-weight: 800;
   letter-spacing: -0.02em;
-  margin-top: 1.75rem !important;
+  margin-top: 2.5rem !important;
 }
 
 .view h1 i {
@@ -93,7 +93,7 @@ body {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin: 1.5rem 0 1rem;
+  margin: 2.25rem 0 1rem;
 }
 
 .page-head h1 {
