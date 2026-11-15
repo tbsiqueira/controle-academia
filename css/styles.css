@@ -437,3 +437,11 @@ body:has(.rest-bar:not(.d-none)) .pb-nav {
   font-weight: 600;
   white-space: nowrap;
 }
+
+/* Botão do número da série no Treinar (vira verde quando a série foi feita) */
+.set-done {
+  min-height: 34px;
+  padding: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+}

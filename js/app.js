@@ -840,6 +840,17 @@ function addFormSet(exIdx) {
   scheduleDraftSave();
 }
 
+// Toque no número da série: marca como feita e já inicia o descanso. Tocar de novo só desmarca.
+// "done" vive no formulário e no rascunho; não é gravado no treino salvo.
+function toggleSetDone(exIdx, setIdx) {
+  const group = state.formSets[exIdx];
+  if (!group || !group.sets[setIdx]) return;
+  group.sets[setIdx].done = !group.sets[setIdx].done;
+  if (group.sets[setIdx].done) startRest();
+  renderFormSets();
+  scheduleDraftSave();
+}
+
 // Tira a ÚLTIMA série do exercício (a ficha pede 4 e hoje só deu para fazer 3, ou um toque a mais
 // no "+ série"). Sempre sobra pelo menos uma; pergunta antes se ela tem algo preenchido.
 function removeFormSet(exIdx) {

@@ -213,10 +213,9 @@ function colSizes(html) {
 test('setRowHtml da mais largura para a carga do que para o numero da serie', () => {
   const html = core.setRowHtml(0, 0, { number: 1, reps: 12, load: 102.5, rir: 2, note: '' }, true);
   // regressao: numero e carga eram col-2 cada; "102,5" ficava cortado em telas de 375px
-  assert.doesNotMatch(html, /readonly/, 'o numero da serie nao e mais um campo');
-  assert.match(html, /<div class="col-1[^"]*">1<\/div>/);
+  assert.doesNotMatch(html, /readonly/, 'o numero da serie nao e um campo de texto');
   assert.match(html, /<div class="col-3"><input type="text" inputmode="decimal" autocomplete="off"[^>]*value="102,5"/);
-  assert.deepEqual(colSizes(html), [1, 2, 3, 2, 4]);
+  assert.deepEqual(colSizes(html), [2, 2, 3, 2, 3]);
   assert.equal(colSizes(html).reduce((a, b) => a + b, 0), 12, 'a linha ocupa a grade inteira');
 });
 

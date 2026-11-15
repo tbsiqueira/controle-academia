@@ -219,25 +219,29 @@
 
   /* ---------- formulário do Treinar: linha de uma série ---------- */
 
-  // Larguras (grade de 12 do Bootstrap). O número da série é só texto numa coluna estreita,
-  // para sobrar espaço para a carga: "102,5" não cabia quando as duas tinham a mesma largura.
-  const SET_COLS = { number: 'col-1', reps: 'col-2', load: 'col-3', rir: 'col-2', note: 'col-4' };
+  // Larguras (grade de 12 do Bootstrap). A carga fica com col-3: "102,5" não cabia em col-2.
+  // O número da série é um botão (marca a série como feita), por isso precisa de col-2 para o dedo.
+  const SET_COLS = { number: 'col-2', reps: 'col-2', load: 'col-3', rir: 'col-2', note: 'col-3' };
 
   function setHeaderHtml() {
     return '<div class="row g-1 text-center fw-semibold small text-muted mb-1">' +
-      '<div class="' + SET_COLS.number + '">#</div><div class="' + SET_COLS.reps + '">reps</div>' +
+      '<div class="' + SET_COLS.number + '">série</div><div class="' + SET_COLS.reps + '">reps</div>' +
       '<div class="' + SET_COLS.load + '">carga</div><div class="' + SET_COLS.rir + '">RIR</div>' +
       '<div class="' + SET_COLS.note + '">obs</div>' +
       '</div>';
   }
 
   // Os campos chamam setField(exercício, série, campo, valor), definido no app.js.
+  // O botão do número chama toggleSetDone(exercício, série): marca como feita e inicia o descanso.
+  // Série feita só muda de cor (sem som, vibração ou animação).
   function setRowHtml(exIdx, setIdx, s, useComma) {
     function field(name) {
       return ' oninput="setField(' + exIdx + ',' + setIdx + ",'" + name + "',this.value)\"";
     }
     return '<div class="row g-1 mb-1 align-items-center">' +
-      '<div class="' + SET_COLS.number + ' text-center small fw-semibold text-muted">' + esc(s.number) + '</div>' +
+      '<div class="' + SET_COLS.number + '"><button type="button" class="btn set-done w-100 ' + (s.done ? 'btn-success' : 'btn-outline-secondary') + '"' +
+      ' aria-pressed="' + (s.done ? 'true' : 'false') + '" aria-label="Série ' + esc(s.number) + (s.done ? ' feita (toque para desmarcar)' : ': marcar como feita e iniciar o descanso') + '"' +
+      ' onclick="toggleSetDone(' + exIdx + ',' + setIdx + ')">' + esc(s.number) + (s.done ? ' <i class="bi bi-check-lg"></i>' : '') + '</button></div>' +
       '<div class="' + SET_COLS.reps + '"><input type="number" inputmode="numeric" class="form-control form-control-sm" value="' + esc(s.reps) + '" aria-label="Reps da série ' + esc(s.number) + '"' + field('reps') + '></div>' +
       '<div class="' + SET_COLS.load + '"><input type="text" inputmode="decimal" autocomplete="off" class="form-control form-control-sm" value="' + esc(formatDecimal(s.load, useComma)) + '" aria-label="Carga da série ' + esc(s.number) + '"' + field('load') + '></div>' +
       '<div class="' + SET_COLS.rir + '"><input type="number" inputmode="numeric" class="form-control form-control-sm" value="' + esc(s.rir) + '" aria-label="RIR da série ' + esc(s.number) + '"' + field('rir') + '></div>' +

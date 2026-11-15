@@ -138,3 +138,49 @@ test('Treinar tem o botao "- serie": tira a ultima, nunca a unica, e confirma se
   assert.match(body, /scheduleDraftSave\(\)/, 'o rascunho acompanha');
   assert.match(APP, /onclick="removeFormSet\(' \+ exIdx \+ '\)"' \+ \(group\.sets\.length <= 1 \? ' disabled' : ''\)/);
 });
+
+/* ---------- série feita: inicia o descanso pela própria linha ---------- */
+
+test('setRowHtml: o numero da serie e um botao que chama toggleSetDone', () => {
+  const html = core.setRowHtml(2, 1, { number: 2, reps: 10, load: 40, rir: '', note: '' }, true);
+  assert.match(html, /<button type="button" class="btn set-done w-100 btn-outline-secondary"/);
+  assert.match(html, /aria-pressed="false"/);
+  assert.match(html, /aria-label="Série 2: marcar como feita e iniciar o descanso"/);
+  assert.match(html, /onclick="toggleSetDone\(2,1\)">2<\/button>/);
+  assert.equal((html.match(/<input /g) || []).length, 4, 'os quatro campos continuam la');
+});
+
+test('setRowHtml: serie feita fica verde, com o visto, e avisa o leitor de tela', () => {
+  const html = core.setRowHtml(0, 0, { number: 1, reps: 10, load: 40, done: true }, true);
+  assert.match(html, /class="btn set-done w-100 btn-success"/);
+  assert.match(html, /aria-pressed="true"/);
+  assert.match(html, /aria-label="Série 1 feita \(toque para desmarcar\)"/);
+  assert.match(html, />1 <i class="bi bi-check-lg"><\/i><\/button>/);
+});
+
+test('a carga continua com a coluna larga e a linha fecha a grade de 12', () => {
+  const html = core.setRowHtml(0, 0, { number: 1, load: 102.5 }, true);
+  assert.match(html, /<div class="col-3"><input type="text" inputmode="decimal"[^>]*value="102,5"/);
+  const cols = (html.match(/class="col-(\d+)/g) || []).map((c) => Number(c.replace(/\D/g, '')));
+  assert.equal(cols.reduce((a, b) => a + b, 0), 12);
+});
+
+test('toggleSetDone marca, inicia o descanso so ao marcar e nao vaza para o treino salvo', () => {
+  const body = APP.slice(APP.indexOf('function toggleSetDone'), APP.indexOf('function removeFormSet'));
+  assert.match(body, /if \(group\.sets\[setIdx\]\.done\) startRest\(\);/, 'desmarcar nao reinicia o timer');
+  assert.match(body, /scheduleDraftSave\(\)/, 'o rascunho guarda o que ja foi feito');
+
+  const save = APP.slice(APP.indexOf('async function saveWorkout'), APP.indexOf('async function deleteWorkout'));
+  assert.doesNotMatch(save, /done/, 'o treino salvo nao ganha campo novo (formato do banco intacto)');
+
+  // repetir/editar um treino monta o formulario sem "done"
+  const form = core.formFromWorkout({ sets: [{ exerciseName: 'Supino', number: 1, reps: 10, load: 40, done: true }] });
+  assert.equal('done' in form[0].sets[0], false);
+  assert.equal('done' in core.groupSets([{ exerciseName: 'Supino', number: 1, done: true }], [])[0].sets[0], false);
+});
+
+test('fim do descanso continua sem som, vibracao nem animacao (so cor)', () => {
+  assert.doesNotMatch(APP, /vibrate\(|new Audio|AudioContext|\.play\(\)/);
+  const rule = CSS.slice(CSS.indexOf('.set-done {'), CSS.indexOf('}', CSS.indexOf('.set-done {')));
+  assert.doesNotMatch(rule, /animation|transition/);
+});
