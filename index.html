@@ -11,9 +11,9 @@
   <link rel="icon" href="icons/icon-16.png" sizes="16x16" type="image/png">
   <link rel="icon" href="icons/icon-32.png" sizes="32x32" type="image/png">
   <link rel="apple-touch-icon" href="icons/icon-180.png">
-  <link rel="stylesheet" href="vendor/bootstrap/bootstrap.min.css?v=67">
-  <link rel="stylesheet" href="vendor/bootstrap-icons/bootstrap-icons.min.css?v=67">
-  <link rel="stylesheet" href="css/styles.css?v=67">
+  <link rel="stylesheet" href="vendor/bootstrap/bootstrap.min.css?v=68">
+  <link rel="stylesheet" href="vendor/bootstrap-icons/bootstrap-icons.min.css?v=68">
+  <link rel="stylesheet" href="css/styles.css?v=68">
 </head>
 <body>
   <main class="container pb-nav">
@@ -97,26 +97,6 @@
       </div>
       <div id="eraseBody"></div>
     </section>
-    <section id="view-ia" class="view d-none">
-      <div class="page-head">
-        <a href="#/exercises" class="btn-back" aria-label="Voltar"><i class="bi bi-arrow-left"></i></a>
-        <h1 class="h4">Ficha pela IA</h1>
-      </div>
-      <div class="card mb-3"><div class="card-body">
-        <ol class="steps">
-          <li><span><strong>Copie o texto</strong> no botão abaixo.<small>Ele traz as regras e os exercícios que você já tem, para não duplicar.</small></span></li>
-          <li><span><strong>Cole na IA</strong> (ChatGPT, Claude…) junto com o plano da professora.<small>Pode anexar o PDF: cada treino vira uma ficha.</small></span></li>
-          <li><span><strong>Copie a resposta</strong> da IA inteira.</span></li>
-          <li><span><strong>Cole em Fichas → Importar</strong> e confira.</span></li>
-        </ol>
-      </div></div>
-      <div class="d-flex gap-2 mb-3">
-        <button type="button" class="btn btn-primary flex-fill" id="iaCopy"><i class="bi bi-clipboard"></i> Copiar texto</button>
-        <button type="button" class="btn btn-outline-secondary flex-fill" id="iaShare"><i class="bi bi-send"></i> Compartilhar</button>
-      </div>
-      <label class="form-label" for="iaText">Texto que vai para a IA</label>
-      <textarea class="form-control font-monospace" id="iaText" rows="10" readonly></textarea>
-    </section>
     <!-- Sheets & exercises -->
     <section id="view-exercises" class="view d-none">
       <h1 class="h4 mt-3 mb-3"><i class="bi bi-card-checklist"></i> Fichas</h1>
@@ -134,11 +114,10 @@
             exercícios, cada um com o número de séries, as reps de cada série e a observação da professora.
             Ao <strong>Treinar</strong>, você escolhe a ficha e os exercícios entram automaticamente no formulário.</p>
           </details>
-          <div class="d-flex gap-2 mb-2">
+          <div class="d-flex gap-2 mb-3">
             <button class="btn btn-primary flex-fill" type="button" id="btnNewSheet"><i class="bi bi-plus-circle"></i> Nova ficha</button>
-            <button class="btn btn-outline-secondary flex-fill" type="button" id="btnImportSheet"><i class="bi bi-filetype-json"></i> Importar</button>
+            <button class="btn btn-outline-primary flex-fill" type="button" id="btnImportSheet"><i class="bi bi-stars"></i> Criar com IA</button>
           </div>
-          <a href="#/ia" class="btn btn-dashed w-100 mb-3"><i class="bi bi-stars"></i> Pedir uma ficha para a IA</a>
           <div id="sheetsList"></div>
         </div>
         <div class="tab-pane fade" id="tabExercises">
@@ -261,7 +240,7 @@
       </div>
       </details>
 
-      <p class="text-center text-muted small">Meu Treino <span id="appVersion">v67</span> · dados 100% locais · catálogo: gugeldev/exercicios-bd-ptbr (CC0)</p>
+      <p class="text-center text-muted small">Meu Treino <span id="appVersion">v68</span> · dados 100% locais · catálogo: gugeldev/exercicios-bd-ptbr (CC0)</p>
     </section>
   </main>
 
@@ -408,14 +387,19 @@
     <div class="modal-dialog modal-dialog-scrollable modal-fullscreen-sm-down">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title"><i class="bi bi-filetype-json"></i> Importar ficha</h5>
+          <h5 class="modal-title"><i class="bi bi-stars"></i> Criar com IA</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
         </div>
         <div class="modal-body">
           <div id="sheetImportPaste">
-            <ol class="steps mb-3">
-              <li><span><strong>Copie a resposta da IA</strong> inteira.<small>Não tem uma? Feche aqui e use <strong>Pedir uma ficha para a IA</strong>.</small></span></li>
-              <li><span><strong>Cole no campo abaixo.</strong></span></li>
+            <ol class="steps mb-2">
+              <li><span><strong>Copie o texto</strong> abaixo.<small>Ele traz as regras e os exercícios que você já tem, para não duplicar.</small></span></li>
+              <li><span><strong>Cole na IA</strong> (ChatGPT, Claude…) junto com o plano da professora.<small>Pode anexar o PDF: cada treino vira uma ficha.</small></span></li>
+            </ol>
+            <button type="button" class="btn btn-primary w-100 mb-2" id="iaCopy"><i class="bi bi-clipboard"></i> Copiar texto</button>
+            <textarea class="form-control font-monospace mb-3" id="iaText" rows="2" readonly aria-label="Texto que vai para a IA"></textarea>
+            <ol class="steps mb-3" start="3">
+              <li><span><strong>Copie a resposta da IA</strong> inteira e cole abaixo.</span></li>
               <li><span><strong>Toque em Revisar</strong> e confira os exercícios antes de importar.</span></li>
             </ol>
             <label class="form-label" for="sheetImportText">Resposta da IA</label>
@@ -450,9 +434,9 @@
     </div>
   </div>
 
-  <script src="vendor/bootstrap/bootstrap.bundle.min.js?v=67"></script>
-  <script src="js/db.js?v=67"></script>
-  <script src="js/core.js?v=67"></script>
-  <script src="js/app.js?v=67"></script>
+  <script src="vendor/bootstrap/bootstrap.bundle.min.js?v=68"></script>
+  <script src="js/db.js?v=68"></script>
+  <script src="js/core.js?v=68"></script>
+  <script src="js/app.js?v=68"></script>
 </body>
 </html>

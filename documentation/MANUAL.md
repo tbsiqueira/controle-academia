@@ -101,13 +101,13 @@ Elevação pélvica 3×12-10-8 · Leg press 3×12 · Cadeira flexora 3×12 …
 Em vez de digitar ficha por ficha, dá para pedir a uma IA (ChatGPT, Claude…) que converta o plano da
 professora — inclusive um **PDF com vários treinos** — e colar o resultado no app.
 
-1. **Fichas → Pedir uma ficha para a IA**. A tela traz um texto pronto: as regras do formato (o "contrato",
+1. **Fichas → Criar com IA**. A janela traz um texto pronto: as regras do formato (o "contrato",
    também em [FICHA-JSON.md](../FICHA-JSON.md)) e a lista dos exercícios que **já existem** no app (sua Biblioteca
    + catálogo), para a IA usar os mesmos nomes e não duplicar.
-2. Toque em **Copiar** (ou **Compartilhar**), cole na IA, **anexe o PDF** (ou cole o plano em texto) e peça:
+2. Toque em **Copiar texto**, cole na IA, **anexe o PDF** (ou cole o plano em texto) e peça:
    _"Converta o plano em anexo para o JSON do contrato acima, com uma ficha para cada treino. Responda só com o JSON."_
 3. Copie a resposta da IA.
-4. **Fichas → Importar ficha** → cole na caixa de texto → **Revisar**.
+4. Na mesma janela, cole na caixa de texto de baixo → **Revisar**.
 5. A revisão mostra as fichas encontradas (ex.: _TREINO A — 6 exercícios_, _TREINO B — 5 exercícios_).
    Exercícios cujo nome já existe no app são ligados sozinhos (sem diferenciar maiúscula/acento). Para cada nome
    **sem par exato**, escolha um exercício parecido da lista ou **Criar novo** (vai para a Biblioteca, grupo
@@ -461,7 +461,7 @@ Só se você tiver um backup JSON exportado. Vale a pena exportar de vez em quan
 Não. Use o **catálogo** (927 exercícios em português) e só crie os que a sua academia tem de específico.
 
 **Dá para montar as fichas a partir do PDF da professora?**
-Sim: peça para uma IA converter o PDF e cole o resultado em **Fichas → Importar ficha**. Passo a passo em
+Sim: peça para uma IA converter o PDF e cole o resultado em **Fichas → Criar com IA**. Passo a passo em
 [Importar as fichas da professora com a IA](#importar-as-fichas-da-professora-com-a-ia).
 
 **A semana pode começar em qualquer dia?**
@@ -485,7 +485,7 @@ quem mantém o app — é uma evolução prevista.
 | A tela dá **zoom** ao tocar num campo de texto (iPhone) | Safari amplia quando o campo tem fonte menor que 16px | Corrigido nas versões novas; se ainda acontecer, use **Mais → Opções avançadas → Debug → Atualizar app** |
 | Exercícios que eu criei **sumiram da Biblioteca** | Bug corrigido na v27: o app escondia exercícios cujo nome também existia no catálogo | Use **Mais → Opções avançadas → Debug → Atualizar app** — seus exercícios nunca foram apagados |
 | Importei o backup errado | — | **Mais → Dados → Desfazer** (logo após importar) |
-| **Importar ficha** diz que o texto não é um JSON válido | A IA escreveu texto junto do JSON, ou só parte da resposta foi copiada | Copie a resposta **inteira** da IA (o bloco ` ```json ` pode vir junto) ou peça de novo: _"responda só com o JSON"_ |
+| **Criar com IA** diz que o texto não é um JSON válido | A IA escreveu texto junto do JSON, ou só parte da resposta foi copiada | Copie a resposta **inteira** da IA (o bloco ` ```json ` pode vir junto) ou peça de novo: _"responda só com o JSON"_ |
 | Uma ficha antiga não aparece no **Treinar** | Ela está **desativada** | **Fichas** → seção **Desativadas** → ícone do olho (**Reativar**) |
 
 ---
@@ -499,7 +499,7 @@ quem mantém o app — é uma evolução prevista.
 - **Aquecimento**: série leve antes das séries de trabalho, para preparar o músculo e testar a carga.
 - **Ficha**: seu treino completo, o plano que você segue (ex.: TREINO A - inferiores).
 - **Tonelagem/volume**: soma de carga × reps (sem o aquecimento). Aparece por semana em **Calendário → Evolução das últimas 8 semanas**.
-- **JSON**: o formato de texto que a IA devolve com as fichas para você colar em **Fichas → Importar ficha**.
+- **JSON**: o formato de texto que a IA devolve com as fichas para você colar em **Fichas → Criar com IA**.
 - **PR**: *personal record* — sua melhor marca naquele exercício (maior carga registrada).
 
 ---

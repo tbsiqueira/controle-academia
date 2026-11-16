@@ -103,7 +103,7 @@ function navigate() {
   if (view) view.classList.remove('d-none');
 
   document.querySelectorAll('.bottom-nav a').forEach(function (a) {
-    const activeHash = (viewName === 'detail' || viewName === 'exercise') ? '#/dashboard' : viewName === 'ia' ? '#/exercises' : (viewName === 'erase' ? '#/more' : hash);
+    const activeHash = (viewName === 'detail' || viewName === 'exercise') ? '#/dashboard' : (viewName === 'erase' ? '#/more' : hash);
     a.classList.toggle('active', a.getAttribute('href') === activeHash);
   });
 
@@ -115,7 +115,6 @@ function navigate() {
   if (viewName === 'exercises') renderSheetsAndExercises();
   if (viewName === 'calendar') renderCalendar();
   if (viewName === 'more') renderMore();
-  if (viewName === 'ia') guard(renderIa)();
 }
 
 /* ---------- week logic ---------- */
@@ -1739,6 +1738,7 @@ function openSheetImport() {
   document.getElementById('sheetImportPaste').classList.remove('d-none');
   document.getElementById('sheetImportBody').innerHTML = '';
   setImportButton('Revisar');
+  guard(renderIa)();
   bootstrap.Modal.getOrCreateInstance(document.getElementById('sheetImportModal')).show();
 }
 
@@ -1818,7 +1818,7 @@ async function confirmSheetImport() {
   renderExercises();
 }
 
-/* ---------- contrato para a IA (#/ia) ---------- */
+/* ---------- contrato para a IA (modal Criar com IA) ---------- */
 
 async function renderIa() {
   const area = document.getElementById('iaText');
@@ -2515,7 +2515,6 @@ function bindEvents() {
   document.getElementById('exportCopy').addEventListener('click', function () { guard(copyExportText)('exportText'); });
   document.getElementById('iaCopy').addEventListener('click', function () { guard(copyExportText)('iaText'); });
   document.getElementById('exportShare').addEventListener('click', function () { guard(shareExportText)('exportText'); });
-  document.getElementById('iaShare').addEventListener('click', function () { guard(shareExportText)('iaText'); });
   document.getElementById('sheetImportConfirm').addEventListener('click', function () {
     guard(state.pendingImport ? confirmSheetImport : reviewSheetImport)();
   });

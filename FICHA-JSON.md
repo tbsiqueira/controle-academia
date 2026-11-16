@@ -1,7 +1,7 @@
 # Contrato: ficha de treino em JSON (Meu Treino)
 
 Este arquivo explica para qualquer pessoa ou IA (LLM) como montar uma ficha de treino que o
-app **Meu Treino** importa em **Fichas → Importar ficha**.
+app **Meu Treino** importa em **Fichas → Criar com IA**.
 
 ## Instruções para a IA
 
@@ -85,13 +85,13 @@ Campos que não estão nesta tabela são ignorados.
 
 ## Como pedir para a IA
 
-No app, abra **Fichas → Pedir uma ficha para a IA** (endereço `#/ia`). A tela junta este
+No app, abra **Fichas → Criar com IA**. A janela junta este
 contrato com a lista dos exercícios que já existem (sua Biblioteca + catálogo). Toque em
-**Copiar**, cole na IA, **anexe o PDF** da professora (ou cole o plano em texto) e escreva
+**Copiar texto**, cole na IA, **anexe o PDF** da professora (ou cole o plano em texto) e escreva
 logo abaixo:
 
 > Converta o plano de treino em anexo para o JSON do contrato acima, com uma ficha para
 > cada treino do plano. Responda só com o JSON.
 
-Copie o JSON da resposta, abra **Fichas → Importar ficha**, cole na caixa de texto e toque
+Copie o JSON da resposta, cole na caixa de texto logo abaixo, na mesma janela, e toque
 em **Revisar**.

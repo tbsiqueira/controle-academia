@@ -154,7 +154,7 @@ serve.ps1                   servidor local de desenvolvimento
 test.ps1                    roda os testes unitários (Node)
 check.ps1                   verificações estáticas
 documentation/MANUAL.md     manual do usuário (como usar, exemplos, FAQ)
-FICHA-JSON.md               contrato do JSON de ficha para a IA (servido pelo app e usado em #/ia)
+FICHA-JSON.md               contrato do JSON de ficha para a IA (servido pelo app e usado em Fichas → Criar com IA)
 documentation/PLANO.md      plano/requisitos e histórico de revisões
 ```
 

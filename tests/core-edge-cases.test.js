@@ -643,7 +643,7 @@ test('parseRoute le a tela e o id do endereco', () => {
 });
 
 test('parseRoute mantem os enderecos antigos funcionando (sem id)', () => {
-  ['dashboard', 'workout', 'detail', 'exercise', 'erase', 'ia', 'exercises', 'calendar', 'more'].forEach((view) => {
+  ['dashboard', 'workout', 'detail', 'exercise', 'erase', 'exercises', 'calendar', 'more'].forEach((view) => {
     assert.deepEqual(core.parseRoute('#/' + view), { view: view, id: '' });
   });
 });

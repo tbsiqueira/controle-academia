@@ -1280,7 +1280,7 @@ a.cal-cell {
   padding-top: 0;
 }
 
-/* Passos numerados (Ficha pela IA, Importar ficha) */
+/* Passos numerados (Criar com IA) */
 .steps {
   list-style: none;
   counter-reset: step;
@@ -1288,6 +1288,10 @@ a.cal-cell {
   gap: 14px;
   padding: 0;
   margin: 0;
+}
+
+.steps[start="3"] {
+  counter-reset: step 2;
 }
 
 .steps li {

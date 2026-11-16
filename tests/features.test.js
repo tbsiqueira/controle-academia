@@ -339,3 +339,16 @@ test('os tres campos do aquecimento tem aria-label (placeholder some quando o ca
   });
   assert.equal((body.match(/oninput="setWarmupField\(/g) || []).length, 3, 'os tres continuam ligados ao setWarmupField');
 });
+
+/* ---------- Criar com IA: texto para a IA e resposta na mesma janela ---------- */
+
+test('Criar com IA junta pedir e importar num botao e numa janela so', () => {
+  assert.match(HTML, /id="btnImportSheet"><i class="bi bi-stars"><\/i> Criar com IA</, 'botao unico na aba Fichas');
+  const modal = HTML.slice(HTML.indexOf('id="sheetImportModal"'), HTML.indexOf('id="exportModal"'));
+  assert.match(modal, /class="btn btn-primary w-100 mb-2" id="iaCopy"/, 'Copiar texto verde, dentro da janela');
+  assert.match(modal, /id="iaText" rows="2" readonly/, 'texto para a IA com 2 linhas');
+  assert.ok(modal.indexOf('id="iaText"') < modal.indexOf('id="sheetImportText"'), 'primeiro copia, depois cola a resposta');
+  assert.match(CSS, /\.steps\[start="3"\] \{\s*counter-reset: step 2;/, 'segunda lista continua no passo 3');
+  assert.match(APP, /function openSheetImport\(\) \{[\s\S]*?guard\(renderIa\)\(\);[\s\S]*?\.show\(\);/, 'abrir a janela carrega o texto');
+  assert.doesNotMatch(HTML + APP, /view-ia|#\/ia|iaShare|Pedir uma ficha/, 'tela #/ia e Compartilhar removidos');
+});
