@@ -299,7 +299,7 @@ body {
   font-weight: 700;
 }
 
-/* Botão tracejado (ações secundárias: repetir treino, ficha pela IA, adicionar) */
+/* Botão tracejado (ações secundárias: repetir treino, adicionar) */
 .btn-dashed {
   --bs-btn-color: var(--mt-lime-deep);
   --bs-btn-hover-color: var(--mt-ink);
