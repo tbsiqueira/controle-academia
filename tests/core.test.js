@@ -281,15 +281,15 @@ test('workoutAsText monta a mensagem com o aquecimento dentro de cada exercicio'
   const text = core.workoutAsText(workout);
   const lines = text.split('\n');
 
-  assert.equal(lines[0], 'MEU TREINO — 08/10/2026');
-  assert.equal(lines[1], 'Ficha: TREINO A - inferiores');
-  assert.ok(text.indexOf('1. Elevação pélvica (obs.: pausa de 1s)') !== -1);
-  assert.ok(text.indexOf('   Aquecimento: 15 reps · 20 kg · RIR 3') !== -1);
-  assert.ok(text.indexOf('   Série 1: 12 reps · 27 kg · RIR 2') !== -1);
-  assert.ok(text.indexOf('   Série 2: 10 reps · 27 kg · RIR 1 (caiu a força)') !== -1);
-  assert.ok(text.indexOf('2. Esteira') !== -1, 'exercicio so com aquecimento tambem aparece');
-  assert.ok(text.indexOf('Cardio: 30 min') !== -1);
-  assert.ok(text.indexOf('Observações: treino leve') !== -1);
+  assert.equal(lines[0], '*08/10/2026*');
+  assert.equal(lines[1], 'Ficha: _TREINO A - inferiores_');
+  assert.ok(text.indexOf('1. *Elevação pélvica*\n_Obs.: pausa de 1s_') !== -1);
+  assert.ok(text.indexOf('- Aquecimento: 15 reps · 20 kg · RIR 3') !== -1);
+  assert.ok(text.indexOf('- Série 1: 12 reps · 27 kg · RIR 2') !== -1);
+  assert.ok(text.indexOf('- Série 2: 10 reps · 27 kg · RIR 1 _(caiu a força)_') !== -1);
+  assert.ok(text.indexOf('2. *Esteira*') !== -1, 'exercicio so com aquecimento tambem aparece');
+  assert.ok(text.indexOf('*Cardio:* 30 min') !== -1);
+  assert.ok(text.indexOf('*Observações:* treino leve') !== -1);
 });
 
 test('workoutAsText omite cardio, observacoes e ficha quando vazios', () => {
@@ -300,7 +300,7 @@ test('workoutAsText omite cardio, observacoes e ficha quando vazios', () => {
   assert.equal(text.indexOf('Cardio'), -1);
   assert.equal(text.indexOf('Observações'), -1);
   assert.equal(text.indexOf('Ficha:'), -1);
-  assert.ok(text.indexOf('1. X') !== -1);
+  assert.ok(text.indexOf('1. *X*') !== -1);
 });
 
 /* ---------- referência por id (chave estrangeira) ---------- */
@@ -527,10 +527,10 @@ test('workoutAsText usa o nome atual da ficha', () => {
   const sheets = [{ id: 's1', name: 'Peito e triceps' }];
 
   const atual = core.workoutAsText(workout, sheets);
-  assert.match(atual, /Ficha: Peito e triceps/);
+  assert.match(atual, /Ficha: _Peito e triceps_/);
   assert.ok(atual.indexOf('Nome antigo') === -1);
 
-  assert.match(core.workoutAsText(workout), /Ficha: Nome antigo/, 'sem a lista de fichas usa o nome guardado');
+  assert.match(core.workoutAsText(workout), /Ficha: _Nome antigo_/, 'sem a lista de fichas usa o nome guardado');
 });
 
 /* ---------- referência por id (nome sempre atual) ---------- */
@@ -660,7 +660,7 @@ test('workoutAsText usa o nome atual do exercicio e agrupa por id', () => {
 
   const text = core.workoutAsText(workout, [], [{ id: 5, name: 'Remada baixa' }]);
 
-  assert.ok(text.indexOf('1. Remada baixa') !== -1);
+  assert.ok(text.indexOf('1. *Remada baixa*') !== -1);
   assert.equal(text.indexOf('Antigo'), -1, 'nome congelado nao aparece');
   assert.ok(text.indexOf('2. ') === -1, 'series agrupadas por id em um unico exercicio');
   assert.ok(text.indexOf('8 reps') !== -1);

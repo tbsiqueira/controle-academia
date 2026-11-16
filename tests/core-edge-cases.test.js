@@ -107,7 +107,7 @@ test('workoutAsText mostra serie sem numero', () => {
     sets: [{ exerciseName: 'Leg press 45', reps: 10, load: 100, note: 'subiu' }]
   });
 
-  assert.ok(texto.indexOf('Série ?: 10 reps · 100 kg (subiu)') !== -1);
+  assert.ok(texto.indexOf('- Série ?: 10 reps · 100 kg _(subiu)_') !== -1);
 });
 
 test('materializeSampleData cria settings e aceita a data informada', () => {
@@ -282,7 +282,7 @@ test('ultima carga ignora series com carga zero', () => {
 test('workoutAsText sem series nem aquecimento mostra so o cabecalho', () => {
   const texto = core.workoutAsText({ date: '2026-10-12', sets: [], warmups: [] });
 
-  assert.equal(texto, 'MEU TREINO — 12/10/2026');
+  assert.equal(texto, '*12/10/2026*');
 });
 
 test('normalizeBackup converte tipos de treino (v1) e mantem datas', () => {

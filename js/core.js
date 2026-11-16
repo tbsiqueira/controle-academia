@@ -758,24 +758,26 @@
 
   /* ---------- exportar treino como texto ---------- */
 
+  // Formatado para o WhatsApp: *negrito*, _itálico_, "1." e "- " viram listas lá.
   function workoutAsText(workout, sheets, exercises, useComma) {
     const lines = [];
-    lines.push('MEU TREINO — ' + fmtBR(workout.date));
+    lines.push('*' + fmtBR(workout.date) + '*');
 
     const sheetName = sheetLabel(workout, sheets);
-    if (sheetName) lines.push('Ficha: ' + sheetName);
+    if (sheetName) lines.push('Ficha: _' + sheetName + '_');
     lines.push('');
 
     const groups = groupSets(workout.sets, workout.warmups);
 
     groups.forEach(function (g, i) {
-      lines.push((i + 1) + '. ' + exerciseLabel(g, exercises) + (g.note ? ' (obs.: ' + g.note + ')' : ''));
+      lines.push((i + 1) + '. *' + exerciseLabel(g, exercises) + '*');
+      if (g.note) lines.push('_Obs.: ' + g.note + '_');
 
-      if (warmupHasData(g.warmup)) lines.push('   Aquecimento: ' + warmupLine(g.warmup, useComma));
+      if (warmupHasData(g.warmup)) lines.push('- Aquecimento: ' + warmupLine(g.warmup, useComma));
 
       g.sets.slice().sort(function (a, b) { return toNum(a.number) - toNum(b.number); }).forEach(function (s) {
-        let line = '   Série ' + (s.number || '?') + ': ' + setLine(s, useComma);
-        if (s.note) line += ' (' + s.note + ')';
+        let line = '- Série ' + (s.number || '?') + ': ' + setLine(s, useComma);
+        if (s.note) line += ' _(' + s.note + ')_';
         lines.push(line);
       });
 
@@ -783,8 +785,8 @@
     });
 
     const cardio = toNum(workout.cardioMinutes);
-    if (cardio > 0) lines.push('Cardio: ' + cardio + ' min');
-    if (workout.notes) lines.push('Observações: ' + workout.notes);
+    if (cardio > 0) lines.push('*Cardio:* ' + cardio + ' min');
+    if (workout.notes) lines.push('*Observações:* ' + workout.notes);
 
     return lines.join('\n').trim();
   }
