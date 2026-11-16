@@ -34,6 +34,13 @@ Tempo de leitura: ~10 minutos. Não precisa ler tudo de uma vez — use o índic
    - **iPhone (Safari)**: botão **Compartilhar** → *Adicionar à Tela de Início*.
 3. Pronto: o app abre pelo ícone, em tela cheia, e **funciona sem internet**.
 
+Também dá para instalar por **Mais → Instalar o app**: no Chrome e no Edge (celular ou computador) aparece o
+botão **Instalar**, que coloca o app na tela inicial ou na área de trabalho. No iPhone o card mostra o passo a
+passo do Safari, e no app já instalado ele avisa que está tudo certo.
+
+> **iPhone:** o app instalado guarda os dados separado do Safari e começa vazio. Se você já treinou pelo Safari,
+> use **Mais → Dados → Exportar** lá e depois **Importar** dentro do app instalado.
+
 > **Seus dados ficam só no seu aparelho.** Não há login, conta ou servidor. Por isso, faça backups
 > de vez em quando (veja o [item 11](#11-backup-restauração-e-apagar-dados)).
 
@@ -47,7 +54,7 @@ Na parte de baixo da tela existem 5 abas:
 | **Treinar** | Registrar o treino de hoje |
 | **Fichas** | Montar seus treinos (fichas) e a biblioteca de exercícios |
 | **Calendário** | Quantas vezes você treinou no mês, evolução semanal |
-| **Mais** | Metas, colinha, backup e, em **Opções avançadas**, o card **Debug** (atualizar app, apagar dados, dados de exemplo) |
+| **Mais** | Metas, colinha, backup, **Instalar o app** e, em **Opções avançadas**, o card **Debug** (atualizar app, apagar dados, dados de exemplo) |
 
 ---
 

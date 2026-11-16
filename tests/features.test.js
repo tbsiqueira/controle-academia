@@ -352,3 +352,21 @@ test('Criar com IA junta pedir e importar num botao e numa janela so', () => {
   assert.match(APP, /function openSheetImport\(\) \{[\s\S]*?guard\(renderIa\)\(\);[\s\S]*?\.show\(\);/, 'abrir a janela carrega o texto');
   assert.doesNotMatch(HTML + APP, /view-ia|#\/ia|iaShare|Pedir uma ficha/, 'tela #/ia e Compartilhar removidos');
 });
+
+/* ---------- Mais -> Instalar o app (PWA) ---------- */
+
+test('installHint: instalado, botao do navegador, iPhone ou menu do navegador', () => {
+  assert.match(core.installHint(true, true, true), /já está instalado/, 'instalado vence tudo');
+  assert.match(core.installHint(false, true, false), /Toque em Instalar/);
+  assert.match(core.installHint(false, false, true), /Safari.*Adicionar à Tela de Início.*Exportar/);
+  assert.match(core.installHint(false, false, false), /menu do navegador/);
+});
+
+test('card Instalar o app fica entre Dados e as opcoes avancadas', () => {
+  const dados = HTML.indexOf('bi-database"></i> Dados');
+  const install = HTML.indexOf('bi-download"></i> Instalar o app');
+  assert.ok(dados > 0 && install > dados && install < HTML.indexOf('Opções avançadas'));
+  assert.match(HTML, /id="btnInstall"/);
+  assert.match(APP, /addEventListener\('beforeinstallprompt', function \(e\) \{\s*e\.preventDefault\(\);\s*installPrompt = e;/);
+  assert.match(APP, /getElementById\('btnInstall'\)\.addEventListener\('click', guard\(installApp\)\)/);
+});

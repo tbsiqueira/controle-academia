@@ -11,9 +11,9 @@
   <link rel="icon" href="icons/icon-16.png" sizes="16x16" type="image/png">
   <link rel="icon" href="icons/icon-32.png" sizes="32x32" type="image/png">
   <link rel="apple-touch-icon" href="icons/icon-180.png">
-  <link rel="stylesheet" href="vendor/bootstrap/bootstrap.min.css?v=69">
-  <link rel="stylesheet" href="vendor/bootstrap-icons/bootstrap-icons.min.css?v=69">
-  <link rel="stylesheet" href="css/styles.css?v=69">
+  <link rel="stylesheet" href="vendor/bootstrap/bootstrap.min.css?v=70">
+  <link rel="stylesheet" href="vendor/bootstrap-icons/bootstrap-icons.min.css?v=70">
+  <link rel="stylesheet" href="css/styles.css?v=70">
 </head>
 <body>
   <main class="container pb-nav">
@@ -219,6 +219,16 @@
         </div>
       </div>
 
+      <div class="card mb-3">
+        <div class="card-header fw-semibold"><i class="bi bi-download"></i> Instalar o app</div>
+        <div class="card-body">
+          <p class="text-muted small">Instalado, o Meu Treino fica na tela inicial (ou na área de trabalho do computador) como um aplicativo:
+            abre com um toque, em tela cheia, e funciona sem internet. Não ocupa quase nada e não precisa de loja de apps.</p>
+          <p class="small mb-2" id="installStatus"></p>
+          <button class="btn btn-primary w-100 d-none" type="button" id="btnInstall"><i class="bi bi-download"></i> Instalar</button>
+        </div>
+      </div>
+
       <!-- Fechado por padrão: "Apagar todos os dados" não fica à vista junto das metas -->
       <details class="mb-3">
         <summary class="text-center text-muted small mb-2">Opções avançadas (atualizar app, apagar dados, dados de exemplo)</summary>
@@ -240,7 +250,7 @@
       </div>
       </details>
 
-      <p class="text-center text-muted small">Meu Treino <span id="appVersion">v69</span> · dados 100% locais · catálogo: gugeldev/exercicios-bd-ptbr (CC0)</p>
+      <p class="text-center text-muted small">Meu Treino <span id="appVersion">v70</span> · dados 100% locais · catálogo: gugeldev/exercicios-bd-ptbr (CC0)</p>
     </section>
   </main>
 
@@ -434,9 +444,9 @@
     </div>
   </div>
 
-  <script src="vendor/bootstrap/bootstrap.bundle.min.js?v=69"></script>
-  <script src="js/db.js?v=69"></script>
-  <script src="js/core.js?v=69"></script>
-  <script src="js/app.js?v=69"></script>
+  <script src="vendor/bootstrap/bootstrap.bundle.min.js?v=70"></script>
+  <script src="js/db.js?v=70"></script>
+  <script src="js/core.js?v=70"></script>
+  <script src="js/app.js?v=70"></script>
 </body>
 </html>

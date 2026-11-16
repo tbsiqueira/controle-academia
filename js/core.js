@@ -83,6 +83,15 @@
     return { view: parts[0] || 'dashboard', id: parts[1] || '' };
   }
 
+  // Texto do card "Instalar o app": já instalado, botão do navegador, iPhone (só pelo Safari) ou menu do navegador.
+  function installHint(standalone, canPrompt, ios) {
+    if (standalone) return 'O app já está instalado neste aparelho.';
+    if (canPrompt) return 'Toque em Instalar: o Meu Treino ganha um ícone próprio e abre em tela cheia, sem a barra do navegador.';
+    if (ios) return 'No iPhone, abra no Safari, toque em Compartilhar e depois em "Adicionar à Tela de Início". ' +
+      'O app instalado começa vazio: antes, use Exportar no card Dados e depois Importar dentro do app.';
+    return 'Abra o menu do navegador (⋮ ou ⋯) e escolha "Instalar app" ou "Adicionar à tela inicial".';
+  }
+
   /* ---------- texto e números ---------- */
 
   function esc(value) {
@@ -1243,6 +1252,7 @@
     fmtBR: fmtBR,
     shiftMonth: shiftMonth,
     parseRoute: parseRoute,
+    installHint: installHint,
     dateParts: dateParts,
     // texto e números
     esc: esc,

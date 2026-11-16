@@ -1990,6 +1990,27 @@ function renderMore() {
   renderBackupStatus();
   renderStorageInfo();
   renderColinhaList();
+  renderInstall();
+}
+
+/* ---------- instalar o app (PWA) ---------- */
+
+let installPrompt = null;   // evento beforeinstallprompt guardado até o toque em Instalar
+
+function renderInstall() {
+  const standalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+  document.getElementById('installStatus').textContent = installHint(standalone, !!installPrompt, /iPhone|iPad|iPod/.test(navigator.userAgent));
+  document.getElementById('btnInstall').classList.toggle('d-none', standalone || !installPrompt);
+}
+
+async function installApp() {
+  const prompt = installPrompt;
+  installPrompt = null;   // o navegador só aceita usar o evento uma vez
+  if (prompt) {
+    prompt.prompt();
+    await prompt.userChoice;
+  }
+  renderInstall();
 }
 
 /* ---------- armazenamento persistente ---------- */
@@ -2469,6 +2490,13 @@ function bindEvents() {
     if (document.visibilityState === 'hidden') flushDraft();
   });
   window.addEventListener('pagehide', flushDraft);
+  window.addEventListener('beforeinstallprompt', function (e) {
+    e.preventDefault();
+    installPrompt = e;
+    renderInstall();
+  });
+  window.addEventListener('appinstalled', renderInstall);
+  document.getElementById('btnInstall').addEventListener('click', guard(installApp));
   document.getElementById('restAdd').addEventListener('click', function () { addRest(15); });
   document.getElementById('restStop').addEventListener('click', stopRest);
 
