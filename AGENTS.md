@@ -33,5 +33,6 @@ Read before changing anything:
 5. Commit only when asked; never push unless asked. `main` is protected: every change goes through a branch and a
    PR, merged **only by rebase** after the required checks pass. Never tag by hand: merging a PR with a new version
    makes `deploy.yml` publish and tag `vN`. Always `git pull --ff-only origin main` before branching from `main`
-   (cloud sessions merge PRs too), and rebase on `origin/main` before pushing.
+   (cloud sessions merge PRs too), and rebase on `origin/main` before pushing. A PR related to a GitHub issue
+   references it in its description (`Closes #N` or `Refs #N`) so the full context is one click away.
 6. No sound, vibration or flashing. No extra taps on the training screen.
