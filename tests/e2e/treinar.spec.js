@@ -1,6 +1,6 @@
-// Treinar (tela crítica), parte A da issue #5: abrir, ficha, séries, descanso, exercícios e campos.
-// Cada comportamento tem o seu teste (documentation/REFACTOR.md, seção 4). Rascunho, salvar e treino existente
-// ficam no PR B.
+// Treinar (tela crítica), issue #5. Parte A: abrir, ficha, séries, descanso, exercícios e campos.
+// Cada comportamento tem o seu teste (documentation/REFACTOR.md, seção 4). Parte B: rascunho, salvar e treino
+// existente.
 //
 // Ponto de partida da maioria dos testes: `fixtures/treinar-backup.json`, importado pela tela Mais.
 // - Treino A (ativa): Supino reto 3 séries (reps 12-10-8) e Remada baixa 2 séries (reps 10-10).
@@ -523,5 +523,344 @@ test.describe('Treinar · exercícios e campos', () => {
     await expect(page.locator('#workoutCardio')).toHaveValue('25');
     await expect(page.locator('#workoutNotes')).toHaveValue('Academia cheia, troquei a ordem');
     await expect(progress).toContainText('25 mincardio');
+  });
+});
+
+/* ---------- Parte B: rascunho, salvar e treino existente ---------- */
+
+/** Rascunho gravado no aparelho (IndexedDB do app, store `settings`, id `workoutDraft`), ou null. */
+function storedDraft(page) {
+  return page.evaluate(() => new Promise((resolve, reject) => {
+    const open = indexedDB.open('meu-treino');
+    open.onerror = () => reject(open.error);
+    open.onsuccess = () => {
+      const db = open.result;
+      const get = db.transaction('settings').objectStore('settings').get('workoutDraft');
+      get.onsuccess = () => { db.close(); resolve(get.result || null); };
+      get.onerror = () => { db.close(); reject(get.error); };
+    };
+  }));
+}
+
+/** Simula o app indo para segundo plano (trocar de app, bloquear a tela). */
+async function hidePage(page) {
+  await page.evaluate(() => {
+    Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => 'hidden' });
+    document.dispatchEvent(new Event('visibilitychange'));
+  });
+}
+
+/** Faz o próximo confirm() responder "Cancelar" e guarda a pergunta em window.__pergunta. */
+async function answerNextConfirmNo(page) {
+  await page.evaluate(() => {
+    const original = window.confirm;
+    window.confirm = (message) => { window.__pergunta = message; window.confirm = original; return false; };
+  });
+}
+
+/** Abre um treino salvo pelo Início (lista Histórico) e toca em Editar treino. */
+async function editSavedWorkout(page, workoutId) {
+  await goTo(page, 'Início');
+  await page.locator(`#recentWorkouts button[data-view-workout="${workoutId}"]`).click();
+  await expect(page.locator('#view-detail')).toBeVisible();
+  await page.locator('#detailEdit').click();
+  await expect(page.locator('#view-workout')).toBeVisible();
+}
+
+const historyCount = (page) => page.locator('#recentWorkouts .section-head .chip');
+
+test.describe('Treinar · rascunho', () => {
+  test('toda alteração grava o rascunho; recarregar a página no meio do treino continua de onde parou', async ({ page }) => {
+    await workoutWithSheet(page, 'Treino A');
+    const supino = exerciseCard(page, 'Supino reto');
+    const draft = () => storedDraft(page);
+
+    // Cada tipo de alteração chega sozinho ao rascunho, sem precisar sair da tela.
+    await expect.poll(async () => (await draft())?.sheetId).toBe('s-a');
+    await supino.getByLabel('Reps da série 2').fill('9');
+    await expect.poll(async () => (await draft())?.formSets[0].sets[1].reps).toBe('9');
+    await supino.getByLabel('Carga da série 2').fill('44');
+    await expect.poll(async () => (await draft())?.formSets[0].sets[1].load).toBe('44');
+    await supino.getByLabel('RIR da série 2').fill('1');
+    await expect.poll(async () => (await draft())?.formSets[0].sets[1].rir).toBe('1');
+    await supino.getByLabel('Observação da série 2').fill('pegada fechada');
+    await expect.poll(async () => (await draft())?.formSets[0].sets[1].note).toBe('pegada fechada');
+    await supino.getByLabel('RIR do aquecimento').fill('3');
+    await expect.poll(async () => (await draft())?.formSets[0].warmup.rir).toBe('3');
+    await setButton(supino, 1).click();
+    await expect.poll(async () => (await draft())?.formSets[0].sets[0].done).toBe(true);
+    await page.locator('#workoutCardio').fill('20');
+    await expect.poll(async () => (await draft())?.cardio).toBe('20');
+    await page.locator('#workoutNotes').fill('no meio do treino');
+    await expect.poll(async () => (await draft())?.notes).toBe('no meio do treino');
+
+    await page.reload();
+
+    await expect(page.locator('#draftNotice')).toContainText('Rascunho recuperado');
+    await expect(page.locator('#workoutSheet')).toHaveValue('s-a');
+    expect(await setValues(supino, 'Reps')).toEqual(['12', '9', '8']);
+    expect(await setValues(supino, 'Carga')).toEqual(['40', '44', '45']);
+    expect(await setValues(supino, 'RIR')).toEqual(['', '1', '']);
+    expect(await setValues(supino, 'Observação')).toEqual(['', 'pegada fechada', '']);
+    await expect(supino.getByLabel('RIR do aquecimento')).toHaveValue('3');
+    await expect(setButton(supino, 1)).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.locator('#workoutProgress')).toContainText('1/5séries feitas');
+    await expect(page.locator('#workoutCardio')).toHaveValue('20');
+    await expect(page.locator('#workoutNotes')).toHaveValue('no meio do treino');
+    await expect(exerciseCard(page, 'Remada baixa')).toBeVisible();
+  });
+
+  test('sair do app (página oculta) grava o rascunho na hora', async ({ page }) => {
+    await page.clock.install();
+    await withBackup(page, BACKUP);
+    await goTo(page, 'Treinar');
+    // Relógio parado: a gravação de 500 ms depois da alteração nunca chega a rodar.
+    await pauseClock(page);
+    await page.locator('#workoutSheet').selectOption({ label: 'Treino A' });
+    await exerciseCard(page, 'Supino reto').getByLabel('Carga da série 1').fill('41');
+    expect(await storedDraft(page)).toBeNull();
+
+    await hidePage(page);
+
+    await expect.poll(async () => (await storedDraft(page))?.formSets[0].sets[0].load).toBe('41');
+  });
+
+  test('Cancelar descarta as alterações e o rascunho', async ({ page }) => {
+    await workoutWithSheet(page, 'Treino A');
+    await page.locator('#workoutNotes').fill('vou desistir');
+    await expect.poll(async () => (await storedDraft(page))?.notes).toBe('vou desistir');
+
+    await page.getByRole('button', { name: 'Cancelar' }).click();
+
+    await expect(page.locator('#view-dashboard')).toBeVisible();
+    await expect(page.locator('#draftBanner')).toBeEmpty();
+    await expect.poll(() => storedDraft(page)).toBeNull();
+    await expect(historyCount(page)).toHaveText('2 treinos');
+
+    await goTo(page, 'Treinar');
+    await expect(page.locator('#draftNotice')).toBeEmpty();
+    await expect(page.locator('#workoutSheet')).toHaveValue('');
+    await expect(page.locator('#workoutNotes')).toHaveValue('');
+    await expect(page.locator('#workoutExercises')).toHaveText('Adicione exercícios ao treino.');
+  });
+
+  test('rascunho de outro treino: continuar mantém o treino novo, sem misturar com o que foi aberto', async ({ page }) => {
+    await workoutWithSheet(page, 'Treino B');
+    await page.locator('#workoutNotes').fill('treino novo de pernas');
+    await expect.poll(async () => (await storedDraft(page))?.notes).toBe('treino novo de pernas');
+
+    // Abrir para editar o treino de 10/03 pergunta; "OK" continua o rascunho (treino novo).
+    await editSavedWorkout(page, 'w-ultimo');
+
+    await expect(page.locator('#workoutTitle')).toHaveText('Treinar');
+    await expect(page.locator('#draftNotice')).toContainText('Rascunho recuperado');
+    await expect(page.locator('#workoutSheet')).toHaveValue('s-b');
+    await expect(page.locator('#workoutNotes')).toHaveValue('treino novo de pernas');
+    await expect(page.locator('#workoutExercises .card')).toHaveCount(1);
+    await expect(exerciseCard(page, 'Agachamento livre')).toBeVisible();
+    await expect(page.locator('#workoutDelete')).toBeHidden();
+    expect((await storedDraft(page)).editingWorkoutId).toBeNull();
+  });
+
+  test('rascunho de outro treino: descartar abre o treino escolhido só com os dados dele', async ({ page }) => {
+    await workoutWithSheet(page, 'Treino B');
+    await page.locator('#workoutNotes').fill('treino novo de pernas');
+    await expect.poll(async () => (await storedDraft(page))?.notes).toBe('treino novo de pernas');
+
+    await goTo(page, 'Início');
+    await page.locator('#recentWorkouts button[data-view-workout="w-ultimo"]').click();
+    await expect(page.locator('#view-detail')).toBeVisible();
+    await answerNextConfirmNo(page);
+    await page.locator('#detailEdit').click();
+
+    await expect(page.locator('#workoutTitle')).toHaveText('Editar treino');
+    expect(await page.evaluate(() => window.__pergunta)).toContain('Você tem um treino em andamento que não foi salvo');
+    await expect(page.locator('#draftNotice')).toBeEmpty();
+    await expect(page.locator('#workoutDate')).toHaveValue('2025-03-10');
+    await expect(page.locator('#workoutSheet')).toHaveValue('s-a');
+    await expect(page.locator('#workoutNotes')).toHaveValue('Bom treino');
+    await expect(page.locator('#workoutCardio')).toHaveValue('15');
+    await expect(exerciseCard(page, 'Agachamento livre')).toHaveCount(0);
+    expect(await setValues(exerciseCard(page, 'Supino reto'), 'Reps')).toEqual(['11', '9', '7']);
+    await expect.poll(() => storedDraft(page)).toBeNull();
+  });
+});
+
+test.describe('Treinar · salvar', () => {
+  test('treino inválido não é salvo e mostra o motivo', async ({ page }) => {
+    await freshApp(page);
+    await goTo(page, 'Treinar');
+    // Exercício do catálogo sem nenhuma série preenchida, sem aquecimento e sem cardio.
+    await page.locator('#btnAddExercise').click();
+    await page.locator('#pickerSearch').fill('Rosca 21');
+    await page.locator('#pickerResults').getByRole('button', { name: /^Rosca 21/ }).click();
+    await expect(exerciseCard(page, 'Rosca 21')).toBeVisible();
+
+    const messages = [];
+    page.once('dialog', (dialog) => { messages.push(dialog.message()); dialog.accept(); });
+    await page.locator('#workoutSave').click();
+
+    await expect.poll(() => messages).toEqual([
+      'Preencha pelo menos uma série (reps ou carga), um aquecimento ou os minutos de cardio.'
+    ]);
+    await expect(page.locator('#view-workout')).toBeVisible();
+    await expect(exerciseCard(page, 'Rosca 21')).toBeVisible();
+
+    await goTo(page, 'Início');
+    await expect(page.locator('#recentWorkouts')).toContainText('Nenhum treino registrado ainda');
+  });
+
+  test('salvar leva ao Início com o resumo, e o treino aparece no Calendário e no histórico de cada exercício', async ({ page }) => {
+    await page.clock.setFixedTime(new Date('2026-05-20T10:00:00-03:00'));
+    await workoutWithSheet(page, 'Treino A');
+    await page.locator('#workoutCardio').fill('30');
+
+    await page.locator('#workoutSave').click();
+
+    // Início: o treino de hoje no topo, com o resumo (2 exercícios, volume 1.265 + 1.000 kg, cardio).
+    await expect(page.locator('#view-dashboard')).toBeVisible();
+    await expect(historyCount(page)).toHaveText('3 treinos');
+    const first = page.locator('#recentWorkouts button[data-view-workout]').first();
+    await expect(first).toHaveAttribute('aria-label', 'Treino A, 20/05/2026, 2 exercícios · 2.265 kg · 30 min cardio');
+    await expect(first).toContainText('2 exercícios · 2.265 kg · 30 min cardio');
+
+    // Calendário: o dia de hoje marcado e com link para o treino.
+    await goTo(page, 'Calendário');
+    await expect(page.locator('#calMonthLabel')).toHaveText('maio de 2026');
+    const today = page.getByRole('link', { name: 'Abrir treino de 20/05/2026' });
+    await expect(today).toHaveClass(/has-workout/);
+    await expect(today).toHaveClass(/today/);
+    await today.click();
+    await expect(page.locator('#view-detail')).toBeVisible();
+    await expect(page.locator('#detailBody')).toContainText('Treino A');
+    await expect(page.locator('#detailBody')).toContainText('20/05/2026');
+
+    // Histórico de cada exercício: o treino de hoje é o primeiro.
+    for (const [name, total] of [['Supino reto', '3 treinos'], ['Remada baixa', '2 treinos']]) {
+      await page.locator('#detailBody .ex-link', { hasText: name }).click();
+      await expect(page.locator('#view-exercise')).toBeVisible();
+      await expect(page.locator('#exerciseHistoryTitle')).toHaveText(name);
+      await expect(page.locator('#exerciseHistory .history-head .chip')).toContainText(total);
+      const firstSession = page.locator('#exerciseHistory .card-body.py-2').first();
+      await expect(firstSession).toContainText('20/05/2026');
+      await expect(firstSession).toContainText('Treino A');
+      await page.locator('#exerciseBack').click();
+      await expect(page.locator('#view-detail')).toBeVisible();
+    }
+  });
+
+  test('linha "Recorde" quando bate a maior carga anterior', async ({ page }) => {
+    await workoutWithSheet(page, 'Treino A');
+    // Maior carga anterior do supino: 45 kg. A remada repete os 50 kg (igual não conta).
+    await exerciseCard(page, 'Supino reto').getByLabel('Carga da série 1').fill('47,5');
+    await page.locator('#workoutSave').click();
+    await expect(page.locator('#view-dashboard')).toBeVisible();
+
+    const first = page.locator('#recentWorkouts button[data-view-workout]').first();
+    await expect(first.locator('.pr-count')).toHaveText('1');
+    await first.click();
+
+    const supino = page.locator('#detailBody .card').filter({ has: page.locator('.ex-link', { hasText: 'Supino reto' }) });
+    await expect(supino.locator('.pr-line')).toHaveText('Recorde: 47,5 kg × 12 (antes: 45 kg)');
+    const remada = page.locator('#detailBody .card').filter({ has: page.locator('.ex-link', { hasText: 'Remada baixa' }) });
+    await expect(remada.locator('.pr-line')).toHaveCount(0);
+  });
+
+  test('depois de salvar, o rascunho some', async ({ page }) => {
+    await workoutWithSheet(page, 'Treino A');
+    await page.locator('#workoutNotes').fill('salvando');
+    await expect.poll(async () => (await storedDraft(page))?.notes).toBe('salvando');
+
+    await page.locator('#workoutSave').click();
+
+    await expect(page.locator('#view-dashboard')).toBeVisible();
+    await expect(page.locator('#draftBanner')).toBeEmpty();
+    expect(await storedDraft(page)).toBeNull();
+    // Sem treino em andamento, o atalho do Início volta (a próxima ficha depois da A é a B).
+    await expect(page.getByRole('button', { name: 'Treinar: Treino B' })).toBeVisible();
+
+    await page.reload();
+    await expect(page.locator('#weekProgress .week-card')).toBeVisible();
+    await expect(page.locator('#draftBanner')).toBeEmpty();
+    await goTo(page, 'Treinar');
+    await expect(page.locator('#draftNotice')).toBeEmpty();
+    await expect(page.locator('#workoutSheet')).toHaveValue('');
+    await expect(page.locator('#workoutNotes')).toHaveValue('');
+  });
+});
+
+test.describe('Treinar · treino existente', () => {
+  test('abrir pelo detalhe, editar e salvar (sem duplicar)', async ({ page }) => {
+    await withBackup(page, BACKUP);
+    await expect(historyCount(page)).toHaveText('2 treinos');
+    await editSavedWorkout(page, 'w-ultimo');
+
+    await expect(page.locator('#workoutTitle')).toHaveText('Editar treino');
+    await expect(page.locator('#workoutDate')).toHaveValue('2025-03-10');
+    await expect(page.locator('#workoutSheet')).toHaveValue('s-a');
+    await expect(page.locator('#workoutCardio')).toHaveValue('15');
+    await expect(page.locator('#workoutNotes')).toHaveValue('Bom treino');
+    const supino = exerciseCard(page, 'Supino reto');
+    expect(await setValues(supino, 'Reps')).toEqual(['11', '9', '7']);
+    expect(await setValues(supino, 'Carga')).toEqual(['40', '42,5', '45']);
+    expect(await setValues(supino, 'RIR')).toEqual(['2', '1', '0']);
+    await expect(supino.getByLabel('RIR do aquecimento')).toHaveValue('3');
+    await expect(page.locator('#workoutDelete')).toBeVisible();
+    await expect(page.locator('#workoutExport')).toBeVisible();
+
+    await supino.getByLabel('Reps da série 3').fill('8');
+    await page.locator('#workoutNotes').fill('Editado depois');
+    await page.locator('#workoutSave').click();
+
+    await expect(page.locator('#view-dashboard')).toBeVisible();
+    await expect(historyCount(page)).toHaveText('2 treinos');
+    await expect(page.locator('#recentWorkouts button[data-view-workout]')).toHaveCount(2);
+    await page.locator('#recentWorkouts button[data-view-workout="w-ultimo"]').click();
+    await expect(page.locator('#detailBody')).toContainText('Editado depois');
+    await expect(page.locator('#detailBody')).toContainText('8 reps · 45 kg · RIR 0');
+    await expect(page.locator('#detailBody')).toContainText('10/03/2025');
+  });
+
+  test('excluir o treino', async ({ page }) => {
+    await withBackup(page, BACKUP);
+    await editSavedWorkout(page, 'w-ultimo');
+
+    await page.getByRole('button', { name: 'Excluir treino' }).click();
+
+    await expect(page.locator('#view-dashboard')).toBeVisible();
+    await expect(historyCount(page)).toHaveText('1 treino');
+    await expect(page.locator('#recentWorkouts button[data-view-workout="w-ultimo"]')).toHaveCount(0);
+    await expect(page.locator('#recentWorkouts button[data-view-workout="w-antigo"]')).toBeVisible();
+
+    // Excluído de verdade: a "última vez" do supino volta a ser o treino de 03/03.
+    await goTo(page, 'Treinar');
+    await page.locator('#workoutSheet').selectOption({ label: 'Treino A' });
+    await expect(exerciseCard(page, 'Supino reto').locator('.last-session')).toContainText('Última vez (03/03/2025)');
+  });
+
+  test('exportar como texto (formato do WhatsApp, só a data no topo)', async ({ page }) => {
+    await withBackup(page, BACKUP);
+    await editSavedWorkout(page, 'w-ultimo');
+
+    await page.locator('#workoutExport').click();
+
+    await expect(page.locator('#exportModal')).toBeVisible();
+    await expect(page.locator('#exportText')).toHaveValue([
+      '*10/03/2025*',
+      'Ficha: _Treino A_',
+      '',
+      '1. *Supino reto*',
+      '- Aquecimento: 15 reps · 20 kg · RIR 3',
+      '- Série 1: 11 reps · 40 kg · RIR 2',
+      '- Série 2: 9 reps · 42,5 kg · RIR 1',
+      '- Série 3: 7 reps · 45 kg · RIR 0',
+      '',
+      '2. *Remada baixa*',
+      '- Série 1: 10 reps · 50 kg · RIR 2',
+      '- Série 2: 9 reps · 50 kg · RIR 1',
+      '',
+      '*Cardio:* 15 min',
+      '*Observações:* Bom treino'
+    ].join('\n'));
   });
 });
