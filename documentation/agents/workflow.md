@@ -94,6 +94,8 @@ On localhost the service worker doesn't hold stale files, so edits show without 
 - Commit messages: Conventional prefix + short **Portuguese** summary without accents, version in parentheses
   when bumped, e.g. `feat: tocar num dia do calendario abre o treino (v58)`. Prefixes in use: `feat`, `fix`,
   `style`, `perf`, `refactor`, `test`, `docs`, `a11y`, `ci`, `chore`, `revert`. A body is welcome for the "why".
+- Don't sign commit messages: no `Co-Authored-By:` or "Generated with …" lines at the end. The message is just the
+  summary and, if useful, the body.
 - Commit only when asked, never push unless asked.
 - **`main` only changes through PRs.** A ruleset on `main` blocks direct pushes, force pushes and deletion, and
   requires a linear history plus the checks `Testes unitários`, `Verificações estáticas` and `Versão` to pass on

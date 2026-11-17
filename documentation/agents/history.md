@@ -12,6 +12,7 @@ agent should know before touching the same area.
 | 2026-11-13 | v49–v52 | Persistent storage, draft, "last time" hint, repeat last workout, rest timer, weekly evolution, PRs |
 | 2026-11-14 | v53–v59 | Import ficha from AI-generated JSON (`FICHA-JSON.md`), deactivate fichas, Debug card |
 | 2026-11-15 | v60–v67 | Bug-fix sweep, one-tap "Treinar agora", 1RM, lime theme (v62), iPhone layout polish, body weight removed |
+| 2026-11-17 | v74 (no app change) | PR flow on `main`; refactor phase 1 done: Playwright browser tests for every user-triggered path, CHECKLIST guard, `app.js` coverage ratchet (98.7%) |
 
 ## Decisions worth keeping
 
