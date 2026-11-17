@@ -5,7 +5,7 @@ Mapa de **cada funcionalidade do app** para os testes que a cobrem. Serve para r
 
 - Testes de unidade: `node --test tests/` (sem dependências).
 - Testes de navegador: `npm run test:e2e` (Playwright, pasta `tests/e2e/`; instalação em `documentation/agents/workflow.md`).
-  Coluna **Testes de navegador**: "—" quer dizer que ainda falta (issues #6 e #7 da refatoração). Treinar e
+  Coluna **Testes de navegador**: "—" quer dizer que ainda falta (issue #7 da refatoração). Treinar e
   Início são **telas críticas**: cada comportamento delas ganha linha e teste próprios.
 - Cobertura: `node tools/coverage-gate.js` (o CI exige **100% de linhas e ramos em `js/core.js`**).
 - Lógica pura fica em `js/core.js` de propósito: é o que dá para testar sem navegador.
@@ -36,14 +36,14 @@ Mapa de **cada funcionalidade do app** para os testes que a cobrem. Serve para r
 | Importar treinos antigos + fichas recriadas (contrato `TREINO-JSON.md`, fichas reaproveitadas pelo nome, treinos repetidos pulados) | `core.js`: `parseHistoryImportText`, `parseHistoryImport`, `sheetByName`, `splitImportedSheets`, `importedWorkout`, `workoutFingerprint`, `splitImportedWorkouts`, `historyExerciseNames`, `sheetNamesText`, `historyImportSummaryHtml`, `historyImportToast` | `history-import.test.js` (resumo da revisão e aviso final, exemplo do contrato, datas BR/ISO/futuro, números com vírgula, erros com o lugar exato, carga da última vez pela ficha recriada, reimportar não duplica), `features.test.js` (card em Mais, janela, precache, revisar/importar ligados, fichas gravadas antes dos treinos, revisão de exercícios compartilhada com Criar com IA) | — |
 | Biblioteca do usuário × catálogo | `core.js`: `isUserExercise`, `libraryExercises`, `fixLibrarySources` | `core.test.js`, `core-edge-cases.test.js` | — |
 | Backup: nome do arquivo, status e lembrete | `core.js`: `backupFileName`, `backupStatus` | `core.test.js`, `core-edge-cases.test.js` | `inicio.spec.js` (lembrete no Início) |
-| Backup: exportar/compartilhar (um arquivo só) | `core.js`: `backupAction`, `backupSharePayload`, `isBackupPayload`, `backupHint` | `core.test.js` (payload sem `text`/`title`; evento de clique não vira backup) | — |
-| Backup: importar e compatibilidade entre versões | `core.js`: `normalizeBackup`, `normalizeWorkout`, `normalizeSet`, `normalizeWarmup`, `normalizeSettings` | `core.test.js` + `tests/fixtures/backup-v1.json`, `backup-v2-sheets.json` | — |
-| Dados de exemplo (3 fichas, 12 treinos) | `core.js`: `materializeSampleData` + `data/sample-data.json` | `sample-data.test.js` (estrutura, integridade referencial, progressão de cargas, normalização) | `smoke.spec.js` (carregar pela tela Mais; Início e Calendário com dados) |
+| Backup: exportar/compartilhar (um arquivo só) | `core.js`: `backupAction`, `backupSharePayload`, `isBackupPayload`, `backupHint` | `core.test.js` (payload sem `text`/`title`; evento de clique não vira backup) | `dados.spec.js` (download no computador; no celular, um único `.json` para o menu de compartilhar) |
+| Backup: importar e compatibilidade entre versões | `core.js`: `normalizeBackup`, `normalizeWorkout`, `normalizeSet`, `normalizeWarmup`, `normalizeSettings` | `core.test.js` + `tests/fixtures/backup-v1.json`, `backup-v2-sheets.json` | `dados.spec.js` (cada backup de `tests/fixtures/` importado pela tela: treinos, fichas, Biblioteca, colinha e metas; ida e volta exportar → apagar → reimportar sem perder nada; Desfazer; arquivo que não é backup não apaga nada) |
+| Dados de exemplo (3 fichas, 12 treinos) | `core.js`: `materializeSampleData` + `data/sample-data.json` | `sample-data.test.js` (estrutura, integridade referencial, progressão de cargas, normalização) | `smoke.spec.js` (carregar pela tela Mais; Início e Calendário com dados), `dados.spec.js` (substituem os dados atuais; Desfazer devolve os anteriores) |
 | Catálogo embutido (ids únicos, contíguos, estáveis) | `data/exercises.json` | `core.test.js` (travas de ids) + `check.ps1` | — |
 | Registro dos módulos no navegador (globais) | `js/core.js` (UMD) | `module.test.js` (roda o core num escopo de navegador) | — |
 | Base antiga (era sem ids) sobrevive ao init | `core.js`: `fixLibrarySources`, `linkSheetItemsToExercises`, `historyTarget`, `normalizeBackup` | `old-db.test.js` (nenhuma série/carga/aquecimento/item se perde; histórico por nome guardado) | — |
-| PWA: versão consistente, precache, offline | `index.html`, `sw.js`, `manifest.webmanifest` | `check.ps1` (13 verificações) | `smoke.spec.js` (versão no rodapé × arquivos × cache; abre offline com o catálogo) |
-| Exportar/importar/apagar dentro do app (telas) | `js/app.js` | `check.ps1` (ids e handlers) + lógica do `core.js` | — |
+| PWA: versão consistente, precache, offline | `index.html`, `sw.js`, `manifest.webmanifest` | `check.ps1` (13 verificações) | `smoke.spec.js` (versão no rodapé × arquivos × cache; abre offline com o catálogo), `dados.spec.js` (versão nova do service worker assume e apaga o cache antigo; "Atualizar app"; o rascunho em andamento sobrevive aos dois) |
+| Exportar/importar/apagar dentro do app (telas) | `js/app.js` | `check.ps1` (ids e handlers) + lógica do `core.js` | `dados.spec.js` (exportar, importar, Apagar dados só depois de marcar a confirmação, Cancelar não apaga, apagar leva tudo inclusive o rascunho) |
 | Telas da importação de ficha (colar, revisão, botão Revisar → Importar), desativar/reativar ficha, modal Criar com IA (texto para a IA + colar a resposta), card Debug | `js/app.js` | `check.ps1` (ids e handlers) + lógica do `core.js` (`parseSheetImportText`, `suggestExercises`, `exerciseNamesText`, `normalizeSheet` mantém `active: false`) | — |
 | Importar/desfazer/dados de exemplo sem risco de perder tudo (apaga e grava numa transação só) | `db.js`: `dbReplaceAll` (usado por `restoreAll` no `app.js`) | `db.test.js` (IndexedDB falso: uma transação, `clear` antes do `put`, `abort` em registro inválido) | — |
 | Calendário: trocar de mês (inclusive nos dias 29–31) | `core.js`: `shiftMonth` | `core-edge-cases.test.js` (31/out ‹ vai para setembro; 31/jan › vai para fevereiro; virada do ano) | — |
@@ -144,7 +144,7 @@ importado pela tela Mais, com o relógio da página parado em 20/05/2026 (`page.
 ## Limites conhecidos
 
 - **Testes de navegador ainda parciais**: fumaça (abrir, navegar, offline, privacidade, 375px), o Treinar
-  e o Início inteiros. Os outros fluxos entram nas próximas issues da Fase 1 da refatoração (`documentation/REFACTOR.md`).
+  e o Início inteiros, dados/backup/atualização (`dados.spec.js`). Os outros fluxos entram nas próximas issues da Fase 1 da refatoração (`documentation/REFACTOR.md`).
 - **Wrapper de módulo do `core.js`** (detecção Node × navegador) fica fora da meta de cobertura: cada
   ambiente executa um dos lados. O lado do navegador é testado em `module.test.js` (carrega o core num
   escopo sem `module.exports` e confere que as funções viram globais).

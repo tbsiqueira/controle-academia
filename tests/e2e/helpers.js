@@ -61,7 +61,7 @@ async function withBackup(page, backup) {
   await freshApp(page);
   await goTo(page, 'Mais');
   const file = typeof backup === 'string'
-    ? path.join(__dirname, 'fixtures', backup)
+    ? path.resolve(__dirname, 'fixtures', backup)
     : { name: 'backup.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(backup)) };
   await page.locator('#importFile').setInputFiles(file);
   await base.expect(page.locator('#appToastBody')).toContainText('Backup importado');
@@ -87,6 +87,20 @@ function storedDraft(page) {
   }));
 }
 
+/** Todos os registros de um store do IndexedDB do app (workouts, sheets, exercises, colinha, settings). */
+function storedRecords(page, store) {
+  return page.evaluate((storeName) => new Promise((resolve, reject) => {
+    const open = indexedDB.open('meu-treino');
+    open.onerror = () => reject(open.error);
+    open.onsuccess = () => {
+      const db = open.result;
+      const all = db.transaction(storeName).objectStore(storeName).getAll();
+      all.onsuccess = () => { db.close(); resolve(all.result); };
+      all.onerror = () => { db.close(); reject(all.error); };
+    };
+  }), store);
+}
+
 /** Toca numa aba da barra inferior, como uma pessoa faria, e confere que a tela certa abriu. */
 async function goTo(page, tabName) {
   const tab = TABS[tabName];
@@ -98,5 +112,6 @@ async function goTo(page, tabName) {
 }
 
 module.exports = {
-  test, expect: base.expect, TABS, freshApp, waitForApp, withSampleData, withBackup, readFixture, storedDraft, goTo
+  test, expect: base.expect, TABS, freshApp, waitForApp, withSampleData, withBackup, readFixture, storedDraft, storedRecords,
+  goTo
 };
