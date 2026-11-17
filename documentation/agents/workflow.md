@@ -40,9 +40,12 @@ npm run test:e2e:report   # HTML report of the last run (traces of failures)
   gets a fresh browser context (empty IndexedDB, no service worker).
 - Use `test`/`expect` from `tests/e2e/helpers.js`: any console error or uncaught exception fails the test, and
   `confirm()` answers yes. Helpers: `freshApp`, `withSampleData`, `withBackup(page, 'file.json')` (imports a
-  backup from `tests/e2e/fixtures/` through Mais → Importar, for an exact starting state; also takes an object, e.g.
-  a `readFixture('file.json')` copy changed in the test), `storedDraft(page)` (the draft saved in IndexedDB),
-  `goTo(page, 'Treinar')`.
+  backup from `tests/e2e/fixtures/` through Mais → Importar, for an exact starting state; also takes an absolute path,
+  e.g. the old backups in `tests/fixtures/`, or an object, e.g. a `readFixture('file.json')` copy changed in the
+  test), `storedDraft(page)` (the draft saved in IndexedDB), `storedRecords(page, 'workouts')` (every record of a
+  store), `goTo(page, 'Treinar')`.
+- App update (`dados.spec.js`): Playwright can't intercept the service worker script, so the test server serves
+  `sw.js` as version N when the context has the cookie `e2e-sw-version=N` (`context.addCookies`).
 - No fixed waits (`waitForTimeout`): wait for what the user would see. For timers (rest), install `page.clock` before
   opening the app and move time with `runFor`/`setSystemTime` (see `treinar.spec.js`). For a fixed "today" (week,
   backup age), `page.clock.setFixedTime` before opening the app (see `inicio.spec.js`).

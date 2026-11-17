@@ -41,6 +41,12 @@ http.createServer((req, res) => {
       res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' }).end('404');
       return;
     }
+    // Teste da atualização do app (dados.spec.js): com o cookie `e2e-sw-version=N`, o sw.js sai como se fosse a
+    // versão N (um deploy novo), só para aquele contexto do navegador. Sem o cookie, sai como está no repositório.
+    const swVersion = /(?:^|;\s*)e2e-sw-version=(\d+)/.exec(req.headers.cookie || '');
+    if (swVersion && rel === '/sw.js') {
+      body = Buffer.from(body.toString('utf8').replace(/meu-treino-v\d+/, 'meu-treino-v' + swVersion[1]));
+    }
     res.writeHead(200, {
       'Content-Type': TYPES[path.extname(file).toLowerCase()] || 'application/octet-stream',
       'Cache-Control': 'no-cache'
