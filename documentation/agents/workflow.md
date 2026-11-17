@@ -18,6 +18,12 @@ already tagged). These three jobs are the required checks of the `main` ruleset.
 `deploy.yml` runs on every push to `main` (= a merged PR): if tag `vN` for the current version doesn't exist yet,
 it runs the checks, publishes to GitHub Pages and then creates and pushes tag `vN`. Otherwise it publishes nothing.
 
+## Refactor in progress
+
+The code is being reorganised in phases (browser tests → ES modules → JSDoc types), one GitHub issue per PR.
+Before picking up a refactor issue, read [REFACTOR.md](../REFACTOR.md): refactor PRs are behaviour-neutral and
+never mix in features or fixes. Tracking issue: #2.
+
 ## Checklist for every change
 
 1. **Logic in `core.js`, with a test** in `tests/` (coverage must stay at 100%; no unreachable fallbacks).

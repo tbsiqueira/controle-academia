@@ -9,14 +9,17 @@ Read before changing anything:
 - [documentation/agents/workflow.md](documentation/agents/workflow.md) — commands and the checklist every change goes through
 - [documentation/agents/product-rules.md](documentation/agents/product-rules.md) — what the user wants (and has rejected)
 - [documentation/agents/history.md](documentation/agents/history.md) — key decisions, past regressions and their lessons
+- [documentation/REFACTOR.md](documentation/REFACTOR.md) — the ongoing refactor (phases, target structure, test policy,
+  rules for refactor PRs). Tracked in issue #2; work one issue per PR
 
 ## Where documentation goes
 
 - **All new documentation goes in `documentation/`.** Agent references live in `documentation/agents/`.
   Don't create new `.md` files at the repo root or next to code.
 - Root exceptions: `README.md` (GitHub shows it), `AGENTS.md` and `CLAUDE.md` (tools only read them at the root).
-- Human docs: [documentation/MANUAL.md](documentation/MANUAL.md) (user manual) and
-  [documentation/PLANO.md](documentation/PLANO.md) (requirements + revision log).
+- Human docs: [documentation/MANUAL.md](documentation/MANUAL.md) (user manual),
+  [documentation/PLANO.md](documentation/PLANO.md) (requirements + revision log) and
+  [documentation/REFACTOR.md](documentation/REFACTOR.md) (refactor plan).
 - **`FICHA-JSON.md` and `TREINO-JSON.md` must stay at the root**: the app fetches them and the service worker caches them.
 - Other docs that stay where they are: `tests/CHECKLIST.md` (feature → tests) and `tools/README.md`.
 
