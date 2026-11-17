@@ -5,7 +5,7 @@ Mapa de **cada funcionalidade do app** para os testes que a cobrem. Serve para r
 
 - Testes de unidade: `node --test tests/` (sem dependências).
 - Testes de navegador: `npm run test:e2e` (Playwright, pasta `tests/e2e/`; instalação em `documentation/agents/workflow.md`).
-  Coluna **Testes de navegador**: "—" quer dizer que ainda falta (issues #5, #19, #6 e #7 da refatoração). Treinar e
+  Coluna **Testes de navegador**: "—" quer dizer que ainda falta (issues #6 e #7 da refatoração). Treinar e
   Início são **telas críticas**: cada comportamento delas ganha linha e teste próprios.
 - Cobertura: `node tools/coverage-gate.js` (o CI exige **100% de linhas e ramos em `js/core.js`**).
 - Lógica pura fica em `js/core.js` de propósito: é o que dá para testar sem navegador.
@@ -16,14 +16,14 @@ Mapa de **cada funcionalidade do app** para os testes que a cobrem. Serve para r
 |---|---|---|---|
 | Abrir o app sem erro, as 5 abas e telas internas, nada sai do aparelho, cabe em 375px | `index.html`, `js/app.js` (`navigate`) | — | `smoke.spec.js` |
 | Datas (ISO ↔ BR, somar dias, fuso local) | `core.js`: `pad2`, `fmtDate`, `parseDate`, `todayISO`, `addDaysISO`, `fmtBR`, `dateParts`, `fmtDateTimeBR` | `core.test.js` (datas), `core-edge-cases.test.js` (formato vazio) | — |
-| Semana flexível (janela de 7 dias, metas, aviso) | `core.js`: `defaultSettings`, `weekWindow`, `isValidWorkout` | `core.test.js`, `core-edge-cases.test.js` (`weekWindow` sem argumento) | — |
+| Semana flexível (janela de 7 dias, metas, aviso) | `core.js`: `defaultSettings`, `weekWindow`, `isValidWorkout` | `core.test.js`, `core-edge-cases.test.js` (`weekWindow` sem argumento) | `inicio.spec.js` |
 | Números com vírgula (bug do iPhone) | `core.js`: `parseLocalNumber`, `toNum`, `toNumOrNull`, `formatDecimal` | `core.test.js` (inclui regressão da carga `27,5`) | `treinar.spec.js` (carga `27,5` no Treinar) |
 | Busca sem acentos | `core.js`: `normalizeText` | `core.test.js` | — |
 | Escapar HTML (XSS no que vem do banco) | `core.js`: `esc` | `core.test.js`, `setsSummaryLines` | — |
 | Aquecimento (reps/carga/RIR) | `core.js`: `warmupHasData`, `warmupLine`, `previousWarmupFields` | `core.test.js`, `core-edge-cases.test.js` | `treinar.spec.js` (pré-preenchido e editado no Treinar) |
 | Séries e agrupamento **por id** | `core.js`: `setLine`, `setsSummaryLines`, `groupSets`, `exerciseKey` | `core.test.js`, `core-edge-cases.test.js` (mesmo nome/ids diferentes, só aquecimento, registro sem nome) | — |
 | Histórico por exercício (gráfico, PR, tendência) | `core.js`: `workoutRecords`, `lastLoadsForExercise`, `lastWarmupForExercise`, `sessionsForExercise`, `bestSetForExercise`, `exerciseMatches` | `core.test.js`, `core-edge-cases.test.js` (renomear não perde histórico; nomes iguais não se misturam; ordenação), `form-and-progress.test.js` (recordes: primeira vez e carga igual não contam) | — |
-| Nome **atual** de exercício e de ficha (sem nome congelado) | `core.js`: `exerciseLabel`, `sheetLabel`, `exerciseTarget` | `core.test.js`, `core-edge-cases.test.js` | — |
+| Nome **atual** de exercício e de ficha (sem nome congelado) | `core.js`: `exerciseLabel`, `sheetLabel`, `exerciseTarget` | `core.test.js`, `core-edge-cases.test.js` | `inicio.spec.js` (ficha renomeada na lista) |
 | Renomear exercício propaga (fichas antigas e histórico) | `core.js`: `renameInSheets`, `renameInWorkouts`, `linkSheetItemsToExercises` | `core.test.js`, `sample-data.test.js` (fixture antiga religada) | — |
 | Dica "Última vez" e repetir o último treino da ficha | `core.js`: `lastSessionForExercise`, `lastSessionLine`, `lastWorkoutForSheet`, `formFromWorkout` | `form-and-progress.test.js` (ignora o treino em edição, `typeId` antigo, RIR/obs em branco) | `treinar.spec.js` |
 | Rascunho do treino em andamento | `core.js`: `draftHasContent` (gravação/restauração no `app.js`) | `form-and-progress.test.js` | `treinar.spec.js` (gravar, recarregar, página oculta, cancelar, outro treino) |
@@ -35,7 +35,7 @@ Mapa de **cada funcionalidade do app** para os testes que a cobrem. Serve para r
 | Importar ficha em JSON (contrato `FICHA-JSON.md`, sugestão de exercício parecido, lista para a IA) | `core.js`: `parseSheetImportText`, `parseSheetImport`, `suggestExercises`, `exerciseNamesText` | `core.test.js` (cerca ```json, JSON quebrado, formatos aceitos, reps, erros, ordem das sugestões, nomes sem repetir) | — |
 | Importar treinos antigos + fichas recriadas (contrato `TREINO-JSON.md`, fichas reaproveitadas pelo nome, treinos repetidos pulados) | `core.js`: `parseHistoryImportText`, `parseHistoryImport`, `sheetByName`, `splitImportedSheets`, `importedWorkout`, `workoutFingerprint`, `splitImportedWorkouts`, `historyExerciseNames`, `sheetNamesText`, `historyImportSummaryHtml`, `historyImportToast` | `history-import.test.js` (resumo da revisão e aviso final, exemplo do contrato, datas BR/ISO/futuro, números com vírgula, erros com o lugar exato, carga da última vez pela ficha recriada, reimportar não duplica), `features.test.js` (card em Mais, janela, precache, revisar/importar ligados, fichas gravadas antes dos treinos, revisão de exercícios compartilhada com Criar com IA) | — |
 | Biblioteca do usuário × catálogo | `core.js`: `isUserExercise`, `libraryExercises`, `fixLibrarySources` | `core.test.js`, `core-edge-cases.test.js` | — |
-| Backup: nome do arquivo, status e lembrete | `core.js`: `backupFileName`, `backupStatus` | `core.test.js`, `core-edge-cases.test.js` | — |
+| Backup: nome do arquivo, status e lembrete | `core.js`: `backupFileName`, `backupStatus` | `core.test.js`, `core-edge-cases.test.js` | `inicio.spec.js` (lembrete no Início) |
 | Backup: exportar/compartilhar (um arquivo só) | `core.js`: `backupAction`, `backupSharePayload`, `isBackupPayload`, `backupHint` | `core.test.js` (payload sem `text`/`title`; evento de clique não vira backup) | — |
 | Backup: importar e compatibilidade entre versões | `core.js`: `normalizeBackup`, `normalizeWorkout`, `normalizeSet`, `normalizeWarmup`, `normalizeSettings` | `core.test.js` + `tests/fixtures/backup-v1.json`, `backup-v2-sheets.json` | — |
 | Dados de exemplo (3 fichas, 12 treinos) | `core.js`: `materializeSampleData` + `data/sample-data.json` | `sample-data.test.js` (estrutura, integridade referencial, progressão de cargas, normalização) | `smoke.spec.js` (carregar pela tela Mais; Início e Calendário com dados) |
@@ -50,7 +50,7 @@ Mapa de **cada funcionalidade do app** para os testes que a cobrem. Serve para r
 | Selo de PR na evolução do exercício (some quando não há carga) | `core.js`: `maxBestLoad` | `core-edge-cases.test.js` (peso do corpo = 0, sem "PR 1 kg"; maior carga; carga < 1 kg) | — |
 | Backup importado não confia no arquivo (ids e datas) | `core.js`: `normalizeBackup` (`hasSafeId`), `normalizeWorkout`, `normalizeSettings` | `core-edge-cases.test.js` (id com aspas/tags é descartado; formatos antigos de id mantidos; data inválida vira "sem data"; início da semana inválido; idempotência) | — |
 | Service worker: `?v=N` sai do cache primeiro (abre rápido com sinal fraco); resto é rede primeiro | `sw.js` | `sw.test.js` (cache e rede falsos: produção × localhost, offline, versão nova = URL nova, o que não é interceptado) | — |
-| Iniciar próxima semana (pula as semanas perdidas de uma vez) | `core.js`: `nextWeekAnchor` | `core-edge-cases.test.js` (1 semana, 3 semanas paradas, virada do ano, mesmo dia da semana) | — |
+| Iniciar próxima semana (pula as semanas perdidas de uma vez) | `core.js`: `nextWeekAnchor` | `core-edge-cases.test.js` (1 semana, 3 semanas paradas, virada do ano, mesmo dia da semana) | `inicio.spec.js` |
 | Formulário do Treinar: linha da série (carga larga, número como texto) | `core.js`: `setRowHtml`, `setHeaderHtml` | `form-and-progress.test.js` (colunas 1-2-3-2-4, "102,5" cabe, handlers `setField`, teclados, escape) | `treinar.spec.js` |
 | Remover exercício do treino em andamento (confirma se há algo preenchido) | `core.js`: `groupHasData` (pergunta no `app.js`: `removeFormExercise`) | `form-and-progress.test.js` (série/aquecimento preenchidos, RIR 0, em branco, confirmação antes do `splice`) | `treinar.spec.js` |
 | Carga com vírgula também no resumo, histórico e texto exportado | `core.js`: `setLine`, `warmupLine`, `setsSummaryLines`, `workoutAsText` (parâmetro `useComma`) | `core-edge-cases.test.js` (vírgula quando pedido; sem o parâmetro o formato antigo não muda) | — |
@@ -60,7 +60,7 @@ Mapa de **cada funcionalidade do app** para os testes que a cobrem. Serve para r
 | Dois treinos no mesmo dia: o mais recente vem primeiro | `core.js`: `byDateDesc` (usado em toda ordenação por data) | `core-edge-cases.test.js` (qualquer ordem de entrada, sem `createdAt`, "última vez"/cargas/aquecimento do treino mais novo) | — |
 | Busca de exercício (seletor do treino, da ficha e do cadastro) | `core.js`: `pickerHtml` (os três `render*Results` do `app.js`) | `picker.test.js` (Biblioteca × catálogo, busca sem acento, Criar, limites, escape, handlers existem e aceitam id como texto, código morto não voltou) | `treinar.spec.js` (seletor do Treinar: Biblioteca, catálogo, Criar) |
 | Resumo no card do Início (exercícios · volume · cardio · recordes) | `core.js`: `workoutSummary`, `fmtThousands` (+ `workoutRecords`) | `features.test.js` (linha completa, partes zeradas, singular, dados de exemplo, card usa o resumo) | — |
-| Começar o treino em um toque (botão "Treinar: <ficha>" no Início) | `core.js`: `nextSheet` (botão e carga da ficha no `app.js`) | `features.test.js` (próxima ficha em ordem alfabética, volta ao início, ficha desativada/excluída, sem fichas, dados v1) | `treinar.spec.js` |
+| Começar o treino em um toque (botão "Treinar: <ficha>" no Início) | `core.js`: `nextSheet` (botão e carga da ficha no `app.js`) | `features.test.js` (próxima ficha em ordem alfabética, volta ao início, ficha desativada/excluída, sem fichas, dados v1) | `inicio.spec.js`, `treinar.spec.js` |
 | Remover a última série de um exercício no Treinar | `core.js`: `setHasData` (botão "− série" no `app.js`: `removeFormSet`) | `features.test.js` (série em branco × preenchida, nunca remove a única, confirma antes) | `treinar.spec.js` |
 | Marcar a série como feita inicia o descanso (botão no número da série) | `core.js`: `setRowHtml` (ação no `app.js`: `toggleSetDone`) | `features.test.js` (botão, estado feito, acessibilidade, carga continua larga, `done` não vai para o treino salvo, sem som/vibração) | `treinar.spec.js` |
 | Calendário: tocar no dia abre o treino daquele dia | `core.js`: `workoutsByDate` (link no `app.js`: `renderCalendar`) | `features.test.js` (agrupa por dia, mais recente primeiro, sem data fica de fora, link `#/detail/<id>`) | — |
@@ -114,10 +114,37 @@ importado pela tela Mais. O descanso usa o relógio controlado do Playwright (`p
 | Treino existente: excluir | `js/app.js` (Treinar) | — | `treinar.spec.js`: excluir o treino |
 | Treino existente: exportar como texto (formato do WhatsApp, só a data no topo) | `js/app.js` (Treinar) | — | `treinar.spec.js`: exportar como texto |
 
+## Início (tela crítica): cada comportamento
+
+Um teste de navegador por comportamento (issue #19). Ponto de partida: `tests/e2e/fixtures/inicio-backup.json`,
+importado pela tela Mais, com o relógio da página parado em 20/05/2026 (`page.clock.setFixedTime`). Variações
+(sem backup, meta menor, última ficha diferente) são montadas no próprio teste com `readFixture`.
+
+| Comportamento | Onde vive | Testes | Testes de navegador |
+|---|---|---|---|
+| Primeiro uso sem dados: estado vazio correto, sem erro no console | `js/app.js` (Início) | — | `inicio.spec.js`: primeiro uso sem dados |
+| Aviso do rascunho aparece com um treino em andamento (descrição do rascunho) | `js/app.js` (Início) | — | `inicio.spec.js`: aparece com um treino em andamento |
+| Aviso do rascunho: **Continuar** abre o Treinar com o rascunho | `js/app.js` (Início) | — | `inicio.spec.js`: Continuar abre o Treinar |
+| Aviso do rascunho: **Descartar** remove o rascunho e o aviso | `js/app.js` (Início) | — | `inicio.spec.js`: Descartar remove o rascunho e o aviso |
+| Progresso das metas: treinos (x/meta) e minutos de cardio (x/meta), com as barras | `js/app.js` (Início) | — | `inicio.spec.js`: progresso das metas |
+| Meta batida: selo "Meta batida" e barras cheias, sem passar de 100% | `js/app.js` (Início) | — | `inicio.spec.js`: meta batida |
+| Treino com data fora da janela da semana não conta na semana atual (e não se perde) | `js/app.js` (Início) | — | `inicio.spec.js`: treino com data fora da janela |
+| Aviso de **semana encerrada** depois de 7 dias, com o resultado final | `js/app.js` (Início) | — | `inicio.spec.js`: aviso de semana encerrada |
+| Confirmar o aviso avança para a próxima janela (e fica gravado) | `js/app.js` (Início) | — | `inicio.spec.js`: confirmar o aviso avança |
+| "Treinar: <ficha>" sugere a próxima ficha certa (pela rotina) e abre o Treinar com ela carregada | `js/app.js` (Início) | — | `inicio.spec.js`: "Treinar: <ficha>" sugere a próxima ficha |
+| Atalho Treinar some enquanto existe um rascunho | `js/app.js` (Início) | — | `inicio.spec.js`: some enquanto existe um rascunho |
+| Fichas desativadas não são sugeridas no atalho | `js/app.js` (Início) | — | `inicio.spec.js`: fichas desativadas não são sugeridas |
+| Lembrete de backup aparece quando nunca houve backup | `js/app.js` (Início) | — | `inicio.spec.js`: aparece quando nunca houve backup |
+| Lembrete de backup aparece quando o último backup está velho; some quando está em dia | `js/app.js` (Início) | — | `inicio.spec.js`: aparece quando o último backup está velho |
+| Lembrete de backup some depois de fazer um backup | `js/app.js` (Início) | — | `inicio.spec.js`: some depois de fazer um backup |
+| Treinos recentes: data e nome da ficha, do mais recente para o mais antigo | `js/app.js` (Início) | — | `inicio.spec.js`: lista com data e nome da ficha |
+| Tocar num treino da lista abre o detalhe | `js/app.js` (Início) | — | `inicio.spec.js`: tocar num treino abre o detalhe |
+| Ficha renomeada aparece com o nome novo na lista | `js/app.js` (Início) | — | `inicio.spec.js`: ficha renomeada aparece com o nome novo |
+
 ## Limites conhecidos
 
-- **Testes de navegador ainda parciais**: fumaça (abrir, navegar, offline, privacidade, 375px) e o Treinar
-  inteiro. Os outros fluxos entram nas próximas issues da Fase 1 da refatoração (`documentation/REFACTOR.md`).
+- **Testes de navegador ainda parciais**: fumaça (abrir, navegar, offline, privacidade, 375px), o Treinar
+  e o Início inteiros. Os outros fluxos entram nas próximas issues da Fase 1 da refatoração (`documentation/REFACTOR.md`).
 - **Wrapper de módulo do `core.js`** (detecção Node × navegador) fica fora da meta de cobertura: cada
   ambiente executa um dos lados. O lado do navegador é testado em `module.test.js` (carrega o core num
   escopo sem `module.exports` e confere que as funções viram globais).

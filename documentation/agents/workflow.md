@@ -40,9 +40,12 @@ npm run test:e2e:report   # HTML report of the last run (traces of failures)
   gets a fresh browser context (empty IndexedDB, no service worker).
 - Use `test`/`expect` from `tests/e2e/helpers.js`: any console error or uncaught exception fails the test, and
   `confirm()` answers yes. Helpers: `freshApp`, `withSampleData`, `withBackup(page, 'file.json')` (imports a
-  backup from `tests/e2e/fixtures/` through Mais → Importar, for an exact starting state), `goTo(page, 'Treinar')`.
+  backup from `tests/e2e/fixtures/` through Mais → Importar, for an exact starting state; also takes an object, e.g.
+  a `readFixture('file.json')` copy changed in the test), `storedDraft(page)` (the draft saved in IndexedDB),
+  `goTo(page, 'Treinar')`.
 - No fixed waits (`waitForTimeout`): wait for what the user would see. For timers (rest), install `page.clock` before
-  opening the app and move time with `runFor`/`setSystemTime` (see `treinar.spec.js`).
+  opening the app and move time with `runFor`/`setSystemTime` (see `treinar.spec.js`). For a fixed "today" (week,
+  backup age), `page.clock.setFixedTime` before opening the app (see `inicio.spec.js`).
 - In CI a failed run uploads the report and traces as the `relatorio-testes-navegador` artifact.
 
 ## Refactor in progress
@@ -50,7 +53,7 @@ npm run test:e2e:report   # HTML report of the last run (traces of failures)
 The code is being reorganised in phases (browser tests → ES modules → JSDoc types), one GitHub issue per PR.
 Before picking up a refactor issue, read [REFACTOR.md](../REFACTOR.md): refactor PRs are behaviour-neutral and
 never mix in features or fixes. Tracking issue: #2.
-**Treinar and Início are critical screens**: once their browser tests exist (#5, #19), every change to them
+**Treinar and Início are critical screens** with a browser test per behaviour (`treinar.spec.js`, `inicio.spec.js`): every change to them
 keeps those tests green and adds a test for each behaviour it adds or changes.
 
 ## Checklist for every change

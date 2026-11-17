@@ -1,5 +1,6 @@
 // Ajudantes compartilhados pelos testes de navegador.
 // Cada teste roda num contexto novo do navegador: IndexedDB, caches e service worker começam vazios.
+const fs = require('fs');
 const path = require('path');
 const base = require('@playwright/test');
 
@@ -51,15 +52,39 @@ async function withSampleData(page) {
 }
 
 /**
- * Abre o app e importa um backup de `tests/e2e/fixtures/` pela tela Mais → Importar, como uma pessoa faria.
+ * Abre o app e importa um backup pela tela Mais → Importar, como uma pessoa faria.
  * Serve para montar um ponto de partida exato (fichas, treinos anteriores com cargas conhecidas).
+ * `backup` é o nome de um arquivo de `tests/e2e/fixtures/` ou o próprio conteúdo (objeto), para variações
+ * feitas no teste a partir de `readFixture`.
  */
-async function withBackup(page, fixtureName) {
+async function withBackup(page, backup) {
   await freshApp(page);
   await goTo(page, 'Mais');
-  await page.locator('#importFile').setInputFiles(path.join(__dirname, 'fixtures', fixtureName));
+  const file = typeof backup === 'string'
+    ? path.join(__dirname, 'fixtures', backup)
+    : { name: 'backup.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(backup)) };
+  await page.locator('#importFile').setInputFiles(file);
   await base.expect(page.locator('#appToastBody')).toContainText('Backup importado');
   await base.expect(page.locator('#view-dashboard')).toBeVisible();
+}
+
+/** Conteúdo de um backup de `tests/e2e/fixtures/` (cópia nova a cada chamada, pode ser alterada). */
+function readFixture(fixtureName) {
+  return JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures', fixtureName), 'utf8'));
+}
+
+/** Rascunho gravado no aparelho (IndexedDB do app, store `settings`, id `workoutDraft`), ou null. */
+function storedDraft(page) {
+  return page.evaluate(() => new Promise((resolve, reject) => {
+    const open = indexedDB.open('meu-treino');
+    open.onerror = () => reject(open.error);
+    open.onsuccess = () => {
+      const db = open.result;
+      const get = db.transaction('settings').objectStore('settings').get('workoutDraft');
+      get.onsuccess = () => { db.close(); resolve(get.result || null); };
+      get.onerror = () => { db.close(); reject(get.error); };
+    };
+  }));
 }
 
 /** Toca numa aba da barra inferior, como uma pessoa faria, e confere que a tela certa abriu. */
@@ -72,4 +97,6 @@ async function goTo(page, tabName) {
   await base.expect(page.locator('#' + tab.view)).toBeVisible();
 }
 
-module.exports = { test, expect: base.expect, TABS, freshApp, waitForApp, withSampleData, withBackup, goTo };
+module.exports = {
+  test, expect: base.expect, TABS, freshApp, waitForApp, withSampleData, withBackup, readFixture, storedDraft, goTo
+};
