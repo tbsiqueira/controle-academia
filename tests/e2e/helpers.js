@@ -3,6 +3,7 @@
 const fs = require('fs');
 const path = require('path');
 const base = require('@playwright/test');
+const { coveredLines, isAppScript, FILE: COVERED_FILE, RAW_DIR: COVERAGE_DIR } = require('../../tools/e2e-coverage');
 
 /** Abas da barra inferior, pelo texto que a pessoa vê. */
 const TABS = {
@@ -14,11 +15,40 @@ const TABS = {
 };
 
 /**
- * `test` com o fixture automático `appErrors`: junta todo erro do console e toda exceção não tratada da página e
+ * `test` com dois fixtures automáticos.
+ *
+ * `appCoverage`: mede quais linhas do js/app.js rodaram no teste (cobertura de JS do Chromium) e grava em
+ * tests/e2e/coverage/; `node tools/e2e-coverage.js` junta tudo depois (a catraca do CI).
+ *
+ * `appErrors`: junta todo erro do console e toda exceção não tratada da página e
  * reprova o teste no fim se houver algum. Um teste que espera um erro de propósito pode esvaziar a lista.
  * Também responde "sim" a todo confirm(), para os botões com confirmação funcionarem.
  */
 const test = base.test.extend({
+  appCoverage: [async ({ page }, use, testInfo) => {
+    // Perfil do V8 pelo protocolo do Chromium. Recarregar a página descarta os contadores da página anterior,
+    // então page.reload/page.goto tiram uma foto antes (recargas feitas pelo próprio app não têm foto).
+    const cdp = await page.context().newCDPSession(page);
+    await cdp.send('Profiler.enable');
+    await cdp.send('Profiler.startPreciseCoverage', { callCount: true, detailed: true });
+    const source = fs.readFileSync(path.join(__dirname, '..', '..', COVERED_FILE), 'utf8');
+    const lines = new Set();
+    const snapshot = async () => {
+      const { result } = await cdp.send('Profiler.takePreciseCoverage').catch(() => ({ result: [] }));
+      result.filter((e) => isAppScript(e.url))
+        .forEach((e) => coveredLines({ source, functions: e.functions }).forEach((l) => lines.add(l)));
+    };
+    for (const method of ['reload', 'goto']) {
+      const original = page[method].bind(page);
+      page[method] = async (...args) => { await snapshot(); return original(...args); };
+    }
+    await use();
+    await snapshot();
+    const name = testInfo.testId + '-' + testInfo.retry + '.json';
+    fs.mkdirSync(COVERAGE_DIR, { recursive: true });
+    fs.writeFileSync(path.join(COVERAGE_DIR, name),
+      JSON.stringify({ file: COVERED_FILE, title: testInfo.titlePath.join(' › '), lines: [...lines] }));
+  }, { auto: true }],
   appErrors: [async ({ page }, use) => {
     const errors = [];
     page.on('console', (msg) => {

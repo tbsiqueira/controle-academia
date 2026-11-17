@@ -9,6 +9,7 @@ module.exports = defineConfig({
   testDir: 'tests/e2e',
   testMatch: '**/*.spec.js',
   outputDir: 'tests/e2e/results',
+  globalSetup: './tests/e2e/global-setup.js',
   fullyParallel: true,
   forbidOnly: CI,
   retries: CI ? 1 : 0,

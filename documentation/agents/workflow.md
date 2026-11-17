@@ -50,6 +50,12 @@ npm run test:e2e:report   # HTML report of the last run (traces of failures)
   opening the app and move time with `runFor`/`setSystemTime` (see `treinar.spec.js`). For a fixed "today" (week,
   backup age), `page.clock.setFixedTime` before opening the app (see `inicio.spec.js`).
 - In CI a failed run uploads the report and traces as the `relatorio-testes-navegador` artifact.
+- Every row of `tests/CHECKLIST.md` names at least one browser test (`tests/checklist.test.js` fails on "—" or on a
+  spec file that doesn't exist). A new feature gets a row and a browser test.
+- Coverage ratchet: each test records which lines of `js/app.js` ran. After `npm run test:e2e`, run
+  `npm run test:e2e:coverage` (number + uncovered functions). CI fails if it drops below the `main` value in
+  `tests/e2e/coverage-baseline.json`, or if it rose and the PR didn't run `node tools/e2e-coverage.js --update` and
+  commit the file. Details in `tools/README.md`.
 
 ## Refactor in progress
 

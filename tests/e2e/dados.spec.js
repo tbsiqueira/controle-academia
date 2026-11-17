@@ -169,6 +169,36 @@ test.describe('Dados · importar backups antigos pela tela', () => {
     expect(await storedRecords(page, 'workouts')).toHaveLength(1);
     expect(await storedRecords(page, 'sheets')).toHaveLength(1);
   });
+
+  test('não confia no arquivo: id com código é descartado e data inválida vira "sem data"', async ({ page }) => {
+    const set = { exerciseId: 'ex-1', exerciseName: 'Supino reto', number: 1, reps: 10, load: 30 };
+    const backup = {
+      app: 'meu-treino', version: 2,
+      data: {
+        workouts: [
+          { id: 'w-bom', date: '2026-09-14', sheetId: 's-1', sets: [set] },
+          { id: 'x\')"><img src=x onerror="__xss=1">', date: '2026-09-13', sheetId: 's-1', sets: [set] },
+          { id: 'w-sem-data', date: '31/31/2026', sheetId: 's-1', sets: [set] }
+        ],
+        sheets: [
+          { id: 's-1', name: 'Treino A', exercises: [{ exerciseId: 'ex-1', name: 'Supino reto', sets: 1 }] },
+          { id: '<b>s-2</b>', name: 'Ficha com id ruim', exercises: [] }
+        ],
+        exercises: [{ id: 'ex-1', name: 'Supino reto', group: 'Peito', source: 'custom' }],
+        settings: { id: 'app', weekAnchor: 'ontem', weeklyWorkoutTarget: 3, weeklyCardioTarget: 120 },
+        colinha: []
+      }
+    };
+    await importOld(page, backup);
+
+    expect((await storedRecords(page, 'workouts')).map((w) => [w.id, w.date]).sort()).toEqual([['w-bom', '2026-09-14'], ['w-sem-data', '']]);
+    expect((await storedRecords(page, 'sheets')).map((s) => s.id)).toEqual(['s-1']);
+    await expect(recent(page).locator('.workout-month')).toHaveText(['setembro de 2026 · 1 treino', 'Sem data · 1 treino']);
+    await expect(page.locator('#weekProgress .week-card')).toContainText('Semana ativa');
+    expect(await page.evaluate(() => window.__xss)).toBeUndefined();
+    await goTo(page, 'Fichas');
+    await expect(sheetsList(page)).not.toContainText('Ficha com id ruim');
+  });
 });
 
 test.describe('Dados · exportar e reimportar', () => {
