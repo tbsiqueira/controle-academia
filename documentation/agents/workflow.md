@@ -23,6 +23,8 @@ it runs the checks, publishes to GitHub Pages and then creates and pushes tag `v
 The code is being reorganised in phases (browser tests → ES modules → JSDoc types), one GitHub issue per PR.
 Before picking up a refactor issue, read [REFACTOR.md](../REFACTOR.md): refactor PRs are behaviour-neutral and
 never mix in features or fixes. Tracking issue: #2.
+**Treinar and Início are critical screens**: once their browser tests exist (#5, #19), every change to them
+keeps those tests green and adds a test for each behaviour it adds or changes.
 
 ## Checklist for every change
 

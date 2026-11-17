@@ -66,7 +66,7 @@ A ordem importa: **primeiro a rede de segurança, depois mexer no código.**
 | Fase | O que entrega | Issues |
 |---|---|---|
 | **0 — Plano** | Este documento e as regras abaixo | #3 |
-| **1 — Testes de navegador** | Playwright no CI como check obrigatório; testes de todos os fluxos do `tests/CHECKLIST.md`; catraca de cobertura do `app.js` | #4, #5, #6, #7 |
+| **1 — Testes de navegador** | Playwright no CI como check obrigatório; **cada comportamento** das telas críticas (Treinar e Início); testes de todos os fluxos do `tests/CHECKLIST.md`; catraca de cobertura do `app.js` | #4, #5, #19, #6, #7 |
 | **2 — Módulos** | `core.js`/`db.js` como módulos; `app.js` como módulo sem `onclick` inline; `app.js` dividido por área, um PR por área | #8, #9, #10–#14 |
 | **3 — Tipos** | Tipos dos dados em JSDoc checados por `tsc --noEmit` no CI; `// @ts-check` em todos os arquivos; documentação final | #15, #16, #17 |
 
@@ -77,14 +77,19 @@ com a experiência das fases anteriores. Depois da Fase 3 essa migração seria 
 
 1. **Lógica pura: 100%.** `js/core.js` continua com 100% de linhas e ramos cobertos por testes de unidade
    (`tools/coverage-gate.js`), como hoje.
-2. **Testes de navegador cobrem funcionalidades, não linhas.** Toda funcionalidade listada no
+2. **Telas críticas: cada comportamento.** **Treinar** e **Início** são as telas críticas: o Treinar é usado na
+   academia, com pressa, e o Início é a primeira coisa que todo mundo vê. Nelas, **cada comportamento** que a
+   pessoa consegue disparar tem o seu próprio teste de navegador e a sua própria linha no `tests/CHECKLIST.md`
+   (lista completa nas issues #5 e #19). Todo PR que mexe numa tela crítica mantém esses testes verdes e traz
+   teste para o que acrescentar ou mudar.
+3. **Demais telas: funcionalidades, não linhas.** Toda funcionalidade listada no
    `tests/CHECKLIST.md` tem pelo menos um teste de navegador do caminho principal, e o CI falha se alguma ficar sem.
    Funcionalidade nova entra com teste de navegador; bug corrigido entra com um teste que o reproduz.
-3. **Cobertura do `app.js` medida, com catraca.** Os testes de navegador medem quais linhas do código de tela
+4. **Cobertura do `app.js` medida, com catraca.** Os testes de navegador medem quais linhas do código de tela
    rodaram. O número aparece no PR e **não pode cair** em relação à `main`. Não há meta fixa (como 100%): os
    últimos trechos são caminhos de erro do navegador que só se alcançam com testes frágeis e lentos, e testes
    instáveis ensinam a ignorar check vermelho.
-4. **Testes de navegador estáveis e rápidos.** Celular (375px), tema claro, banco começando vazio ou com
+5. **Testes de navegador estáveis e rápidos.** Celular (375px), tema claro, banco começando vazio ou com
    `data/sample-data.json`, sem esperas fixas. O job inteiro deve levar poucos minutos.
 
 ## 5. Ferramentas de desenvolvimento (npm)
