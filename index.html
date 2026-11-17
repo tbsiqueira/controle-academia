@@ -11,9 +11,9 @@
   <link rel="icon" href="icons/icon-16.png" sizes="16x16" type="image/png">
   <link rel="icon" href="icons/icon-32.png" sizes="32x32" type="image/png">
   <link rel="apple-touch-icon" href="icons/icon-180.png">
-  <link rel="stylesheet" href="vendor/bootstrap/bootstrap.min.css?v=73">
-  <link rel="stylesheet" href="vendor/bootstrap-icons/bootstrap-icons.min.css?v=73">
-  <link rel="stylesheet" href="css/styles.css?v=73">
+  <link rel="stylesheet" href="vendor/bootstrap/bootstrap.min.css?v=74">
+  <link rel="stylesheet" href="vendor/bootstrap-icons/bootstrap-icons.min.css?v=74">
+  <link rel="stylesheet" href="css/styles.css?v=74">
 </head>
 <body>
   <main class="container pb-nav">
@@ -189,10 +189,10 @@
       </div>
 
       <div class="card mb-3">
-        <div class="card-header fw-semibold"><i class="bi bi-clipboard2-pulse"></i> Fichas de treino</div>
+        <div class="card-header fw-semibold"><i class="bi bi-journal-text"></i> Colinha</div>
         <div class="card-body">
-          <p class="text-muted small mb-2">Uma ficha agrupa os exercícios do treino (ex.: TREINO A - inferiores). Ao registrar, escolha a ficha para carregar os exercícios dela.</p>
-          <a href="#/exercises" class="btn btn-outline-primary w-100"><i class="bi bi-card-checklist"></i> Gerenciar fichas</a>
+          <div id="colinhaList"></div>
+          <button class="btn btn-dashed w-100 mt-2" type="button" id="btnAddColinha"><i class="bi bi-plus"></i> Nova colinha</button>
         </div>
       </div>
 
@@ -201,14 +201,6 @@
         <div class="card-body">
           <p class="text-muted small mb-2">Tem seus treinos numa planilha (Excel, Google Sheets)? Uma IA converte o histórico e recria as fichas da rotina mais recente, já com a carga da última vez.</p>
           <button class="btn btn-outline-primary w-100" type="button" id="btnHistoryImport"><i class="bi bi-stars"></i> Importar com IA</button>
-        </div>
-      </div>
-
-      <div class="card mb-3">
-        <div class="card-header fw-semibold"><i class="bi bi-journal-text"></i> Colinha</div>
-        <div class="card-body">
-          <div id="colinhaList"></div>
-          <button class="btn btn-dashed w-100 mt-2" type="button" id="btnAddColinha"><i class="bi bi-plus"></i> Nova colinha</button>
         </div>
       </div>
 
@@ -237,9 +229,6 @@
         </div>
       </div>
 
-      <!-- Fechado por padrão: "Apagar todos os dados" não fica à vista junto das metas -->
-      <details class="mb-3">
-        <summary class="text-center text-muted small mb-2">Opções avançadas (atualizar app, apagar dados, dados de exemplo)</summary>
       <div class="card mb-3">
         <div class="card-header fw-semibold"><i class="bi bi-bug"></i> Debug</div>
         <div class="card-body">
@@ -256,9 +245,8 @@
           <p class="small text-muted mt-2 mb-0" id="sampleStatus"></p>
         </div>
       </div>
-      </details>
 
-      <p class="text-center text-muted small">Meu Treino <span id="appVersion">v73</span> · dados 100% locais · catálogo: gugeldev/exercicios-bd-ptbr (CC0)</p>
+      <p class="text-center text-muted small">Meu Treino <span id="appVersion">v74</span> · dados 100% locais · catálogo: gugeldev/exercicios-bd-ptbr (CC0)</p>
     </section>
   </main>
 
@@ -484,9 +472,9 @@
     </div>
   </div>
 
-  <script src="vendor/bootstrap/bootstrap.bundle.min.js?v=73"></script>
-  <script src="js/db.js?v=73"></script>
-  <script src="js/core.js?v=73"></script>
-  <script src="js/app.js?v=73"></script>
+  <script src="vendor/bootstrap/bootstrap.bundle.min.js?v=74"></script>
+  <script src="js/db.js?v=74"></script>
+  <script src="js/core.js?v=74"></script>
+  <script src="js/app.js?v=74"></script>
 </body>
 </html>

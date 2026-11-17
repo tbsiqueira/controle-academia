@@ -107,7 +107,7 @@ git push origin v2
 ```
 
 Acompanhe em **Actions → Publicar no GitHub Pages**. Leva ~1 minuto.
-No aparelho, feche e abra o app (ou use **Mais → Opções avançadas → Debug → Atualizar app**) para pegar a versão nova.
+No aparelho, feche e abra o app (ou use **Mais → Debug → Atualizar app**) para pegar a versão nova.
 
 ### Voltar para uma versão anterior
 
@@ -121,7 +121,7 @@ o Pages volta a publicar aquele conteúdo. (Ou envie uma tag nova a partir do co
 | `Tag "v1" is not allowed to deploy to github-pages due to environment protection rules` | O ambiente `github-pages` tem regras de deploy que **não incluem tags** (ex.: só existe a regra `main`, tipo *branch*) | **Settings → Environments → `github-pages` → Deployment branches and tags** → **Add deployment branch or tag rule** → **Ref type: `Tag`** + **Name pattern: `v*`** → *Add rule* (ou troque a política para **All branches and tags**). Depois **Actions → Publicar no GitHub Pages → Re-run all jobs** |
 | `Get Pages site failed` / `Pages site not found` | Pages não está com a fonte **GitHub Actions** | **Settings → Pages → Source: GitHub Actions** |
 | Falhou em "Rodar check.ps1" | versão inconsistente ou arquivo/id faltando | rode localmente `powershell -ExecutionPolicy Bypass -File .\check.ps1` e corrija antes de taguear |
-| Deploy "verde" mas o site não atualizou | cache do navegador/service worker | no aparelho: **Mais → Opções avançadas → Debug → Atualizar app**; no PC: Ctrl+F5 ou `/reset.html` |
+| Deploy "verde" mas o site não atualizou | cache do navegador/service worker | no aparelho: **Mais → Debug → Atualizar app**; no PC: Ctrl+F5 ou `/reset.html` |
 
 ### Publicar manualmente (emergência)
 
@@ -165,7 +165,7 @@ documentation/PLANO.md      plano/requisitos e histórico de revisões
 `data/sample-data.json` é uma fixture com **3 fichas**, **12 treinos** (4 por ficha) e **6 exercícios criados
 pelo usuário** — cada ficha mistura exercícios do catálogo com **2 exercícios custom**.
 
-- **No app**: **Mais → Opções avançadas → Debug → Carregar dados de exemplo**. Substitui os dados atuais e pode ser
+- **No app**: **Mais → Debug → Carregar dados de exemplo**. Substitui os dados atuais e pode ser
   desfeito pelo botão **Desfazer** do card Dados (o estado anterior fica em memória). As datas ficam em `dayOffset`
   (dias em relação a hoje), então a demonstração está sempre recente.
 - **Nos testes**: `tests/sample-data.test.js` valida estrutura, integridade referencial, normalização de

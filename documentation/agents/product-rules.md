@@ -32,7 +32,7 @@ their trainer (the "professora") and send her each workout as text. Everything m
 - UI text in pt-BR, short and plain. Lime-green theme (v62+): reuse the `--mt-*` variables and existing classes in
   `css/styles.css` plus Bootstrap utilities; don't introduce a new palette.
 - Keep screens lean: the Início list shows date + ficha name + a short summary; details live one tap away.
-- Rarely used tools (update app, erase data, storage used, sample data) live in **Mais → Opções avançadas → Debug**.
+- Rarely used tools (update app, erase data, storage used, sample data) live in the **Debug** card at the end of **Mais**, always visible (the collapsible "Opções avançadas" wrapper was removed in v74 at the user's request; don't hide it again).
 - Destructive actions confirm first; erasing everything uses a checkbox, not typing a word.
 
 ## Data and privacy

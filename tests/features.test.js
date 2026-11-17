@@ -306,25 +306,24 @@ test('todo botao pequeno so com icone tem aria-label (e por ele que a regra de 4
   botoes.forEach((b) => assert.match(b, /aria-label="/, b.slice(0, 120)));
 });
 
-/* ---------- card Debug fechado por padrão ---------- */
+/* ---------- card Debug sempre à vista no fim de Mais (v74) ---------- */
 
-// O <details> das opcoes avancadas, na tela Mais (as dicas recolhiveis das Fichas tambem usam <details>).
-const ADVANCED = HTML.indexOf('<details', HTML.indexOf('id="view-more"'));
+// Inicio do card Debug, na tela Mais.
+const DEBUG = HTML.indexOf('bi-bug"></i> Debug', HTML.indexOf('id="view-more"'));
 
-test('Debug (atualizar, apagar tudo, dados de exemplo) fica dentro de um <details> fechado', () => {
-  const inicio = ADVANCED;
-  const fim = HTML.indexOf('</details>', inicio);
-  assert.ok(inicio !== -1 && fim > inicio);
-  assert.doesNotMatch(HTML.slice(inicio, HTML.indexOf('>', inicio)), /\bopen\b/, 'comeca fechado');
-  const dentro = HTML.slice(inicio, fim);
+test('Debug (atualizar, apagar tudo, dados de exemplo) fica a vista no fim de Mais, sem recolher', () => {
+  const more = HTML.slice(HTML.indexOf('id="view-more"'), HTML.indexOf('</section>', HTML.indexOf('id="view-more"')));
+  assert.doesNotMatch(more, /<details|Opções avançadas/, 'nada recolhido em Mais');
+  const fim = HTML.indexOf('id="appVersion"');
+  assert.ok(DEBUG > 0 && fim > DEBUG, 'Debug e o ultimo card, antes da versao');
+  const dentro = HTML.slice(DEBUG, fim);
   ['btnForceUpdate', 'btnEraseAll', 'btnLoadSample', 'sampleStatus', 'storageInfo'].forEach((id) => {
-    assert.ok(dentro.indexOf('id="' + id + '"') !== -1, id + ' dentro das opcoes avancadas');
+    assert.ok(dentro.indexOf('id="' + id + '"') !== -1, id + ' dentro do card Debug');
   });
-  assert.match(dentro, /<summary[^>]*>[^<]*apagar dados/i, 'o resumo diz o que tem dentro');
 });
 
-test('backup (Exportar/Importar/Desfazer) continua a vista, fora das opcoes avancadas', () => {
-  const antes = HTML.slice(HTML.indexOf('id="view-more"'), ADVANCED);
+test('backup (Exportar/Importar/Desfazer) continua a vista, antes do Debug', () => {
+  const antes = HTML.slice(HTML.indexOf('id="view-more"'), DEBUG);
   ['btnExport', 'btnImport', 'btnUndoImport', 'backupStatus'].forEach((id) => {
     assert.ok(antes.indexOf('id="' + id + '"') !== -1, id);
   });
@@ -362,10 +361,10 @@ test('installHint: instalado, botao do navegador, iPhone ou menu do navegador', 
   assert.match(core.installHint(false, false, false), /menu do navegador/);
 });
 
-test('card Instalar o app fica entre Dados e as opcoes avancadas', () => {
+test('card Instalar o app fica entre Dados e o Debug', () => {
   const dados = HTML.indexOf('bi-database"></i> Dados');
   const install = HTML.indexOf('bi-download"></i> Instalar o app');
-  assert.ok(dados > 0 && install > dados && install < HTML.indexOf('Opções avançadas'));
+  assert.ok(dados > 0 && install > dados && install < DEBUG);
   assert.match(HTML, /id="btnInstall"/);
   assert.match(APP, /addEventListener\('beforeinstallprompt', function \(e\) \{\s*e\.preventDefault\(\);\s*installPrompt = e;/);
   assert.match(APP, /getElementById\('btnInstall'\)\.addEventListener\('click', guard\(installApp\)\)/);
@@ -419,4 +418,11 @@ test('Fichas e treinos antigos usam a mesma revisao de exercicios (sem duplicar 
   assert.match(APP, /function resolveImportedExercise\(name, chosen\) \{\s*return exactExercise\(name\) \|\| chosen\[normalizeText\(name\)\] \|\| await findOrCreateExercise\(name\);/,
     'nome exato, depois a escolha, depois Criar novo');
   assert.match(APP, /function exerciseChoicesHtml\(unmatched, prefix\)[\s\S]*?suggestExercises\(name, candidates, 1, 0\.5\)[\s\S]*?➕ Criar novo/);
+});
+
+test('Mais: ordem dos cards e sem o card Fichas de treino (a aba Fichas ja faz isso)', () => {
+  const more = HTML.slice(HTML.indexOf('id="view-more"'), HTML.indexOf('</section>', HTML.indexOf('id="view-more"')));
+  const titles = [...more.matchAll(/class="card-header fw-semibold"><i class="bi [^"]+"><\/i> ([^<]+)</g)].map((m) => m[1].trim());
+  assert.deepEqual(titles, ['Metas da semana', 'Colinha', 'Importar treinos antigos', 'Dados', 'Instalar o app', 'Debug']);
+  assert.doesNotMatch(more, /Gerenciar fichas|Fichas de treino/);
 });
