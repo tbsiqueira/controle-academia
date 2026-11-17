@@ -24,6 +24,10 @@ agent should know before touching the same area.
   when a PR with a new version is merged; nobody tags by hand.
 - **PR flow (2026-11-17)**: `main` is protected by a ruleset; rebase merge only, linear history, required checks
   (tests + coverage, `check.ps1`, version bump). Before that, everything was pushed straight to `main`.
+- **Refactor plan (2026-11-17)**: [REFACTOR.md](../REFACTOR.md). Browser tests (Playwright) first, then native ES
+  modules, then JSDoc types checked by `tsc --noEmit`; still no build step. This **relaxes "no npm"**: from the
+  Playwright PR (#4) on, a `package.json` exists for dev tools only; the app and the unit tests still need nothing
+  installed. Browser tests cover every feature, not 100% of lines; `app.js` coverage is measured with a ratchet.
 
 ## Regressions and their lessons
 
