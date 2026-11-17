@@ -918,6 +918,30 @@ test.describe('Treinar · responder "Não" mantém o que foi preenchido', () => 
     await expect(page.locator('#workoutNotes')).toHaveValue('só uma anotação');
     expect((await storedDraft(page)).notes).toBe('só uma anotação');
   });
+
+  test('tirar a última série preenchida', async ({ page }) => {
+    await workoutWithSheet(page, 'Treino A');
+    const supino = exerciseCard(page, 'Supino reto');
+    const asked = await answerConfirm(page, false);
+
+    await supino.locator('button:has(.bi-dash)').click();
+
+    await expect.poll(asked).toEqual(['Remover a série 3 de "Supino reto"?']);
+    await expect(supino.locator('.ex-title small')).toHaveText('3 séries · descanso 1:30');
+    expect(await setValues(supino, 'Carga')).toEqual(['40', '42,5', '45']);
+  });
+
+  test('excluir o treino', async ({ page }) => {
+    await withBackup(page, BACKUP);
+    await editSavedWorkout(page, 'w-ultimo');
+    const asked = await answerConfirm(page, false);
+
+    await page.getByRole('button', { name: 'Excluir treino' }).click();
+
+    await expect.poll(asked).toEqual(['Excluir este treino?']);
+    await expect(page.locator('#view-workout')).toBeVisible();
+    expect((await storedRecords(page, 'workouts')).map((w) => w.id).sort()).toEqual(['w-antigo', 'w-ultimo']);
+  });
 });
 
 test.describe('Treinar · cancelar e esvaziar', () => {

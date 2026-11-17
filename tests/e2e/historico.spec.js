@@ -6,7 +6,7 @@
 //   cardio) e 18/05 (aquecimento 15 reps 20 kg RIR 3; Supino 47,5×6, 45×8; Barra ×12; 30 min; observação).
 // - Treino B: 04/05 (Agachamento 50×10) e 18/05 de noite (Agachamento 60×10, 60×9): dois treinos no mesmo dia.
 // - Barra fixa é sempre com o peso do corpo (carga 0).
-const { test, expect, withBackup, readFixture, goTo } = require('./helpers');
+const { test, expect, withBackup, readFixture, goTo, answerConfirm } = require('./helpers');
 
 const BACKUP = 'historico-backup.json';
 const TODAY = '2026-05-20T10:00:00-03:00';
@@ -93,6 +93,20 @@ test.describe('Detalhe do treino', () => {
     expect(await listedWorkouts(page)).toEqual([
       'Treino B, 18/05/2026', 'Treino A, 18/05/2026', 'Treino A, 15/04/2026', 'Treino A, 30/03/2026'
     ]);
+  });
+
+  test('responder "Não" ao excluir pelo detalhe não apaga o treino', async ({ page }) => {
+    await historyWith(page);
+    const before = await listedWorkouts(page);
+    await openWorkout(page, 'Treino B, 04/05/2026');
+    const asked = await answerConfirm(page, false);
+
+    await page.locator('#detailDelete').click();
+
+    await expect.poll(asked).toEqual(['Excluir este treino?']);
+    await expect(page.locator('#view-detail')).toBeVisible();
+    await page.locator('#detailBack').click();
+    expect(await listedWorkouts(page)).toEqual(before);
   });
 
   test('exportar pelo detalhe: texto do treino e Compartilhar', async ({ page }) => {

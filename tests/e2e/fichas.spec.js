@@ -6,7 +6,7 @@
 // - Treino Antigo (desativada): Remada baixa 3 séries.
 // - Biblioteca: Supino reto, Remada baixa, Agachamento livre e Rosca na máquina azul.
 // - Treinos da Treino A em 03/03/2025 e 10/03/2025.
-const { test, expect, withBackup, readFixture, storedRecords, goTo } = require('./helpers');
+const { test, expect, withBackup, readFixture, storedRecords, goTo, answerConfirm } = require('./helpers');
 
 const BACKUP = 'treinar-backup.json';
 
@@ -275,6 +275,18 @@ test.describe('Fichas · desativar, reativar e excluir', () => {
     await goTo(page, 'Início');
     await expect(page.locator('#recentWorkouts .workout-row strong')).toHaveText(['Treino A', 'Treino A']);
     expect(await storedRecords(page, 'workouts')).toHaveLength(2);
+  });
+
+  test('responder "Não" ao excluir não apaga a ficha', async ({ page }) => {
+    await sheetsWithBackup(page);
+    const before = await listedSheetNames(page);
+    const asked = await answerConfirm(page, false);
+
+    await sheetCard(page, 'Treino A').getByRole('button', { name: 'Excluir ficha' }).click();
+
+    await expect.poll(asked).toEqual(['Excluir esta ficha? Os treinos já registrados não são afetados.']);
+    expect(await listedSheetNames(page)).toEqual(before);
+    expect(await storedRecords(page, 'sheets')).toHaveLength(before.length);
   });
 });
 

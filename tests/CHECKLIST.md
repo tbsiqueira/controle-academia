@@ -8,6 +8,8 @@ Mapa de **cada funcionalidade do app** para os testes que a cobrem. Serve para r
   Coluna **Testes de navegador**: toda linha tem pelo menos um (`tests/checklist.test.js` reprova linha com "—"
   e arquivo citado que não existe). Funcionalidade nova entra com linha e teste de navegador. Treinar e
   Início são **telas críticas**: cada comportamento delas ganha linha e teste próprios.
+- Toda pergunta de confirmação (`confirm()` do `app.js`) tem teste de navegador da resposta **Não**, que confere o
+  texto da pergunta: `tests/confirm-no.test.js` reprova pergunta nova sem esse teste.
 - Cobertura: `node tools/coverage-gate.js` (o CI exige **100% de linhas e ramos em `js/core.js`**).
   Cobertura de `js/app.js` pelos testes de navegador: `node tools/e2e-coverage.js` depois de `npm run test:e2e`;
   o CI publica o número no resumo do job e reprova se cair em relação à `main` (catraca, `tests/e2e/coverage-baseline.json`).
@@ -48,6 +50,7 @@ Mapa de **cada funcionalidade do app** para os testes que a cobrem. Serve para r
 | PWA: versão consistente, precache, offline | `index.html`, `sw.js`, `manifest.webmanifest` | `check.ps1` (13 verificações) | `smoke.spec.js` (versão no rodapé × arquivos × cache; abre offline com o catálogo), `dados.spec.js` (versão nova do service worker assume e apaga o cache antigo; "Atualizar app"; o rascunho em andamento sobrevive aos dois) |
 | Exportar/importar/apagar dentro do app (telas) | `js/app.js` | `check.ps1` (ids e handlers) + lógica do `core.js` | `dados.spec.js` (exportar, importar, Apagar dados só depois de marcar a confirmação, Cancelar não apaga, apagar leva tudo inclusive o rascunho), compartilhamento cancelado ou com erro avisa e não conta como backup; botão Importar abre o seletor de arquivo (`dados.spec.js`) |
 | Telas da importação de ficha (colar, revisão, botão Revisar → Importar), desativar/reativar ficha, modal Criar com IA (texto para a IA + colar a resposta), card Debug | `js/app.js` | `check.ps1` (ids e handlers) + lógica do `core.js` (`parseSheetImportText`, `suggestExercises`, `exerciseNamesText`, `normalizeSheet` mantém `active: false`) | `fichas.spec.js` (Criar com IA, desativar/reativar), `mais.spec.js` (card Debug) |
+| Responder **Não** nas confirmações das outras telas não muda nada: excluir treino pelo detalhe, exercício, ficha e colinha; importar backup; Desfazer; dados de exemplo; "Atualizar app" | `js/app.js` | `confirm-no.test.js` (toda pergunta tem teste do "Não") | `historico.spec.js`, `biblioteca.spec.js`, `fichas.spec.js`, `mais.spec.js`, `dados.spec.js` (responder "Não") |
 | Importar/desfazer/dados de exemplo sem risco de perder tudo (apaga e grava numa transação só) | `db.js`: `dbReplaceAll` (usado por `restoreAll` no `app.js`) | `db.test.js` (IndexedDB falso: uma transação, `clear` antes do `put`, `abort` em registro inválido) | `dados.spec.js` (Desfazer; arquivo que não é backup não apaga nada; dados de exemplo e Desfazer) |
 | Calendário: trocar de mês (inclusive nos dias 29–31) | `core.js`: `shiftMonth` | `core-edge-cases.test.js` (31/out ‹ vai para setembro; 31/jan › vai para fevereiro; virada do ano) | `historico.spec.js` (trocar de mês; dias 31 de outubro e de janeiro, nos dois sentidos e na virada do ano) |
 | Selo de PR na evolução do exercício (some quando não há carga) | `core.js`: `maxBestLoad` | `core-edge-cases.test.js` (peso do corpo = 0, sem "PR 1 kg"; maior carga; carga < 1 kg) | `historico.spec.js` (carga máxima; peso do corpo sem selo e sem 1RM) |
@@ -106,6 +109,8 @@ importado pela tela Mais. O descanso usa o relógio controlado do Playwright (`p
 | Remover um exercício | `js/app.js` (Treinar) | — | `treinar.spec.js`: remover um exercício |
 | Adicionar um exercício que já está no treino avisa e não duplica | `js/app.js` (Treinar) | — | `treinar.spec.js`: o mesmo exercício não entra duas vezes no treino |
 | Responder **Não** mantém o que foi preenchido: trocar de ficha, "Repetir o último treino", remover exercício preenchido, Cancelar | `js/app.js` (Treinar) | — | `treinar.spec.js`: responder "Não" mantém o que foi preenchido (4 testes) |
+| Responder **Não** ao tirar a última série preenchida mantém a série | `js/app.js` (Treinar) | — | `treinar.spec.js`: responder "Não" → tirar a última série preenchida |
+| Responder **Não** ao excluir um treino salvo (na edição) não apaga nada | `js/app.js` (Treinar) | — | `treinar.spec.js`: responder "Não" → excluir o treino |
 | Aquecimento por exercício (reps, peso, RIR) | `js/app.js` (Treinar) | — | `treinar.spec.js`: aquecimento por exercício |
 | Cardio e observações | `js/app.js` (Treinar) | — | `treinar.spec.js`: cardio e observações |
 | Toda alteração grava o rascunho; recarregar a página no meio do treino continua de onde parou | `js/app.js` (Treinar) | — | `treinar.spec.js`: toda alteração grava o rascunho |
@@ -135,6 +140,7 @@ importado pela tela Mais, com o relógio da página parado em 20/05/2026 (`page.
 | Aviso do rascunho aparece com um treino em andamento (descrição do rascunho) | `js/app.js` (Início) | — | `inicio.spec.js`: aparece com um treino em andamento |
 | Aviso do rascunho: **Continuar** abre o Treinar com o rascunho | `js/app.js` (Início) | — | `inicio.spec.js`: Continuar abre o Treinar |
 | Aviso do rascunho: **Descartar** remove o rascunho e o aviso | `js/app.js` (Início) | — | `inicio.spec.js`: Descartar remove o rascunho e o aviso |
+| Aviso do rascunho: responder **Não** ao Descartar mantém o rascunho e o aviso | `js/app.js` (Início) | — | `inicio.spec.js`: responder "Não" ao Descartar |
 | Aviso do rascunho descreve a edição de um treino salvo ("Edição do treino de <data>") | `js/app.js` (Início) | — | `inicio.spec.js`: descreve a edição de um treino salvo |
 | Progresso das metas: treinos (x/meta) e minutos de cardio (x/meta), com as barras | `js/app.js` (Início) | — | `inicio.spec.js`: progresso das metas |
 | Meta batida: selo "Meta batida" e barras cheias, sem passar de 100% | `js/app.js` (Início) | — | `inicio.spec.js`: meta batida |

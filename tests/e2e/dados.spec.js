@@ -154,6 +154,35 @@ test.describe('Dados · importar backups antigos pela tela', () => {
     await expect(sheetsList(page)).not.toContainText('TREINO B - superiores');
   });
 
+  test('responder "Não" ao importar não troca nada', async ({ page }) => {
+    await importOld(page, V2);
+    await goTo(page, 'Mais');
+    const asked = await answerConfirm(page, false);
+
+    await page.locator('#importFile').setInputFiles(V1);
+
+    await expect.poll(asked).toEqual(['Substituir todos os dados atuais pelo backup importado?\n\n' +
+      'Se algo estiver errado, você poderá desfazer em Mais → Dados.']);
+    await expect(page.locator('#view-more')).toBeVisible();
+    expect(await storedRecords(page, 'workouts')).toHaveLength(1);
+    await goTo(page, 'Fichas');
+    await expect(sheetsList(page)).toContainText('TREINO A - inferiores');
+    await expect(sheetsList(page)).not.toContainText('TREINO B - superiores');
+  });
+
+  test('responder "Não" ao Desfazer mantém os dados importados', async ({ page }) => {
+    await importOld(page, V2);
+    await importFile(page, 'backup-v1.json', fs.readFileSync(V1, 'utf8'));
+    await goTo(page, 'Mais');
+    const asked = await answerConfirm(page, false);
+
+    await page.locator('#btnUndoImport').click();
+
+    await expect.poll(asked).toEqual(['Desfazer a última importação e voltar aos dados anteriores?']);
+    await expect(page.locator('#btnUndoImport')).toBeVisible();
+    expect(await storedRecords(page, 'workouts')).toHaveLength(2);
+  });
+
   test('arquivo que não é backup não apaga nada', async ({ page }) => {
     await importOld(page, V2);
     const alerts = [];
@@ -399,6 +428,22 @@ test.describe('Atualização do app', () => {
 
     await expectDraftBack(page);
   });
+
+  test('responder "Não" ao "Atualizar app" não limpa o cache nem recarrega', async ({ page }) => {
+    await appWithDraft(page);
+    const keys = await page.evaluate(() => caches.keys());
+    await goTo(page, 'Mais');
+    await page.evaluate(() => { window.__semRecarregar = true; });
+    const asked = await answerConfirm(page, false);
+
+    await page.locator('#btnForceUpdate').click();
+
+    await expect.poll(asked).toEqual(['Atualizar o app?\n\nIsso limpa o cache e recarrega a versão mais nova. ' +
+      'Seus treinos salvos não são afetados.']);
+    expect(await page.evaluate(() => window.__semRecarregar)).toBe(true);
+    expect(await page.evaluate(() => caches.keys())).toEqual(keys);
+    expect(await page.evaluate(async () => (await navigator.serviceWorker.getRegistrations()).length)).toBe(1);
+  });
 });
 
 test.describe('Dados · caminhos que faltavam', () => {
@@ -459,7 +504,7 @@ test.describe('Dados · caminhos que faltavam', () => {
     const asked = await answerConfirm(page, false);
     await page.locator('#btnLoadSample').click();
 
-    await expect.poll(asked).toHaveLength(1);
+    await expect.poll(async () => (await asked()).map((q) => q.split('\n')[0])).toEqual(['Carregar os dados de exemplo?']);
     await expect(page.locator('#sampleStatus')).toHaveText('');
     expect(await storedRecords(page, 'workouts')).toHaveLength(1);
     await expect(page.locator('#btnUndoImport')).toBeVisible();
