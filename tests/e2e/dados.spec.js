@@ -12,7 +12,7 @@
 //   (reps 12-10-8); 1 treino em 14/09 (Elevação pélvica 30 kg × 12, 20 min de cardio), metas 3 / 120.
 const fs = require('fs');
 const path = require('path');
-const { test, expect, freshApp, waitForApp, withBackup, storedDraft, storedRecords, goTo } = require('./helpers');
+const { test, expect, freshApp, waitForApp, withBackup, storedDraft, storedRecords, goTo, answerConfirm } = require('./helpers');
 
 const OLD_BACKUPS = path.resolve(__dirname, '..', 'fixtures');
 const V1 = path.join(OLD_BACKUPS, 'backup-v1.json');
@@ -398,5 +398,70 @@ test.describe('Atualização do app', () => {
     await expect.poll(() => page.evaluate(() => caches.keys())).toEqual(['meu-treino-v' + version]);
 
     await expectDraftBack(page);
+  });
+});
+
+test.describe('Dados · caminhos que faltavam', () => {
+  /** Celular com menu de compartilhar que termina com o erro `name` (AbortError = a pessoa cancelou). */
+  function shareFailsWith(page, name) {
+    return page.addInitScript((errorName) => {
+      Object.defineProperty(Navigator.prototype, 'canShare', { configurable: true, value: () => true });
+      Object.defineProperty(Navigator.prototype, 'share', {
+        configurable: true,
+        value: async () => { throw new DOMException('falhou', errorName); }
+      });
+    }, name);
+  }
+
+  for (const [name, message] of [
+    ['AbortError', 'Compartilhamento cancelado — nada foi gerado.'],
+    ['NotAllowedError', 'Não deu para compartilhar agora. Tente de novo ou use um computador.']
+  ]) {
+    test(`Exportar no celular: compartilhamento ${name === 'AbortError' ? 'cancelado' : 'com erro'} avisa e não conta como backup`, async ({ page }) => {
+      await shareFailsWith(page, name);
+      await importOld(page, V2);
+      await goTo(page, 'Mais');
+      await page.locator('#btnExport').click();
+
+      await expect(page.locator('#backupAction')).toHaveText(message);
+      const settings = (await storedRecords(page, 'settings')).find((s) => s.id === 'app');
+      expect(settings.lastBackupAt).toBeUndefined();
+    });
+  }
+
+  test('o botão Importar abre o seletor de arquivo do aparelho', async ({ page }) => {
+    await freshApp(page);
+    await goTo(page, 'Mais');
+    const chooser = page.waitForEvent('filechooser');
+    await page.locator('#btnImport').click();
+    await (await chooser).setFiles(V2);
+
+    await expect(page.locator('#appToastBody')).toContainText('Backup importado');
+    expect(await storedRecords(page, 'workouts')).toHaveLength(1);
+  });
+
+  test('o arquivo dos dados de exemplo também importa pela tela, com as datas a partir de hoje', async ({ page }) => {
+    await page.clock.setFixedTime(new Date('2026-09-16T10:00:00-03:00'));
+    await freshApp(page);
+    await goTo(page, 'Mais');
+    await page.locator('#importFile').setInputFiles(path.resolve(__dirname, '..', '..', 'data', 'sample-data.json'));
+
+    await expect(page.locator('#appToastBody')).toContainText('Backup importado');
+    const workouts = await storedRecords(page, 'workouts');
+    expect(workouts).toHaveLength(12);
+    expect(workouts.every((w) => /^\d{4}-\d{2}-\d{2}$/.test(w.date) && w.date <= '2026-09-16')).toBe(true);
+    expect(await storedRecords(page, 'sheets')).toHaveLength(3);
+  });
+
+  test('responder "Não" aos dados de exemplo não troca nada', async ({ page }) => {
+    await importOld(page, V2);
+    await goTo(page, 'Mais');
+    const asked = await answerConfirm(page, false);
+    await page.locator('#btnLoadSample').click();
+
+    await expect.poll(asked).toHaveLength(1);
+    await expect(page.locator('#sampleStatus')).toHaveText('');
+    expect(await storedRecords(page, 'workouts')).toHaveLength(1);
+    await expect(page.locator('#btnUndoImport')).toBeVisible();
   });
 });

@@ -282,3 +282,50 @@ test.describe('Histórico no Início', () => {
     await expect(head).toHaveText(/Histórico\s*13 treinos/);
   });
 });
+
+test.describe('Detalhe · compartilhar sem o menu do aparelho', () => {
+  test('sem menu de compartilhar, Compartilhar copia o texto', async ({ page }) => {
+    await page.addInitScript(() => {
+      Object.defineProperty(Navigator.prototype, 'share', { configurable: true, value: undefined });
+    });
+    await page.context().grantPermissions(['clipboard-read', 'clipboard-write']);
+    await historyWith(page);
+    await openWorkout(page, 'Treino B, 04/05/2026');
+    await page.locator('#detailExport').click();
+    const text = await page.locator('#exportText').inputValue();
+
+    await page.locator('#exportShare').click();
+
+    await expect(page.locator('#appToastBody')).toHaveText('Texto copiado!');
+    const copied = await page.evaluate(() => navigator.clipboard.readText());
+    expect(copied.replace(/\r\n/g, '\n')).toBe(text);
+  });
+
+  test('menu cancelado e área de transferência bloqueada: copia selecionando o texto', async ({ page }) => {
+    await page.addInitScript(() => {
+      window.__execCommands = [];
+      Object.defineProperty(Navigator.prototype, 'share', {
+        configurable: true, value: async () => { throw new DOMException('cancelado', 'AbortError'); }
+      });
+      Clipboard.prototype.writeText = async () => { throw new DOMException('bloqueado', 'NotAllowedError'); };
+      document.execCommand = (command) => { window.__execCommands.push(command); return true; };
+    });
+    await historyWith(page);
+    await openWorkout(page, 'Treino B, 04/05/2026');
+    await page.locator('#detailExport').click();
+
+    await page.locator('#exportShare').click();
+
+    await expect(page.locator('#appToastBody')).toHaveText('Texto copiado!');
+    expect(await page.evaluate(() => window.__execCommands)).toEqual(['copy']);
+  });
+});
+
+test.describe('Evolução · sem registros', () => {
+  test('abrir a evolução direto pelo endereço, sem exercício escolhido, mostra que não há registros', async ({ page }) => {
+    await historyWith(page);
+    await page.goto('./#/exercise');
+    await expect(page.locator('#view-exercise')).toBeVisible();
+    await expect(history(page)).toHaveText('Nenhum registro deste exercício ainda.');
+  });
+});

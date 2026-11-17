@@ -81,7 +81,8 @@ com a experiência das fases anteriores. Depois da Fase 3 essa migração seria 
    academia, com pressa, e o Início é a primeira coisa que todo mundo vê. Nelas, **cada comportamento** que a
    pessoa consegue disparar tem o seu próprio teste de navegador e a sua própria linha no `tests/CHECKLIST.md`
    (lista completa nas issues #5 e #19). Todo PR que mexe numa tela crítica mantém esses testes verdes e traz
-   teste para o que acrescentar ou mudar.
+   teste para o que acrescentar ou mudar. Toda pergunta de confirmação tem teste das duas respostas: o "Não"
+   precisa manter o que a pessoa preencheu (`answerConfirm` em `tests/e2e/helpers.js`).
 3. **Demais telas: funcionalidades, não linhas.** Toda funcionalidade listada no
    `tests/CHECKLIST.md` tem pelo menos um teste de navegador do caminho principal, e o CI falha se alguma ficar sem.
    Funcionalidade nova entra com teste de navegador; bug corrigido entra com um teste que o reproduz.

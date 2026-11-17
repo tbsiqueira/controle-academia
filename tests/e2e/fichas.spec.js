@@ -179,6 +179,18 @@ test.describe('Fichas · criar e editar', () => {
     await expect(page.locator('#exerciseHistory .badge').first()).toHaveText('Treino A - peito e costas');
   });
 
+  test('ficha sem exercícios pode ser salva e mostra como adicionar', async ({ page }) => {
+    await sheetsWithBackup(page);
+    await page.locator('#btnNewSheet').click();
+    await page.locator('#sheetName').fill('Treino E - a montar');
+    await page.locator('#sheetEditorSave').click();
+    await expect(editor(page)).toBeHidden();
+
+    const card = sheetCard(page, 'Treino E - a montar');
+    await expect(card.locator('.badge')).toHaveText('0 exercícios');
+    await expect(card).toContainText('sem exercícios ainda — toque em ✏️ para adicionar');
+  });
+
   test('nome repetido entre as fichas ativas é recusado', async ({ page }) => {
     const alerts = collectAlerts(page);
     await sheetsWithBackup(page);

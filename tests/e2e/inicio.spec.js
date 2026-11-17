@@ -107,6 +107,22 @@ test.describe('Início · aviso do rascunho', () => {
     await expect(page.locator('#workoutSheet')).toHaveValue('');
     await expect(page.locator('#draftNotice')).toBeEmpty();
   });
+
+  test('descreve a edição de um treino salvo, com a data dele', async ({ page }) => {
+    await homeWith(page);
+    await page.locator('#recentWorkouts button[data-view-workout="w-seg"]').click();
+    await page.locator('#detailEdit').click();
+    await expect(page.locator('#view-workout')).toBeVisible();
+    await page.locator('#workoutNotes').fill('ajuste depois');
+    await expect.poll(async () => (await storedDraft(page))?.notes).toBe('ajuste depois');
+
+    await goTo(page, 'Início');
+
+    await expect(draftBanner(page).locator('.small')).toHaveText('Edição do treino de 18/05/2026 · Treino B · salvo hoje às 10:00');
+    await draftBanner(page).getByRole('button', { name: 'Continuar' }).click();
+    await expect(page.locator('#workoutTitle')).toHaveText('Editar treino');
+    await expect(page.locator('#workoutNotes')).toHaveValue('ajuste depois');
+  });
 });
 
 test.describe('Início · semana e metas', () => {
@@ -248,6 +264,20 @@ test.describe('Início · lembrete de backup', () => {
     await expect(backupReminder(page)).toBeEmpty();
   });
 
+  test('"Lembrar depois" (✕) esconde o lembrete', async ({ page }) => {
+    const backup = readFixture(BACKUP);
+    delete backup.data.settings.lastBackupAt;
+    await homeWith(page, backup);
+    await expect(backupReminder(page)).toContainText('Backup pendente');
+
+    await backupReminder(page).getByRole('button', { name: 'Lembrar depois' }).click();
+
+    await expect(backupReminder(page)).toBeEmpty();
+    await goTo(page, 'Calendário');
+    await goTo(page, 'Início');
+    await expect(backupReminder(page)).toBeEmpty();
+  });
+
   test('some depois de fazer um backup', async ({ page }) => {
     // Sem o menu de compartilhar, o backup vira um download (o caminho do computador).
     await page.addInitScript(() => {
@@ -294,6 +324,17 @@ test.describe('Início · treinos recentes', () => {
     await expect(page.locator('#detailBody .detail-hero')).toContainText('Treino B');
     await expect(page.locator('#detailBody .detail-hero')).toContainText('18/05/2026');
     await expect(page.locator('#detailBody')).toContainText('Agachamento livre');
+  });
+
+  test('o botão de compartilhar da linha abre o texto do treino', async ({ page }) => {
+    await homeWith(page);
+    await page.locator('#recentWorkouts button[data-share-workout="w-seg"]').click();
+
+    await expect(page.locator('#exportModal')).toBeVisible();
+    const text = await page.locator('#exportText').inputValue();
+    expect(text).toContain('18/05/2026');
+    expect(text).toContain('Agachamento livre');
+    await expect(page.locator('#view-dashboard')).toBeVisible();
   });
 
   test('ficha renomeada aparece com o nome novo', async ({ page }) => {

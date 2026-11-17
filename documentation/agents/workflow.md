@@ -43,7 +43,8 @@ npm run test:e2e:report   # HTML report of the last run (traces of failures)
   backup from `tests/e2e/fixtures/` through Mais → Importar, for an exact starting state; also takes an absolute path,
   e.g. the old backups in `tests/fixtures/`, or an object, e.g. a `readFixture('file.json')` copy changed in the
   test), `storedDraft(page)` (the draft saved in IndexedDB), `storedRecords(page, 'workouts')` (every record of a
-  store), `goTo(page, 'Treinar')`.
+  store), `goTo(page, 'Treinar')`, `answerConfirm(page, false)` (answer "Não" to every `confirm()` from now on and
+  return a reader for the questions asked; every confirmation needs a test for its "Não" answer too).
 - App update (`dados.spec.js`): Playwright can't intercept the service worker script, so the test server serves
   `sw.js` as version N when the context has the cookie `e2e-sw-version=N` (`context.addCookies`).
 - No fixed waits (`waitForTimeout`): wait for what the user would see. For timers (rest), install `page.clock` before
