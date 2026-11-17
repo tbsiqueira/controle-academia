@@ -17,7 +17,7 @@ Read before changing anything:
 - Root exceptions: `README.md` (GitHub shows it), `AGENTS.md` and `CLAUDE.md` (tools only read them at the root).
 - Human docs: [documentation/MANUAL.md](documentation/MANUAL.md) (user manual) and
   [documentation/PLANO.md](documentation/PLANO.md) (requirements + revision log).
-- **`FICHA-JSON.md` must stay at the root**: the app fetches it and the service worker caches it.
+- **`FICHA-JSON.md` and `TREINO-JSON.md` must stay at the root**: the app fetches them and the service worker caches them.
 - Other docs that stay where they are: `tests/CHECKLIST.md` (feature → tests) and `tools/README.md`.
 
 ## Non-negotiables

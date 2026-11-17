@@ -124,6 +124,28 @@ professora — inclusive um **PDF com vários treinos** — e colar o resultado 
 Se o texto colado não for um JSON válido, nada é gravado e o app diz o que faltou. Se já existir uma ficha
 **ativa** com o mesmo nome, a nova ganha _" (importada)"_ no fim do nome.
 
+### Trazer os treinos antigos de uma planilha (Excel)
+
+Se você já anotava seus treinos numa planilha (Excel, Google Sheets…), uma IA converte o histórico **e
+recria as fichas da sua rotina mais recente**. Assim, no primeiro treino no app, a carga da última vez já
+aparece preenchida.
+
+1. **Mais → Importar treinos antigos → Importar com IA**. A janela traz o texto para a IA: as regras (também
+   em [TREINO-JSON.md](../TREINO-JSON.md)), as fichas que você já tem e os exercícios que já existem.
+2. Toque em **Copiar texto**, cole na IA, **anexe a planilha** e peça:
+   _"Converta o histórico da planilha em anexo para o JSON do contrato acima: um treino para cada dia e uma
+   ficha para cada treino da rotina mais recente. Responda só com o JSON."_
+3. Cole a resposta na caixa de baixo → **Revisar**.
+4. A revisão mostra quantos treinos novos e de que período, as fichas (novas, ou "já existe, será usada") e,
+   como em Criar com IA, um seletor para cada nome de exercício sem par exato.
+5. Toque em **Importar**. Os treinos entram no histórico, nos gráficos e nos recordes como qualquer outro.
+
+- Cada treino fica ligado à ficha de mesmo nome. Se a ficha não existe (ex.: uma rotina antiga), o treino guarda
+  só o nome.
+- Ficha com o mesmo nome de uma que você já tem **não** é duplicada: a sua é usada.
+- Importar o mesmo JSON de novo não duplica nada: treinos com a mesma data e as mesmas séries são pulados.
+- Histórico muito grande? Peça à IA por partes (ex.: um trimestre por vez) e importe cada uma.
+
 ### Desativar uma ficha antiga
 
 Quando a professora troca o treino, não precisa excluir a ficha velha: na lista de **Fichas**, toque no ícone

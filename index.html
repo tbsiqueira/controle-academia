@@ -11,9 +11,9 @@
   <link rel="icon" href="icons/icon-16.png" sizes="16x16" type="image/png">
   <link rel="icon" href="icons/icon-32.png" sizes="32x32" type="image/png">
   <link rel="apple-touch-icon" href="icons/icon-180.png">
-  <link rel="stylesheet" href="vendor/bootstrap/bootstrap.min.css?v=71">
-  <link rel="stylesheet" href="vendor/bootstrap-icons/bootstrap-icons.min.css?v=71">
-  <link rel="stylesheet" href="css/styles.css?v=71">
+  <link rel="stylesheet" href="vendor/bootstrap/bootstrap.min.css?v=72">
+  <link rel="stylesheet" href="vendor/bootstrap-icons/bootstrap-icons.min.css?v=72">
+  <link rel="stylesheet" href="css/styles.css?v=72">
 </head>
 <body>
   <main class="container pb-nav">
@@ -197,6 +197,14 @@
       </div>
 
       <div class="card mb-3">
+        <div class="card-header fw-semibold"><i class="bi bi-clock-history"></i> Importar treinos antigos</div>
+        <div class="card-body">
+          <p class="text-muted small mb-2">Tem seus treinos numa planilha (Excel, Google Sheets)? Uma IA converte o histórico e recria as fichas da rotina mais recente, já com a carga da última vez.</p>
+          <button class="btn btn-outline-primary w-100" type="button" id="btnHistoryImport"><i class="bi bi-stars"></i> Importar com IA</button>
+        </div>
+      </div>
+
+      <div class="card mb-3">
         <div class="card-header fw-semibold"><i class="bi bi-journal-text"></i> Colinha</div>
         <div class="card-body">
           <div id="colinhaList"></div>
@@ -250,7 +258,7 @@
       </div>
       </details>
 
-      <p class="text-center text-muted small">Meu Treino <span id="appVersion">v71</span> · dados 100% locais · catálogo: gugeldev/exercicios-bd-ptbr (CC0)</p>
+      <p class="text-center text-muted small">Meu Treino <span id="appVersion">v72</span> · dados 100% locais · catálogo: gugeldev/exercicios-bd-ptbr (CC0)</p>
     </section>
   </main>
 
@@ -425,6 +433,38 @@
     </div>
   </div>
 
+  <div class="modal fade" id="historyImportModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-fullscreen-sm-down">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title"><i class="bi bi-clock-history"></i> Importar treinos antigos</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+        </div>
+        <div class="modal-body">
+          <div id="historyImportPaste">
+            <ol class="steps mb-2">
+              <li><span><strong>Copie o texto</strong> abaixo.<small>Ele traz as regras, suas fichas e os exercícios que você já tem, para não duplicar.</small></span></li>
+              <li><span><strong>Cole na IA</strong> (ChatGPT, Claude…) e anexe a planilha.<small>Cada dia vira um treino; a rotina mais recente vira fichas.</small></span></li>
+            </ol>
+            <button type="button" class="btn btn-primary w-100 mb-2" id="historyIaCopy"><i class="bi bi-clipboard"></i> Copiar texto</button>
+            <textarea class="form-control font-monospace mb-3" id="historyIaText" rows="2" readonly aria-label="Texto que vai para a IA"></textarea>
+            <ol class="steps mb-3" start="3">
+              <li><span><strong>Copie a resposta da IA</strong> inteira e cole abaixo.</span></li>
+              <li><span><strong>Toque em Revisar</strong> e confira antes de importar.</span></li>
+            </ol>
+            <label class="form-label" for="historyImportText">Resposta da IA</label>
+            <textarea class="form-control font-monospace" id="historyImportText" rows="9" placeholder="Cole aqui o texto que a IA respondeu"></textarea>
+          </div>
+          <div id="historyImportBody"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary flex-fill" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-primary flex-fill" id="historyImportConfirm"><i class="bi bi-check-lg"></i> Revisar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="modal fade" id="exportModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-fullscreen-sm-down">
       <div class="modal-content">
@@ -444,9 +484,9 @@
     </div>
   </div>
 
-  <script src="vendor/bootstrap/bootstrap.bundle.min.js?v=71"></script>
-  <script src="js/db.js?v=71"></script>
-  <script src="js/core.js?v=71"></script>
-  <script src="js/app.js?v=71"></script>
+  <script src="vendor/bootstrap/bootstrap.bundle.min.js?v=72"></script>
+  <script src="js/db.js?v=72"></script>
+  <script src="js/core.js?v=72"></script>
+  <script src="js/app.js?v=72"></script>
 </body>
 </html>

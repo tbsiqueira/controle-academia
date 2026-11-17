@@ -4,7 +4,8 @@ Aplicativo web instalável (**PWA**) para registrar treinos de academia: fichas 
 aquecimento por exercício, séries com carga e RIR, recordes e 1RM estimado, metas semanais flexíveis,
 calendário de frequência com evolução semanal,
 exportação do treino como texto para enviar à professora e **importação de fichas em JSON** (geradas por uma IA
-a partir do plano/PDF da professora, seguindo o contrato [FICHA-JSON.md](FICHA-JSON.md)).
+a partir do plano/PDF da professora, seguindo o contrato [FICHA-JSON.md](FICHA-JSON.md)) e **importação de treinos
+antigos** de uma planilha, com as fichas da rotina mais recente recriadas (contrato [TREINO-JSON.md](TREINO-JSON.md)).
 
 📖 **Como usar o app, passo a passo: [documentation/MANUAL.md](documentation/MANUAL.md)**
 
@@ -155,6 +156,7 @@ test.ps1                    roda os testes unitários (Node)
 check.ps1                   verificações estáticas
 documentation/MANUAL.md     manual do usuário (como usar, exemplos, FAQ)
 FICHA-JSON.md               contrato do JSON de ficha para a IA (servido pelo app e usado em Fichas → Criar com IA)
+TREINO-JSON.md              contrato do JSON de treinos antigos + fichas (servido pelo app e usado em Mais → Importar treinos antigos)
 documentation/PLANO.md      plano/requisitos e histórico de revisões
 ```
 

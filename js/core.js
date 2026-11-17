@@ -1129,7 +1129,194 @@
   // Texto colado (resposta da IA) -> fichas. A IA costuma cercar o JSON com ```json ... ```: tiramos a cerca.
   // JSON quebrado lança SyntaxError; JSON válido fora do contrato lança Error com o motivo.
   function parseSheetImportText(text) {
-    return parseSheetImport(JSON.parse(String(text).replace(/^\s*```(?:json)?|```\s*$/g, '')));
+    return parseSheetImport(parseAiJson(text));
+  }
+
+  function parseAiJson(text) {
+    return JSON.parse(String(text).replace(/^\s*```(?:json)?|```\s*$/g, ''));
+  }
+
+  /* ---------- importar treinos antigos + fichas recriadas (TREINO-JSON.md) ---------- */
+
+  // Data do JSON: AAAA-MM-DD ou DD/MM/AAAA, e precisa existir no calendário (31/02 não passa).
+  function importDate(value) {
+    const text = String(value === undefined || value === null ? '' : value).trim();
+    const br = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(text);
+    const iso = br ? br[3] + '-' + pad2(br[2]) + '-' + pad2(br[1]) : text;
+    return ISO_DATE.test(iso) && fmtDate(parseDate(iso)) === iso ? iso : '';
+  }
+
+  // Número opcional: ausente vira null; texto que não é número (ou negativo) é erro, nunca um palpite.
+  function importNumber(value, where) {
+    if (value === undefined || value === null || value === '') return null;
+    const n = parseLocalNumber(value);
+    if (isNaN(n) || n < 0) throw new Error(where + ': "' + value + '" não é um número válido.');
+    return n;
+  }
+
+  function importText(value) {
+    return typeof value === 'string' ? value.trim() : '';
+  }
+
+  function importSetFields(raw, where) {
+    return {
+      reps: importNumber(raw.reps, where),
+      load: importNumber(raw.load, where),
+      rir: importNumber(raw.rir, where)
+    };
+  }
+
+  // Lista de treinos feitos -> [{ date, sheetName, cardioMinutes, notes, exercises: [{ name, note, warmup, sets }] }]
+  // em ordem de data, ou Error dizendo qual treino e qual campo. Datas depois de `today` são recusadas.
+  function parseWorkoutList(list, today) {
+    return list.map(function (w, i) {
+      if (!w || typeof w !== 'object') throw new Error('Treino ' + (i + 1) + ': formato inválido.');
+      const date = importDate(w.date);
+      if (!date) throw new Error('Treino ' + (i + 1) + ': "date" ausente ou inválida (use AAAA-MM-DD).');
+      const where = 'Treino de ' + fmtBR(date);
+      if (date > today) throw new Error(where + ': a data está no futuro.');
+      if (w.exercises !== undefined && !Array.isArray(w.exercises)) throw new Error(where + ': "exercises" precisa ser uma lista.');
+      const cardioMinutes = importNumber(w.cardioMinutes, where + ', cardioMinutes') || 0;
+
+      const exercises = (w.exercises || []).map(function (ex, j) {
+        const name = ex && typeof ex === 'object' ? importText(ex.name) : '';
+        if (!name) throw new Error(where + ', exercício ' + (j + 1) + ': falta o "name".');
+        const label = where + ', ' + name;
+        if (!Array.isArray(ex.sets) || !ex.sets.length) throw new Error(label + ': falta a lista "sets".');
+        const sets = ex.sets.map(function (s, k) {
+          const setWhere = label + ', série ' + (k + 1);
+          if (!s || typeof s !== 'object') throw new Error(setWhere + ': formato inválido.');
+          return Object.assign(importSetFields(s, setWhere), { note: importText(s.note) });
+        }).filter(function (s) { return s.reps !== null || s.load !== null; });
+        if (!sets.length) throw new Error(label + ': nenhuma série com "reps" ou "load".');
+        const warmup = ex.warmup && typeof ex.warmup === 'object' ? importSetFields(ex.warmup, label + ', aquecimento') : null;
+        return { name: name, note: importText(ex.note), warmup: warmupHasData(warmup) ? warmup : null, sets: sets };
+      });
+
+      if (!exercises.length && !cardioMinutes) throw new Error(where + ': sem exercícios nem cardio.');
+      return { date: date, sheetName: importText(w.ficha), cardioMinutes: cardioMinutes, notes: importText(w.notes), exercises: exercises };
+    }).sort(function (a, b) { return a.date.localeCompare(b.date); });
+  }
+
+  // Formato de TREINO-JSON.md: { "fichas": [...], "treinos": [...] }. As fichas seguem FICHA-JSON.md
+  // e são opcionais; uma lista solta conta como só treinos. Devolve { sheets, workouts } ou lança Error.
+  function parseHistoryImport(payload, today) {
+    const data = Array.isArray(payload) ? { treinos: payload } : (payload || {});
+    if (!Array.isArray(data.treinos) || !data.treinos.length) throw new Error('Falta a lista "treinos" (com pelo menos um treino).');
+    if (data.fichas !== undefined && !Array.isArray(data.fichas)) throw new Error('"fichas" precisa ser uma lista.');
+    const sheets = data.fichas && data.fichas.length ? parseSheetImport(data.fichas) : [];
+    sheets.forEach(function (s, i) {
+      const twin = sheets.findIndex(function (o) { return normalizeText(o.name) === normalizeText(s.name); });
+      if (twin !== i) throw new Error('Ficha "' + s.name + '" aparece duas vezes em "fichas".');
+    });
+    return { sheets: sheets, workouts: parseWorkoutList(data.treinos, today || todayISO()) };
+  }
+
+  function parseHistoryImportText(text, today) {
+    return parseHistoryImport(parseAiJson(text), today);
+  }
+
+  // Ficha do app com o mesmo nome (sem diferenciar maiúscula/acento), ativa primeiro.
+  function sheetByName(sheets, name) {
+    const key = normalizeText(name);
+    const same = key ? (sheets || []).filter(function (s) { return normalizeText(s.name) === key; }) : [];
+    return same.find(function (s) { return s.active !== false; }) || same[0] || null;
+  }
+
+  // Fichas do JSON: as que já existem no app (mesmo nome) são reaproveitadas, não duplicadas.
+  function splitImportedSheets(sheets, existing) {
+    const fresh = [];
+    const reused = [];
+    sheets.forEach(function (s) {
+      (sheetByName(existing, s.name) ? reused : fresh).push(s);
+    });
+    return { fresh: fresh, reused: reused };
+  }
+
+  // Treino importado -> registro do banco (sem id e datas de criação). A ficha é ligada pelo nome;
+  // sem par, o treino guarda só o nome. exerciseFor(nome) devolve { id, name }.
+  function importedWorkout(item, sheets, exerciseFor) {
+    const sheet = sheetByName(sheets, item.sheetName);
+    const sets = [];
+    const warmups = [];
+    item.exercises.forEach(function (ex) {
+      const found = exerciseFor(ex.name);
+      if (ex.warmup) {
+        warmups.push({ exerciseId: found.id, exerciseName: found.name, reps: ex.warmup.reps, load: ex.warmup.load, rir: ex.warmup.rir });
+      }
+      ex.sets.forEach(function (s, k) {
+        sets.push({
+          exerciseId: found.id,
+          exerciseName: found.name,
+          number: k + 1,
+          reps: s.reps,
+          load: s.load,
+          rir: s.rir,
+          note: s.note,
+          exerciseNote: ex.note
+        });
+      });
+    });
+    return {
+      date: item.date,
+      sheetId: sheet ? sheet.id : null,
+      sheetName: sheet ? sheet.name : item.sheetName,
+      cardioMinutes: item.cardioMinutes,
+      notes: item.notes,
+      warmups: warmups,
+      sets: sets
+    };
+  }
+
+  // "Impressão digital" de um treino: data, cardio e reps×carga de cada série, em ordem.
+  // Não usa nomes: renomear exercício ou ficha não faz um treino reimportado parecer novo.
+  function workoutFingerprint(w) {
+    const sets = w.exercises
+      ? w.exercises.reduce(function (all, ex) { return all.concat(ex.sets); }, [])
+      : (w.sets || []);
+    return [w.date, toNum(w.cardioMinutes)].concat(sets.map(function (s) {
+      return toNum(s.reps) + 'x' + toNum(s.load);
+    })).join('|');
+  }
+
+  // Separa os treinos do JSON em novos e repetidos (já no app, ou duas vezes no mesmo JSON).
+  function splitImportedWorkouts(items, existing) {
+    const seen = {};
+    (existing || []).forEach(function (w) { seen[workoutFingerprint(w)] = true; });
+    const fresh = [];
+    const repeated = [];
+    items.forEach(function (item) {
+      const key = workoutFingerprint(item);
+      (seen[key] ? repeated : fresh).push(item);
+      seen[key] = true;
+    });
+    return { fresh: fresh, repeated: repeated };
+  }
+
+  // Nomes de exercício usados no JSON (fichas + treinos), sem repetir, na ordem em que aparecem.
+  function historyExerciseNames(parsed) {
+    const seen = {};
+    const names = [];
+    parsed.sheets.concat(parsed.workouts).forEach(function (item) {
+      item.exercises.forEach(function (ex) {
+        const key = normalizeText(ex.name);
+        if (seen[key]) return;
+        seen[key] = true;
+        names.push(ex.name);
+      });
+    });
+    return names;
+  }
+
+  // Lista das fichas do app para colar na IA junto com TREINO-JSON.md.
+  function sheetNamesText(sheets) {
+    const lines = (sheets || []).filter(function (s) { return s && s.name; }).map(function (s) {
+      return '- ' + s.name + (s.active === false ? ' (desativada)' : '');
+    });
+    return '## Fichas que já existem no app\n\n' +
+      'Quando um treino for uma destas fichas, use o nome EXATAMENTE como está aqui, sem "(desativada)", ' +
+      'e não a coloque em "fichas" de novo.\n\n' +
+      (lines.length ? lines.join('\n') : '(nenhuma)') + '\n';
   }
 
   const NAME_STOPWORDS =['a', 'o', 'e', 'ao', 'de', 'da', 'do', 'das', 'dos', 'com', 'no', 'na', 'em'];
@@ -1342,6 +1529,16 @@
     parseSheetImport: parseSheetImport,
     parseSheetImportText: parseSheetImportText,
     suggestExercises: suggestExercises,
-    exerciseNamesText: exerciseNamesText
+    exerciseNamesText: exerciseNamesText,
+    // importar treinos antigos + fichas recriadas (TREINO-JSON.md)
+    parseHistoryImport: parseHistoryImport,
+    parseHistoryImportText: parseHistoryImportText,
+    sheetByName: sheetByName,
+    splitImportedSheets: splitImportedSheets,
+    importedWorkout: importedWorkout,
+    workoutFingerprint: workoutFingerprint,
+    splitImportedWorkouts: splitImportedWorkouts,
+    historyExerciseNames: historyExerciseNames,
+    sheetNamesText: sheetNamesText
   };
 });

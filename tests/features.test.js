@@ -370,3 +370,16 @@ test('card Instalar o app fica entre Dados e as opcoes avancadas', () => {
   assert.match(APP, /addEventListener\('beforeinstallprompt', function \(e\) \{\s*e\.preventDefault\(\);\s*installPrompt = e;/);
   assert.match(APP, /getElementById\('btnInstall'\)\.addEventListener\('click', guard\(installApp\)\)/);
 });
+
+/* ---------- Mais -> Importar treinos antigos (TREINO-JSON.md) ---------- */
+
+test('Importar treinos antigos: card em Mais e janela com o mesmo fluxo do Criar com IA', () => {
+  const more = HTML.slice(HTML.indexOf('id="view-more"'), HTML.indexOf('</section>', HTML.indexOf('id="view-more"')));
+  assert.match(more, /Importar treinos antigos[\s\S]*?id="btnHistoryImport"/, 'card proprio em Mais');
+  const modal = HTML.slice(HTML.indexOf('id="historyImportModal"'), HTML.indexOf('id="exportModal"'));
+  assert.ok(modal.indexOf('id="historyIaText"') < modal.indexOf('id="historyImportText"'), 'primeiro copia, depois cola a resposta');
+  assert.match(APP, /fetch\('TREINO-JSON\.md'\)/, 'texto para a IA vem do contrato');
+  assert.match(APP, /sheetNamesText\(state\.sheets\)[\s\S]*?exerciseNamesText\(/, 'junta fichas e exercicios que ja existem');
+  assert.match(APP, /state\.pendingHistory = null;   \/\/ antes dos awaits/, 'toque duplo nao importa duas vezes');
+  assert.match(fs.readFileSync(path.join(__dirname, '..', 'sw.js'), 'utf8'), /'\.\/TREINO-JSON\.md'/, 'contrato funciona offline');
+});

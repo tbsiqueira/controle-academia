@@ -1753,14 +1753,7 @@ async function reviewSheetImport() {
   }
 
   await loadCatalog();
-  const unmatched = [];
-  sheets.forEach(function (s) {
-    s.exercises.forEach(function (item) {
-      if (!exactExercise(item.name) && !unmatched.some(function (n) { return normalizeText(n) === normalizeText(item.name); })) {
-        unmatched.push(item.name);
-      }
-    });
-  });
+  const unmatched = unmatchedExerciseNames(historyExerciseNames({ sheets: sheets, workouts: [] }));
   state.pendingImport = { sheets: sheets, unmatched: unmatched };
 
   const summary = '<p class="fw-bold mb-2">' + (sheets.length === 1 ? 'Ficha encontrada' : sheets.length + ' fichas encontradas') + '</p>' +
@@ -1768,21 +1761,7 @@ async function reviewSheetImport() {
       return '<li><span class="sheet-item-name">' + esc(s.name) + '</span><span class="sheet-item-detail ms-auto">' + s.exercises.length + (s.exercises.length === 1 ? ' exercício' : ' exercícios') + '</span></li>';
     }).join('') + '</ul></div></div>';
 
-  const review = unmatched.length
-    ? '<p class="mb-3"><i class="bi bi-question-circle text-primary"></i> <strong>Estes nomes não existem no app.</strong> Escolha um exercício parecido para não duplicar, ou crie um novo:</p>' +
-      unmatched.map(function (name, i) {
-        const candidates = importCandidates();
-        const strong = suggestExercises(name, candidates, 1, 0.5)[0];
-        const options = suggestExercises(name, candidates, 6).map(function (e) {
-          return '<option value="' + esc(e.id) + '"' + (e === strong ? ' selected' : '') + '>' + esc(e.name) + (typeof e.id === 'number' ? ' (catálogo)' : ' (biblioteca)') + '</option>';
-        }).join('');
-        return '<div class="mb-3"><label class="form-label import-name" for="imp-' + i + '">' + esc(name) + '</label>' +
-          '<select class="form-select" id="imp-' + i + '">' +
-          '<option value=""' + (strong ? '' : ' selected') + '>➕ Criar novo: ' + esc(name) + '</option>' + options + '</select></div>';
-      }).join('')
-    : '<p class="mb-0"><i class="bi bi-check-circle-fill text-success"></i> Todos os exercícios já existem no app.</p>';
-
-  document.getElementById('sheetImportBody').innerHTML = summary + review;
+  document.getElementById('sheetImportBody').innerHTML = summary + exerciseChoicesHtml(unmatched, 'imp-');
   document.getElementById('sheetImportPaste').classList.add('d-none');
   setImportButton('Importar');
 }
@@ -1792,30 +1771,168 @@ async function confirmSheetImport() {
   state.pendingImport = null;   // antes dos awaits: toque duplo não grava duas vezes
   if (!pending) return;
 
-  const chosen = {};
-  pending.unmatched.forEach(function (name, i) {
-    const id = document.getElementById('imp-' + i).value;
-    chosen[normalizeText(name)] = id ? importCandidates().find(function (e) { return String(e.id) === id; }) : null;
-  });
-
+  const chosen = chosenExercises(pending.unmatched, 'imp-');
   for (let i = 0; i < pending.sheets.length; i++) {
     const s = pending.sheets[i];
-    const exercises = [];
-    for (let j = 0; j < s.exercises.length; j++) {
-      const item = s.exercises[j];
-      const found = exactExercise(item.name) || chosen[normalizeText(item.name)] || await findOrCreateExercise(item.name);
-      exercises.push(Object.assign({}, item, { exerciseId: found.id, name: found.name }));
-    }
     let name = s.name;
     while (sheetNameExists(name, null)) name += ' (importada)';
-    const now = new Date().toISOString();
-    await dbPut('sheets', { id: uid(), name: name, active: true, exercises: exercises, createdAt: now, updatedAt: now });
-    state.sheets = await dbAll('sheets');
+    await createImportedSheet(name, s.exercises, chosen);
   }
 
   bootstrap.Modal.getInstance(document.getElementById('sheetImportModal')).hide();
   refreshAfterSheetChange();
   renderExercises();
+}
+
+/* ---------- revisão de nomes de exercício (fichas e treinos antigos) ---------- */
+
+// Nomes que não têm par exato na Biblioteca/catálogo (sem repetir).
+function unmatchedExerciseNames(names) {
+  return names.filter(function (name) { return !exactExercise(name); });
+}
+
+// Um seletor por nome sem par: exercícios parecidos (o mais forte já escolhido) ou "Criar novo".
+function exerciseChoicesHtml(unmatched, prefix) {
+  if (!unmatched.length) {
+    return '<p class="mb-0"><i class="bi bi-check-circle-fill text-success"></i> Todos os exercícios já existem no app.</p>';
+  }
+  const candidates = importCandidates();
+  return '<p class="mb-3"><i class="bi bi-question-circle text-primary"></i> <strong>Estes nomes não existem no app.</strong> Escolha um exercício parecido para não duplicar, ou crie um novo:</p>' +
+    unmatched.map(function (name, i) {
+      const strong = suggestExercises(name, candidates, 1, 0.5)[0];
+      const options = suggestExercises(name, candidates, 6).map(function (e) {
+        return '<option value="' + esc(e.id) + '"' + (e === strong ? ' selected' : '') + '>' + esc(e.name) + (typeof e.id === 'number' ? ' (catálogo)' : ' (biblioteca)') + '</option>';
+      }).join('');
+      return '<div class="mb-3"><label class="form-label import-name" for="' + prefix + i + '">' + esc(name) + '</label>' +
+        '<select class="form-select" id="' + prefix + i + '">' +
+        '<option value=""' + (strong ? '' : ' selected') + '>➕ Criar novo: ' + esc(name) + '</option>' + options + '</select></div>';
+    }).join('');
+}
+
+// O que a pessoa escolheu em cada seletor: { nome normalizado: exercício | null (criar novo) }.
+function chosenExercises(unmatched, prefix) {
+  const chosen = {};
+  unmatched.forEach(function (name, i) {
+    const id = document.getElementById(prefix + i).value;
+    chosen[normalizeText(name)] = id ? importCandidates().find(function (e) { return String(e.id) === id; }) : null;
+  });
+  return chosen;
+}
+
+async function resolveImportedExercise(name, chosen) {
+  return exactExercise(name) || chosen[normalizeText(name)] || await findOrCreateExercise(name);
+}
+
+async function createImportedSheet(name, items, chosen) {
+  const exercises = [];
+  for (let j = 0; j < items.length; j++) {
+    const found = await resolveImportedExercise(items[j].name, chosen);
+    exercises.push(Object.assign({}, items[j], { exerciseId: found.id, name: found.name }));
+  }
+  const now = new Date().toISOString();
+  await dbPut('sheets', { id: uid(), name: name, active: true, exercises: exercises, createdAt: now, updatedAt: now });
+  state.sheets = await dbAll('sheets');
+}
+
+/* ---------- importar treinos antigos + fichas (Mais, contrato TREINO-JSON.md) ---------- */
+
+function setHistoryButton(label) {
+  document.getElementById('historyImportConfirm').innerHTML = '<i class="bi bi-check-lg"></i> ' + label;
+}
+
+// Passo 1: texto para a IA (contrato + fichas + exercícios) e caixa para colar a resposta.
+function openHistoryImport() {
+  state.pendingHistory = null;
+  document.getElementById('historyImportText').value = '';
+  document.getElementById('historyImportPaste').classList.remove('d-none');
+  document.getElementById('historyImportBody').innerHTML = '';
+  setHistoryButton('Revisar');
+  guard(renderHistoryIa)();
+  bootstrap.Modal.getOrCreateInstance(document.getElementById('historyImportModal')).show();
+}
+
+async function renderHistoryIa() {
+  const area = document.getElementById('historyIaText');
+  area.value = 'Carregando…';
+  const response = await fetch('TREINO-JSON.md');
+  const contract = await response.text();
+  area.value = contract + '\n\n' + sheetNamesText(state.sheets) + '\n' +
+    exerciseNamesText(libraryExercises(state.exercises), await loadCatalog());
+}
+
+// Passo 2: valida e mostra o que vai entrar (o botão vira "Importar").
+async function reviewHistoryImport() {
+  let parsed;
+  try {
+    parsed = parseHistoryImportText(document.getElementById('historyImportText').value, todayISO());
+  } catch (e) {
+    alert('Não deu para importar os treinos.\n\n' + (e instanceof SyntaxError ? 'O texto não é um JSON válido. Copie a resposta inteira da IA.' : e.message));
+    return;
+  }
+
+  const workouts = splitImportedWorkouts(parsed.workouts, state.workouts);
+  const sheets = splitImportedSheets(parsed.sheets, state.sheets);
+  if (!workouts.fresh.length && !sheets.fresh.length) {
+    alert('Nada novo para importar: esses treinos e fichas já estão no app.');
+    return;
+  }
+
+  await loadCatalog();
+  const unmatched = unmatchedExerciseNames(historyExerciseNames({ sheets: sheets.fresh, workouts: workouts.fresh }));
+  state.pendingHistory = { sheets: sheets.fresh, workouts: workouts.fresh, unmatched: unmatched };
+
+  const fresh = workouts.fresh;
+  const sheetRows = sheets.fresh.map(function (s) {
+    return '<li><span class="sheet-item-name">' + esc(s.name) + '</span><span class="sheet-item-detail ms-auto">nova · ' + s.exercises.length + (s.exercises.length === 1 ? ' exercício' : ' exercícios') + '</span></li>';
+  }).concat(sheets.reused.map(function (s) {
+    return '<li><span class="sheet-item-name">' + esc(s.name) + '</span><span class="sheet-item-detail ms-auto">já existe, será usada</span></li>';
+  }));
+  const summary =
+    '<p class="fw-bold mb-2">' + (fresh.length === 1 ? '1 treino novo' : fresh.length + ' treinos novos') +
+      (fresh.length ? ' <span class="fw-normal text-muted">(' + fmtBR(fresh[0].date) + ' a ' + fmtBR(fresh[fresh.length - 1].date) + ')</span>' : '') + '</p>' +
+    (workouts.repeated.length
+      ? '<p class="small text-muted mb-2">' + workouts.repeated.length + (workouts.repeated.length === 1 ? ' treino já estava' : ' treinos já estavam') + ' no app e não será importado de novo.</p>'
+      : '') +
+    (sheetRows.length
+      ? '<p class="fw-bold mb-2">Fichas</p><div class="card mb-3"><div class="card-body py-2"><ul class="list-unstyled sheet-items mb-0">' + sheetRows.join('') + '</ul></div></div>'
+      : '<p class="small text-muted mb-3">Nenhuma ficha no JSON: os treinos ficam ligados às fichas de mesmo nome que já existem.</p>');
+
+  document.getElementById('historyImportBody').innerHTML = summary + exerciseChoicesHtml(unmatched, 'imph-');
+  document.getElementById('historyImportPaste').classList.add('d-none');
+  setHistoryButton('Importar');
+}
+
+// Passo 3: grava exercícios novos, fichas novas e os treinos (ligados às fichas pelo nome).
+async function confirmHistoryImport() {
+  const pending = state.pendingHistory;
+  state.pendingHistory = null;   // antes dos awaits: toque duplo não grava duas vezes
+  if (!pending) return;
+
+  const chosen = chosenExercises(pending.unmatched, 'imph-');
+  for (let i = 0; i < pending.sheets.length; i++) {
+    await createImportedSheet(pending.sheets[i].name, pending.sheets[i].exercises, chosen);
+  }
+
+  const resolved = {};
+  const names = historyExerciseNames({ sheets: [], workouts: pending.workouts });
+  for (let i = 0; i < names.length; i++) {
+    resolved[normalizeText(names[i])] = await resolveImportedExercise(names[i], chosen);
+  }
+  const exerciseFor = function (name) { return resolved[normalizeText(name)]; };
+
+  const now = new Date().toISOString();
+  for (let i = 0; i < pending.workouts.length; i++) {
+    const record = importedWorkout(pending.workouts[i], state.sheets, exerciseFor);
+    await dbPut('workouts', Object.assign({ id: uid() }, record, { createdAt: now, updatedAt: now }));
+  }
+  state.workouts = await dbAll('workouts');
+
+  bootstrap.Modal.getInstance(document.getElementById('historyImportModal')).hide();
+  refreshAfterSheetChange();
+  renderExercises();
+  renderDashboard();
+  showToast(pending.workouts.length + (pending.workouts.length === 1 ? ' treino importado' : ' treinos importados') +
+    (pending.sheets.length ? ' e ' + pending.sheets.length + (pending.sheets.length === 1 ? ' ficha criada' : ' fichas criadas') : '') + '.');
 }
 
 /* ---------- contrato para a IA (modal Criar com IA) ---------- */
@@ -2545,6 +2662,11 @@ function bindEvents() {
   document.getElementById('exportShare').addEventListener('click', function () { guard(shareExportText)('exportText'); });
   document.getElementById('sheetImportConfirm').addEventListener('click', function () {
     guard(state.pendingImport ? confirmSheetImport : reviewSheetImport)();
+  });
+  document.getElementById('btnHistoryImport').addEventListener('click', openHistoryImport);
+  document.getElementById('historyIaCopy').addEventListener('click', function () { guard(copyExportText)('historyIaText'); });
+  document.getElementById('historyImportConfirm').addEventListener('click', function () {
+    guard(state.pendingHistory ? confirmHistoryImport : reviewHistoryImport)();
   });
   document.getElementById('btnForceUpdate').addEventListener('click', guard(forceUpdate));
   document.getElementById('btnImport').addEventListener('click', function () {
