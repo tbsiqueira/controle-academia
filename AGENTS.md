@@ -28,7 +28,8 @@ Read before changing anything:
 1. Logic goes in `js/core.js` (pure, 100% covered by tests); `js/app.js` only renders and wires the DOM.
 2. Never break old backups: imports must keep loading old data and silently ignore fields they don't know.
 3. Changing `index.html`, `css/` or `js/` → bump the version (see workflow.md). `check.ps1` fails otherwise.
-4. Before you say done: `node --test tests/` and `powershell -ExecutionPolicy Bypass -File .\check.ps1` both pass.
+4. Before you say done: `node --test tests/`, `powershell -ExecutionPolicy Bypass -File .\check.ps1` and
+   `npm run test:e2e` (browser tests) all pass.
 5. Commit only when asked; never push unless asked. `main` is protected: every change goes through a branch and a
    PR, merged **only by rebase** after the required checks pass. Never tag by hand: merging a PR with a new version
    makes `deploy.yml` publish and tag `vN`. Always `git pull --ff-only origin main` before branching from `main`

@@ -33,10 +33,14 @@ e a instalação como app funcionam.)
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\test.ps1    # testes unitários (Node 18+, sem dependências)
 powershell -ExecutionPolicy Bypass -File .\check.ps1   # verificações estáticas
+npm run test:e2e                                       # testes de navegador (Playwright)
 ```
 
 - **`test.ps1`** roda `node --test tests/`. Se o Node não estiver instalado, ele apenas avisa (os testes
   rodam no GitHub Actions de qualquer forma).
+- **Testes de navegador** (`tests/e2e/`): abrem o app de verdade num Chromium de celular (375px). Precisam de
+  `npm ci` e `npx playwright install chromium` uma vez; o `package.json` é só para essas ferramentas, o app
+  não usa nada dele. `npm run test:e2e:ui` mostra cada passo; `npm run test:e2e:report` abre o relatório.
 - **`check.ps1`** confere JSONs, referências de `id`, handlers `onclick`, assets do HTML e do service
   worker, o catálogo (ids únicos/contíguos/estáveis), o versionamento e se o `core.js` está ligado.
 
@@ -71,7 +75,7 @@ A `main` é protegida: **nada entra nela por push direto**. Toda mudança vai nu
 request e só entra com **merge por rebase** depois que os checks passam. O site publica sozinho:
 
 ```
-branch + PR               → roda tests.yml (Testes unitários, Verificações estáticas, Versão)
+branch + PR               → roda tests.yml (Testes unitários, Verificações estáticas, Testes de navegador, Versão)
 merge do PR (por rebase)  → deploy.yml: versão vN ainda sem tag? testa, publica no Pages e cria a tag vN
 PR só de docs/CI          → mantém a versão → o deploy vê que vN já tem tag e não publica nada
 ```
@@ -96,7 +100,7 @@ versão já tem tag). Ninguém cria tag à mão: quem cria é o `deploy.yml`, de
 - **Settings → General → Pull Requests**: só **Allow rebase merging** ligado (merge commit e squash
   desligados), **Allow auto-merge** e **Automatically delete head branches** ligados.
 - **Settings → Rules → Rulesets → `main`**: bloqueia push direto, force push e exclusão; exige PR, histórico
-  linear, merge por rebase e os checks `Testes unitários`, `Verificações estáticas` e `Versão` com a
+  linear, merge por rebase e os checks `Testes unitários`, `Verificações estáticas`, `Testes de navegador` e `Versão` com a
   branch atualizada com a `main`. Mudou o nome de um job em `tests.yml`? Atualize o ruleset.
 - **Settings → Environments → `github-pages`**: a regra de branch `main` permite o deploy.
 

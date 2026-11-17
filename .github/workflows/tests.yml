@@ -49,6 +49,40 @@ jobs:
         shell: pwsh
         run: ./check.ps1
 
+  # Testes de navegador (Playwright): o app de verdade num Chromium de celular. Veja documentation/REFACTOR.md.
+  navegador:
+    name: Testes de navegador
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Configurar Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: '26'
+          cache: npm
+
+      - name: Instalar ferramentas (package-lock.json)
+        run: npm ci
+
+      - name: Instalar o Chromium do Playwright
+        run: npx playwright install --with-deps chromium
+
+      - name: Rodar os testes de navegador
+        run: npx playwright test
+
+      - name: Guardar relatório e traces das falhas
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: relatorio-testes-navegador
+          path: |
+            tests/e2e/report/
+            tests/e2e/results/
+          retention-days: 14
+
   # Só em PR: mexeu no app (index.html, css/, js/) → a versão precisa subir e ser nova,
   # senão o merge não publica nada (deploy.yml só publica versão sem tag).
   versao:
