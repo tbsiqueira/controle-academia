@@ -9,7 +9,7 @@
 // - Último treino da Treino A em 10/03/2025: Supino 40 kg × 11, 42,5 × 9, 45 × 7 (aquecimento 15 reps, 20 kg,
 //   RIR 3); Remada 50 × 10, 50 × 9. Um treino mais velho (03/03/2025) com cargas menores não deve aparecer.
 // - Biblioteca: Supino reto, Remada baixa, Agachamento livre e Rosca na máquina azul. Descanso: 90 s.
-const { test, expect, freshApp, withBackup, storedDraft, goTo } = require('./helpers');
+const { test, expect, freshApp, withBackup, storedDraft, storedRecords, goTo, answerConfirm } = require('./helpers');
 
 const BACKUP = 'treinar-backup.json';
 
@@ -848,5 +848,117 @@ test.describe('Treinar · treino existente', () => {
       '*Cardio:* 15 min',
       '*Observações:* Bom treino'
     ].join('\n'));
+  });
+});
+
+test.describe('Treinar · exercício repetido', () => {
+  test('o mesmo exercício não entra duas vezes no treino', async ({ page }) => {
+    const alerts = [];
+    page.on('dialog', (dialog) => { alerts.push(dialog.message()); dialog.accept(); });
+    await workoutWithSheet(page, 'Treino A');
+    await page.locator('#btnAddExercise').click();
+    await page.locator('#pickerSearch').fill('Supino reto');
+    await page.locator('#pickerResults').getByRole('button', { name: /^Supino reto/ }).first().click();
+
+    await expect.poll(() => alerts).toEqual([
+      '"Supino reto" já está neste treino. Use o botão "+ série" dele para fazer mais séries.'
+    ]);
+    await expect(page.locator('#workoutExercises .card')).toHaveCount(2);
+    expect(await setValues(exerciseCard(page, 'Supino reto'), 'Reps')).toEqual(['12', '10', '8']);
+  });
+});
+
+test.describe('Treinar · responder "Não" mantém o que foi preenchido', () => {
+  test('trocar de ficha', async ({ page }) => {
+    await workoutWithSheet(page, 'Treino A');
+    await exerciseCard(page, 'Supino reto').getByLabel('RIR da série 1').fill('2');
+    const asked = await answerConfirm(page, false);
+
+    await page.locator('#workoutSheet').selectOption({ label: 'Treino B' });
+
+    await expect.poll(asked).toEqual(['Substituir os exercícios já no formulário pelos da ficha "Treino B"?']);
+    await expect(page.locator('#workoutExercises .card')).toHaveCount(2);
+    await expect(exerciseCard(page, 'Supino reto').getByLabel('RIR da série 1')).toHaveValue('2');
+    await expect(exerciseCard(page, 'Agachamento livre')).toHaveCount(0);
+  });
+
+  test('"Repetir o último treino desta ficha"', async ({ page }) => {
+    await workoutWithSheet(page, 'Treino A');
+    const asked = await answerConfirm(page, false);
+
+    await page.getByRole('button', { name: 'Repetir o último treino desta ficha (10/03/2025)' }).click();
+
+    await expect.poll(asked).toEqual(['Substituir os exercícios do formulário pelo treino de 10/03/2025?\n\n' +
+      'Reps e cargas vêm daquele treino; RIR e observações ficam em branco.']);
+    expect(await setValues(exerciseCard(page, 'Supino reto'), 'Reps')).toEqual(['12', '10', '8']);
+  });
+
+  test('remover um exercício preenchido', async ({ page }) => {
+    await workoutWithSheet(page, 'Treino A');
+    const asked = await answerConfirm(page, false);
+
+    await exerciseCard(page, 'Supino reto').getByRole('button', { name: 'Remover exercício' }).click();
+
+    await expect.poll(asked).toEqual(['Remover "Supino reto" do treino?\n\nO que foi preenchido neste exercício será perdido.']);
+    await expect(page.locator('#workoutExercises .card')).toHaveCount(2);
+    expect(await setValues(exerciseCard(page, 'Supino reto'), 'Carga')).toEqual(['40', '42,5', '45']);
+  });
+
+  test('Cancelar (pergunta mesmo com só a observação preenchida)', async ({ page }) => {
+    await freshApp(page);
+    await goTo(page, 'Treinar');
+    await page.locator('#workoutNotes').fill('só uma anotação');
+    await expect.poll(async () => (await storedDraft(page))?.notes).toBe('só uma anotação');
+    const asked = await answerConfirm(page, false);
+
+    await page.getByRole('button', { name: 'Cancelar' }).click();
+
+    await expect.poll(asked).toEqual(['Descartar as alterações deste treino?']);
+    await expect(page.locator('#view-workout')).toBeVisible();
+    await expect(page.locator('#workoutNotes')).toHaveValue('só uma anotação');
+    expect((await storedDraft(page)).notes).toBe('só uma anotação');
+  });
+});
+
+test.describe('Treinar · cancelar e esvaziar', () => {
+  test('Cancelar na edição de um treino salvo volta ao detalhe dele, sem mudar nada', async ({ page }) => {
+    await withBackup(page, BACKUP);
+    await editSavedWorkout(page, 'w-ultimo');
+    await page.locator('#workoutNotes').fill('mudei de ideia');
+
+    await page.getByRole('button', { name: 'Cancelar' }).click();
+
+    await expect(page.locator('#view-detail')).toBeVisible();
+    await expect(page).toHaveURL(/#\/detail\/w-ultimo$/);
+    await expect(page.locator('#detailBody')).toContainText('Bom treino');
+    await expect(page.locator('#detailBody')).not.toContainText('mudei de ideia');
+    await expect.poll(() => storedDraft(page)).toBeNull();
+  });
+
+  test('apagar tudo o que foi digitado apaga o rascunho', async ({ page }) => {
+    await freshApp(page);
+    await goTo(page, 'Treinar');
+    await page.locator('#workoutCardio').fill('20');
+    await expect.poll(async () => (await storedDraft(page))?.cardio).toBe('20');
+
+    await page.locator('#workoutCardio').fill('');
+
+    await expect.poll(() => storedDraft(page)).toBeNull();
+    await goTo(page, 'Início');
+    await expect(page.locator('#draftBanner')).toBeEmpty();
+  });
+});
+
+test.describe('Treinar · navegador antigo', () => {
+  test('salva o treino mesmo sem crypto.randomUUID', async ({ page }) => {
+    await page.addInitScript(() => {
+      Object.defineProperty(Crypto.prototype, 'randomUUID', { configurable: true, value: undefined });
+    });
+    await workoutWithSheet(page, 'Treino B');
+    await page.locator('#workoutSave').click();
+    await expect(page.locator('#view-dashboard')).toBeVisible();
+
+    const saved = (await storedRecords(page, 'workouts')).filter((w) => !w.id.startsWith('w-'));
+    expect(saved.map((w) => w.id)).toEqual([expect.stringMatching(/^id-\d+-[0-9a-f]+$/)]);
   });
 });

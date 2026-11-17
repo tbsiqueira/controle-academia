@@ -27,7 +27,8 @@ const TABS = {
 const test = base.test.extend({
   appCoverage: [async ({ page }, use, testInfo) => {
     // Perfil do V8 pelo protocolo do Chromium. Recarregar a página descarta os contadores da página anterior,
-    // então page.reload/page.goto tiram uma foto antes (recargas feitas pelo próprio app não têm foto).
+    // então page.reload/page.goto tiram uma foto antes. Recargas feitas pelo próprio app ("Atualizar app") não
+    // têm foto: segurar a navegação (Fetch) para fotografar trava o perfil do V8. O teste delas continua valendo.
     const cdp = await page.context().newCDPSession(page);
     await cdp.send('Profiler.enable');
     await cdp.send('Profiler.startPreciseCoverage', { callCount: true, detailed: true });
@@ -131,6 +132,18 @@ function storedRecords(page, store) {
   }), store);
 }
 
+/**
+ * Daqui em diante, responde `answer` a todo confirm() da página (o padrão dos testes é "sim") e guarda as perguntas.
+ * Devolve uma função que lê as perguntas feitas até agora.
+ */
+async function answerConfirm(page, answer) {
+  await page.evaluate((reply) => {
+    window.__confirms = [];
+    window.confirm = (message) => { window.__confirms.push(message); return reply; };
+  }, answer);
+  return () => page.evaluate(() => window.__confirms);
+}
+
 /** Toca numa aba da barra inferior, como uma pessoa faria, e confere que a tela certa abriu. */
 async function goTo(page, tabName) {
   const tab = TABS[tabName];
@@ -143,5 +156,5 @@ async function goTo(page, tabName) {
 
 module.exports = {
   test, expect: base.expect, TABS, freshApp, waitForApp, withSampleData, withBackup, readFixture, storedDraft, storedRecords,
-  goTo
+  goTo, answerConfirm
 };
