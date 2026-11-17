@@ -4,7 +4,8 @@
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\serve.ps1   # http://localhost:8080 (often already running)
-node --test tests/                                      # unit tests
+node --test tests/                                      # unit tests (no install needed)
+npm run test:e2e                                        # browser tests (Playwright), see below
 node tools/coverage-gate.js                             # tests + 100% coverage of js/core.js
 powershell -ExecutionPolicy Bypass -File .\check.ps1   # static checks (must print "Tudo certo.")
 powershell -ExecutionPolicy Bypass -File .\tools\build-sample-data.ps1   # only after editing sample data content
@@ -12,11 +13,35 @@ powershell -ExecutionPolicy Bypass -File .\tools\build-sample-data.ps1   # only 
 
 Python is not installed; use Node for scripted edits. Node 26 locally and in CI.
 
-CI: `tests.yml` runs `node --check`, the coverage gate and `check.ps1` on every PR and push to `main`; on PRs its
-`Versão` job also fails when `index.html`, `css/` or `js/` changed without a version bump (or the version is
-already tagged). These three jobs are the required checks of the `main` ruleset.
+CI: `tests.yml` runs `node --check`, the coverage gate, `check.ps1` and the browser tests on every PR and push to
+`main`; on PRs its `Versão` job also fails when `index.html`, `css/` or `js/` changed without a version bump (or the
+version is already tagged). These four jobs are the required checks of the `main` ruleset.
 `deploy.yml` runs on every push to `main` (= a merged PR): if tag `vN` for the current version doesn't exist yet,
 it runs the checks, publishes to GitHub Pages and then creates and pushes tag `vN`. Otherwise it publishes nothing.
+
+## Browser tests (Playwright)
+
+`package.json` exists only for dev tools; the app never loads anything from it. One-time setup:
+
+```powershell
+npm ci                              # Playwright, from package-lock.json, into node_modules/ (git-ignored)
+npx playwright install chromium     # the browser, ~150 MB, into %LOCALAPPDATA%\ms-playwright
+```
+
+```powershell
+npm run test:e2e          # all browser tests, headless, same settings as CI
+npm run test:e2e:ui       # Playwright UI: pick a test, watch each step
+npm run test:e2e:report   # HTML report of the last run (traces of failures)
+```
+
+- Tests live in `tests/e2e/*.spec.js`; `node --test tests/` never picks them up.
+- They start their own server (`tests/e2e/server.js`, port 4173), so `serve.ps1` on 8080 can keep running.
+- Same conditions everywhere: Chromium, 375px phone viewport, light theme, pt-BR, São Paulo time zone. Each test
+  gets a fresh browser context (empty IndexedDB, no service worker).
+- Use `test`/`expect` from `tests/e2e/helpers.js`: any console error or uncaught exception fails the test, and
+  `confirm()` answers yes. Helpers: `freshApp`, `withSampleData`, `goTo(page, 'Treinar')`.
+- No fixed waits (`waitForTimeout`): wait for what the user would see.
+- In CI a failed run uploads the report and traces as the `relatorio-testes-navegador` artifact.
 
 ## Refactor in progress
 
