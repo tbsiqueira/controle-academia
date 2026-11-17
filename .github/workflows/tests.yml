@@ -1,7 +1,8 @@
 name: Testes
 
 # Roda os testes de unidade e as verificações estáticas a cada push na main e em pull requests.
-# (O deploy publica somente em tags — veja deploy.yml)
+# Os jobs abaixo são checks obrigatórios do PR na main (ruleset "main"): mudou o nome de um job,
+# atualize o ruleset. O deploy fica em deploy.yml (publica ao entrar versão nova na main).
 on:
   push:
     branches:
@@ -47,3 +48,41 @@ jobs:
       - name: Rodar check.ps1
         shell: pwsh
         run: ./check.ps1
+
+  # Só em PR: mexeu no app (index.html, css/, js/) → a versão precisa subir e ser nova,
+  # senão o merge não publica nada (deploy.yml só publica versão sem tag).
+  versao:
+    name: Versão
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Conferir o bump de versão
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          git fetch --no-tags origin "$BASE_REF"
+          base=$(git show "origin/$BASE_REF:index.html" | grep -oP 'id="appVersion">v\K\d+')
+          head=$(grep -oP 'id="appVersion">v\K\d+' index.html)
+          echo "main: v$base | PR: v$head"
+          if [ "$head" -lt "$base" ]; then
+            echo "::error::a versao do PR (v$head) e menor que a da main (v$base). Faca rebase na main."
+            exit 1
+          fi
+          if git diff --quiet "origin/$BASE_REF...HEAD" -- index.html css js; then
+            echo "Sem mudanca em index.html, css/ ou js/: bump nao exigido."
+            exit 0
+          fi
+          if [ "$head" -le "$base" ]; then
+            echo "::error::index.html, css/ ou js/ mudou mas a versao continua v$head. Suba para v$((base + 1)) (veja documentation/agents/workflow.md)."
+            exit 1
+          fi
+          if git ls-remote --exit-code --tags origin "refs/tags/v$head" >/dev/null; then
+            echo "::error::a tag v$head ja existe. Faca rebase na main e suba a versao."
+            exit 1
+          fi
+          echo "OK: v$base -> v$head"

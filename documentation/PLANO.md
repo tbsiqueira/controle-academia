@@ -89,8 +89,8 @@ tools/build-sample-data.ps1 + tools/sample-data-content.json (gerador reprodutí
 README.md (como rodar, publicar no GitHub Pages, estrutura, versionamento)
 documentation/MANUAL.md (documentação de uso: exemplos, FAQ, problemas comuns, glossário)
 .gitattributes / .nojekyll (higiene do repositório e do GitHub Pages)
-.github/workflows/deploy.yml (testes + verificação e deploy no Pages ao enviar uma tag v*)
-.github/workflows/tests.yml (testes unitários e verificações a cada push na main / PR)
+.github/workflows/deploy.yml (ao entrar versão nova na main: testes, deploy no Pages e criação da tag vN)
+.github/workflows/tests.yml (testes, verificações e bump de versão: checks obrigatórios dos PRs)
 documentation/PLANO.md
 ```
 - Service worker: cache-first para o "shell" do app; **nenhum dado é enviado a servidor**.
@@ -98,7 +98,7 @@ documentation/PLANO.md
 - Teste local sem Node/Python: `serve.ps1` sobe um servidor HTTP local via PowerShell (`localhost` é contexto seguro, então o PWA pode ser testado antes de publicar).
 
 ## 8. Distribuição (GitHub Pages)
-1. Repositório: `https://github.com/tbsiqueira/controle-academia.git`. Tudo na branch `main`; **a publicação no Pages acontece só ao enviar uma tag de versão** (`v1`, `v2`, ...) via GitHub Actions.
+1. Repositório: `https://github.com/tbsiqueira/controle-academia.git`. A `main` só muda por pull request (merge por rebase, com os checks passando); **quando entra um PR com versão nova, o GitHub Actions publica no Pages e cria a tag** (`v1`, `v2`, ...).
 2. Habilitar GitHub Pages no repositório (Settings → Pages → branch `main`, pasta `/`).
 3. No celular, abrir a URL e usar "Adicionar à tela inicial" (Chrome/Edge/Safari).
 4. Depois de instalado, o app abre pelo ícone e funciona offline.
@@ -137,6 +137,7 @@ documentation/PLANO.md
 - **Revisão 20**: a **Biblioteca** passa a listar apenas os exercícios **criados pelo usuário** (os do catálogo não são mais copiados para lá nem aparecem na lista).
 - **Revisão 21**: padronização das barras de botões (ações na **mesma linha**, botões de ícone com largura fixa `.btn-icon`) em todas as telas.
 - **Revisão 42**: auditoria de **referências por id** em todo o app — `exerciseLabel`, `sheetLabel`, `exerciseTarget`, `exerciseMatches` e `exerciseKey` no core; agrupamento de séries, histórico, PR, fichas, pré-preenchimento e texto exportado passaram a resolver pelo id (nome guardado é só fallback para dados antigos/sem id); ids que eram descartados (`pickCatalogExercise`, adicionar do catálogo à ficha) passaram a ser gravados; itens inválidos de ficha são descartados na normalização.
+- **Processo (2026-11-17, sem mudança no app)**: a `main` passou a ser protegida — toda mudança entra por **pull request**, merge **só por rebase**, histórico linear e checks obrigatórios (testes + cobertura, `check.ps1` e o novo job **Versão**, que exige o bump quando `index.html`, `css/` ou `js/` mudam). O `deploy.yml` agora roda a cada merge na `main` e, se a versão ainda não tem tag, publica no Pages e **cria a tag `vN` sozinho**; ninguém mais tagueia à mão.
 - **v74**: tela **Mais** mais enxuta: card **Debug** sempre à vista no fim (saiu o recolhível "Opções avançadas"); card **Fichas de treino** removido (a aba Fichas já faz isso); **Colinha** logo abaixo de **Metas da semana**. Ordem: Metas, Colinha, Importar treinos antigos, Dados, Instalar o app, Debug.
 - **v73**: resumo da revisão e aviso final de **Importar treinos antigos** foram para o core com testes (`historyImportSummaryHtml`, `historyImportToast`); o aviso não diz mais "0 treinos importados" quando só entram fichas. Testes de ligação das duas importações com IA (revisar, importar, ordem fichas → treinos, revisão de exercícios compartilhada).
 - **v72**: novo card **Mais → Importar treinos antigos**: a IA converte uma planilha de treinos já feitos seguindo o contrato `TREINO-JSON.md` (`{ fichas, treinos }`) e recria as **fichas da rotina mais recente**, ligadas aos mesmos exercícios do histórico, para a carga da última vez já vir preenchida. Revisão com período, fichas novas/reaproveitadas e escolha de exercício parecido; treinos repetidos (mesma data e séries) são pulados. Core: `parseHistoryImport`, `sheetByName`, `splitImportedSheets`, `importedWorkout`, `workoutFingerprint`, `splitImportedWorkouts`, `historyExerciseNames`, `sheetNamesText`.

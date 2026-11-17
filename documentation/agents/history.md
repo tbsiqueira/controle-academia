@@ -20,7 +20,10 @@ agent should know before touching the same area.
 - **DB version stays at 2**: new settings go onto the existing `settings` record so no migration is needed.
 - **Backups stay manual and local** (share sheet / download), no cloud integration.
 - **Service worker**: versioned assets cache-first (fast start on weak signal), `index.html` network-first.
-- **Deploy only by tag**, so `main` can move freely.
+- **Deploy only by tag**, so `main` can move freely. Since 2026-11-17 the tag is created by `deploy.yml` itself
+  when a PR with a new version is merged; nobody tags by hand.
+- **PR flow (2026-11-17)**: `main` is protected by a ruleset; rebase merge only, linear history, required checks
+  (tests + coverage, `check.ps1`, version bump). Before that, everything was pushed straight to `main`.
 
 ## Regressions and their lessons
 
