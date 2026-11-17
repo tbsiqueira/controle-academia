@@ -12,10 +12,10 @@ O app funciona e a lógica está bem cuidada, mas a parte de tela virou um bloco
 
 | Arquivo | Tamanho | Situação |
 |---|---|---|
-| `js/app.js` | ~2.700 linhas, 159 funções globais | Telas, render em strings HTML, eventos e estado global num arquivo só. **Nenhum teste roda no navegador.** |
+| `js/app.js` | ~2.700 linhas, 159 funções globais | Telas, render em strings HTML, eventos e estado global num arquivo só. Os HTMLs montados aqui chamam funções globais com `onclick="…"`, `oninput` e `onchange`. Na partida, **nenhum teste rodava no navegador** (resolvido na Fase 1). |
 | `js/core.js` | ~1.600 linhas | Lógica pura, **100% de cobertura** em testes de unidade. Está bem. |
 | `js/db.js` | ~140 linhas | IndexedDB, com teste. Está bem. |
-| `index.html` | ~480 linhas | Todas as telas; botões chamam funções globais com `onclick="…"`. |
+| `index.html` | ~480 linhas | Todas as telas. Sem handlers inline: os botões fixos são ligados com `addEventListener` no `bindEvents()` do `app.js`. |
 | `css/styles.css` | ~1.400 linhas | Estilo do app inteiro. Fora do escopo desta refatoração. |
 
 `core.js`, `db.js` e `app.js` dividem o mesmo escopo global: qualquer função de um é visível nos outros e no HTML.
@@ -56,8 +56,9 @@ tests/                     testes de unidade (node --test), como hoje
 tests/e2e/                 testes de navegador (Playwright)
 ```
 
-Os botões deixam de usar `onclick="funcao()"` e passam a declarar `data-action="…"`, tratados por delegação de
-eventos em cada tela.
+Os HTMLs montados no `app.js` deixam de usar `onclick="funcao()"` (e `oninput`/`onchange`) e passam a declarar
+`data-action="…"`, tratados por delegação de eventos em cada tela. Sem nenhum handler inline, a CSP do `index.html`
+perde o `'unsafe-inline'` do `script-src` (o do `style-src` fica: o app ainda usa atributos `style`).
 
 ## 3. Fases e ordem dos PRs
 
@@ -66,9 +67,26 @@ A ordem importa: **primeiro a rede de segurança, depois mexer no código.**
 | Fase | O que entrega | Issues |
 |---|---|---|
 | **0 — Plano** | Este documento e as regras abaixo | #3 |
-| **1 — Testes de navegador** | Playwright no CI como check obrigatório; **cada comportamento** das telas críticas (Treinar e Início); testes de todos os fluxos do `tests/CHECKLIST.md`; catraca de cobertura do `app.js` | #4, #5, #19, #6, #7, #29 (concluída) |
-| **2 — Módulos** | `core.js`/`db.js` como módulos; `app.js` como módulo sem `onclick` inline; `app.js` dividido por área, um PR por área | #8, #9, #10–#14 |
+| **1 — Testes de navegador** | Playwright no CI como check obrigatório; **cada comportamento** das telas críticas (Treinar e Início); testes de todos os fluxos do `tests/CHECKLIST.md`; catraca de cobertura do `app.js` | #4, #5, #19, #6, #7, #29 — **concluída** |
+| **2 — Módulos** | `core.js`/`db.js` como módulos; `app.js` como módulo sem handler inline e CSP sem `'unsafe-inline'` no `script-src`; catraca de cobertura medindo vários arquivos; `app.js` dividido por área, um PR por área | #8, #9, #33, #10–#14 |
 | **3 — Tipos** | Tipos dos dados em JSDoc checados por `tsc --noEmit` no CI; `// @ts-check` em todos os arquivos; documentação final | #15, #16, #17 |
+
+Dentro da Fase 2 a ordem também importa:
+
+1. **#8 — `core.js`/`db.js` como módulos.** Não é só trocar `module.exports` por `export`: os testes de unidade
+   passam de `require` para `import`, o laço do `tools/coverage-gate.js` que faz `require` de cada teste é
+   reescrito e o `tests/module.test.js` (que testa o registro UMD no navegador) sai ou é substituído.
+2. **#9 — fim dos handlers inline, com o `app.js` ainda num arquivo só.** A troca para `data-action` mexe em quase
+   toda função de render; num arquivo só, a catraca de cobertura e a checagem de handlers do `check.ps1` continuam
+   valendo como estão. Fecha tirando `'unsafe-inline'` do `script-src` da CSP.
+3. **#33 — catraca de cobertura para vários arquivos.** `tools/e2e-coverage.js` (e `tests/e2e/helpers.js`) medem
+   só `js/app.js`. Antes do primeiro PR que divide o `app.js`, a catraca passa a somar `js/app.js`, `js/ui/**` e
+   `js/screens/**`; senão a divisão faria a rede de segurança medir cada vez menos sem ninguém perceber.
+4. **#10–#14 — divisão por área**, um PR por área.
+
+Na Fase 3, `js/types.js` não basta sozinho: o `tsc` precisa de um `tsconfig.json` só de desenvolvimento
+(`allowJs`, `checkJs`, `noEmit`) e cada arquivo referencia os tipos com `import('./types.js').Treino`, porque um
+`@typedef` não fica visível em outro módulo sem isso.
 
 Uma **Fase 4** (TypeScript de verdade, com build) não está planejada. Ela só será avaliada no fim (issue #17),
 com a experiência das fases anteriores. Depois da Fase 3 essa migração seria quase mecânica.
