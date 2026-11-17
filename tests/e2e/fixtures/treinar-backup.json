@@ -1,0 +1,94 @@
+{
+  "app": "meu-treino",
+  "version": 2,
+  "exportedAt": "2025-03-12T10:00:00.000Z",
+  "data": {
+    "workouts": [
+      {
+        "id": "w-antigo",
+        "date": "2025-03-03",
+        "sheetId": "s-a",
+        "sheetName": "Treino A",
+        "cardioMinutes": 0,
+        "notes": "",
+        "warmups": [
+          { "exerciseId": "ex-supino", "exerciseName": "Supino reto", "reps": 20, "load": 10, "rir": 4 }
+        ],
+        "sets": [
+          { "exerciseId": "ex-supino", "exerciseName": "Supino reto", "number": 1, "reps": 12, "load": 30, "rir": 3, "note": "" },
+          { "exerciseId": "ex-supino", "exerciseName": "Supino reto", "number": 2, "reps": 10, "load": 32, "rir": 2, "note": "" },
+          { "exerciseId": "ex-supino", "exerciseName": "Supino reto", "number": 3, "reps": 8, "load": 34, "rir": 1, "note": "" }
+        ],
+        "createdAt": "2025-03-03T12:00:00.000Z",
+        "updatedAt": "2025-03-03T12:00:00.000Z"
+      },
+      {
+        "id": "w-ultimo",
+        "date": "2025-03-10",
+        "sheetId": "s-a",
+        "sheetName": "Treino A",
+        "cardioMinutes": 15,
+        "notes": "Bom treino",
+        "warmups": [
+          { "exerciseId": "ex-supino", "exerciseName": "Supino reto", "reps": 15, "load": 20, "rir": 3 }
+        ],
+        "sets": [
+          { "exerciseId": "ex-supino", "exerciseName": "Supino reto", "number": 1, "reps": 11, "load": 40, "rir": 2, "note": "" },
+          { "exerciseId": "ex-supino", "exerciseName": "Supino reto", "number": 2, "reps": 9, "load": 42.5, "rir": 1, "note": "" },
+          { "exerciseId": "ex-supino", "exerciseName": "Supino reto", "number": 3, "reps": 7, "load": 45, "rir": 0, "note": "" },
+          { "exerciseId": "ex-remada", "exerciseName": "Remada baixa", "number": 1, "reps": 10, "load": 50, "rir": 2, "note": "" },
+          { "exerciseId": "ex-remada", "exerciseName": "Remada baixa", "number": 2, "reps": 9, "load": 50, "rir": 1, "note": "" }
+        ],
+        "createdAt": "2025-03-10T12:00:00.000Z",
+        "updatedAt": "2025-03-10T12:00:00.000Z"
+      }
+    ],
+    "sheets": [
+      {
+        "id": "s-a",
+        "name": "Treino A",
+        "active": true,
+        "exercises": [
+          { "exerciseId": "ex-supino", "name": "Supino reto", "sets": 3, "reps": [12, 10, 8], "note": "" },
+          { "exerciseId": "ex-remada", "name": "Remada baixa", "sets": 2, "reps": [10, 10], "note": "" }
+        ],
+        "createdAt": "2025-03-01T10:00:00.000Z",
+        "updatedAt": "2025-03-01T10:00:00.000Z"
+      },
+      {
+        "id": "s-b",
+        "name": "Treino B",
+        "active": true,
+        "exercises": [
+          { "exerciseId": "ex-agachamento", "name": "Agachamento livre", "sets": 4, "reps": [8, 8, 6, 6], "note": "" }
+        ],
+        "createdAt": "2025-03-01T10:00:00.000Z",
+        "updatedAt": "2025-03-01T10:00:00.000Z"
+      },
+      {
+        "id": "s-velha",
+        "name": "Treino Antigo",
+        "active": false,
+        "exercises": [
+          { "exerciseId": "ex-remada", "name": "Remada baixa", "sets": 3, "reps": [12, 12, 12], "note": "" }
+        ],
+        "createdAt": "2025-01-01T10:00:00.000Z",
+        "updatedAt": "2025-01-01T10:00:00.000Z"
+      }
+    ],
+    "exercises": [
+      { "id": "ex-supino", "name": "Supino reto", "group": "Peito", "source": "custom", "correction": "", "active": true },
+      { "id": "ex-remada", "name": "Remada baixa", "group": "Costas", "source": "custom", "correction": "", "active": true },
+      { "id": "ex-agachamento", "name": "Agachamento livre", "group": "Pernas", "source": "custom", "correction": "", "active": true },
+      { "id": "ex-rosca", "name": "Rosca na máquina azul", "group": "Bíceps", "source": "custom", "correction": "", "active": true }
+    ],
+    "settings": {
+      "id": "app",
+      "weekAnchor": "2025-03-03",
+      "weeklyWorkoutTarget": 3,
+      "weeklyCardioTarget": 120,
+      "restSeconds": 90
+    },
+    "colinha": []
+  }
+}

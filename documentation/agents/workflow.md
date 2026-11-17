@@ -39,8 +39,10 @@ npm run test:e2e:report   # HTML report of the last run (traces of failures)
 - Same conditions everywhere: Chromium, 375px phone viewport, light theme, pt-BR, São Paulo time zone. Each test
   gets a fresh browser context (empty IndexedDB, no service worker).
 - Use `test`/`expect` from `tests/e2e/helpers.js`: any console error or uncaught exception fails the test, and
-  `confirm()` answers yes. Helpers: `freshApp`, `withSampleData`, `goTo(page, 'Treinar')`.
-- No fixed waits (`waitForTimeout`): wait for what the user would see.
+  `confirm()` answers yes. Helpers: `freshApp`, `withSampleData`, `withBackup(page, 'file.json')` (imports a
+  backup from `tests/e2e/fixtures/` through Mais → Importar, for an exact starting state), `goTo(page, 'Treinar')`.
+- No fixed waits (`waitForTimeout`): wait for what the user would see. For timers (rest), install `page.clock` before
+  opening the app and move time with `runFor`/`setSystemTime` (see `treinar.spec.js`).
 - In CI a failed run uploads the report and traces as the `relatorio-testes-navegador` artifact.
 
 ## Refactor in progress
