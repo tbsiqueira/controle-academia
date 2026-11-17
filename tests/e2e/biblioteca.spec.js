@@ -4,7 +4,7 @@
 // - Biblioteca: Supino reto (Peito), Remada baixa (Costas), Agachamento livre (Pernas), Rosca na máquina azul (Bíceps).
 // - Treino A usa Supino reto e Remada baixa; Treino B usa Agachamento livre; Treino Antigo (desativada) usa Remada.
 // - Treinos da Treino A em 03/03/2025 e 10/03/2025, com Supino reto (e Remada no último).
-const { test, expect, freshApp, withBackup, storedRecords, goTo } = require('./helpers');
+const { test, expect, freshApp, withBackup, storedRecords, goTo, answerConfirm } = require('./helpers');
 
 const BACKUP = 'treinar-backup.json';
 
@@ -196,6 +196,17 @@ test.describe('Biblioteca · criar, renomear e excluir', () => {
     await libraryCard(page, 'Rosca na máquina azul').getByRole('button', { name: 'Excluir exercício' }).click();
     await expect(libraryNames(page)).toHaveText(['Agachamento livre', 'Remada baixa', 'Supino reto']);
     expect((await storedRecords(page, 'exercises')).map((e) => e.id).sort()).toEqual(['ex-agachamento', 'ex-remada', 'ex-supino']);
+  });
+
+  test('responder "Não" ao excluir exercício não apaga nada', async ({ page }) => {
+    await libraryWithBackup(page);
+    const asked = await answerConfirm(page, false);
+
+    await libraryCard(page, 'Rosca na máquina azul').getByRole('button', { name: 'Excluir exercício' }).click();
+
+    await expect.poll(asked).toEqual(['Excluir este exercício?']);
+    await expect(libraryNames(page)).toHaveText(['Agachamento livre', 'Remada baixa', 'Rosca na máquina azul', 'Supino reto']);
+    expect(await storedRecords(page, 'exercises')).toHaveLength(4);
   });
 });
 

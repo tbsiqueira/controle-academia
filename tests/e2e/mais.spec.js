@@ -1,6 +1,6 @@
 // Tela Mais (issue #7): metas e descanso, colinha, importar treinos antigos, Instalar o app e o card Debug
 // (armazenamento persistente). Backup, apagar dados, dados de exemplo e atualização ficam em dados.spec.js.
-const { test, expect, freshApp, withBackup, storedRecords, goTo } = require('./helpers');
+const { test, expect, freshApp, withBackup, storedRecords, goTo, answerConfirm } = require('./helpers');
 
 const TODAY = '2026-05-20T10:00:00-03:00';
 
@@ -91,6 +91,22 @@ test.describe('Mais · colinha', () => {
     await list.getByRole('button', { name: 'Excluir colinha' }).click();
     await expect(list).toContainText('Nenhuma colinha ainda.');
     expect(await storedRecords(page, 'colinha')).toHaveLength(0);
+  });
+
+  test('responder "Não" ao excluir não apaga a colinha', async ({ page }) => {
+    await moreScreen(page);
+    const list = page.locator('#colinhaList');
+    await page.locator('#btnAddColinha').click();
+    await page.locator('#colinhaTitle').fill('RIR');
+    await page.locator('#colinhaSave').click();
+    await expect(list.locator('.colinha-item')).toHaveCount(1);
+    const asked = await answerConfirm(page, false);
+
+    await list.getByRole('button', { name: 'Excluir colinha' }).click();
+
+    await expect.poll(asked).toEqual(['Excluir esta colinha?']);
+    await expect(list.locator('.colinha-item strong')).toHaveText('RIR');
+    expect(await storedRecords(page, 'colinha')).toHaveLength(1);
   });
 });
 

@@ -8,7 +8,7 @@
 // - Fichas: Treino A e Treino B ativas, Treino C desativada.
 // - Último backup: 19/05/2026 (em dia).
 const path = require('path');
-const { test, expect, freshApp, withBackup, readFixture, storedDraft, goTo } = require('./helpers');
+const { test, expect, freshApp, withBackup, readFixture, storedDraft, goTo, answerConfirm } = require('./helpers');
 
 const BACKUP = 'inicio-backup.json';
 const TODAY = '2026-05-20T10:00:00-03:00';
@@ -106,6 +106,20 @@ test.describe('Início · aviso do rascunho', () => {
     await goTo(page, 'Treinar');
     await expect(page.locator('#workoutSheet')).toHaveValue('');
     await expect(page.locator('#draftNotice')).toBeEmpty();
+  });
+
+  test('responder "Não" ao Descartar mantém o rascunho e o aviso', async ({ page }) => {
+    await homeWith(page);
+    await startDraft(page);
+    const asked = await answerConfirm(page, false);
+
+    await draftBanner(page).getByRole('button', { name: 'Descartar' }).click();
+
+    await expect.poll(asked).toEqual(['Descartar o treino em andamento? O que foi digitado e não salvo será perdido.']);
+    await expect(draftBanner(page)).toContainText('Treino em andamento (não salvo)');
+    expect((await storedDraft(page)).formSets[0].sets[0].load).toBe('62,5');
+    await draftBanner(page).getByRole('button', { name: 'Continuar' }).click();
+    await expect(page.locator('#workoutExercises input[aria-label="Carga da série 1"]')).toHaveValue('62,5');
   });
 
   test('descreve a edição de um treino salvo, com a data dele', async ({ page }) => {
