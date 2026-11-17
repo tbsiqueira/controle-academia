@@ -41,6 +41,8 @@ npm run test:e2e                                       # testes de navegador (Pl
 - **Testes de navegador** (`tests/e2e/`): abrem o app de verdade num Chromium de celular (375px). Precisam de
   `npm ci` e `npx playwright install chromium` uma vez; o `package.json` é só para essas ferramentas, o app
   não usa nada dele. `npm run test:e2e:ui` mostra cada passo; `npm run test:e2e:report` abre o relatório.
+  Toda funcionalidade do `tests/CHECKLIST.md` tem teste de navegador (o CI cobra), e `npm run test:e2e:coverage`
+  mostra quanto do `js/app.js` eles executam; no CI esse número não pode cair em relação à `main`.
 - **`check.ps1`** confere JSONs, referências de `id`, handlers `onclick`, assets do HTML e do service
   worker, o catálogo (ids únicos/contíguos/estáveis), o versionamento e se o `core.js` está ligado.
 

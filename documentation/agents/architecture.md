@@ -22,7 +22,7 @@ Load and RIR belong to the workout, never to the ficha. "Peso" in the UI means l
 | File | Role | Tested how |
 |---|---|---|
 | `js/core.js` | Pure logic: dates, week window, grouping, history/PRs/1RM, export text, backup normalize/import, ficha JSON import. No DOM. UMD: `module.exports` in Node, globals in the browser. | Unit tests, **100% line coverage enforced** (`tools/coverage-gate.js`) |
-| `js/app.js` | Screens, rendering (HTML strings), event wiring, global `state`. Calls core functions as globals. | Browser tests (`tests/e2e/`, Playwright) + static checks in `check.ps1` + string assertions in `tests/features.test.js` |
+| `js/app.js` | Screens, rendering (HTML strings), event wiring, global `state`. Calls core functions as globals. | Browser tests (`tests/e2e/`, Playwright) for every user-triggered path, with a line-coverage ratchet (`tools/e2e-coverage.js`) + static checks in `check.ps1` + string assertions in `tests/features.test.js` |
 | `js/db.js` | IndexedDB wrapper (`dbAll`, `dbGet`, `dbPut`, `dbDelete`, `dbReplaceAll`, `dbClear`). DB version 2 — don't bump without a migration plan. | `tests/db.test.js` |
 | `index.html` | App shell: every screen is a `<section id="view-…">`, switched by hash routes (`#/dashboard`, `#/workout`, `#/exercises`, `#/calendar`, `#/more`, `#/detail/<id>`, `#/exercise`). | `check.ps1` (ids, handlers, assets) |
 | `sw.js` | Service worker: cache-first for `?v=N` assets, network-first for `index.html` and the catalog. | `tests/sw.test.js` |

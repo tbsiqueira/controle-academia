@@ -66,7 +66,7 @@ A ordem importa: **primeiro a rede de segurança, depois mexer no código.**
 | Fase | O que entrega | Issues |
 |---|---|---|
 | **0 — Plano** | Este documento e as regras abaixo | #3 |
-| **1 — Testes de navegador** | Playwright no CI como check obrigatório; **cada comportamento** das telas críticas (Treinar e Início); testes de todos os fluxos do `tests/CHECKLIST.md`; catraca de cobertura do `app.js` | #4, #5, #19, #6, #7 |
+| **1 — Testes de navegador** | Playwright no CI como check obrigatório; **cada comportamento** das telas críticas (Treinar e Início); testes de todos os fluxos do `tests/CHECKLIST.md`; catraca de cobertura do `app.js` | #4, #5, #19, #6, #7, #29 (concluída) |
 | **2 — Módulos** | `core.js`/`db.js` como módulos; `app.js` como módulo sem `onclick` inline; `app.js` dividido por área, um PR por área | #8, #9, #10–#14 |
 | **3 — Tipos** | Tipos dos dados em JSDoc checados por `tsc --noEmit` no CI; `// @ts-check` em todos os arquivos; documentação final | #15, #16, #17 |
 
