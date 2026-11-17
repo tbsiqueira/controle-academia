@@ -12,3 +12,6 @@ $RECYCLE.BIN/
 
 # Ferramentas do agente
 .reasonix/
+
+# Configuracao local do preview (Claude desktop)
+.claude/launch.json

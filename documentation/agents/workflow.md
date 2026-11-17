@@ -44,5 +44,10 @@ On localhost the service worker doesn't hold stale files, so edits show without 
   when bumped, e.g. `feat: tocar num dia do calendario abre o treino (v58)`. Prefixes in use: `feat`, `fix`,
   `style`, `perf`, `refactor`, `test`, `docs`, `a11y`, `ci`, `chore`, `revert`. A body is welcome for the "why".
 - Work on `main`. Commit only when asked, never push unless asked.
+- **No pull requests.** Finished work is pushed straight to `origin main`; never open a PR.
+- **Sync before you start.** Cloud sessions also push to `main`, so the local copy goes stale. Before starting
+  work, or before creating any branch/worktree from `main`, run `git fetch origin` and
+  `git pull --ff-only origin main` (on `main`). If it can't fast-forward or there are uncommitted changes, stop
+  and ask; never reset or force anything. Before pushing, pull again (`--rebase` for your own unpushed commits).
 - **Deploy = pushing a tag `vN`.** Never create or push tags on your own.
 - Undoing a shipped visual change: revert it **and** bump the version again (v57 → v58), or phones keep it.
