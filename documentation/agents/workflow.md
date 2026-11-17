@@ -110,6 +110,10 @@ On localhost the service worker doesn't hold stale files, so edits show without 
 - **Before pushing**: `git fetch origin` + `git rebase origin/main`, run the tests and `check.ps1`, then
   `git push -u origin <branch>` (after a rebase of an already-pushed branch: `--force-with-lease`, only on your
   own branch). Open the PR with `gh pr create --base main` (title = the commit message for one-commit PRs).
+- **PR linked to an issue → reference it in the description**, so any agent picking up the PR can open the issue
+  for the full context: `Closes #N` when the PR resolves it (GitHub closes it on merge), `Refs #N` when it only
+  advances it (e.g. one of several PRs). Put it on the first line of the description and keep the description
+  self-contained (what changed and why), not just the link.
 - **Merge**: `gh pr merge <n> --rebase --auto` merges as soon as the checks pass. If another PR merged first,
   GitHub asks for the branch to be updated: rebase on `origin/main` again. A version conflict (both shipped `vN`)
   means bumping yours to the next number.
