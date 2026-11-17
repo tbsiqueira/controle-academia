@@ -9,7 +9,7 @@
 // - Último treino da Treino A em 10/03/2025: Supino 40 kg × 11, 42,5 × 9, 45 × 7 (aquecimento 15 reps, 20 kg,
 //   RIR 3); Remada 50 × 10, 50 × 9. Um treino mais velho (03/03/2025) com cargas menores não deve aparecer.
 // - Biblioteca: Supino reto, Remada baixa, Agachamento livre e Rosca na máquina azul. Descanso: 90 s.
-const { test, expect, freshApp, withBackup, goTo } = require('./helpers');
+const { test, expect, freshApp, withBackup, storedDraft, goTo } = require('./helpers');
 
 const BACKUP = 'treinar-backup.json';
 
@@ -527,20 +527,6 @@ test.describe('Treinar · exercícios e campos', () => {
 });
 
 /* ---------- Parte B: rascunho, salvar e treino existente ---------- */
-
-/** Rascunho gravado no aparelho (IndexedDB do app, store `settings`, id `workoutDraft`), ou null. */
-function storedDraft(page) {
-  return page.evaluate(() => new Promise((resolve, reject) => {
-    const open = indexedDB.open('meu-treino');
-    open.onerror = () => reject(open.error);
-    open.onsuccess = () => {
-      const db = open.result;
-      const get = db.transaction('settings').objectStore('settings').get('workoutDraft');
-      get.onsuccess = () => { db.close(); resolve(get.result || null); };
-      get.onerror = () => { db.close(); reject(get.error); };
-    };
-  }));
-}
 
 /** Simula o app indo para segundo plano (trocar de app, bloquear a tela). */
 async function hidePage(page) {
