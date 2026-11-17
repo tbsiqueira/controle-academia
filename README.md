@@ -44,8 +44,8 @@ Os dois rodam automaticamente no GitHub Actions:
 
 | Workflow | Quando roda |
 |---|---|
-| `.github/workflows/tests.yml` | a cada push na `main` e em pull requests |
-| `.github/workflows/deploy.yml` | antes de publicar — **uma tag só publica se os testes passarem** |
+| `.github/workflows/tests.yml` | em todo pull request (checks obrigatórios do merge) e a cada push na `main` |
+| `.github/workflows/deploy.yml` | a cada merge na `main` com versão nova — **só publica se os testes passarem** |
 
 **O que os testes cobrem:** toda a lógica pura (`js/core.js`) — datas, janela da semana, busca sem acentos,
 agrupamento de séries **por id**, aquecimento, histórico/PR, geração do texto exportado, backup
@@ -65,17 +65,19 @@ resultado como *annotations* do GitHub Actions, então dá para ver o que faltou
 
 ---
 
-## Publicar no GitHub Pages (deploy por tag)
+## Fluxo de trabalho e publicação (PR → merge → deploy)
 
-Nada é publicado por push na `main`. O deploy acontece **somente quando você envia uma tag de versão**
-(`v1`, `v2`, ...), através do workflow `.github/workflows/deploy.yml`:
+A `main` é protegida: **nada entra nela por push direto**. Toda mudança vai numa branch, abre um pull
+request e só entra com **merge por rebase** depois que os checks passam. O site publica sozinho:
 
 ```
-push na main            → nada acontece com o site publicado
-push da tag v2          → roda check.ps1 e publica no GitHub Pages
+branch + PR               → roda tests.yml (Testes unitários, Verificações estáticas, Versão)
+merge do PR (por rebase)  → deploy.yml: versão vN ainda sem tag? testa, publica no Pages e cria a tag vN
+PR só de docs/CI          → mantém a versão → o deploy vê que vN já tem tag e não publica nada
 ```
 
-Assim você desenvolve tranquilo na `main` e o app publicado só muda quando você decide marcar uma versão.
+O job **Versão** reprova o PR se `index.html`, `css/` ou `js/` mudaram e a versão não subiu (ou se a
+versão já tem tag). Ninguém cria tag à mão: quem cria é o `deploy.yml`, depois de publicar.
 
 ### Configurar (uma vez só)
 
@@ -89,44 +91,58 @@ Assim você desenvolve tranquilo na `main` e o app publicado só muda quando voc
 > O repositório precisa ser **público** para o Pages no plano gratuito (em repositório privado, só com
 > GitHub Pro/Team).
 
+### Regras do repositório (já aplicadas)
+
+- **Settings → General → Pull Requests**: só **Allow rebase merging** ligado (merge commit e squash
+  desligados), **Allow auto-merge** e **Automatically delete head branches** ligados.
+- **Settings → Rules → Rulesets → `main`**: bloqueia push direto, force push e exclusão; exige PR, histórico
+  linear, merge por rebase e os checks `Testes unitários`, `Verificações estáticas` e `Versão` com a
+  branch atualizada com a `main`. Mudou o nome de um job em `tests.yml`? Atualize o ruleset.
+- **Settings → Environments → `github-pages`**: a regra de branch `main` permite o deploy.
+
 ### Publicar uma versão nova
 
 ```powershell
-# 1) desenvolva e salve na main (isso NÃO publica)
+# 1) parta da main atualizada e crie uma branch
 git checkout main
-git add -A
-git commit -m "feat: ..."
-git push
+git pull --ff-only origin main
+git switch -c feat/minha-mudanca
 
-# 2) confira antes de publicar
-powershell -ExecutionPolicy Bypass -File .\check.ps1
+# 2) desenvolva, suba a versão (index.html + sw.js) e confira
+node --test tests/
+powershell -ExecutionPolicy Bypass -File .check.ps1
+git commit -am "feat: ... (v75)"
 
-# 3) marque e envie a tag -> o deploy começa sozinho
-git tag -a v2 -m "v2: <resumo das mudancas>"
-git push origin v2
+# 3) atualize com a main, envie e abra o PR com merge automático por rebase
+git fetch origin
+git rebase origin/main
+git push -u origin feat/minha-mudanca
+gh pr create --base main --fill
+gh pr merge --rebase --auto
 ```
 
-Acompanhe em **Actions → Publicar no GitHub Pages**. Leva ~1 minuto.
-No aparelho, feche e abra o app (ou use **Mais → Debug → Atualizar app**) para pegar a versão nova.
+Quando os checks passam, o PR entra na `main` e **Actions → Publicar no GitHub Pages** publica e cria a
+tag. Leva ~1–2 minutos. No aparelho, feche e abra o app (ou use **Mais → Debug → Atualizar app**).
 
 ### Voltar para uma versão anterior
 
-Na aba **Actions**, abra a execução da tag desejada (ex.: `v1`) e clique em **Re-run all jobs** —
-o Pages volta a publicar aquele conteúdo. (Ou envie uma tag nova a partir do commit correto.)
+Reverta a mudança num PR (`git revert <commit>`) **e suba a versão de novo** (ex.: v75 → v76), senão os
+celulares continuam com o cache. O merge publica a v76 normalmente.
 
 ### Se o deploy falhar
 
 | Erro mostrado no Actions | Causa | Solução |
 |---|---|---|
-| `Tag "v1" is not allowed to deploy to github-pages due to environment protection rules` | O ambiente `github-pages` tem regras de deploy que **não incluem tags** (ex.: só existe a regra `main`, tipo *branch*) | **Settings → Environments → `github-pages` → Deployment branches and tags** → **Add deployment branch or tag rule** → **Ref type: `Tag`** + **Name pattern: `v*`** → *Add rule* (ou troque a política para **All branches and tags**). Depois **Actions → Publicar no GitHub Pages → Re-run all jobs** |
+| `Branch "main" is not allowed to deploy to github-pages due to environment protection rules` | O ambiente `github-pages` não tem a regra da branch `main` | **Settings → Environments → `github-pages` → Deployment branches and tags** → adicione **Ref type: `Branch`**, **Name pattern: `main`**. Depois **Re-run all jobs** |
+| Merge entrou mas nada foi publicado | a versão não subiu, então a tag `vN` já existia | esperado para PRs de docs/CI; se mexeu no app, o job **Versão** deveria ter barrado: confira o ruleset |
 | `Get Pages site failed` / `Pages site not found` | Pages não está com a fonte **GitHub Actions** | **Settings → Pages → Source: GitHub Actions** |
-| Falhou em "Rodar check.ps1" | versão inconsistente ou arquivo/id faltando | rode localmente `powershell -ExecutionPolicy Bypass -File .\check.ps1` e corrija antes de taguear |
+| Falhou em "Rodar check.ps1" | versão inconsistente ou arquivo/id faltando | rode localmente `powershell -ExecutionPolicy Bypass -File .\check.ps1` e corrija num novo PR |
 | Deploy "verde" mas o site não atualizou | cache do navegador/service worker | no aparelho: **Mais → Debug → Atualizar app**; no PC: Ctrl+F5 ou `/reset.html` |
 
 ### Publicar manualmente (emergência)
 
-Aba **Actions** → **Publicar no GitHub Pages** → **Run workflow** (publica o estado atual da branch
-selecionada). Use só quando precisar.
+Aba **Actions** → **Publicar no GitHub Pages** → **Run workflow** (publica o estado atual da `main` e
+cria a tag se faltar). Use só quando precisar.
 
 ## Estrutura
 

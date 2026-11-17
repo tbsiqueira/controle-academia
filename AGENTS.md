@@ -26,7 +26,8 @@ Read before changing anything:
 2. Never break old backups: imports must keep loading old data and silently ignore fields they don't know.
 3. Changing `index.html`, `css/` or `js/` → bump the version (see workflow.md). `check.ps1` fails otherwise.
 4. Before you say done: `node --test tests/` and `powershell -ExecutionPolicy Bypass -File .\check.ps1` both pass.
-5. Commit only when asked; never push or tag unless asked (a `v*` tag publishes the site).
-   No PRs: push straight to `main`. Always `git pull --ff-only origin main` before starting work or branching
-   from `main` (cloud sessions push too), and pull again before pushing.
+5. Commit only when asked; never push unless asked. `main` is protected: every change goes through a branch and a
+   PR, merged **only by rebase** after the required checks pass. Never tag by hand: merging a PR with a new version
+   makes `deploy.yml` publish and tag `vN`. Always `git pull --ff-only origin main` before branching from `main`
+   (cloud sessions merge PRs too), and rebase on `origin/main` before pushing.
 6. No sound, vibration or flashing. No extra taps on the training screen.

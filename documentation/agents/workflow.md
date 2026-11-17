@@ -12,8 +12,11 @@ powershell -ExecutionPolicy Bypass -File .\tools\build-sample-data.ps1   # only 
 
 Python is not installed; use Node for scripted edits. Node 26 locally and in CI.
 
-CI: `tests.yml` runs `node --check`, the coverage gate and `check.ps1` on every push to `main`.
-`deploy.yml` publishes to GitHub Pages **only on a `v*` tag**, after the same checks pass.
+CI: `tests.yml` runs `node --check`, the coverage gate and `check.ps1` on every PR and push to `main`; on PRs its
+`Versão` job also fails when `index.html`, `css/` or `js/` changed without a version bump (or the version is
+already tagged). These three jobs are the required checks of the `main` ruleset.
+`deploy.yml` runs on every push to `main` (= a merged PR): if tag `vN` for the current version doesn't exist yet,
+it runs the checks, publishes to GitHub Pages and then creates and pushes tag `vN`. Otherwise it publishes nothing.
 
 ## Checklist for every change
 
@@ -43,11 +46,22 @@ On localhost the service worker doesn't hold stale files, so edits show without 
 - Commit messages: Conventional prefix + short **Portuguese** summary without accents, version in parentheses
   when bumped, e.g. `feat: tocar num dia do calendario abre o treino (v58)`. Prefixes in use: `feat`, `fix`,
   `style`, `perf`, `refactor`, `test`, `docs`, `a11y`, `ci`, `chore`, `revert`. A body is welcome for the "why".
-- Work on `main`. Commit only when asked, never push unless asked.
-- **No pull requests.** Finished work is pushed straight to `origin main`; never open a PR.
-- **Sync before you start.** Cloud sessions also push to `main`, so the local copy goes stale. Before starting
-  work, or before creating any branch/worktree from `main`, run `git fetch origin` and
-  `git pull --ff-only origin main` (on `main`). If it can't fast-forward or there are uncommitted changes, stop
-  and ask; never reset or force anything. Before pushing, pull again (`--rebase` for your own unpushed commits).
-- **Deploy = pushing a tag `vN`.** Never create or push tags on your own.
+- Commit only when asked, never push unless asked.
+- **`main` only changes through PRs.** A ruleset on `main` blocks direct pushes, force pushes and deletion, and
+  requires a linear history plus the checks `Testes unitários`, `Verificações estáticas` and `Versão` to pass on
+  a branch that is up to date with `main`. The repo only allows **rebase merges** and deletes merged branches.
+- **Branches**: `<prefix>/<short-kebab-summary>` using the commit prefix, e.g. `feat/importar-treinos`,
+  `fix/rir-vazio`, `docs/manual-backup`. One topic per branch/PR. Keep the commits clean (each one a
+  conventional message) because rebase merge puts every commit on `main` as is.
+- **Sync before you start.** Cloud sessions also merge PRs, so the local copy goes stale. On `main`, run
+  `git fetch origin` and `git pull --ff-only origin main` before creating a branch/worktree. If it can't
+  fast-forward or there are uncommitted changes, stop and ask; never reset `main` or force anything onto it.
+- **Before pushing**: `git fetch origin` + `git rebase origin/main`, run the tests and `check.ps1`, then
+  `git push -u origin <branch>` (after a rebase of an already-pushed branch: `--force-with-lease`, only on your
+  own branch). Open the PR with `gh pr create --base main` (title = the commit message for one-commit PRs).
+- **Merge**: `gh pr merge <n> --rebase --auto` merges as soon as the checks pass. If another PR merged first,
+  GitHub asks for the branch to be updated: rebase on `origin/main` again. A version conflict (both shipped `vN`)
+  means bumping yours to the next number.
+- **Deploy = merging a PR with a new version.** `deploy.yml` publishes and creates tag `vN`; never create or
+  push tags yourself. Docs/CI-only PRs keep the version and publish nothing.
 - Undoing a shipped visual change: revert it **and** bump the version again (v57 → v58), or phones keep it.

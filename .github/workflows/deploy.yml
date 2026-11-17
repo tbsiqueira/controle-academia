@@ -1,18 +1,19 @@
 name: Publicar no GitHub Pages
 
-# Publica APENAS quando uma tag de versão é enviada (v1, v2, ...).
-# Push na branch main não publica nada.
+# Publica sozinho quando um PR entra na main com uma versão nova.
+# A versão vem de <span id="appVersion">vN</span> no index.html:
+#   - se a tag vN ainda não existe → testa, publica e cria a tag vN;
+#   - se a tag vN já existe (PR só de docs/CI, sem bump) → não publica nada.
+# Ninguém cria tag à mão: quem cria é este workflow, depois de publicar.
 on:
   push:
-    tags:
-      - 'v*'
-  # Permite publicar manualmente pela aba Actions (escape hatch).
+    branches:
+      - main
+  # Escape hatch: publica o estado atual da main pela aba Actions (cria a tag se faltar).
   workflow_dispatch:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 # Uma publicação por vez; não cancela uma em andamento.
 concurrency:
@@ -20,8 +21,41 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  versao:
+    name: Versão a publicar
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.v.outputs.version }}
+      publish: ${{ steps.v.outputs.publish }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Ler a versão e ver se a tag já existe
+        id: v
+        env:
+          MANUAL: ${{ github.event_name == 'workflow_dispatch' }}
+        run: |
+          version=$(grep -oP 'id="appVersion">v\K\d+' index.html)
+          if [ -z "$version" ]; then echo "::error::versao nao encontrada no index.html"; exit 1; fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          if git ls-remote --exit-code --tags origin "refs/tags/v$version" >/dev/null; then
+            if [ "$MANUAL" = "true" ]; then
+              echo "Tag v$version ja existe; publicacao manual segue mesmo assim."
+              echo "publish=true" >> "$GITHUB_OUTPUT"
+            else
+              echo "Tag v$version ja existe: nada novo para publicar."
+              echo "publish=false" >> "$GITHUB_OUTPUT"
+            fi
+          else
+            echo "Versao nova: v$version sera publicada."
+            echo "publish=true" >> "$GITHUB_OUTPUT"
+          fi
+
   verificar:
     name: Testes e verificações
+    needs: versao
+    if: needs.versao.outputs.publish == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -47,8 +81,12 @@ jobs:
 
   publicar:
     name: Publicar
-    needs: verificar
+    needs: [versao, verificar]
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -67,3 +105,27 @@ jobs:
       - name: Publicar no GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v5
+
+  tag:
+    name: Criar a tag da versão
+    needs: [versao, publicar]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Criar e enviar vN
+        env:
+          VERSION: ${{ needs.versao.outputs.version }}
+        run: |
+          if git ls-remote --exit-code --tags origin "refs/tags/v$VERSION" >/dev/null; then
+            echo "Tag v$VERSION ja existe."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          subject=$(git log -1 --format=%s)
+          git tag -a "v$VERSION" -m "v$VERSION: $subject"
+          git push origin "v$VERSION"
