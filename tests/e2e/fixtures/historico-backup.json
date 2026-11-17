@@ -1,0 +1,125 @@
+{
+  "app": "meu-treino",
+  "version": 2,
+  "exportedAt": "2026-05-19T10:00:00.000Z",
+  "data": {
+    "workouts": [
+      {
+        "id": "h-mar",
+        "date": "2026-03-30",
+        "sheetId": "s-a",
+        "sheetName": "Treino A",
+        "cardioMinutes": 0,
+        "notes": "",
+        "warmups": [],
+        "sets": [
+          { "exerciseId": "ex-supino", "exerciseName": "Supino reto", "number": 1, "reps": 10, "load": 40, "rir": 2, "note": "" },
+          { "exerciseId": "ex-supino", "exerciseName": "Supino reto", "number": 2, "reps": 8, "load": 42.5, "rir": 1, "note": "" },
+          { "exerciseId": "ex-barra", "exerciseName": "Barra fixa", "number": 1, "reps": 8, "load": 0, "rir": 2, "note": "" }
+        ],
+        "createdAt": "2026-03-30T12:00:00.000Z",
+        "updatedAt": "2026-03-30T12:00:00.000Z"
+      },
+      {
+        "id": "h-abr",
+        "date": "2026-04-15",
+        "sheetId": "s-a",
+        "sheetName": "Treino A",
+        "cardioMinutes": 20,
+        "notes": "",
+        "warmups": [],
+        "sets": [
+          { "exerciseId": "ex-supino", "exerciseName": "Supino reto", "number": 1, "reps": 8, "load": 45, "rir": 1, "note": "" },
+          { "exerciseId": "ex-supino", "exerciseName": "Supino reto", "number": 2, "reps": 10, "load": 42.5, "rir": 1, "note": "" },
+          { "exerciseId": "ex-barra", "exerciseName": "Barra fixa", "number": 1, "reps": 10, "load": 0, "rir": 1, "note": "" }
+        ],
+        "createdAt": "2026-04-15T12:00:00.000Z",
+        "updatedAt": "2026-04-15T12:00:00.000Z"
+      },
+      {
+        "id": "h-mai-b1",
+        "date": "2026-05-04",
+        "sheetId": "s-b",
+        "sheetName": "Treino B",
+        "cardioMinutes": 0,
+        "notes": "",
+        "warmups": [],
+        "sets": [
+          { "exerciseId": "ex-agachamento", "exerciseName": "Agachamento livre", "number": 1, "reps": 10, "load": 50, "rir": 2, "note": "" }
+        ],
+        "createdAt": "2026-05-04T12:00:00.000Z",
+        "updatedAt": "2026-05-04T12:00:00.000Z"
+      },
+      {
+        "id": "h-mai-a",
+        "date": "2026-05-18",
+        "sheetId": "s-a",
+        "sheetName": "Treino A",
+        "cardioMinutes": 30,
+        "notes": "Supino pesado hoje",
+        "warmups": [
+          { "exerciseId": "ex-supino", "exerciseName": "Supino reto", "reps": 15, "load": 20, "rir": 3 }
+        ],
+        "sets": [
+          { "exerciseId": "ex-supino", "exerciseName": "Supino reto", "number": 1, "reps": 6, "load": 47.5, "rir": 0, "note": "" },
+          { "exerciseId": "ex-supino", "exerciseName": "Supino reto", "number": 2, "reps": 8, "load": 45, "rir": 1, "note": "" },
+          { "exerciseId": "ex-barra", "exerciseName": "Barra fixa", "number": 1, "reps": 12, "load": 0, "rir": 1, "note": "" }
+        ],
+        "createdAt": "2026-05-18T11:00:00.000Z",
+        "updatedAt": "2026-05-18T11:00:00.000Z"
+      },
+      {
+        "id": "h-mai-b2",
+        "date": "2026-05-18",
+        "sheetId": "s-b",
+        "sheetName": "Treino B",
+        "cardioMinutes": 0,
+        "notes": "",
+        "warmups": [],
+        "sets": [
+          { "exerciseId": "ex-agachamento", "exerciseName": "Agachamento livre", "number": 1, "reps": 10, "load": 60, "rir": 2, "note": "" },
+          { "exerciseId": "ex-agachamento", "exerciseName": "Agachamento livre", "number": 2, "reps": 9, "load": 60, "rir": 1, "note": "" }
+        ],
+        "createdAt": "2026-05-18T22:00:00.000Z",
+        "updatedAt": "2026-05-18T22:00:00.000Z"
+      }
+    ],
+    "sheets": [
+      {
+        "id": "s-a",
+        "name": "Treino A",
+        "active": true,
+        "exercises": [
+          { "exerciseId": "ex-supino", "name": "Supino reto", "sets": 2, "reps": [8, 8], "note": "" },
+          { "exerciseId": "ex-barra", "name": "Barra fixa", "sets": 1, "reps": [10], "note": "" }
+        ],
+        "createdAt": "2026-03-01T10:00:00.000Z",
+        "updatedAt": "2026-03-01T10:00:00.000Z"
+      },
+      {
+        "id": "s-b",
+        "name": "Treino B",
+        "active": true,
+        "exercises": [
+          { "exerciseId": "ex-agachamento", "name": "Agachamento livre", "sets": 2, "reps": [10, 10], "note": "" }
+        ],
+        "createdAt": "2026-03-01T10:00:00.000Z",
+        "updatedAt": "2026-03-01T10:00:00.000Z"
+      }
+    ],
+    "exercises": [
+      { "id": "ex-supino", "name": "Supino reto", "group": "Peito", "source": "custom", "correction": "", "active": true },
+      { "id": "ex-barra", "name": "Barra fixa", "group": "Costas", "source": "custom", "correction": "", "active": true },
+      { "id": "ex-agachamento", "name": "Agachamento livre", "group": "Pernas", "source": "custom", "correction": "", "active": true }
+    ],
+    "settings": {
+      "id": "app",
+      "weekAnchor": "2026-05-18",
+      "weeklyWorkoutTarget": 3,
+      "weeklyCardioTarget": 120,
+      "restSeconds": 90,
+      "lastBackupAt": "2026-05-19T10:00:00.000Z"
+    },
+    "colinha": []
+  }
+}

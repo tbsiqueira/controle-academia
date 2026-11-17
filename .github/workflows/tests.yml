@@ -73,6 +73,16 @@ jobs:
       - name: Rodar os testes de navegador
         run: npx playwright test
 
+      # Catraca (documentation/REFACTOR.md, seção 4): a cobertura do js/app.js pelos testes de navegador vai para o
+      # resumo do job e não pode cair em relação à main. Subiu? O PR atualiza tests/e2e/coverage-baseline.json.
+      - name: Cobertura do js/app.js (catraca)
+        run: |
+          git fetch --no-tags --depth=1 origin main
+          if ! git show origin/main:tests/e2e/coverage-baseline.json > "$RUNNER_TEMP/baseline-main.json" 2>/dev/null; then
+            cp tests/e2e/coverage-baseline.json "$RUNNER_TEMP/baseline-main.json"
+          fi
+          node tools/e2e-coverage.js --baseline "$RUNNER_TEMP/baseline-main.json"
+
       - name: Guardar relatório e traces das falhas
         if: failure()
         uses: actions/upload-artifact@v7
