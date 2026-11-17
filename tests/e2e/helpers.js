@@ -1,5 +1,6 @@
 // Ajudantes compartilhados pelos testes de navegador.
 // Cada teste roda num contexto novo do navegador: IndexedDB, caches e service worker começam vazios.
+const path = require('path');
 const base = require('@playwright/test');
 
 /** Abas da barra inferior, pelo texto que a pessoa vê. */
@@ -49,6 +50,18 @@ async function withSampleData(page) {
   await goTo(page, 'Início');
 }
 
+/**
+ * Abre o app e importa um backup de `tests/e2e/fixtures/` pela tela Mais → Importar, como uma pessoa faria.
+ * Serve para montar um ponto de partida exato (fichas, treinos anteriores com cargas conhecidas).
+ */
+async function withBackup(page, fixtureName) {
+  await freshApp(page);
+  await goTo(page, 'Mais');
+  await page.locator('#importFile').setInputFiles(path.join(__dirname, 'fixtures', fixtureName));
+  await base.expect(page.locator('#appToastBody')).toContainText('Backup importado');
+  await base.expect(page.locator('#view-dashboard')).toBeVisible();
+}
+
 /** Toca numa aba da barra inferior, como uma pessoa faria, e confere que a tela certa abriu. */
 async function goTo(page, tabName) {
   const tab = TABS[tabName];
@@ -59,4 +72,4 @@ async function goTo(page, tabName) {
   await base.expect(page.locator('#' + tab.view)).toBeVisible();
 }
 
-module.exports = { test, expect: base.expect, TABS, freshApp, waitForApp, withSampleData, goTo };
+module.exports = { test, expect: base.expect, TABS, freshApp, waitForApp, withSampleData, withBackup, goTo };
