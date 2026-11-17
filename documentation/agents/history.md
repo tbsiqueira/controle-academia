@@ -28,6 +28,7 @@ agent should know before touching the same area.
   modules, then JSDoc types checked by `tsc --noEmit`; still no build step. This **relaxes "no npm"**: from the
   Playwright PR (#4) on, a `package.json` exists for dev tools only; the app and the unit tests still need nothing
   installed. Browser tests cover every feature, not 100% of lines; `app.js` coverage is measured with a ratchet.
+  **Treinar and Início are critical screens**: every behaviour has its own browser test (issues #5, #19).
 
 ## Regressions and their lessons
 
