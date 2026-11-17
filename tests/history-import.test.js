@@ -189,3 +189,35 @@ test('sheetNamesText lista as fichas do app para a IA, marcando as desativadas',
   assert.match(text, /- TREINO A\n- Antiga \(desativada\)\n$/);
   assert.match(core.sheetNamesText(null), /\(nenhuma\)/);
 });
+
+test('historyImportSummaryHtml: treinos novos com período, repetidos e fichas novas/reaproveitadas', () => {
+  const parsed = parse([treino(), treino({ date: '2025-03-20' })], [
+    { name: 'A <b>', exercises: [{ name: 'Supino reto' }] },
+    { name: 'B', exercises: [{ name: 'Remada' }, { name: 'Rosca' }] }
+  ]);
+  const sheets = core.splitImportedSheets(parsed.sheets, [{ id: 's', name: 'b' }]);
+  const html = core.historyImportSummaryHtml(core.splitImportedWorkouts(parsed.workouts, []), sheets);
+  assert.match(html, />2 treinos novos <span class="fw-normal text-muted">\(14\/03\/2025 a 20\/03\/2025\)</);
+  assert.match(html, /A &lt;b&gt;<\/span><span class="sheet-item-detail ms-auto">nova · 1 exercício</, 'nome escapado, singular');
+  assert.match(html, />B<\/span><span class="sheet-item-detail ms-auto">já existe, será usada</);
+  assert.doesNotMatch(html, /já estava/, 'sem repetidos, sem aviso');
+
+  const one = core.historyImportSummaryHtml(core.splitImportedWorkouts(parsed.workouts.slice(0, 1), []), { fresh: [], reused: [] });
+  assert.match(one, />1 treino novo <span class="fw-normal text-muted">\(14\/03\/2025 a 14\/03\/2025\)</);
+  assert.match(one, /Nenhuma ficha no JSON/);
+
+  const again = core.splitImportedWorkouts(parsed.workouts, parsed.workouts);
+  const none = core.historyImportSummaryHtml(again, { fresh: [{ name: 'C', exercises: [{}, {}] }], reused: [] });
+  assert.match(none, />0 treinos novos<\/p>/, 'só fichas: sem período');
+  assert.match(none, />2 treinos já estavam no app e não será importado de novo/);
+  assert.match(none, /nova · 2 exercícios/);
+  const oneRepeated = core.splitImportedWorkouts(parsed.workouts.slice(0, 1), parsed.workouts);
+  assert.match(core.historyImportSummaryHtml(oneRepeated, { fresh: [], reused: [] }), />1 treino já estava no app/);
+});
+
+test('historyImportToast: só fala do que entrou, com singular e plural', () => {
+  assert.equal(core.historyImportToast(3, 2), '3 treinos importados e 2 fichas criadas.');
+  assert.equal(core.historyImportToast(1, 1), '1 treino importado e 1 ficha criada.');
+  assert.equal(core.historyImportToast(5, 0), '5 treinos importados.');
+  assert.equal(core.historyImportToast(0, 2), '2 fichas criadas.', 'nada de "0 treinos importados"');
+});

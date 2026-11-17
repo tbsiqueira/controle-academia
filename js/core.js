@@ -1308,6 +1308,38 @@
     return names;
   }
 
+  function countLabel(n, one, many) {
+    return n + ' ' + (n === 1 ? one : many);
+  }
+
+  // Resumo da revisão: treinos novos (com o período), repetidos que serão pulados e fichas novas/reaproveitadas.
+  // workouts = splitImportedWorkouts(...), sheets = splitImportedSheets(...).
+  function historyImportSummaryHtml(workouts, sheets) {
+    const fresh = workouts.fresh;
+    const rows = sheets.fresh.map(function (s) {
+      return '<li><span class="sheet-item-name">' + esc(s.name) + '</span><span class="sheet-item-detail ms-auto">nova · ' +
+        countLabel(s.exercises.length, 'exercício', 'exercícios') + '</span></li>';
+    }).concat(sheets.reused.map(function (s) {
+      return '<li><span class="sheet-item-name">' + esc(s.name) + '</span><span class="sheet-item-detail ms-auto">já existe, será usada</span></li>';
+    }));
+    return '<p class="fw-bold mb-2">' + countLabel(fresh.length, 'treino novo', 'treinos novos') +
+        (fresh.length ? ' <span class="fw-normal text-muted">(' + fmtBR(fresh[0].date) + ' a ' + fmtBR(fresh[fresh.length - 1].date) + ')</span>' : '') + '</p>' +
+      (workouts.repeated.length
+        ? '<p class="small text-muted mb-2">' + countLabel(workouts.repeated.length, 'treino já estava', 'treinos já estavam') + ' no app e não será importado de novo.</p>'
+        : '') +
+      (rows.length
+        ? '<p class="fw-bold mb-2">Fichas</p><div class="card mb-3"><div class="card-body py-2"><ul class="list-unstyled sheet-items mb-0">' + rows.join('') + '</ul></div></div>'
+        : '<p class="small text-muted mb-3">Nenhuma ficha no JSON: os treinos ficam ligados às fichas de mesmo nome que já existem.</p>');
+  }
+
+  // Aviso depois de importar: "3 treinos importados e 2 fichas criadas." (cada parte só se houver).
+  function historyImportToast(workoutCount, sheetCount) {
+    const parts = [];
+    if (workoutCount) parts.push(countLabel(workoutCount, 'treino importado', 'treinos importados'));
+    if (sheetCount) parts.push(countLabel(sheetCount, 'ficha criada', 'fichas criadas'));
+    return parts.join(' e ') + '.';
+  }
+
   // Lista das fichas do app para colar na IA junto com TREINO-JSON.md.
   function sheetNamesText(sheets) {
     const lines = (sheets || []).filter(function (s) { return s && s.name; }).map(function (s) {
@@ -1539,6 +1571,8 @@
     workoutFingerprint: workoutFingerprint,
     splitImportedWorkouts: splitImportedWorkouts,
     historyExerciseNames: historyExerciseNames,
+    historyImportSummaryHtml: historyImportSummaryHtml,
+    historyImportToast: historyImportToast,
     sheetNamesText: sheetNamesText
   };
 });

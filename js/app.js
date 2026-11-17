@@ -1881,23 +1881,7 @@ async function reviewHistoryImport() {
   const unmatched = unmatchedExerciseNames(historyExerciseNames({ sheets: sheets.fresh, workouts: workouts.fresh }));
   state.pendingHistory = { sheets: sheets.fresh, workouts: workouts.fresh, unmatched: unmatched };
 
-  const fresh = workouts.fresh;
-  const sheetRows = sheets.fresh.map(function (s) {
-    return '<li><span class="sheet-item-name">' + esc(s.name) + '</span><span class="sheet-item-detail ms-auto">nova · ' + s.exercises.length + (s.exercises.length === 1 ? ' exercício' : ' exercícios') + '</span></li>';
-  }).concat(sheets.reused.map(function (s) {
-    return '<li><span class="sheet-item-name">' + esc(s.name) + '</span><span class="sheet-item-detail ms-auto">já existe, será usada</span></li>';
-  }));
-  const summary =
-    '<p class="fw-bold mb-2">' + (fresh.length === 1 ? '1 treino novo' : fresh.length + ' treinos novos') +
-      (fresh.length ? ' <span class="fw-normal text-muted">(' + fmtBR(fresh[0].date) + ' a ' + fmtBR(fresh[fresh.length - 1].date) + ')</span>' : '') + '</p>' +
-    (workouts.repeated.length
-      ? '<p class="small text-muted mb-2">' + workouts.repeated.length + (workouts.repeated.length === 1 ? ' treino já estava' : ' treinos já estavam') + ' no app e não será importado de novo.</p>'
-      : '') +
-    (sheetRows.length
-      ? '<p class="fw-bold mb-2">Fichas</p><div class="card mb-3"><div class="card-body py-2"><ul class="list-unstyled sheet-items mb-0">' + sheetRows.join('') + '</ul></div></div>'
-      : '<p class="small text-muted mb-3">Nenhuma ficha no JSON: os treinos ficam ligados às fichas de mesmo nome que já existem.</p>');
-
-  document.getElementById('historyImportBody').innerHTML = summary + exerciseChoicesHtml(unmatched, 'imph-');
+  document.getElementById('historyImportBody').innerHTML = historyImportSummaryHtml(workouts, sheets) + exerciseChoicesHtml(unmatched, 'imph-');
   document.getElementById('historyImportPaste').classList.add('d-none');
   setHistoryButton('Importar');
 }
@@ -1931,8 +1915,7 @@ async function confirmHistoryImport() {
   refreshAfterSheetChange();
   renderExercises();
   renderDashboard();
-  showToast(pending.workouts.length + (pending.workouts.length === 1 ? ' treino importado' : ' treinos importados') +
-    (pending.sheets.length ? ' e ' + pending.sheets.length + (pending.sheets.length === 1 ? ' ficha criada' : ' fichas criadas') : '') + '.');
+  showToast(historyImportToast(pending.workouts.length, pending.sheets.length));
 }
 
 /* ---------- contrato para a IA (modal Criar com IA) ---------- */

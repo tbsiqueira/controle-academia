@@ -383,3 +383,40 @@ test('Importar treinos antigos: card em Mais e janela com o mesmo fluxo do Criar
   assert.match(APP, /state\.pendingHistory = null;   \/\/ antes dos awaits/, 'toque duplo nao importa duas vezes');
   assert.match(fs.readFileSync(path.join(__dirname, '..', 'sw.js'), 'utf8'), /'\.\/TREINO-JSON\.md'/, 'contrato funciona offline');
 });
+
+test('Importar treinos antigos: revisar valida, pula repetidos e so pede escolha para nomes novos', () => {
+  const review = APP.slice(APP.indexOf('async function reviewHistoryImport('), APP.indexOf('async function confirmHistoryImport('));
+  assert.match(review, /parseHistoryImportText\(document\.getElementById\('historyImportText'\)\.value, todayISO\(\)\)/, 'datas no futuro barradas pela data de hoje');
+  assert.match(review, /e instanceof SyntaxError \? 'O texto não é um JSON válido/, 'erro sempre visivel, com o motivo');
+  assert.match(review, /splitImportedWorkouts\(parsed\.workouts, state\.workouts\)/, 'repetidos comparados com o que ja existe');
+  assert.match(review, /splitImportedSheets\(parsed\.sheets, state\.sheets\)/, 'ficha de mesmo nome reaproveitada');
+  assert.match(review, /Nada novo para importar/, 'reimportar o mesmo JSON avisa e nao grava');
+  assert.match(review, /historyExerciseNames\(\{ sheets: sheets\.fresh, workouts: workouts\.fresh \}\)/, 'so nomes do que vai entrar');
+  assert.match(review, /historyImportSummaryHtml\(workouts, sheets\) \+ exerciseChoicesHtml\(unmatched, 'imph-'\)/);
+  assert.match(review, /setHistoryButton\('Importar'\)/, 'botao vira Importar depois da revisao');
+});
+
+test('Importar treinos antigos: grava fichas antes dos treinos e liga tudo aos mesmos exercicios', () => {
+  const confirm = APP.slice(APP.indexOf('async function confirmHistoryImport('), APP.indexOf('/* ---------- contrato para a IA'));
+  const sheetsAt = confirm.indexOf('createImportedSheet(');
+  const workoutsAt = confirm.indexOf("dbPut('workouts'");
+  assert.ok(sheetsAt > 0 && sheetsAt < workoutsAt, 'fichas primeiro: os treinos precisam do id delas');
+  assert.match(confirm, /chosenExercises\(pending\.unmatched, 'imph-'\)/, 'usa o que a pessoa escolheu na revisao');
+  assert.match(confirm, /resolved\[normalizeText\(names\[i\]\)\] = await resolveImportedExercise\(names\[i\], chosen\)/, 'cada nome resolvido uma vez');
+  assert.match(confirm, /importedWorkout\(pending\.workouts\[i\], state\.sheets, exerciseFor\)/, 'liga a ficha recem-criada');
+  assert.match(confirm, /Object\.assign\(\{ id: uid\(\) \}, record, \{ createdAt: now, updatedAt: now \}\)/);
+  assert.match(confirm, /showToast\(historyImportToast\(pending\.workouts\.length, pending\.sheets\.length\)\)/, 'sucesso some sozinho');
+  assert.match(APP, /'historyImportConfirm'\)\.addEventListener\('click', function \(\) \{\s*guard\(state\.pendingHistory \? confirmHistoryImport : reviewHistoryImport\)\(\);/, 'um botao: revisar, depois importar');
+  assert.match(APP, /'historyIaCopy'\)\.addEventListener\('click', function \(\) \{ guard\(copyExportText\)\('historyIaText'\); \}\)/);
+});
+
+test('Fichas e treinos antigos usam a mesma revisao de exercicios (sem duplicar codigo)', () => {
+  const sheetReview = APP.slice(APP.indexOf('async function reviewSheetImport('), APP.indexOf('async function confirmSheetImport('));
+  assert.match(sheetReview, /exerciseChoicesHtml\(unmatched, 'imp-'\)/);
+  const sheetConfirm = APP.slice(APP.indexOf('async function confirmSheetImport('), APP.indexOf('function unmatchedExerciseNames('));
+  assert.match(sheetConfirm, /chosenExercises\(pending\.unmatched, 'imp-'\)/);
+  assert.match(sheetConfirm, /while \(sheetNameExists\(name, null\)\) name \+= ' \(importada\)';[\s\S]*?createImportedSheet\(name, s\.exercises, chosen\)/, 'Criar com IA continua renomeando a ficha repetida');
+  assert.match(APP, /function resolveImportedExercise\(name, chosen\) \{\s*return exactExercise\(name\) \|\| chosen\[normalizeText\(name\)\] \|\| await findOrCreateExercise\(name\);/,
+    'nome exato, depois a escolha, depois Criar novo');
+  assert.match(APP, /function exerciseChoicesHtml\(unmatched, prefix\)[\s\S]*?suggestExercises\(name, candidates, 1, 0\.5\)[\s\S]*?➕ Criar novo/);
+});
