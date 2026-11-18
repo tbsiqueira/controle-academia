@@ -25,10 +25,17 @@ answer. So they start in `dontAsk` mode (anything not on their allow-list is ref
 allow-lists in sections 3 and 6. If one still stops, `hc read <name>` shows why; `hc attach <name>` lets the human
 answer. Check the flags against `claude --help` the first time.
 
-**Waiting on another agent.** Use `hc wait <name> --timeout 90`: it returns when the agent stops working, or after
-90 seconds with `reason: timeout`, which only means "still working": wait again. 90 seconds keeps each call under
-the 2-minute limit Claude Code puts on a shell command. `hc get <name>` shows its status: `working`, `done`,
-`blocked` (it needs a person: read its screen), `error`. Never sleep or poll in a loop of your own.
+**Waiting on another agent.** `hc wait <name>` returns the moment the agent stops working (done, `blocked`,
+`error` or exit); `--timeout` is only a cap, and `reason: timeout` just means "still working": wait again.
+
+- **Long waits (the planner waiting for a developer):** one **background** command,
+  `hc wait <name> --timeout 3600`. Background commands have no 2-minute limit and you are woken only when it
+  ends, so you hear back as soon as the agent stops, without spending a turn every few minutes.
+- **Short waits in the foreground (the developer waiting for a review):** `hc wait <name> --timeout 90`, under
+  the 2-minute limit Claude Code puts on a shell command; repeat on timeout.
+
+`hc get <name>` shows its status: `working`, `done`, `blocked` (it needs a person: read its screen), `error`.
+Never sleep or poll in a loop of your own.
 
 ## 2. Roles
 
@@ -95,9 +102,10 @@ Only do these when asked; show the human what you'll create or change first when
    ```
 
 4. Report: issue, branch, worktree path, `hc read dev-<N>` to follow it.
-5. **Follow the developer and tell the human.** Wait with `hc wait dev-<N> --timeout 90` (section 1), as a
-   background command where your tools allow it, so the chat stays free; status `blocked` or `error` also ends
-   the wait. When the developer finishes, read its hand-back (`hc read --lines
+5. **Follow the developer and tell the human.** Run `hc wait dev-<N> --timeout 3600` as one background command
+   (section 1), so the chat stays free and you wake only when the developer stops (done, `blocked`, `error`);
+   on `reason: timeout`, start it again. Only without background commands, fall back to `--timeout 90` in the
+   foreground. When the developer finishes, read its hand-back (`hc read --lines
    200 dev-<N>`) and report in the chat:
    - PR opened → the PR link, a two-line summary of what changed, the review's MUST FIX items and what happened
      to them, new issues opened. Remind the human that merging is theirs.
