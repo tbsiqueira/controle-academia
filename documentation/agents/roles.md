@@ -20,10 +20,24 @@ Run `hc --skill` once at the start of a session so you know the herdr commands. 
 sessions, other computers) nobody starts agents: the human starts the developer, the review rounds are skipped, and
 the hand-back says so.
 
+**Start the `hc` server from a normal terminal, never from Claude.** Every agent `hc` starts gets the environment
+of the `hc` server, not of the command that ran `hc run`. Any `hc` command starts the server when it isn't
+running; if that command came from a Claude session (the desktop app or an agent), the server keeps Claude's
+`ANTHROPIC_*`/`CLAUDE_CODE_*` variables and every agent breaks: `hc` never sees its status (`status: null`, so
+`hc wait` only returns on timeout), the DeepSeek reviewer sends the Claude login to DeepSeek (401, "issue with the
+selected model") and transcripts are not saved. So the human runs `hc server restart` in a normal terminal
+(Windows Terminal, not one opened from Claude) before using the flow. An agent that shows `status: null` after
+starting, or the warning "Transcript saving is off", means the server was started from Claude: stop and ask the
+human to restart it.
+
 **Agents started with `hc --bg` run unattended.** A permission prompt would leave them waiting with nobody to
 answer. So they start in `dontAsk` mode (anything not on their allow-list is refused instead of asked) with the
 allow-lists in sections 3 and 6. If one still stops, `hc read <name>` shows why; `hc attach <name>` lets the human
 answer. Check the flags against `claude --help` the first time.
+
+**Tool lists take the `=` form** (`"--allowedTools=Read Edit …"`, `"--disallowedTools=Edit …"`). These flags take
+several values, so with a space (`--allowedTools "…" "prompt"`) Claude reads the prompt as one more tool name and
+the agent starts with an empty prompt. Keep the prompt as the last argument.
 
 **Waiting on another agent.** `hc wait <name>` returns the moment the agent stops working (done, `blocked`,
 `error` or exit); `--timeout` is only a cap, and `reason: timeout` just means "still working": wait again.
@@ -97,7 +111,7 @@ Only do these when asked; show the human what you'll create or change first when
    ```bash
    hc run --bg --name dev-<N> --outlive-parent --cwd <full path of ../Academia-<N>> claude --model opus \
      --permission-mode dontAsk \
-     --allowedTools "Read Edit Write Glob Grep Bash(node *) Bash(npm *) Bash(npx *) Bash(git *) Bash(gh *) Bash(hc *) Bash(powershell *)" \
+     "--allowedTools=Read Edit Write Glob Grep Bash(node *) Bash(npm *) Bash(npx *) Bash(git *) Bash(gh *) Bash(hc *) Bash(powershell *)" \
      "You are the DEVELOPER. Follow documentation/agents/roles.md. Issue #<N>; the plan is the latest plan comment on it."
    ```
 
@@ -189,8 +203,8 @@ hc run --bg --name review-<N> claude \
   --settings ~/.claude/providers/deepseek.json \
   --model "deepseek-flash[1m]" \
   --permission-mode dontAsk \
-  --allowedTools "Read Glob Grep Bash(git diff *) Bash(git log *) Bash(git show *) Bash(git status *) Bash(gh issue view *)" \
-  --disallowedTools "Edit Write NotebookEdit" \
+  "--allowedTools=Read Glob Grep Bash(git diff *) Bash(git log *) Bash(git show *) Bash(git status *) Bash(gh issue view *)" \
+  "--disallowedTools=Edit Write NotebookEdit" \
   "You are the REVIEWER. Follow section 5 of documentation/agents/roles.md. Review the branch for issue #<N>."
 hc wait review-<N> --timeout 90   # repeat while it returns reason: timeout
 hc read --lines 120 review-<N>
