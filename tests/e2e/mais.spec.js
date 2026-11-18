@@ -1,4 +1,4 @@
-// Tela Mais (issue #7): metas e descanso, colinha, importar treinos antigos, Instalar o app e o card Debug
+// Tela Mais (issue #7): metas e descanso, colinha, importar treinos antigos, Instalar o app, botão Teste e o card Debug
 // (armazenamento persistente). Backup, apagar dados, dados de exemplo e atualização ficam em dados.spec.js.
 const { test, expect, freshApp, withBackup, storedRecords, goTo, answerConfirm } = require('./helpers');
 

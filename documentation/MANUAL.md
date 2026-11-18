@@ -38,9 +38,6 @@ Também dá para instalar por **Mais → Instalar o app**: no Chrome e no Edge (
 botão **Instalar**, que coloca o app na tela inicial ou na área de trabalho. No iPhone o card mostra o passo a
 passo do Safari, e no app já instalado ele avisa que está tudo certo.
 
-Logo antes do card **Debug**, o botão **Teste** só mostra um aviso "hello world": serve para testar o fluxo de
-desenvolvimento e não mexe em nenhum dado.
-
 > **iPhone:** o app instalado guarda os dados separado do Safari e começa vazio. Se você já treinou pelo Safari,
 > use **Mais → Dados → Exportar** lá e depois **Importar** dentro do app instalado.
 
@@ -57,7 +54,7 @@ Na parte de baixo da tela existem 5 abas:
 | **Treinar** | Registrar o treino de hoje |
 | **Fichas** | Montar seus treinos (fichas) e a biblioteca de exercícios |
 | **Calendário** | Quantas vezes você treinou no mês, evolução semanal |
-| **Mais** | Metas, colinha, **Importar treinos antigos**, backup, **Instalar o app** e o card **Debug** (atualizar app, apagar dados, dados de exemplo), no fim da tela |
+| **Mais** | Metas, colinha, **Importar treinos antigos**, backup, **Instalar o app**, o botão **Teste** (só mostra um aviso "hello world", para testar o fluxo de desenvolvimento; não mexe em dados) e o card **Debug** (atualizar app, apagar dados, dados de exemplo), no fim da tela |
 
 ---
 
