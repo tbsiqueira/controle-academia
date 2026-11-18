@@ -67,9 +67,12 @@ A ordem importa: **primeiro a rede de segurança, depois mexer no código.**
 | Fase | O que entrega | Issues |
 |---|---|---|
 | **0 — Plano** | Este documento e as regras abaixo | #3 |
-| **1 — Testes de navegador** | Playwright no CI como check obrigatório; **cada comportamento** das telas críticas (Treinar e Início); testes de todos os fluxos do `tests/CHECKLIST.md`; catraca de cobertura do `app.js` | #4, #5, #19, #6, #7, #29 — **concluída** |
+| **1 — Testes de navegador** | Playwright no CI como check obrigatório; **cada comportamento** das telas críticas (Treinar e Início); testes de todos os fluxos do `tests/CHECKLIST.md`; catraca de cobertura do `app.js` | #4, #5, #19, #6, #7, #29 — **concluída**; #39 (testes temporários) antes da Fase 2 |
 | **2 — Módulos** | `core.js`/`db.js` como módulos; `app.js` como módulo sem handler inline e CSP sem `'unsafe-inline'` no `script-src`; catraca de cobertura medindo vários arquivos; `app.js` dividido por área, um PR por área | #8, #9, #33, #10–#14 |
-| **3 — Tipos** | Tipos dos dados em JSDoc checados por `tsc --noEmit` no CI; `// @ts-check` em todos os arquivos; documentação final | #15, #16, #17 |
+| **3 — Tipos** | Tipos dos dados em JSDoc checados por `tsc --noEmit` no CI; `// @ts-check` em todos os arquivos; documentação final | #15, #16, #40, #17 |
+
+Antes da Fase 2 entra o **#39 — testes de navegador temporários** (seção 4, item 6): toda funcionalidade de
+toda tela com teste próprio, para a Fase 2 mexer no `app.js` com a rede mais fina possível.
 
 Dentro da Fase 2 a ordem também importa:
 
@@ -87,6 +90,9 @@ Dentro da Fase 2 a ordem também importa:
 Na Fase 3, `js/types.js` não basta sozinho: o `tsc` precisa de um `tsconfig.json` só de desenvolvimento
 (`allowJs`, `checkJs`, `noEmit`) e cada arquivo referencia os tipos com `import('./types.js').Treino`, porque um
 `@typedef` não fica visível em outro módulo sem isso.
+
+Depois do #16 e antes do #17, o **#40 desliga os testes temporários** do #39 (seção 4, item 6), e o #17 já
+documenta o estado final.
 
 Uma **Fase 4** (TypeScript de verdade, com build) não está planejada. Ela só será avaliada no fim (issue #17),
 com a experiência das fases anteriores. Depois da Fase 3 essa migração seria quase mecânica.
@@ -113,6 +119,22 @@ com a experiência das fases anteriores. Depois da Fase 3 essa migração seria 
    instáveis ensinam a ignorar check vermelho.
 5. **Testes de navegador estáveis e rápidos.** Celular (375px), tema claro, banco começando vazio ou com
    `data/sample-data.json`, sem esperas fixas. O job inteiro deve levar poucos minutos.
+6. **Testes temporários durante a refatoração (#39).** Enquanto a refatoração durar, a regra das telas críticas
+   (item 2) vale para **todas as telas**: toda funcionalidade que a pessoa consegue disparar em Fichas,
+   Biblioteca, Histórico/Calendário/Evolução, Mais e Dados ganha teste de navegador próprio, e a cobertura de
+   linhas do `app.js` vai a **100%**. Só ficam de fora, listadas no #39 com o motivo e o OK do dono do
+   repositório: linhas inalcançáveis pelo navegador e linhas que **rodam num teste mas o coletor não consegue
+   contar**, como o `forceUpdate` ("Atualizar app"), que recarrega a página antes da foto da cobertura
+   (`tests/e2e/helpers.js`). O #39 tenta primeiro fazer o coletor contar essas linhas. Esta é a exceção temporária à "sem meta fixa" do item 4.
+   Esses testes ficam em `tests/e2e/temporarios/`, com tabela própria no `tests/CHECKLIST.md`; o
+   `tests/checklist.test.js` e o `tests/confirm-no.test.js` passam a ler as subpastas de `tests/e2e/`. Cada PR que
+   sobe a cobertura atualiza a catraca (`node tools/e2e-coverage.js --update`). Eles rodam no CI como check
+   obrigatório **até o #16**, o último PR da refatoração que mexe em código.
+   **Depois disso eles são desligados, não apagados (#40):** um PR depois do #16 e antes do #17 tira a pasta da
+   execução (`testIgnore` no `playwright.config.js`), move a tabela do CHECKLIST para uma seção de desligados
+   que as checagens ignoram e **baixa a catraca uma única vez, de propósito**: hoje o CI reprova qualquer queda
+   em relação à `main`, então esse PR traz o jeito explícito de aceitar a queda (detalhes no #40). Ficam no
+   repositório para religar numa mudança grande futura. Os itens 1–5 continuam valendo depois disso.
 
 ## 5. Ferramentas de desenvolvimento (npm)
 
@@ -136,6 +158,6 @@ desenvolvimento** (`@playwright/test` e, na Fase 3, `typescript`), com `package-
   do `sw.js` quando arquivos entram ou saem.
 - **Moveu ou apagou código** → busque cada nome em `js/`, `index.html`, `tests/` e na documentação (lição da v43).
 - **Antes de abrir o PR**: `node --test tests/`, `check.ps1` e, a partir da Fase 1, os testes de navegador
-  passando. Merge só por rebase, com todos os checks verdes.
+  passando (inclusive os temporários do #39, enquanto estiverem ligados). Merge só por rebase, com todos os checks verdes.
 - Testes que conferem o texto do `app.js` (`tests/features.test.js`) e checagens do `check.ps1` que procuram
   funções no `app.js` vão sendo ajustados junto com a mudança que os afeta, nunca desligados.
