@@ -73,8 +73,9 @@ Stores:
 index.html
 css/styles.css
 js/core.js (lógica pura, coberta por testes)
-js/app.js + js/db.js
-tests/core.test.js + tests/fixtures/ (testes de unidade e de compatibilidade de dados)
+js/app.js + js/db.js (db.js é ES module)
+js/bridge.js (ponte temporária: publica core.js e db.js no window para o app.js, até a issue #9)
+tests/core.test.mjs + tests/fixtures/ (testes de unidade e de compatibilidade de dados)
 test.ps1 (roda os testes localmente)
 vendor/bootstrap/ (Bootstrap 5 local)
 vendor/bootstrap-icons/ (ícones locais)
@@ -137,6 +138,7 @@ documentation/PLANO.md
 - **Revisão 20**: a **Biblioteca** passa a listar apenas os exercícios **criados pelo usuário** (os do catálogo não são mais copiados para lá nem aparecem na lista).
 - **Revisão 21**: padronização das barras de botões (ações na **mesma linha**, botões de ícone com largura fixa `.btn-icon`) em todas as telas.
 - **Revisão 42**: auditoria de **referências por id** em todo o app — `exerciseLabel`, `sheetLabel`, `exerciseTarget`, `exerciseMatches` e `exerciseKey` no core; agrupamento de séries, histórico, PR, fichas, pré-preenchimento e texto exportado passaram a resolver pelo id (nome guardado é só fallback para dados antigos/sem id); ids que eram descartados (`pickCatalogExercise`, adicionar do catálogo à ficha) passaram a ser gravados; itens inválidos de ficha são descartados na normalização.
+- **v75** (refatoração, sem mudança visível): `js/core.js` e `js/db.js` viraram **ES modules** (`export`), primeiro passo da Fase 2 (issue #8). O `app.js` continua script clássico, agora com `defer`, e recebe as funções pela ponte temporária `js/bridge.js`. Os testes de unidade viraram `tests/*.test.mjs` com `import`.
 - **Testes (2026-11-17, sem mudança no app)**: Fase 1 da refatoração (`documentation/REFACTOR.md`) concluída — o app de verdade é testado num Chromium de celular (Playwright, `tests/e2e/`) a cada PR. Todo caminho que a pessoa dispara tem teste de navegador, inclusive a resposta **Não** de cada confirmação; o CI reprova linha do `tests/CHECKLIST.md` sem teste de navegador e queda da cobertura do `js/app.js` em relação à `main` (catraca, hoje 98,7%). Issues #4, #5, #19, #6, #7 e #29.
 - **Testes (2026-11-18, sem mudança no app)**: testes de navegador **temporários** para a refatoração (issue #39, `tests/e2e/temporarios/`): cada comportamento de todas as telas tem teste próprio e a cobertura de linhas do `js/app.js` chegou a **100%**, inclusive caminhos de erro (aparelho sem espaço, cache bloqueado) simulados no navegador e o "Atualizar app", que passou a entrar na conta. Ficam ligados até o #16; o #40 os desliga sem apagar.
 - **Processo (2026-11-17, sem mudança no app)**: a `main` passou a ser protegida — toda mudança entra por **pull request**, merge **só por rebase**, histórico linear e checks obrigatórios (testes + cobertura, `check.ps1` e o novo job **Versão**, que exige o bump quando `index.html`, `css/` ou `js/` mudam). O `deploy.yml` agora roda a cada merge na `main` e, se a versão ainda não tem tag, publica no Pages e **cria a tag `vN` sozinho**; ninguém mais tagueia à mão.

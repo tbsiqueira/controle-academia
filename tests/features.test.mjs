@@ -1,16 +1,14 @@
-'use strict';
-
 /* Testes das melhorias de uso (Início, Treinar, Calendário, evolução) e das melhorias de tela.
    A lógica fica no core.js; o que é só marcação (index.html, css, app.js) é conferido lendo o arquivo. */
 
-const test = require('node:test');
-const assert = require('node:assert/strict');
-const fs = require('node:fs');
-const path = require('node:path');
-const core = require('../js/core.js');
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
+import * as core from '../js/core.js';
 
 function read(relative) {
-  return fs.readFileSync(path.join(__dirname, '..', relative), 'utf8');
+  return fs.readFileSync(path.join(import.meta.dirname, '..', relative), 'utf8');
 }
 const APP = read('js/app.js');
 const HTML = read('index.html');
@@ -380,7 +378,7 @@ test('Importar treinos antigos: card em Mais e janela com o mesmo fluxo do Criar
   assert.match(APP, /fetch\('TREINO-JSON\.md'\)/, 'texto para a IA vem do contrato');
   assert.match(APP, /sheetNamesText\(state\.sheets\)[\s\S]*?exerciseNamesText\(/, 'junta fichas e exercicios que ja existem');
   assert.match(APP, /state\.pendingHistory = null;   \/\/ antes dos awaits/, 'toque duplo nao importa duas vezes');
-  assert.match(fs.readFileSync(path.join(__dirname, '..', 'sw.js'), 'utf8'), /'\.\/TREINO-JSON\.md'/, 'contrato funciona offline');
+  assert.match(fs.readFileSync(path.join(import.meta.dirname, '..', 'sw.js'), 'utf8'), /'\.\/TREINO-JSON\.md'/, 'contrato funciona offline');
 });
 
 test('Importar treinos antigos: revisar valida, pula repetidos e so pede escolha para nomes novos', () => {

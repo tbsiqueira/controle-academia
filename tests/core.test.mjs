@@ -1,17 +1,15 @@
-'use strict';
-
 /* Testes de unidade do Meu Treino.
    Rodam em Node sem nenhuma dependência:  node --test tests/
    Cobrem a lógica pura (js/core.js) e a compatibilidade de dados entre versões. */
 
-const test = require('node:test');
-const assert = require('node:assert/strict');
-const fs = require('node:fs');
-const path = require('node:path');
-const core = require('../js/core.js');
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
+import * as core from '../js/core.js';
 
 function loadFixture(name) {
-  return JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures', name), 'utf8'));
+  return JSON.parse(fs.readFileSync(path.join(import.meta.dirname, 'fixtures', name), 'utf8'));
 }
 
 /* ---------- datas ---------- */
@@ -721,7 +719,7 @@ test('libraryExercises lista os exercicios do usuario e ignora inativos', () => 
 });
 
 test('regressao: exercicio do usuario com nome igual ao do catalogo continua visivel', () => {
-  const catalog = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data', 'exercises.json'), 'utf8'));
+  const catalog = JSON.parse(fs.readFileSync(path.join(import.meta.dirname, '..', 'data', 'exercises.json'), 'utf8'));
   const nomeDoCatalogo = catalog.exercises[0].name;
   const meu = { id: 'meu', name: nomeDoCatalogo, correction: '' };
 
@@ -856,7 +854,7 @@ test('itens invalidos (sem id) sao descartados', () => {
 /* ---------- catalogo embutido ---------- */
 
 test('catalogo mantem ids unicos, contiguos e estaveis entre versoes', () => {
-  const catalog = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data', 'exercises.json'), 'utf8'));
+  const catalog = JSON.parse(fs.readFileSync(path.join(import.meta.dirname, '..', 'data', 'exercises.json'), 'utf8'));
   const items = catalog.exercises;
 
   assert.equal(items.length, 927);

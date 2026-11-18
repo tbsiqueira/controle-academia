@@ -143,25 +143,37 @@ if ($htmlVersion -and $htmlVersion -eq $swVersion -and $queryVersions.Count -eq 
 }
 
 # 8) núcleo de lógica + testes
-if ($js -match "js/core\.js" -and $html -match "js/core\.js\?v=") {
-  Ok "js/core.js ligado no index.html"
+#    core.js e db.js sao ES modules: entram pela ponte js/bridge.js (issue #8, sai na #9), que os
+#    importa com o mesmo ?v=N do app (sem isso o service worker serviria o modulo antigo do cache).
+$bridge = Read-Text 'js/bridge.js'
+if ($html -match '<script type="module" src="js/bridge\.js\?v=') {
+  Ok "js/bridge.js ligado no index.html como modulo"
 } else {
-  Bad "js/core.js nao esta referenciado no index.html"
+  Bad "js/bridge.js nao esta no index.html como script type=module"
 }
-if ($swAssets -contains "js/core.js?v=$htmlVersion") {
-  Ok "js/core.js no cache do service worker"
-} else {
-  Bad "js/core.js?v=$htmlVersion ausente da lista ASSETS do service worker"
+foreach ($module in @('core', 'db')) {
+  if ($bridge -match "from '\./$module\.js\?v=$htmlVersion'") {
+    Ok "js/bridge.js importa js/$module.js?v=$htmlVersion"
+  } else {
+    Bad "js/bridge.js nao importa ./$module.js?v=$htmlVersion (suba a versao dos imports junto com a do app)"
+  }
 }
-if (Test-Path (Join-Path $root 'tests/core.test.js')) {
-  $testSource = Read-Text 'tests/core.test.js'
-  if ($testSource -match "require\('\.\./js/core\.js'\)") {
+foreach ($asset in @('core', 'db', 'bridge')) {
+  if ($swAssets -contains "js/$asset.js?v=$htmlVersion") {
+    Ok "js/$asset.js no cache do service worker"
+  } else {
+    Bad "js/$asset.js?v=$htmlVersion ausente da lista ASSETS do service worker"
+  }
+}
+if (Test-Path (Join-Path $root 'tests/core.test.mjs')) {
+  $testSource = Read-Text 'tests/core.test.mjs'
+  if ($testSource -match "import \* as core from '\.\./js/core\.js'") {
     Ok "testes cobrindo js/core.js"
   } else {
-    Bad "tests/core.test.js nao importa js/core.js"
+    Bad "tests/core.test.mjs nao importa js/core.js"
   }
 } else {
-  Bad "tests/core.test.js nao encontrado"
+  Bad "tests/core.test.mjs nao encontrado"
 }
 
 # 9) campos de formulário com 16px no celular (evita o zoom automático do iOS)
@@ -176,7 +188,7 @@ if (($css -match 'font-size:\s*16px') -and ($css -match 'max-width:\s*767\.98px'
 $nodeCmd = Get-Command node -ErrorAction SilentlyContinue
 if ($nodeCmd) {
   $syntaxErrors = @()
-  foreach ($script in @('js/core.js', 'js/app.js', 'js/db.js', 'sw.js')) {
+  foreach ($script in @('js/core.js', 'js/app.js', 'js/db.js', 'js/bridge.js', 'sw.js')) {
     & node --check $script 2>$null
     if ($LASTEXITCODE -ne 0) { $syntaxErrors += $script }
   }
@@ -304,17 +316,20 @@ $definidasApp += @([regex]::Matches($limpo, 'function\s*[A-Za-z_$\w]*\s*\(([^)]*
   ForEach-Object { $_.Trim() -replace '=.*$', '' } |
   Where-Object { $_ -match '^[A-Za-z_$][\w$]*$' })
 
-$definidasCore = @([regex]::Matches($coreSource, '(?:function|async function)\s+([A-Za-z_$][\w$]*)\s*\(') |
-  ForEach-Object { $_.Groups[1].Value })
-$coreKeys = @()
-$coreReturn = $coreSource.LastIndexOf("  return {")
-if ($coreReturn -ge 0) {
-  $coreKeys = @([regex]::Matches($coreSource.Substring($coreReturn), '(?m)^\s{4}([A-Za-z_$][\w$]*):') |
-    ForEach-Object { $_.Groups[1].Value })
+# core.js e db.js sao modulos: o app.js so enxerga o que eles exportam (publicado pela ponte js/bridge.js)
+function Get-ExportedNames([string]$source) {
+  $block = [regex]::Match($source, '(?m)^export \{([^}]*)\};')
+  if (-not $block.Success) { return @() }
+  $semComentarios = [regex]::Replace($block.Groups[1].Value, '(?m)//.*$', ' ')
+  return @([regex]::Matches($semComentarios, '[A-Za-z_$][\w$]*') | ForEach-Object { $_.Value })
 }
-
-$definidasDb = @([regex]::Matches($dbSource, '(?:function|async function)\s+([A-Za-z_$][\w$]*)\s*\(') |
-  ForEach-Object { $_.Groups[1].Value })
+$exportadasCore = Get-ExportedNames $coreSource
+$exportadasDb = Get-ExportedNames $dbSource
+if ($exportadasCore.Count -and $exportadasDb.Count) {
+  Ok "export de js/core.js ($($exportadasCore.Count) nomes) e js/db.js ($($exportadasDb.Count))"
+} else {
+  Bad "lista 'export { ... };' nao encontrada em js/core.js ou js/db.js"
+}
 
 $nativas = @(
   'if', 'for', 'while', 'switch', 'catch', 'return', 'typeof', 'function', 'new', 'await', 'do',
@@ -331,9 +346,8 @@ $nativas = @(
 $faltando = @($chamadas | Where-Object {
   $nativas -notcontains $_ -and
   $definidasApp -notcontains $_ -and
-  $definidasCore -notcontains $_ -and
-  $coreKeys -notcontains $_ -and
-  $definidasDb -notcontains $_
+  $exportadasCore -notcontains $_ -and
+  $exportadasDb -notcontains $_
 })
 
 if (-not $faltando) {

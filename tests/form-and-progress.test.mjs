@@ -1,12 +1,12 @@
-'use strict';
-
 /* Testes das funções do v51: dica da última sessão, repetir treino da ficha,
    rascunho do treino em andamento, timer de descanso, lista curta do Início
    com filtro por ficha e evolução semanal. */
 
-const test = require('node:test');
-const assert = require('node:assert/strict');
-const core = require('../js/core.js');
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
+import * as core from '../js/core.js';
 
 const SUPINO = { exerciseId: 10, exerciseName: 'Supino' };
 
@@ -292,7 +292,7 @@ test('groupHasData: exercicio em branco sai sem perguntar', () => {
 });
 
 test('removeFormExercise (app.js) confirma antes de apagar um exercicio com dados', () => {
-  const app = require('node:fs').readFileSync(require('node:path').join(__dirname, '..', 'js', 'app.js'), 'utf8');
+  const app = fs.readFileSync(path.join(import.meta.dirname, '..', 'js', 'app.js'), 'utf8');
   const body = app.slice(app.indexOf('function removeFormExercise'), app.indexOf('/* ---------- rest timer'));
   assert.match(body, /groupHasData\(group\) && !confirm\(/);
   assert.ok(body.indexOf('confirm(') < body.indexOf('splice('), 'pergunta antes de remover');

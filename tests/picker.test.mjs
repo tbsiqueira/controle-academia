@@ -1,16 +1,14 @@
-'use strict';
-
 /* Busca de exercício: os três seletores (treino, ficha e cadastro de exercício) tinham cada um
    a sua cópia do mesmo HTML. Agora todos usam core.pickerHtml — estes testes travam o
    comportamento que as três cópias tinham. */
 
-const test = require('node:test');
-const assert = require('node:assert/strict');
-const fs = require('node:fs');
-const path = require('node:path');
-const core = require('../js/core.js');
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
+import * as core from '../js/core.js';
 
-const APP = fs.readFileSync(path.join(__dirname, '..', 'js', 'app.js'), 'utf8');
+const APP = fs.readFileSync(path.join(import.meta.dirname, '..', 'js', 'app.js'), 'utf8');
 
 const LIBRARY = [
   { id: '3f2b8c1e-9a4d', name: 'Puxada na barra W', group: 'Costas', source: 'custom' },

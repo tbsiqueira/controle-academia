@@ -68,7 +68,7 @@ jobs:
 
       - name: Verificar sintaxe dos scripts de navegador
         run: |
-          for f in js/core.js js/app.js js/db.js sw.js; do
+          for f in js/core.js js/app.js js/db.js js/bridge.js sw.js; do
             node --check "$f"
           done
 

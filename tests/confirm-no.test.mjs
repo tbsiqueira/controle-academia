@@ -1,16 +1,14 @@
-'use strict';
-
 /* Toda pergunta de confirmação tem teste de navegador da resposta "Não" (documentation/REFACTOR.md seção 4).
    Para cada confirm('…') do js/app.js, algum teste de tests/e2e/ (subpastas incluídas) responde "Não" (answerConfirm(page, false) ou
    answerNextConfirmNo) e confere o texto da pergunta. Basta o começo do texto: até a primeira quebra de linha. */
 
-const test = require('node:test');
-const assert = require('node:assert/strict');
-const fs = require('fs');
-const path = require('path');
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
 
-const APP = fs.readFileSync(path.join(__dirname, '..', 'js', 'app.js'), 'utf8');
-const E2E_DIR = path.join(__dirname, 'e2e');
+const APP = fs.readFileSync(path.join(import.meta.dirname, '..', 'js', 'app.js'), 'utf8');
+const E2E_DIR = path.join(import.meta.dirname, 'e2e');
 
 /** Começo fixo de cada pergunta: o primeiro texto entre aspas do confirm(), até o primeiro \n, sem ":" no fim. */
 function confirmPrefixes(source) {

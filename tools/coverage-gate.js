@@ -151,8 +151,8 @@ function trechosSemTeste(diretorio) {
     (bruto.result || []).forEach(function (arquivo, indiceArquivo) {
       if (!arquivo.url || arquivo.url.indexOf('/' + ALVO) === -1) return;
 
-      // Cada entrada do relatorio e uma execucao do arquivo (o teste do vm carrega o
-      // mesmo core.js de novo): usamos o par url+indice como identificador.
+      // Cada entrada do relatorio e uma execucao do arquivo (um processo por arquivo de teste):
+      // usamos o par url+indice como identificador.
       const chave = arquivo.url + '#' + nome + '#' + indiceArquivo;
       executacoes.push(chave);
       porExecucao[chave] = porExecucao[chave] || [];
@@ -183,7 +183,7 @@ function trechosSemTeste(diretorio) {
       if (faixa.contagem > 0) return;
 
       // O mesmo trecho (mesmos offsets) pode aparecer em varias entradas do relatorio
-      // (funcoes aninhadas, o core carregado de novo no vm...). Basta UMA execucao
+      // (funcoes aninhadas, um processo por arquivo de teste...). Basta UMA execucao
       // ter passado por ele para considerarmos coberto.
       const assinatura = faixa.inicio + ':' + faixa.fim;
       if (cobertos[assinatura] > 0) return;
@@ -220,13 +220,9 @@ function trechosSemTeste(diretorio) {
 
 const diagnostico = trechosSemTeste(temporario);
 const semTeste = diagnostico.trechos;
-// O wrapper de modulo (primeiras linhas do arquivo) escolhe entre Node e navegador: cada
-// ambiente executa so um lado, e o lado do navegador e validado em tests/module.test.js.
-const FIM_DO_WRAPPER = 16;
-
 // Criterio do gate: 100% de linhas (tabela do Node) + nenhum trecho da LOGICA sem teste
 // (passada em processo unico, que nao tem os falsos positivos do relatorio por processo).
-const precisos = diagnosticoPreciso().filter(function (t) { return t.inicio > FIM_DO_WRAPPER; });
+const precisos = diagnosticoPreciso();
 const completo = medidas.linhas === 100 && precisos.length === 0;
 
 console.log('\n[cobertura] ' + ALVO + ': linhas ' + medidas.linhas + '% | ramos ' + medidas.ramos +
@@ -247,16 +243,25 @@ const listaDeLinhas = semTeste.map(function (t) {
 function diagnosticoPreciso() {
   const diretorio = fs.mkdtempSync(path.join(os.tmpdir(), 'mt-cobertura-1p-'));
   const arquivos = fs.readdirSync(path.join(process.cwd(), 'tests')).filter(function (f) {
-    return f.indexOf('.test.js') !== -1;
+    return /\.test\.mjs$/.test(f);
   });
-  const codigo = arquivos.map(function (f) { return "require('./tests/" + f + "');"; }).join(' ');
+  // Os testes sao ES modules (tests/*.test.mjs): um import de cada, num modulo so.
+  const codigo = arquivos.map(function (f) { return "import './tests/" + f + "';"; }).join(' ');
 
-  spawnSync(process.execPath, ['-e', codigo], {
+  const passada = spawnSync(process.execPath, ['--input-type=module', '-e', codigo], {
     encoding: 'utf8',
     env: Object.assign({}, process.env, { NODE_V8_COVERAGE: diretorio })
   });
 
-  return trechosSemTeste(diretorio).trechos;
+  const resultado = trechosSemTeste(diretorio);
+  // Sem nenhuma execucao do core.js a lista sairia vazia e pareceria "tudo coberto".
+  if (passada.status !== 0 || resultado.executacoes === 0) {
+    console.error('\n[cobertura] a passada em processo unico falhou ou nao carregou ' + ALVO + ':\n' +
+      String(passada.stderr || '').slice(0, 2000));
+    process.exit(2);
+  }
+
+  return resultado.trechos;
 }
 console.log('::notice file=' + ALVO + ',line=1::trechos que o V8 nao viu executar: ' +
   (listaDeLinhas || 'nenhum'));
@@ -265,7 +270,7 @@ const precisosTexto = precisos.map(function (t) {
   return (t.fim > t.inicio ? (t.inicio + '-' + t.fim) : String(t.inicio)) + ' [' + t.trecho.slice(0, 45) + ']';
 });
 
-console.log('::notice file=' + ALVO + ',line=1::preciso (processo unico, fora do wrapper): ' +
+console.log('::notice file=' + ALVO + ',line=1::preciso (processo unico): ' +
   (precisosTexto.join(' | ') || 'nada sem cobertura'));
 
 if (completo) {

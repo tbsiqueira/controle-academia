@@ -53,14 +53,14 @@ npm run test:e2e:report   # HTML report of the last run (traces of failures)
   test), `storedDraft(page)` (the draft saved in IndexedDB), `storedRecords(page, 'workouts')` (every record of a
   store), `goTo(page, 'Treinar')`, `answerConfirm(page, false)` (answer "Não" to every `confirm()` from now on and
   return a reader for the questions asked; every confirmation needs a test for its "Não" answer too,
-  asserting the question text; `tests/confirm-no.test.js` fails when a `confirm()` in `app.js` has none).
+  asserting the question text; `tests/confirm-no.test.mjs` fails when a `confirm()` in `app.js` has none).
 - App update (`dados.spec.js`): Playwright can't intercept the service worker script, so the test server serves
   `sw.js` as version N when the context has the cookie `e2e-sw-version=N` (`context.addCookies`).
 - No fixed waits (`waitForTimeout`): wait for what the user would see. For timers (rest), install `page.clock` before
   opening the app and move time with `runFor`/`setSystemTime` (see `treinar.spec.js`). For a fixed "today" (week,
   backup age), `page.clock.setFixedTime` before opening the app (see `inicio.spec.js`).
 - In CI a failed run uploads the report and traces as the `relatorio-testes-navegador` artifact.
-- Every row of `tests/CHECKLIST.md` names at least one browser test (`tests/checklist.test.js` fails on "—" or on a
+- Every row of `tests/CHECKLIST.md` names at least one browser test (`tests/checklist.test.mjs` fails on "—" or on a
   spec file that doesn't exist). A new feature gets a row and a browser test.
 - Coverage ratchet: each test records which lines of `js/app.js` ran. After `npm run test:e2e`, run
   `npm run test:e2e:coverage` (number + uncovered functions). CI fails if it drops below the `main` value in
@@ -78,13 +78,15 @@ keeps those tests green and adds a test for each behaviour it adds or changes.
 ## Checklist for every change
 
 1. **Logic in `core.js`, with a test** in `tests/` (coverage must stay at 100%; no unreachable fallbacks).
-2. **Data shape changed?** Old backups (`tests/fixtures/`) and old databases (`tests/old-db.test.js`) must still
+2. **Data shape changed?** Old backups (`tests/fixtures/`) and old databases (`tests/old-db.test.mjs`) must still
    load without losing anything. Never require a DB version bump for a new field: put it on an existing record.
 3. **New or removed feature** → update its row in `tests/CHECKLIST.md`; user-visible → update `documentation/MANUAL.md`
    (and `README.md` / `documentation/PLANO.md` if it touches the data model or a requirement).
 4. **Touched `index.html`, `css/` or `js/`** → bump the version `N` → `N+1` in all of these places:
    - `index.html`: every `?v=N` and `<span id="appVersion">vN</span>`
    - `sw.js`: `CACHE_NAME = 'meu-treino-vN'` and every `?v=N` in `ASSETS`
+   - `js/bridge.js`: the `?v=N` of the `core.js` and `db.js` imports (a module import without the new `?v=N` is
+     served from the old cache)
    Without the bump, installed phones keep the old cached files.
 5. **Removing or moving code?** Grep every name you delete in `js/`, `index.html`, `tests/` and the docs. Large
    splices in `app.js` have swallowed neighbouring functions before (see history.md, v43).

@@ -1,16 +1,14 @@
-'use strict';
-
 /* Testes do service worker (sw.js) com cache e rede falsos, sem dependências.
    Regressão: tudo era "rede primeiro"; com sinal fraco (academia) o app esperava a rede
    desistir antes de usar o cache. Arquivos versionados (?v=N) agora saem direto do cache. */
 
-const test = require('node:test');
-const assert = require('node:assert/strict');
-const fs = require('node:fs');
-const path = require('node:path');
-const vm = require('node:vm');
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
+import vm from 'node:vm';
 
-const SOURCE = fs.readFileSync(path.join(__dirname, '..', 'sw.js'), 'utf8');
+const SOURCE = fs.readFileSync(path.join(import.meta.dirname, '..', 'sw.js'), 'utf8');
 
 function response(body) {
   return { status: 200, body: body, clone: function () { return this; } };

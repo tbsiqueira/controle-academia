@@ -1,11 +1,11 @@
-'use strict';
-
 /* Testes de borda do core: cobrem os caminhos de fallback (dados ausentes ou invalidos).
    Mantem a cobertura de js/core.js em 100%: cada ramo defensivo tem um caso aqui. */
 
-const test = require('node:test');
-const assert = require('node:assert/strict');
-const core = require('../js/core.js');
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
+import * as core from '../js/core.js';
 
 test('formatDecimal devolve vazio quando nao e numero', () => {
   assert.equal(core.formatDecimal('abc'), '');
@@ -657,7 +657,7 @@ test('parseRoute sem endereco abre o Inicio', () => {
 });
 
 test('app.js abre o treino sempre com o id no endereco', () => {
-  const app = require('node:fs').readFileSync(require('node:path').join(__dirname, '..', 'js', 'app.js'), 'utf8');
+  const app = fs.readFileSync(path.join(import.meta.dirname, '..', 'js', 'app.js'), 'utf8');
   assert.doesNotMatch(app, /location\.hash = '#\/detail';/, 'nenhum #/detail sem id');
   assert.equal((app.match(/location\.hash = '#\/detail\/' \+/g) || []).length, 2, 'lista do Inicio e Cancelar da edicao');
   assert.match(app, /viewName === 'detail' && route\.id\) state\.viewingWorkoutId = route\.id/);
@@ -698,7 +698,7 @@ test('hasExercise com lista vazia ou ausente', () => {
 });
 
 test('app.js recusa repetir exercicio no treino e na ficha', () => {
-  const app = require('node:fs').readFileSync(require('node:path').join(__dirname, '..', 'js', 'app.js'), 'utf8');
+  const app = fs.readFileSync(path.join(import.meta.dirname, '..', 'js', 'app.js'), 'utf8');
   assert.match(app, /if \(hasExercise\(state\.formSets, ref\)\)/);
   assert.match(app, /if \(hasExercise\(state\.sheetExercises, opts\)\)/);
 });
@@ -727,7 +727,7 @@ test('normalizeSheetItem nao mexe em fichas normais (1 a 20 series)', () => {
 });
 
 test('salvar a ficha no editor usa a mesma normalizacao (com o mesmo limite)', () => {
-  const app = require('node:fs').readFileSync(require('node:path').join(__dirname, '..', 'js', 'app.js'), 'utf8');
+  const app = fs.readFileSync(path.join(import.meta.dirname, '..', 'js', 'app.js'), 'utf8');
   const body = app.slice(app.indexOf('async function saveSheetEditor'), app.indexOf('async function toggleSheetActive'));
   assert.match(body, /normalizeSheetItem\(\{/);
   assert.match(body, /clean\.reps\.slice\(0, clean\.sets\)/);

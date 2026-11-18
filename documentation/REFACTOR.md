@@ -79,6 +79,8 @@ Dentro da Fase 2 a ordem também importa:
 1. **#8 — `core.js`/`db.js` como módulos.** Não é só trocar `module.exports` por `export`: os testes de unidade
    passam de `require` para `import`, o laço do `tools/coverage-gate.js` que faz `require` de cada teste é
    reescrito e o `tests/module.test.js` (que testa o registro UMD no navegador) sai ou é substituído.
+   Feito assim: os testes viraram `tests/*.test.mjs` e um `js/package.json` (`"type": "module"`) diz ao Node que
+   `js/*.js` são módulos; a ponte `js/bridge.js` publica os exports no `window` e o `app.js` passou a `defer`.
 2. **#9 — fim dos handlers inline, com o `app.js` ainda num arquivo só.** A troca para `data-action` mexe em quase
    toda função de render; num arquivo só, a catraca de cobertura e a checagem de handlers do `check.ps1` continuam
    valendo como estão. Fecha tirando `'unsafe-inline'` do `script-src` da CSP.
@@ -108,7 +110,7 @@ com a experiência das fases anteriores. Depois da Fase 3 essa migração seria 
    teste para o que acrescentar ou mudar.
    Em **todas as telas**, toda pergunta de confirmação tem teste das duas respostas: o "Não" precisa manter o
    que a pessoa preencheu (`answerConfirm` em `tests/e2e/helpers.js`) e o teste confere o texto da pergunta.
-   `tests/confirm-no.test.js` reprova `confirm()` do `app.js` sem teste do "Não". A cobertura de linhas não pega
+   `tests/confirm-no.test.mjs` reprova `confirm()` do `app.js` sem teste do "Não". A cobertura de linhas não pega
    isso: a linha do `confirm()` roda com qualquer resposta.
 3. **Demais telas: funcionalidades, não linhas.** Toda funcionalidade listada no
    `tests/CHECKLIST.md` tem pelo menos um teste de navegador do caminho principal, e o CI falha se alguma ficar sem.
@@ -127,7 +129,7 @@ com a experiência das fases anteriores. Depois da Fase 3 essa migração seria 
    contar**, como o `forceUpdate` ("Atualizar app"), que recarrega a página antes da foto da cobertura
    (`tests/e2e/helpers.js`). O #39 tenta primeiro fazer o coletor contar essas linhas. Esta é a exceção temporária à "sem meta fixa" do item 4.
    Esses testes ficam em `tests/e2e/temporarios/`, com tabela própria no `tests/CHECKLIST.md`; o
-   `tests/checklist.test.js` e o `tests/confirm-no.test.js` passam a ler as subpastas de `tests/e2e/`. Cada PR que
+   `tests/checklist.test.mjs` e o `tests/confirm-no.test.mjs` passam a ler as subpastas de `tests/e2e/`. Cada PR que
    sobe a cobertura atualiza a catraca (`node tools/e2e-coverage.js --update`). Eles rodam no CI como check
    obrigatório **até o #16**, o último PR da refatoração que mexe em código.
    **Depois disso eles são desligados, não apagados (#40):** um PR depois do #16 e antes do #17 tira a pasta da
@@ -159,5 +161,5 @@ desenvolvimento** (`@playwright/test` e, na Fase 3, `typescript`), com `package-
 - **Moveu ou apagou código** → busque cada nome em `js/`, `index.html`, `tests/` e na documentação (lição da v43).
 - **Antes de abrir o PR**: `node --test tests/`, `check.ps1` e, a partir da Fase 1, os testes de navegador
   passando (inclusive os temporários do #39, enquanto estiverem ligados). Merge só por rebase, com todos os checks verdes.
-- Testes que conferem o texto do `app.js` (`tests/features.test.js`) e checagens do `check.ps1` que procuram
+- Testes que conferem o texto do `app.js` (`tests/features.test.mjs`) e checagens do `check.ps1` que procuram
   funções no `app.js` vão sendo ajustados junto com a mudança que os afeta, nunca desligados.

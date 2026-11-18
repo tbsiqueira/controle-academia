@@ -1,21 +1,20 @@
-'use strict';
-
 /* Testes da camada IndexedDB (js/db.js) com um IndexedDB falso, sem dependências.
    Regressão: importar um backup apagava os dados ANTES de gravar os novos, em transações
    separadas — uma gravação que falhasse deixava o banco vazio. */
 
-const test = require('node:test');
-const assert = require('node:assert/strict');
-const fs = require('node:fs');
-const path = require('node:path');
-const vm = require('node:vm');
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
 
 function read(relative) {
-  return fs.readFileSync(path.join(__dirname, '..', relative), 'utf8');
+  return fs.readFileSync(path.join(import.meta.dirname, '..', relative), 'utf8');
 }
 
-// Carrega o db.js num escopo de navegador com um IndexedDB falso que anota tudo em `log`.
-function loadDb() {
+let loads = 0;
+
+// Importa o db.js com um IndexedDB falso (global, como no navegador) que anota tudo em `log`.
+async function loadDb() {
   const log = [];
   let txCount = 0;
 
@@ -48,22 +47,20 @@ function loadDb() {
     }
   };
 
-  const scope = {
-    indexedDB: {
-      open: function () {
-        const request = { result: db };
-        setTimeout(function () { request.onsuccess(); }, 0);
-        return request;
-      }
+  globalThis.indexedDB = {
+    open: function () {
+      const request = { result: db };
+      setTimeout(function () { request.onsuccess(); }, 0);
+      return request;
     }
   };
-  vm.createContext(scope);
-  new vm.Script(read('js/db.js'), { filename: 'js/db.js' }).runInContext(scope);
-  return { dbReplaceAll: scope.dbReplaceAll, log: log };
+  // ?n= da a cada teste uma copia nova do modulo (o db.js guarda a conexao aberta).
+  const { dbReplaceAll } = await import('../js/db.js?n=' + (++loads));
+  return { dbReplaceAll: dbReplaceAll, log: log };
 }
 
 test('dbReplaceAll apaga e grava tudo em UMA transacao', async () => {
-  const { dbReplaceAll, log } = loadDb();
+  const { dbReplaceAll, log } = await loadDb();
 
   await dbReplaceAll({
     workouts: [{ id: 'w1' }, { id: 'w2' }],
@@ -88,7 +85,7 @@ test('dbReplaceAll apaga e grava tudo em UMA transacao', async () => {
 });
 
 test('dbReplaceAll aborta a transacao quando um registro e invalido (dados antigos ficam)', async () => {
-  const { dbReplaceAll, log } = loadDb();
+  const { dbReplaceAll, log } = await loadDb();
 
   await assert.rejects(
     dbReplaceAll({ workouts: [{ id: 'w1' }, { invalid: true }], sheets: [{ id: 's1' }] }),

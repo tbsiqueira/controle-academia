@@ -1,16 +1,14 @@
-'use strict';
-
 /* Testes dos dados de exemplo (data/sample-data.json).
    O MESMO arquivo é usado pelo app (Mais → Dados → Carregar dados de exemplo) e aqui,
    como fixture de compatibilidade entre versões: se o formato mudar, isso aparece no CI. */
 
-const test = require('node:test');
-const assert = require('node:assert/strict');
-const fs = require('node:fs');
-const path = require('node:path');
-const core = require('../js/core.js');
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
+import * as core from '../js/core.js';
 
-const sample = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data', 'sample-data.json'), 'utf8'));
+const sample = JSON.parse(fs.readFileSync(path.join(import.meta.dirname, '..', 'data', 'sample-data.json'), 'utf8'));
 
 test('fixture: 3 fichas, 4 treinos para cada e 2 exercicios custom por ficha', () => {
   const data = sample.data;

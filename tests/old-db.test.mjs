@@ -1,14 +1,12 @@
-'use strict';
-
 /* Simula uma base antiga (era v33): treinos e fichas SEM ids, nomes que depois foram
    renomeados e exercícios com "source: catalog" sem comprovação.
    Prova que o caminho do init (reparo de sources + ligação por nome) e a exibição por id
    NÃO perdem nenhuma série, carga, aquecimento ou item de ficha — e que o histórico
    antigo continua encontrável pelo nome guardado. */
 
-const test = require('node:test');
-const assert = require('node:assert/strict');
-const core = require('../js/core.js');
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import * as core from '../js/core.js';
 
 function baseAntiga() {
   return {

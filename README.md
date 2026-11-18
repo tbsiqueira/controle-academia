@@ -63,9 +63,9 @@ agrupamento de séries **por id**, aquecimento, histórico/PR, geração do text
 nenhum trecho da lógica sem teste** (no CI, `COVERAGE_ENFORCE=1` reprova o build se cair). Ele publica o
 resultado como *annotations* do GitHub Actions, então dá para ver o que faltou sem abrir o log.
 
-> O **wrapper de módulo** (as primeiras linhas do `core.js`, que escolhem entre Node e navegador) fica fora
-> da conta: cada ambiente executa só um dos lados — o lado do navegador é validado por
-> `tests/module.test.js`, que carrega o core num escopo sem `module.exports`.
+> `core.js` e `db.js` são **ES modules**: os testes (`tests/*.test.mjs`) fazem `import` deles direto. No
+> navegador, a ponte temporária `js/bridge.js` publica os exports no `window` para o `app.js` (até a issue #9);
+> `tests/module.test.mjs` confere a ponte e a ordem dos scripts no `index.html`.
 
 📋 **Qual teste cobre qual funcionalidade: [tests/CHECKLIST.md](tests/CHECKLIST.md)**
 
@@ -158,15 +158,17 @@ css/styles.css              estilos (tema verde-limão, navegação inferior, ca
 js/core.js                  lógica pura (datas, semana, agrupamento por id, histórico, exportação, backups)
 js/app.js                   lógica do app (telas, fichas, treinos, histórico, backup)
 js/db.js                    camada IndexedDB (workouts, exercises, sheets, settings, colinha)
+js/bridge.js                ponte temporária: publica core.js e db.js (ES modules) no window para o app.js
+js/package.json             só {"type": "module"}: o Node lê js/*.js como módulo
 data/exercises.json         catálogo embutido com 927 exercícios em pt-BR
 data/sample-data.json       dados de exemplo (3 fichas, 12 treinos) - usados no app e nos testes
 tools/build-sample-data.ps1 gerador da fixture de exemplo (o check.ps1 confere se está em sincronia)
 tools/sample-data-content.json  conteúdo em pt-BR dos dados de exemplo
 tools/coverage-gate.js      roda os testes e exige 100% de cobertura de js/core.js
-tests/core.test.js          testes da lógica pura e da compatibilidade de dados
-tests/core-edge-cases.test.js  testes de borda (dados ausentes/inválidos, nomes congelados, ids)
-tests/module.test.js        registro do core no navegador (sem module.exports)
-tests/sample-data.test.js   testes da fixture de exemplo
+tests/core.test.mjs         testes da lógica pura e da compatibilidade de dados
+tests/core-edge-cases.test.mjs testes de borda (dados ausentes/inválidos, nomes congelados, ids)
+tests/module.test.mjs       core.js/db.js como módulos e a ponte js/bridge.js
+tests/sample-data.test.mjs  testes da fixture de exemplo
 tests/CHECKLIST.md          mapa funcionalidade -> testes
 tests/fixtures/             backups de versões antigas usados nos testes
 vendor/                     Bootstrap 5 + Bootstrap Icons + fonte Plus Jakarta Sans (OFL), locais, sem CDN
@@ -190,7 +192,7 @@ pelo usuário** — cada ficha mistura exercícios do catálogo com **2 exercíc
 - **No app**: **Mais → Debug → Carregar dados de exemplo**. Substitui os dados atuais e pode ser
   desfeito pelo botão **Desfazer** do card Dados (o estado anterior fica em memória). As datas ficam em `dayOffset`
   (dias em relação a hoje), então a demonstração está sempre recente.
-- **Nos testes**: `tests/sample-data.test.js` valida estrutura, integridade referencial, normalização de
+- **Nos testes**: `tests/sample-data.test.mjs` valida estrutura, integridade referencial, normalização de
   backup, migração de dados antigos e renomeação — é a rede de segurança contra quebra de dados entre versões.
 - **Não** entra no precache do service worker: é buscada sob demanda (a primeira carga precisa de internet).
 - **Reprodutível**: é gerada por `tools/build-sample-data.ps1` a partir de `tools/sample-data-content.json`
@@ -224,10 +226,10 @@ inequívoca com um exercício da biblioteca.
 
 ## Versionamento
 
-Ao alterar `index.html`, `css` ou `js`, atualize a versão em **dois** lugares: `index.html` (os `?v=N` das
-tags `<link>`/`<script>` e o `<span id="appVersion">`) e `sw.js` (`CACHE_NAME` = `meu-treino-vN` e os `?v=N`
-da lista `ASSETS`). Isso garante que o app instalado receba a versão nova (o rodapé de **Mais** e a linha de
-status do backup mostram a versão carregada). O `check.ps1` reprova o commit se as duas saírem de sincronia.
+Ao alterar `index.html`, `css` ou `js`, atualize a versão em **três** lugares: `index.html` (os `?v=N` das
+tags `<link>`/`<script>` e o `<span id="appVersion">`), `sw.js` (`CACHE_NAME` = `meu-treino-vN` e os `?v=N`
+da lista `ASSETS`) e `js/bridge.js` (os `?v=N` dos `import`). Isso garante que o app instalado receba a versão nova (o rodapé de **Mais** e a linha de
+status do backup mostram a versão carregada). O `check.ps1` reprova o commit se saírem de sincronia.
 
 ## Privacidade
 

@@ -1,17 +1,15 @@
-'use strict';
-
 /* Toda funcionalidade do tests/CHECKLIST.md tem teste de navegador (issue #7, documentation/REFACTOR.md seção 4).
    Lê as tabelas cuja última coluna é "Testes de navegador": nenhuma linha pode ficar com "—" ou vazia, e cada
    linha cita pelo menos um arquivo .spec.js de tests/e2e/ ou de uma subpasta que existe (arquivo de subpasta pelo caminho a partir de
    tests/e2e/, ex.: `temporarios/fichas.spec.js`). Todo arquivo de teste de navegador aparece em alguma linha. */
 
-const test = require('node:test');
-const assert = require('node:assert/strict');
-const fs = require('fs');
-const path = require('path');
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
 
-const CHECKLIST = fs.readFileSync(path.join(__dirname, 'CHECKLIST.md'), 'utf8');
-const E2E_DIR = path.join(__dirname, 'e2e');
+const CHECKLIST = fs.readFileSync(path.join(import.meta.dirname, 'CHECKLIST.md'), 'utf8');
+const E2E_DIR = path.join(import.meta.dirname, 'e2e');
 /** Arquivos de teste de navegador, com o caminho a partir de tests/e2e/ (subpastas incluídas). */
 const SPECS = fs.readdirSync(E2E_DIR, { recursive: true })
   .map((f) => f.split(path.sep).join('/'))

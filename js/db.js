@@ -1,6 +1,5 @@
-'use strict';
-
 /* IndexedDB layer for Meu Treino. All data stays on the device.
+   ES module: the browser imports it through the bridge (js/bridge.js), the tests import it directly.
    Stores:
    - workouts: registered sessions
    - exercises: exercise library (each exercise with its defaults)
@@ -138,3 +137,5 @@ async function dbClear(storeName) {
   const tx = db.transaction(storeName, 'readwrite');
   return dbRequest(tx.objectStore(storeName).clear());
 }
+
+export { dbAll, dbGet, dbPut, dbDelete, dbReplaceAll, dbClear };

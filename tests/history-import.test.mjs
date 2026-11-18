@@ -1,15 +1,13 @@
-'use strict';
-
 /* Importar treinos antigos + fichas recriadas (contrato TREINO-JSON.md). */
 
-const test = require('node:test');
-const assert = require('node:assert/strict');
-const fs = require('node:fs');
-const path = require('node:path');
-const core = require('../js/core.js');
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
+import * as core from '../js/core.js';
 
 const TODAY = '2026-11-17';
-const CONTRACT = fs.readFileSync(path.join(__dirname, '..', 'TREINO-JSON.md'), 'utf8');
+const CONTRACT = fs.readFileSync(path.join(import.meta.dirname, '..', 'TREINO-JSON.md'), 'utf8');
 
 function treino(extra) {
   return Object.assign({ date: '2025-03-14', exercises: [{ name: 'Supino reto', sets: [{ reps: 10, load: 30 }] }] }, extra);
