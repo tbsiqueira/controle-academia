@@ -91,6 +91,34 @@ keeps those tests green and adds a test for each behaviour it adds or changes.
 6. Run the tests and `check.ps1`. Report failures as they are; don't claim done with red checks.
 7. For visible changes, check it in the browser at phone width (375px), light theme.
 
+## DeepSeek reviewer setup
+
+The REVIEWER in [roles.md](roles.md) is Claude Code talking to DeepSeek's Anthropic-compatible API. One-time setup
+per machine, **outside the repo** (it holds the API key; never commit it):
+
+`~/.claude/providers/deepseek.json`
+
+```json
+{
+  "env": {
+    "ANTHROPIC_BASE_URL": "https://api.deepseek.com/anthropic",
+    "ANTHROPIC_AUTH_TOKEN": "<DeepSeek API key>",
+    "ANTHROPIC_DEFAULT_OPUS_MODEL": "deepseek-flash[1m]",
+    "ANTHROPIC_DEFAULT_SONNET_MODEL": "deepseek-flash[1m]",
+    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "deepseek-flash",
+    "CLAUDE_CODE_SUBAGENT_MODEL": "deepseek-flash"
+  }
+}
+```
+
+`claude --settings <that file>` loads it for one run only; plain `claude` stays on Anthropic. Inside the reviewer,
+`/status` should show the DeepSeek address. Model names (DeepSeek pricing page, Nov 2026): `deepseek-flash`
+(current Flash; the old `deepseek-v4-flash` still works but is retired) and `deepseek-v4-pro` (stronger, no image
+input). `[1m]` is not part of the name: it tells Claude Code the context window is 1M tokens, as in DeepSeek's
+guide. The reviewer uses `deepseek-flash[1m]` for now; to try Pro, change `--model` in roles.md section 6 and the
+two `DEFAULT_*_MODEL` lines above. Reference:
+https://api-docs.deepseek.com/quick_start/agent_integrations/claude_code
+
 ## Testing in the browser pane
 
 The Claude desktop browser pane makes `confirm()` return `false`, so confirm-guarded buttons ("Carregar dados de
@@ -105,7 +133,8 @@ On localhost the service worker doesn't hold stale files, so edits show without 
   `style`, `perf`, `refactor`, `test`, `docs`, `a11y`, `ci`, `chore`, `revert`. A body is welcome for the "why".
 - Don't sign commit messages: no `Co-Authored-By:` or "Generated with …" lines at the end. The message is just the
   summary and, if useful, the body.
-- Commit only when asked, never push unless asked.
+- Commit only when asked, never push unless asked. Exception: the DEVELOPER role in [roles.md](roles.md) commits
+  each finished step, then pushes its branch and opens the PR.
 - **`main` only changes through PRs.** A ruleset on `main` blocks direct pushes, force pushes and deletion, and
   requires a linear history plus the checks `Testes unitários`, `Verificações estáticas` and `Versão` to pass on
   a branch that is up to date with `main`. The repo only allows **rebase merges** and deletes merged branches.
@@ -122,8 +151,9 @@ On localhost the service worker doesn't hold stale files, so edits show without 
   for the full context: `Closes #N` when the PR resolves it (GitHub closes it on merge), `Refs #N` when it only
   advances it (e.g. one of several PRs). Put it on the first line of the description and keep the description
   self-contained (what changed and why), not just the link.
-- **Merge**: `gh pr merge <n> --rebase --auto` merges as soon as the checks pass. If another PR merged first,
-  GitHub asks for the branch to be updated: rebase on `origin/main` again. A version conflict (both shipped `vN`)
+- **Merge: only the human merges.** Agents never run `gh pr merge` and never turn on auto-merge; merging is what
+  publishes. If another PR merged first, GitHub asks for the branch to be updated: rebase on `origin/main` again
+  and push (`--force-with-lease`). A version conflict (both shipped `vN`)
   means bumping yours to the next number.
 - **Deploy = merging a PR with a new version.** `deploy.yml` publishes and creates tag `vN`; never create or
   push tags yourself. Docs/CI-only PRs keep the version and publish nothing.

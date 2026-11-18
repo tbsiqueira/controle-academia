@@ -100,7 +100,8 @@ versão já tem tag). Ninguém cria tag à mão: quem cria é o `deploy.yml`, de
 ### Regras do repositório (já aplicadas)
 
 - **Settings → General → Pull Requests**: só **Allow rebase merging** ligado (merge commit e squash
-  desligados), **Allow auto-merge** e **Automatically delete head branches** ligados.
+  desligados), **Allow auto-merge** desligado (o merge é sempre feito à mão) e **Automatically delete head
+  branches** ligado.
 - **Settings → Rules → Rulesets → `main`**: bloqueia push direto, force push e exclusão; exige PR, histórico
   linear, merge por rebase e os checks `Testes unitários`, `Verificações estáticas`, `Testes de navegador` e `Versão` com a
   branch atualizada com a `main`. Mudou o nome de um job em `tests.yml`? Atualize o ruleset.
@@ -119,15 +120,17 @@ node --test tests/
 powershell -ExecutionPolicy Bypass -File .check.ps1
 git commit -am "feat: ... (v75)"
 
-# 3) atualize com a main, envie e abra o PR com merge automático por rebase
+# 3) atualize com a main, envie e abra o PR
 git fetch origin
 git rebase origin/main
 git push -u origin feat/minha-mudanca
 gh pr create --base main --fill
-gh pr merge --rebase --auto
+
+# 4) com os checks verdes, faça o merge por rebase (no GitHub ou assim)
+gh pr merge --rebase
 ```
 
-Quando os checks passam, o PR entra na `main` e **Actions → Publicar no GitHub Pages** publica e cria a
+Depois do merge, **Actions → Publicar no GitHub Pages** publica e cria a
 tag. Leva ~1–2 minutos. No aparelho, feche e abra o app (ou use **Mais → Debug → Atualizar app**).
 
 ### Voltar para uma versão anterior

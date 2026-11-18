@@ -9,8 +9,18 @@ Read before changing anything:
 - [documentation/agents/workflow.md](documentation/agents/workflow.md) — commands and the checklist every change goes through
 - [documentation/agents/product-rules.md](documentation/agents/product-rules.md) — what the user wants (and has rejected)
 - [documentation/agents/history.md](documentation/agents/history.md) — key decisions, past regressions and their lessons
+- [documentation/agents/roles.md](documentation/agents/roles.md) — PLANNER / DEVELOPER / REVIEWER: how the next
+  issue is picked from tracker #2, planned on the issue, built step by step and reviewed by a DeepSeek agent
+  through herdr (`hc`)
 - [documentation/REFACTOR.md](documentation/REFACTOR.md) — the ongoing refactor (phases, target structure, test policy,
   rules for refactor PRs). Tracked in issue #2; work one issue per PR
+
+## Roles
+
+Most sessions have no role: answer questions and do what you're asked, under the normal rules here.
+A session has a role only when it's started with `/planner` or its prompt names one (PLANNER, DEVELOPER or
+REVIEWER). Then read [documentation/agents/roles.md](documentation/agents/roles.md) first and follow it.
+Asking about the roles or the workflow doesn't give you one.
 
 ## Where documentation goes
 
@@ -30,8 +40,10 @@ Read before changing anything:
 3. Changing `index.html`, `css/` or `js/` → bump the version (see workflow.md). `check.ps1` fails otherwise.
 4. Before you say done: `node --test tests/`, `powershell -ExecutionPolicy Bypass -File .\check.ps1` and
    `npm run test:e2e` (browser tests) all pass.
-5. Commit only when asked; never push unless asked. `main` is protected: every change goes through a branch and a
-   PR, merged **only by rebase** after the required checks pass. Never tag by hand: merging a PR with a new version
+5. Commit only when asked; never push unless asked. Exception: the DEVELOPER role ([roles.md](documentation/agents/roles.md))
+   commits each finished step on its issue branch, then pushes and opens the PR. **Only the human merges**: never
+   merge a PR and never turn on auto-merge. `main` is protected: every change goes through a branch and a PR,
+   merged **only by rebase** after the required checks pass. Never tag by hand: merging a PR with a new version
    makes `deploy.yml` publish and tag `vN`. Always `git pull --ff-only origin main` before branching from `main`
    (cloud sessions merge PRs too), and rebase on `origin/main` before pushing. A PR related to a GitHub issue
    references it in its description (`Closes #N` or `Refs #N`) so the full context is one click away.
