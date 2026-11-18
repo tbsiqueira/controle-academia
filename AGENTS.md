@@ -30,7 +30,8 @@ Read before changing anything:
 3. Changing `index.html`, `css/` or `js/` → bump the version (see workflow.md). `check.ps1` fails otherwise.
 4. Before you say done: `node --test tests/`, `powershell -ExecutionPolicy Bypass -File .\check.ps1` and
    `npm run test:e2e` (browser tests) all pass.
-5. Commit only when asked; never push unless asked. `main` is protected: every change goes through a branch and a
+5. Commit only when asked; never push unless asked (exception: a clean local DeepSeek review, see workflow.md,
+   is the go-ahead to commit, push and open the PR, never to merge). `main` is protected: every change goes through a branch and a
    PR, merged **only by rebase** after the required checks pass. Never tag by hand: merging a PR with a new version
    makes `deploy.yml` publish and tag `vN`. Always `git pull --ff-only origin main` before branching from `main`
    (cloud sessions merge PRs too), and rebase on `origin/main` before pushing. A PR related to a GitHub issue
