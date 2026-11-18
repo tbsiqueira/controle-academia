@@ -172,8 +172,9 @@ Works in the worktree of one issue, on its branch. Never two developers on the s
    - Run the full set once more: `node --test tests/`, `check.ps1`, `npm run test:e2e`.
    - `git fetch origin`, `git rebase origin/main`, `git push -u origin <branch>`, then `gh pr create --base main`.
      First line of the description: `Closes #<N>` (or `Refs #<N>` if the issue isn't finished). End the
-     description with a `## Revisão` section: the model that reviewed (DeepSeek or the Sonnet fallback) and the
-     reviewer's last reply as it came, in a code block; if the review was skipped, say so and why. Never turn on
+     description with a `## Revisão` section: the model that reviewed (DeepSeek or the Sonnet fallback), then
+     `### Rodada 1` and `### Rodada 2`, each with the reviewer's reply to that round as it came, in a code block,
+     and under round 1 what you fixed; if the review was skipped, say so and why. Never turn on
      auto-merge and never merge: the human merges, and merging is what publishes.
    - Report: the PR link, what changed, what the reviewer found each round and what you didn't fix (and why), new
      issues opened, and which model did the review (DeepSeek or the Sonnet fallback).
@@ -231,7 +232,7 @@ hc read --lines 120 review-<N>
 If the DeepSeek reviewer fails to start or errors, run the same command without `--settings` and with
 `--model sonnet`, and say so in the hand-back.
 
-Fix all MUST FIX items.
+Copy this reply now for the PR (round 2 scrolls it out of `hc read`). Fix all MUST FIX items.
 
 **Round 2**: ask the same reviewer to check again:
 
@@ -241,8 +242,8 @@ hc wait review-<N> --timeout 90   # repeat while it returns reason: timeout
 hc read --lines 120 review-<N>
 ```
 
-Fix what's left if it's small. Otherwise open a new issue for it. **Maximum 2 rounds.** Keep the reviewer's last
-reply for the PR's `## Revisão` section, then shut the reviewer down (`hc kill review-<N>; hc rm review-<N>`) and
+Fix what's left if it's small. Otherwise open a new issue for it. **Maximum 2 rounds.** Keep the reviewer's
+replies to both rounds for the PR's `## Revisão` section, then shut the reviewer down (`hc kill review-<N>; hc rm review-<N>`) and
 go to step 5 of the DEVELOPER.
 
 ## 7. Rules for everyone
