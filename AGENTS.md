@@ -9,8 +9,8 @@ Read before changing anything:
 - [documentation/agents/workflow.md](documentation/agents/workflow.md) — commands and the checklist every change goes through
 - [documentation/agents/product-rules.md](documentation/agents/product-rules.md) — what the user wants (and has rejected)
 - [documentation/agents/history.md](documentation/agents/history.md) — key decisions, past regressions and their lessons
-- [documentation/agents/roles.md](documentation/agents/roles.md) — PLANNER / DEVELOPER / REVIEWER: how the next
-  issue is picked from tracker #2, planned on the issue, built step by step and reviewed by a DeepSeek agent
+- [documentation/agents/roles.md](documentation/agents/roles.md) — PLANNER / DEVELOPER / REVIEWER: how an
+  issue is picked, planned on the issue, built step by step and reviewed by a DeepSeek agent
   through herdr (`hc`)
 - [documentation/REFACTOR.md](documentation/REFACTOR.md) — the ongoing refactor (phases, target structure, test policy,
   rules for refactor PRs). Tracked in issue #2; work one issue per PR

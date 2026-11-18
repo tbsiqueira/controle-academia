@@ -11,7 +11,7 @@ merges.
 | Tool | What it's for |
 |---|---|
 | **GitHub issues** | The work. One issue = one branch = one PR. Read with `gh issue view <N> --comments`. |
-| **Tracker issue #2** | The order. Its checklist lists the issues to do, top to bottom; ticked = done. |
+| **Tracker issue** | Optional order: an issue whose checklist lists issues to do, top to bottom; ticked = done. The human names it when they want one used ("pick the next issue from #T"). |
 | **Plan comment** | The steps for one issue: a `- [ ]` checklist the planner posts on the issue and the developer ticks. |
 | **Label `em andamento`** | The issue has a developer working on it. |
 | **herdr (`hc`)** | Starting and talking to other agents. Names: `planner`, `dev-<N>`, `review-<N>`. |
@@ -61,11 +61,12 @@ you a role.
 Never take a role you weren't given. Only the PLANNER and DEVELOPER may start other agents.
 
 The human starts the planner with `/planner` in any Claude Code chat (app or CLI), e.g.
-`/planner check the next issue`. Or as a background agent they can talk to whenever they want:
+`/planner plan issue #12` or `/planner pick the next issue from #7`. Or as a background agent they can talk to
+whenever they want:
 
 ```bash
 hc run --bg --name planner claude --model opus "You are the PLANNER. Follow documentation/agents/roles.md."
-hc send planner "check the next issue in the list"
+hc send planner "plan issue #12"
 hc attach planner
 ```
 
@@ -79,17 +80,19 @@ code to answer questions, and when the human asks, manage the issues:
 
 - create issues (`gh issue create`), edit their text, labels and milestones, split a big issue into smaller ones,
   close ones the human says are done or dropped;
-- add new issues to tracker #2 in the order agreed (edit its body; keep the existing layout);
+- add new issues to a tracker issue the human names, in the order agreed (edit its body; keep its layout);
 - issue text in pt-BR, self-contained (what, why, done when), no real workout data.
 
 Only do these when asked; show the human what you'll create or change first when it's more than one issue.
 
-**"Check the next issue"** (or "plan issue #N" for one outside the tracker):
+**"Plan issue #N"** or **"pick the next issue from #T"** (`#T` is a tracker issue the human names):
 
-1. **Tidy up first.** For every issue in #2 that is closed: tick its line in #2, remove its `em andamento` label,
-   and remove its worktree if one is left (`git worktree remove <path>`).
-2. **Pick the next issue**: the first unticked line in #2 whose issue is open, has no `em andamento` label and
-   no open PR (`gh pr list --state open --search "<N>"`).
+1. **Tidy up first.** Run "After a PR is merged or closed" (below) for any issue whose PR is merged or closed but
+   whose agents, worktree or label are still there. With a tracker named, also tick its line for every closed
+   issue.
+2. **Pick the issue**: the one the human named; or, from tracker #T, the first unticked line whose issue is open,
+   has no `em andamento` label and no open PR (`gh pr list --state open --search "<N>"`). If the human named
+   neither, ask which issue.
 3. **Plan it.** Read the issue and its comments; a refactor issue also follows [REFACTOR.md](../REFACTOR.md) (no
    behaviour change, never mixed with fixes or features). Post the plan as a comment on the issue:
    - a short "what and why" in pt-BR, then the steps as a `- [ ]` checklist, each small enough to be one commit;
@@ -122,13 +125,28 @@ Only do these when asked; show the human what you'll create or change first when
    foreground. When the developer finishes, read its hand-back (`hc read --lines
    200 dev-<N>`) and report in the chat:
    - PR opened → the PR link, a two-line summary of what changed, the review's MUST FIX items and what happened
-     to them, new issues opened. Remind the human that merging is theirs.
+     to them, new issues opened. Remind the human that merging is theirs, and to tell you once the PR is merged
+     or closed so you can clean up.
    - Stopped without a PR → why (failing check with its output, refused command, open question) and what the
      human needs to decide.
 6. **Relay the human's answer.** When the human answers a stopped developer in the chat, pass it on as they said
    it with `hc send dev-<N> "<their answer>"` and go back to step 5. The developer keeps its context (it was
    started without `-p`). The human can also talk to it directly with `hc attach dev-<N>` (ctrl+\ detaches) or
    take over the worktree; then wait until they say it's back in the developer's hands.
+
+**After a PR is merged or closed.** When the human says PR #M (issue #N) was merged or closed, clean up what the
+issue left behind. Run `gh pr view <M> --json state` first: never clean up a PR that is still open.
+
+1. **Agents:** `hc kill dev-<N>; hc rm dev-<N>`, and the same for `review-<N>` if `hc ls` still lists it. An idle
+   agent costs nothing, but one woken hours later re-reads its whole conversation.
+2. **Worktree:** `git -C <worktree> status --short` first. If it shows only `node_modules/` (or nothing),
+   `git worktree remove --force <worktree>`. Anything else is unsaved work: stop and ask the human.
+3. **Branch:** `git branch -D <branch>`. A merged PR already deleted the branch on GitHub; after a PR closed
+   without merging, also `git push origin --delete <branch>`.
+4. **Label:** `gh issue edit <N> --remove-label "em andamento"`.
+5. **Issue:** a merged PR with `Closes #<N>` closes it. After a PR closed without merging, ask the human whether to
+   close the issue (and why: "not planned", done another way) or leave it open for another try. Never decide alone.
+6. Report what you removed and anything you left.
 
 ## 4. DEVELOPER
 
@@ -223,8 +241,9 @@ hc wait review-<N> --timeout 90   # repeat while it returns reason: timeout
 hc read --lines 120 review-<N>
 ```
 
-Fix what's left if it's small. Otherwise open a new issue for it. **Maximum 2 rounds.** Then go to step 5 of
-the DEVELOPER.
+Fix what's left if it's small. Otherwise open a new issue for it. **Maximum 2 rounds.** Keep the reviewer's last
+reply for the PR's `## Revisão` section, then shut the reviewer down (`hc kill review-<N>; hc rm review-<N>`) and
+go to step 5 of the DEVELOPER.
 
 ## 7. Rules for everyone
 
