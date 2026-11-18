@@ -114,7 +114,7 @@ test.describe('Fichas · criar e editar', () => {
 
     const card = sheetCard(page, 'Treino C - braços');
     await expect(card.locator('.badge')).toHaveText('2 exercícios');
-    expect(await sheetItems(card)).toEqual(['1 Rosca 21 3 séries', '2 Rosca na máquina azul 4×12-10-8-8 pausa de 1s em cima']);
+    await expect.poll(() => sheetItems(card)).toEqual(['1 Rosca 21 3 séries', '2 Rosca na máquina azul 4×12-10-8-8 pausa de 1s em cima']);
 
     // Gravada ligada aos exercícios pelo id; o exercício criado pela busca ficou na Biblioteca.
     const saved = (await storedRecords(page, 'sheets')).find((s) => s.name === 'Treino C - braços');
@@ -147,7 +147,7 @@ test.describe('Fichas · criar e editar', () => {
 
     const card = sheetCard(page, 'Treino A');
     await expect(card.locator('.badge')).toHaveText('1 exercício');
-    expect(await sheetItems(card)).toEqual(['1 Supino reto 3×12-10-6 descer em 3s']);
+    await expect.poll(() => sheetItems(card)).toEqual(['1 Supino reto 3×12-10-6 descer em 3s']);
 
     // O Treinar usa a ficha nova: reps 12-10-6, só o supino.
     await goTo(page, 'Treinar');
@@ -164,10 +164,10 @@ test.describe('Fichas · criar e editar', () => {
     await page.locator('#sheetEditorSave').click();
     await expect(editor(page)).toBeHidden();
 
-    expect(await listedSheetNames(page)).toEqual(['Treino A - peito e costas', 'Treino B', 'Treino Antigo']);
+    await expect.poll(() => listedSheetNames(page)).toEqual(['Treino A - peito e costas', 'Treino B', 'Treino Antigo']);
 
     await goTo(page, 'Treinar');
-    expect(await workoutSheetOptions(page)).toEqual(['Treino A - peito e costas', 'Treino B']);
+    await expect.poll(() => workoutSheetOptions(page)).toEqual(['Treino A - peito e costas', 'Treino B']);
 
     await goTo(page, 'Início');
     const rows = page.locator('#recentWorkouts .workout-row strong');
@@ -241,16 +241,16 @@ test.describe('Fichas · desativar, reativar e excluir', () => {
     await sheetCard(page, 'Treino B').getByRole('button', { name: 'Desativar ficha' }).click();
 
     await expect(page.locator('#sheetsList h6')).toContainText('Desativadas (não aparecem no Treinar)');
-    expect(await listedSheetNames(page)).toEqual(['Treino A', 'Treino B', 'Treino Antigo']);
+    await expect.poll(() => listedSheetNames(page)).toEqual(['Treino A', 'Treino B', 'Treino Antigo']);
     await expect(page.locator('#sheetsList .opacity-50 strong')).toHaveText([/Treino B/, /Treino Antigo/]);
     await goTo(page, 'Treinar');
-    expect(await workoutSheetOptions(page)).toEqual(['Treino A']);
+    await expect.poll(() => workoutSheetOptions(page)).toEqual(['Treino A']);
 
     await goTo(page, 'Fichas');
     await sheetCard(page, 'Treino B').getByRole('button', { name: 'Reativar ficha' }).click();
     await expect(page.locator('#sheetsList .opacity-50 strong')).toHaveText([/Treino Antigo/]);
     await goTo(page, 'Treinar');
-    expect(await workoutSheetOptions(page)).toEqual(['Treino A', 'Treino B']);
+    await expect.poll(() => workoutSheetOptions(page)).toEqual(['Treino A', 'Treino B']);
     expect((await storedRecords(page, 'sheets')).find((s) => s.name === 'Treino B').exercises).toHaveLength(1);
   });
 
@@ -269,9 +269,9 @@ test.describe('Fichas · desativar, reativar e excluir', () => {
     await sheetsWithBackup(page);
     await sheetCard(page, 'Treino A').getByRole('button', { name: 'Excluir ficha' }).click();
 
-    expect(await listedSheetNames(page)).toEqual(['Treino B', 'Treino Antigo']);
+    await expect.poll(() => listedSheetNames(page)).toEqual(['Treino B', 'Treino Antigo']);
     await goTo(page, 'Treinar');
-    expect(await workoutSheetOptions(page)).toEqual(['Treino B']);
+    await expect.poll(() => workoutSheetOptions(page)).toEqual(['Treino B']);
     await goTo(page, 'Início');
     await expect(page.locator('#recentWorkouts .workout-row strong')).toHaveText(['Treino A', 'Treino A']);
     expect(await storedRecords(page, 'workouts')).toHaveLength(2);
@@ -285,7 +285,7 @@ test.describe('Fichas · desativar, reativar e excluir', () => {
     await sheetCard(page, 'Treino A').getByRole('button', { name: 'Excluir ficha' }).click();
 
     await expect.poll(asked).toEqual(['Excluir esta ficha? Os treinos já registrados não são afetados.']);
-    expect(await listedSheetNames(page)).toEqual(before);
+    await expect.poll(() => listedSheetNames(page)).toEqual(before);
     expect(await storedRecords(page, 'sheets')).toHaveLength(before.length);
   });
 });
@@ -393,7 +393,7 @@ test.describe('Fichas · Criar com IA', () => {
     await expect(importModal(page)).toBeHidden();
 
     const card = sheetCard(page, 'Treino D - costas');
-    expect(await sheetItems(card)).toEqual([
+    await expect.poll(() => sheetItems(card)).toEqual([
       '1 Supino reto 4×10-10-10-10',
       '2 Remada baixa 3×12-10-8 pegada neutra',
       '3 Voador invertido da academia 2 séries'

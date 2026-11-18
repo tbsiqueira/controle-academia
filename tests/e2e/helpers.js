@@ -14,6 +14,9 @@ const TABS = {
   'Mais': { hash: '#/more', view: 'view-more' }
 };
 
+/** Marca de um teste em que o próprio app recarrega a página (`location.reload`), para a cobertura contar. */
+const RECARGA_DO_APP = { type: 'recarga-do-app', description: 'o app recarrega a página; a cobertura fotografa antes' };
+
 /**
  * `test` com dois fixtures automáticos.
  *
@@ -27,8 +30,10 @@ const TABS = {
 const test = base.test.extend({
   appCoverage: [async ({ page }, use, testInfo) => {
     // Perfil do V8 pelo protocolo do Chromium. Recarregar a página descarta os contadores da página anterior,
-    // então page.reload/page.goto tiram uma foto antes. Recargas feitas pelo próprio app ("Atualizar app") não
-    // têm foto: segurar a navegação (Fetch) para fotografar trava o perfil do V8. O teste delas continua valendo.
+    // então page.reload/page.goto tiram uma foto antes. Recargas feitas pelo próprio app ("Atualizar app"):
+    // o teste declara `{ annotation: RECARGA_DO_APP }` e um ponto de parada em cada `location.reload(` do app.js
+    // pausa a página, tira a foto e continua. Só nesses testes: com o depurador ligado, recarregar offline pelo
+    // cache do service worker derruba a página. (Segurar a navegação pelo Fetch para fotografar trava o perfil.)
     const cdp = await page.context().newCDPSession(page);
     await cdp.send('Profiler.enable');
     await cdp.send('Profiler.startPreciseCoverage', { callCount: true, detailed: true });
@@ -39,6 +44,19 @@ const test = base.test.extend({
       result.filter((e) => isAppScript(e.url))
         .forEach((e) => coveredLines({ source, functions: e.functions }).forEach((l) => lines.add(l)));
     };
+    const appReloads = source.split('\n')
+      .map((text, i) => (/\blocation\.reload\(/.test(text) ? i : -1)).filter((i) => i >= 0);
+    const appReloadsHere = testInfo.annotations.some((a) => a.type === RECARGA_DO_APP.type);
+    if (appReloadsHere && appReloads.length) {
+      await cdp.send('Debugger.enable');
+      for (const lineNumber of appReloads) {
+        await cdp.send('Debugger.setBreakpointByUrl', { urlRegex: '/' + COVERED_FILE.replace(/[./]/g, '\\$&') + '(\\?|$)', lineNumber });
+      }
+      cdp.on('Debugger.paused', async () => {
+        await snapshot();
+        await cdp.send('Debugger.resume').catch(() => {});
+      });
+    }
     for (const method of ['reload', 'goto']) {
       const original = page[method].bind(page);
       page[method] = async (...args) => { await snapshot(); return original(...args); };
@@ -156,5 +174,5 @@ async function goTo(page, tabName) {
 
 module.exports = {
   test, expect: base.expect, TABS, freshApp, waitForApp, withSampleData, withBackup, readFixture, storedDraft, storedRecords,
-  goTo, answerConfirm
+  goTo, answerConfirm, RECARGA_DO_APP
 };

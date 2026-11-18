@@ -12,7 +12,7 @@
 //   (reps 12-10-8); 1 treino em 14/09 (Elevação pélvica 30 kg × 12, 20 min de cardio), metas 3 / 120.
 const fs = require('fs');
 const path = require('path');
-const { test, expect, freshApp, waitForApp, withBackup, storedDraft, storedRecords, goTo, answerConfirm } = require('./helpers');
+const { test, expect, freshApp, waitForApp, withBackup, storedDraft, storedRecords, goTo, answerConfirm, RECARGA_DO_APP } = require('./helpers');
 
 const OLD_BACKUPS = path.resolve(__dirname, '..', 'fixtures');
 const V1 = path.join(OLD_BACKUPS, 'backup-v1.json');
@@ -412,7 +412,7 @@ test.describe('Atualização do app', () => {
     await expectDraftBack(page);
   });
 
-  test('"Atualizar app" limpa o cache, recarrega e o rascunho em andamento sobrevive', async ({ page }) => {
+  test('"Atualizar app" limpa o cache, recarrega e o rascunho em andamento sobrevive', { annotation: RECARGA_DO_APP }, async ({ page }) => {
     await appWithDraft(page);
     const version = (await page.locator('#appVersion').textContent()).replace(/^v/, '');
 
