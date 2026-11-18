@@ -260,6 +260,15 @@ test.describe('Mais · Instalar o app', () => {
   });
 });
 
+test.describe('Mais · botão Teste', () => {
+  test('tocar em Teste mostra um alerta "hello world"', async ({ page }) => {
+    const alerts = collectAlerts(page);
+    await moreScreen(page);
+    await page.locator('#btnTest').click();
+    await expect.poll(() => alerts).toEqual(['hello world']);
+  });
+});
+
 test.describe('Mais · Debug e armazenamento', () => {
   /** Simula o armazenamento do navegador: espaço usado e se o pedido de proteção é aceito. */
   function fakeStorage(page, grant) {

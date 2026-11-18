@@ -2657,6 +2657,7 @@ function bindEvents() {
   });
   document.getElementById('btnUndoImport').addEventListener('click', guard(undoImport));
   document.getElementById('btnLoadSample').addEventListener('click', guard(loadSampleData));
+  document.getElementById('btnTest').addEventListener('click', function () { alert('hello world'); });
   document.getElementById('btnEraseAll').addEventListener('click', function () { state.eraseDone = false; });
   document.getElementById('importFile').addEventListener('change', function () {
     if (this.files && this.files[0]) guard(importData)(this.files[0]);
