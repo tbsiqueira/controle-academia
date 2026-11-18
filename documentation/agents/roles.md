@@ -25,9 +25,10 @@ answer. So they start in `dontAsk` mode (anything not on their allow-list is ref
 allow-lists in sections 3 and 6. If one still stops, `hc read <name>` shows why; `hc attach <name>` lets the human
 answer. Check the flags against `claude --help` the first time.
 
-**Waiting on another agent.** `hc wait` can take longer than a shell command is allowed to run (the Claude desktop
-app stops commands after a few minutes). If your commands have a time limit, run `hc wait` in the background, or
-check with `hc read` every few minutes until the reply is complete.
+**Waiting on another agent.** Use `hc wait <name> --timeout 90`: it returns when the agent stops working, or after
+90 seconds with `reason: timeout`, which only means "still working": wait again. 90 seconds keeps each call under
+the 2-minute limit Claude Code puts on a shell command. `hc get <name>` shows its status: `working`, `done`,
+`blocked` (it needs a person: read its screen), `error`. Never sleep or poll in a loop of your own.
 
 ## 2. Roles
 
@@ -83,17 +84,20 @@ Only do these when asked; show the human what you'll create or change first when
    `git fetch origin` then `git worktree add ../Academia-<N> -b <prefix>/<short-kebab-summary> origin/main`.
 3. Start the developer **in that worktree**:
 
+   `--outlive-parent` keeps the developer running if the planner's session ends; `--cwd` takes the worktree's
+   full path.
+
    ```bash
-   cd ../Academia-<N>
-   hc run --bg --name dev-<N> claude --model opus \
+   hc run --bg --name dev-<N> --outlive-parent --cwd <full path of ../Academia-<N>> claude --model opus \
      --permission-mode dontAsk \
-     --allowedTools "Read Edit Write Glob Grep Bash(node:*) Bash(npm:*) Bash(npx:*) Bash(git:*) Bash(gh:*) Bash(hc:*) Bash(powershell:*)" \
+     --allowedTools "Read Edit Write Glob Grep Bash(node *) Bash(npm *) Bash(npx *) Bash(git *) Bash(gh *) Bash(hc *) Bash(powershell *)" \
      "You are the DEVELOPER. Follow documentation/agents/roles.md. Issue #<N>; the plan is the latest plan comment on it."
    ```
 
 4. Report: issue, branch, worktree path, `hc read dev-<N>` to follow it.
-5. **Follow the developer and tell the human.** Run `hc wait dev-<N>` in the background (or check `hc read dev-<N>`
-   every few minutes), so the chat stays free. When the developer finishes, read its hand-back (`hc read --lines
+5. **Follow the developer and tell the human.** Wait with `hc wait dev-<N> --timeout 90` (section 1), as a
+   background command where your tools allow it, so the chat stays free; status `blocked` or `error` also ends
+   the wait. When the developer finishes, read its hand-back (`hc read --lines
    200 dev-<N>`) and report in the chat:
    - PR opened → the PR link, a two-line summary of what changed, the review's MUST FIX items and what happened
      to them, new issues opened. Remind the human that merging is theirs.
@@ -177,10 +181,10 @@ hc run --bg --name review-<N> claude \
   --settings ~/.claude/providers/deepseek.json \
   --model "deepseek-flash[1m]" \
   --permission-mode dontAsk \
-  --allowedTools "Read Glob Grep Bash(git diff:*) Bash(git log:*) Bash(git show:*) Bash(git status:*) Bash(gh issue view:*)" \
+  --allowedTools "Read Glob Grep Bash(git diff *) Bash(git log *) Bash(git show *) Bash(git status *) Bash(gh issue view *)" \
   --disallowedTools "Edit Write NotebookEdit" \
   "You are the REVIEWER. Follow section 5 of documentation/agents/roles.md. Review the branch for issue #<N>."
-hc wait review-<N>
+hc wait review-<N> --timeout 90   # repeat while it returns reason: timeout
 hc read --lines 120 review-<N>
 ```
 
@@ -193,7 +197,7 @@ Fix all MUST FIX items.
 
 ```bash
 hc send review-<N> "I fixed your points. Check again: is every MUST FIX resolved, and is there anything new?"
-hc wait review-<N>
+hc wait review-<N> --timeout 90   # repeat while it returns reason: timeout
 hc read --lines 120 review-<N>
 ```
 
