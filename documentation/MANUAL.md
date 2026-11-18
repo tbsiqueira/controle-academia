@@ -38,6 +38,9 @@ Também dá para instalar por **Mais → Instalar o app**: no Chrome e no Edge (
 botão **Instalar**, que coloca o app na tela inicial ou na área de trabalho. No iPhone o card mostra o passo a
 passo do Safari, e no app já instalado ele avisa que está tudo certo.
 
+Logo antes do card **Debug**, o botão **Teste** só mostra um aviso "hello world": serve para testar o fluxo de
+desenvolvimento e não mexe em nenhum dado.
+
 > **iPhone:** o app instalado guarda os dados separado do Safari e começa vazio. Se você já treinou pelo Safari,
 > use **Mais → Dados → Exportar** lá e depois **Importar** dentro do app instalado.
 
