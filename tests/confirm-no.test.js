@@ -1,7 +1,7 @@
 'use strict';
 
 /* Toda pergunta de confirmação tem teste de navegador da resposta "Não" (documentation/REFACTOR.md seção 4).
-   Para cada confirm('…') do js/app.js, algum teste de tests/e2e/ responde "Não" (answerConfirm(page, false) ou
+   Para cada confirm('…') do js/app.js, algum teste de tests/e2e/ (subpastas incluídas) responde "Não" (answerConfirm(page, false) ou
    answerNextConfirmNo) e confere o texto da pergunta. Basta o começo do texto: até a primeira quebra de linha. */
 
 const test = require('node:test');
@@ -24,7 +24,7 @@ function confirmPrefixes(source) {
 /** Corpo de cada teste de navegador que responde "Não" a um confirm(). */
 function noAnswerTests() {
   const bodies = [];
-  for (const file of fs.readdirSync(E2E_DIR).filter((f) => f.endsWith('.spec.js'))) {
+  for (const file of fs.readdirSync(E2E_DIR, { recursive: true }).filter((f) => f.endsWith('.spec.js'))) {
     const chunks = fs.readFileSync(path.join(E2E_DIR, file), 'utf8').split(/\n\s*test\(/).slice(1);
     for (const chunk of chunks) {
       if (/answerConfirm\(page, false\)|answerNextConfirmNo\(page\)/.test(chunk)) bodies.push({ file, chunk });

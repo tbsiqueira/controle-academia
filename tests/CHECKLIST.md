@@ -159,14 +159,58 @@ importado pela tela Mais, com o relógio da página parado em 20/05/2026 (`page.
 | Ficha renomeada aparece com o nome novo na lista | `js/app.js` (Início) | — | `inicio.spec.js`: ficha renomeada aparece com o nome novo |
 | Botão de compartilhar da linha abre o texto do treino | `js/app.js` (Início) | — | `inicio.spec.js`: o botão de compartilhar da linha |
 
+## Testes temporários da refatoração
+
+**Temporários** (issue #39, `documentation/REFACTOR.md` seção 4, item 6): enquanto durar a refatoração, a regra
+das telas críticas vale para todas as telas e a cobertura de linhas do `js/app.js` fica em 100%. Os arquivos ficam
+em `tests/e2e/temporarios/` e rodam no CI como os demais até o #16; depois o #40 os desliga sem apagar. Falhas
+(aparelho sem espaço, cache bloqueado, `canShare` quebrado) são simuladas no navegador (IndexedDB, Cache Storage),
+sem tocar nas funções do app.
+
+| Comportamento | Tela | Testes de navegador |
+|---|---|---|
+| Salvar ficha sem nome avisa e não fecha o editor | Fichas | `temporarios/fichas.spec.js` |
+| Descer exercício no editor; Subir no primeiro e Descer no último não fazem nada | Fichas | `temporarios/fichas.spec.js` |
+| Diminuir as séries tira os campos de reps que sobram e não grava reps a mais | Fichas | `temporarios/fichas.spec.js` |
+| Fechar o editor de ficha sem salvar não grava nada | Fichas | `temporarios/fichas.spec.js` |
+| Tirar todos os exercícios da ficha mostra como adicionar | Fichas | `temporarios/fichas.spec.js` |
+| "Adicionar exercício" abre e fecha a busca; abrir de novo começa vazia | Fichas | `temporarios/fichas.spec.js` |
+| Editar ficha desativada a mantém desativada, mesmo com o nome de uma ativa | Fichas | `temporarios/fichas.spec.js` |
+| Ficha antiga sem reps por série mostra só o número de séries | Fichas | `temporarios/fichas.spec.js` |
+| Desativadas vêm depois das ativas, com o botão Reativar | Fichas | `temporarios/fichas.spec.js` |
+| Editar grupo e correção sem renomear mantém nome e histórico | Biblioteca | `temporarios/biblioteca.spec.js` |
+| Correção da professora vira a observação ao pôr o exercício numa ficha | Biblioteca | `temporarios/biblioteca.spec.js` |
+| Fechar o cadastro de exercício sem salvar não cria nada | Biblioteca | `temporarios/biblioteca.spec.js` |
+| Busca e filtro de grupo valem juntos | Biblioteca | `temporarios/biblioteca.spec.js` |
+| No cadastro, o botão do catálogo abre e fecha a busca | Biblioteca | `temporarios/biblioteca.spec.js` |
+| Treino só de cardio: o detalhe avisa que não há exercícios registrados | Detalhe do treino | `temporarios/historico.spec.js` |
+| "Editar" no detalhe abre o treino no Treinar | Detalhe do treino | `temporarios/historico.spec.js` |
+| "Voltar" na evolução volta para a tela de onde veio | Evolução do exercício | `temporarios/historico.spec.js` |
+| Meta de treinos zerada vira 1; cardio vazio vira 0 | Mais | `temporarios/mais.spec.js` |
+| Trocar a data de início da semana muda a semana do Início | Mais | `temporarios/mais.spec.js` |
+| Colinha: só o título basta; só o conteúdo basta; só espaços é recusado | Mais | `temporarios/mais.spec.js` |
+| Colinhas na ordem de criação; editar não muda a ordem | Mais | `temporarios/mais.spec.js` |
+| Importar treinos antigos: "Copiar texto" copia o texto para a IA; Cancelar não importa nada | Mais | `temporarios/mais.spec.js` |
+| Desfazer não aparece antes de importar e some depois de recarregar a página | Dados | `temporarios/dados.spec.js` |
+| Treino de ficha desativada aparece como "(inativa)" na edição | Treinar | `temporarios/treinar.spec.js` |
+| Treino de ficha excluída aparece como "(excluída)" e o Treinar explica | Treinar | `temporarios/treinar.spec.js` |
+| Ficha sem exercícios: o Treinar explica onde adicionar | Treinar | `temporarios/treinar.spec.js` |
+| Sem nenhuma ficha, o Treinar aponta para a aba Fichas | Treinar | `temporarios/treinar.spec.js` |
+| Rascunho que não grava no aparelho fica na memória; apagar que falha ainda limpa a tela | Treinar | `temporarios/falhas.spec.js` |
+| Rascunho antigo sem hora de gravação aparece sem "salvo às" | Início | `temporarios/falhas.spec.js` |
+| "Criar" exercício que não grava avisa o erro (Treinar e cadastro da Biblioteca) | Treinar, Biblioteca | `temporarios/falhas.spec.js` |
+| `canShare` que dá erro: Exportar baixa o arquivo como no computador | Mais | `temporarios/falhas.spec.js` |
+| "Atualizar app" recarrega mesmo se limpar o cache falhar | Mais | `temporarios/falhas.spec.js` |
+| Erro inesperado numa ação mostra o aviso "Erro:" e o app continua | Treinar | `temporarios/falhas.spec.js` |
+
 ## Limites conhecidos
 
-- **Cobertura do `js/app.js` sem meta fixa** (`documentation/REFACTOR.md`, seção 4). Todo caminho que a pessoa
-  dispara tem teste de navegador; o que fica fora da conta (`npm run test:e2e:coverage` lista) são avisos de erro
-  inesperado (`guard`, falha ao criar exercício, falha do IndexedDB ao gravar/apagar o rascunho) e itens de ficha
-  sem séries nem reps (o app não grava assim). "Atualizar app" **tem teste** (`dados.spec.js`), mas não entra na
-  conta: o próprio app recarrega a página, o que descarta os contadores, e segurar a navegação para tirar a foto
-  trava o perfil do V8.
+- **Cobertura do `js/app.js`** (`documentation/REFACTOR.md`, seção 4). Com os testes temporários (#39), 100% das
+  linhas. Sem eles (depois do #40), ficam fora da conta os avisos de erro inesperado (`guard`, falha ao criar
+  exercício, falha do IndexedDB ao gravar/apagar o rascunho) e itens de ficha sem lista de reps. "Atualizar app"
+  entra na conta: o teste declara `RECARGA_DO_APP` (`tests/e2e/helpers.js`) e a cobertura tira a foto num ponto de
+  parada logo antes do `location.reload()` do app (o depurador só liga nesses testes: com ele ligado, recarregar
+  offline pelo cache do service worker derruba a página).
 - **Wrapper de módulo do `core.js`** (detecção Node × navegador) fica fora da meta de cobertura: cada
   ambiente executa um dos lados. O lado do navegador é testado em `module.test.js` (carrega o core num
   escopo sem `module.exports` e confere que as funções viram globais).

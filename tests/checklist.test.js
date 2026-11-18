@@ -2,8 +2,8 @@
 
 /* Toda funcionalidade do tests/CHECKLIST.md tem teste de navegador (issue #7, documentation/REFACTOR.md seção 4).
    Lê as tabelas cuja última coluna é "Testes de navegador": nenhuma linha pode ficar com "—" ou vazia, e cada
-   linha cita pelo menos um arquivo tests/e2e/*.spec.js que existe. Todo arquivo de teste de navegador aparece
-   em alguma linha. */
+   linha cita pelo menos um arquivo .spec.js de tests/e2e/ ou de uma subpasta que existe (arquivo de subpasta pelo caminho a partir de
+   tests/e2e/, ex.: `temporarios/fichas.spec.js`). Todo arquivo de teste de navegador aparece em alguma linha. */
 
 const test = require('node:test');
 const assert = require('node:assert/strict');
@@ -12,7 +12,12 @@ const path = require('path');
 
 const CHECKLIST = fs.readFileSync(path.join(__dirname, 'CHECKLIST.md'), 'utf8');
 const E2E_DIR = path.join(__dirname, 'e2e');
-const SPECS = fs.readdirSync(E2E_DIR).filter((f) => f.endsWith('.spec.js'));
+/** Arquivos de teste de navegador, com o caminho a partir de tests/e2e/ (subpastas incluídas). */
+const SPECS = fs.readdirSync(E2E_DIR, { recursive: true })
+  .map((f) => f.split(path.sep).join('/'))
+  .filter((f) => f.endsWith('.spec.js'));
+/** Arquivo citado numa linha do CHECKLIST: `treinar.spec.js` ou `temporarios/fichas.spec.js`. */
+const CITED_SPEC = /[\w./-]+\.spec\.js/g;
 
 function cells(line) {
   return line.trim().replace(/^\|/, '').replace(/\|$/, '').split('|').map((c) => c.trim());
@@ -47,14 +52,14 @@ test('toda linha do CHECKLIST tem teste de navegador', () => {
 
 test('cada linha cita um arquivo de teste de navegador que existe', () => {
   const wrong = ROWS.filter((r) => {
-    const cited = r.browser.match(/[\w-]+\.spec\.js/g) || [];
+    const cited = r.browser.match(CITED_SPEC) || [];
     return !cited.length || cited.some((f) => !SPECS.includes(f));
   });
   assert.deepEqual(wrong.map((r) => 'linha ' + r.line + ': ' + r.browser), []);
 });
 
 test('todo arquivo de teste de navegador aparece no CHECKLIST', () => {
-  const cited = new Set(ROWS.flatMap((r) => r.browser.match(/[\w-]+\.spec\.js/g) || []));
+  const cited = new Set(ROWS.flatMap((r) => r.browser.match(CITED_SPEC) || []));
   assert.deepEqual(SPECS.filter((f) => !cited.has(f)), []);
 });
 

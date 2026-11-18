@@ -8,6 +8,8 @@ const CI = !!process.env.CI;
 module.exports = defineConfig({
   testDir: 'tests/e2e',
   testMatch: '**/*.spec.js',
+  // tests/e2e/temporarios/: testes temporários da refatoração (issue #39). Para desligar sem apagar (issue #40):
+  // testIgnore: 'temporarios/**',
   outputDir: 'tests/e2e/results',
   globalSetup: './tests/e2e/global-setup.js',
   fullyParallel: true,
