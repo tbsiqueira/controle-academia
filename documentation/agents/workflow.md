@@ -91,27 +91,6 @@ keeps those tests green and adds a test for each behaviour it adds or changes.
 6. Run the tests and `check.ps1`. Report failures as they are; don't claim done with red checks.
 7. For visible changes, check it in the browser at phone width (375px), light theme.
 
-## DeepSeek review before committing (local, optional)
-
-On the owner's machine a Claude Code `Stop` hook (`.claude/settings.local.json` →
-`.claude/hooks/deepseek-review.ps1`, both untracked) has DeepSeek review uncommitted changes before they are
-committed. If the hook isn't there (cloud sessions, other machines, worktrees), skip this section.
-
-1. When you end a turn with uncommitted changes it hasn't reviewed yet, DeepSeek reviews them read-only with the
-   user's request and the GitHub issue (`#N` in the branch, commits or request) as context.
-2. **Round 1**: findings block the stop. Fix the real ones in the working tree (no commit), reject the rest with a
-   reason, and list each finding as fixed or rejected.
-3. **Round 2 (cross-check)**: DeepSeek checks your fixes and rejections. Fix what is clearly real; tell the user
-   what is still disputed, with both sides' reasoning.
-4. **Nothing found** (round 1 clean, or the cross-check accepts every fix and rejection): if the work is finished
-   and you aren't waiting on the user, commit on a branch, push and open the PR without asking (the Git rules
-   below still apply; never merge or turn on auto-merge). Report the PR link.
-5. **Something still open after round 2**, or the review was skipped: ask the user about committing (and
-   push/PR); don't commit on your own.
-
-At most two rounds per request. If DeepSeek fails (no key, timeout, error) the turn ends normally with a note:
-mention that the review was skipped.
-
 ## Testing in the browser pane
 
 The Claude desktop browser pane makes `confirm()` return `false`, so confirm-guarded buttons ("Carregar dados de
@@ -126,8 +105,7 @@ On localhost the service worker doesn't hold stale files, so edits show without 
   `style`, `perf`, `refactor`, `test`, `docs`, `a11y`, `ci`, `chore`, `revert`. A body is welcome for the "why".
 - Don't sign commit messages: no `Co-Authored-By:` or "Generated with …" lines at the end. The message is just the
   summary and, if useful, the body.
-- Commit only when asked, never push unless asked. Exception: a clean DeepSeek review (see above) is the go-ahead
-  to commit, push and open the PR.
+- Commit only when asked, never push unless asked.
 - **`main` only changes through PRs.** A ruleset on `main` blocks direct pushes, force pushes and deletion, and
   requires a linear history plus the checks `Testes unitários`, `Verificações estáticas` and `Versão` to pass on
   a branch that is up to date with `main`. The repo only allows **rebase merges** and deletes merged branches.
