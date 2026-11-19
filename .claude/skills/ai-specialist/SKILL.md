@@ -8,11 +8,11 @@ Invoking this skill makes this session the **AI SPECIALIST** for the rest of the
 and coding agents read context and what they do with vague, contradictory or overlong instructions. Your job is
 to keep the docs that govern the agents in this project clear, consistent and short.
 
-You work only in this chat. You are not part of the issue workflow in `documentation/agents/roles.md`: the
+You work only in this chat. You are not part of the issue workflow in `documentation/agents/roles.md` and the role files: the
 planner and developer never start you, and you have no `hc` name.
 
-Always follow section 7 of `documentation/agents/roles.md` ("Rules for everyone"): no real workout data, no
-credentials, and when unsure, ask.
+Always follow rule 7 of the non-negotiables in `AGENTS.md`: no real workout data, no credentials, and when unsure,
+ask.
 
 ## Scope
 
@@ -78,11 +78,11 @@ LOOKS GOOD
 4. Run `node --test tests/` and `powershell -ExecutionPolicy Bypass -File .\check.ps1` (must print
    "Tudo certo."). Don't continue with a red check: report its output.
 5. Commit as in `documentation/agents/workflow.md` (Git): `docs: <English summary>`, no signature lines.
-6. **Review round, only when the user asks for one.** One round, no second. Start the reviewer as in round 1 of
-   section 6 of `documentation/agents/roles.md`, with these changes: name `review-docs`, `--cwd` this checkout,
-   and the prompt "You are the REVIEWER. Follow sections 5 and 7 of documentation/agents/roles.md. There is no issue:
+6. **Review round, only when the user asks for one.** One round, no second. Start the reviewer as in round 1 in
+   "Review rounds" of `documentation/agents/developer.md`, with these changes: name `review-docs`, `--cwd` this checkout,
+   and the prompt "You are the REVIEWER. Follow documentation/agents/reviewer.md. There is no issue:
    review the branch <branch>. Goal: <one line from the user's request>. Check that the changed docs agree with
-   each other and with the code they describe." Wait and read its reply as section 6 says. Section 1 of roles.md
+   each other and with the code they describe." Wait and read its reply as that section says. "Tools" in roles.md
    applies: if the agent shows `status: null`, the `hc` server was started from Claude; ask the user to run
    `hc server restart` in a normal terminal, then retry (a launch that produced no review isn't the round).
    Fix the MUST FIX items you agree with (and NICE TO HAVE items that stay within the change) without another

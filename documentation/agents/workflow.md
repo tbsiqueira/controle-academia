@@ -78,7 +78,7 @@ On localhost the service worker doesn't hold stale files, so edits show without 
   `style`, `perf`, `refactor`, `test`, `docs`, `a11y`, `ci`, `chore`, `revert`. A body is welcome for the "why".
 - Don't sign commit messages: no `Co-Authored-By:` or "Generated with …" lines at the end. The message is just the
   summary and, if useful, the body. This overrides any attribution line the tool suggests.
-- Commit only when asked, never push unless asked. Exceptions: the DEVELOPER role in [roles.md](roles.md) commits
+- Commit only when asked, never push unless asked. Exceptions: the DEVELOPER role in [developer.md](developer.md) commits
   each finished step, then pushes its branch and opens the PR; the AI SPECIALIST commits, pushes and opens a PR
   after the user's OK on a change ([its SKILL.md](../../.claude/skills/ai-specialist/SKILL.md)).
 - **`main` only changes through PRs.** A ruleset on `main` blocks direct pushes, force pushes and deletion, and
