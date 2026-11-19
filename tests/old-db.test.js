@@ -1,10 +1,10 @@
 'use strict';
 
-/* Simula uma base antiga (era v33): treinos e fichas SEM ids, nomes que depois foram
-   renomeados e exercícios com "source: catalog" sem comprovação.
-   Prova que o caminho do init (reparo de sources + ligação por nome) e a exibição por id
-   NÃO perdem nenhuma série, carga, aquecimento ou item de ficha — e que o histórico
-   antigo continua encontrável pelo nome guardado. */
+/* Simulates an old database (v33 era): workouts and sheets WITHOUT ids, names that were later
+   renamed and exercises with "source: catalog" without proof.
+   It proves that the init path (sources repair + linking by name) and display by id
+   do NOT lose any set, load, warm-up or sheet item — and that the old history
+   can still be found by the stored name. */
 
 const test = require('node:test');
 const assert = require('node:assert/strict');
@@ -42,31 +42,31 @@ function baseAntiga() {
   };
 }
 
-test('base antiga: reparo de sources nao perde nem altera exercicios validos', () => {
+test('old database: the sources repair neither loses nor changes valid exercises', () => {
   const base = baseAntiga();
   const reparo = core.fixLibrarySources(base.exercises);
 
-  assert.equal(reparo.changed, 1, 'apenas o exercicio com source sem comprovacao');
+  assert.equal(reparo.changed, 1, 'only the exercise with an unproven source');
   assert.equal(reparo.exercises[2].source, 'custom');
-  assert.equal(reparo.exercises[0].source, 'custom', 'custom intacto');
+  assert.equal(reparo.exercises[0].source, 'custom', 'custom untouched');
   assert.equal(reparo.exercises.length, base.exercises.length);
 
   assert.deepEqual(core.fixLibrarySources(), { exercises: [], changed: 0 });
   assert.equal(core.fixLibrarySources([null, { id: 'x', source: 'catalog', catalogId: 3 }]).changed, 0);
 });
 
-test('base antiga: ligacao por nome e inequivoca e nao remove itens', () => {
+test('old database: linking by name is unambiguous and removes no items', () => {
   const base = baseAntiga();
   const reparo = core.fixLibrarySources(base.exercises);
   const ligadas = core.linkSheetItemsToExercises(base.sheets, reparo.exercises);
 
-  assert.equal(ligadas.changed, 1, 'apenas "Remada baixa" casa de forma inequivoca');
-  assert.equal(ligadas.sheets[0].exercises.length, 2, 'nenhum item de ficha sumiu');
-  assert.equal(ligadas.sheets[0].exercises[0].exerciseId, null, 'exercicio renomeado fica sem id (sem adivinhacao)');
+  assert.equal(ligadas.changed, 1, 'only "Remada baixa" matches unambiguously');
+  assert.equal(ligadas.sheets[0].exercises.length, 2, 'no sheet item disappeared');
+  assert.equal(ligadas.sheets[0].exercises[0].exerciseId, null, 'a renamed exercise stays without an id (no guessing)');
   assert.equal(ligadas.sheets[0].exercises[1].exerciseId, 'e2');
 });
 
-test('base antiga: normalizacao preserva series, cargas, notas e aquecimentos', () => {
+test('old database: normalization preserves sets, loads, notes and warm-ups', () => {
   const base = baseAntiga();
   const backup = core.normalizeBackup(base);
 
@@ -82,12 +82,12 @@ test('base antiga: normalizacao preserva series, cargas, notas e aquecimentos', 
   assert.deepEqual(backup.sheets[0].exercises[0].reps, [12, 10]);
 });
 
-test('base antiga: historico por nome guardado continua funcionando', () => {
+test('old database: history by stored name keeps working', () => {
   const base = baseAntiga();
   const alvo = core.historyTarget({ exerciseId: null, exerciseName: 'Puxada frente' });
 
   assert.deepEqual(alvo, { exerciseId: null, exerciseName: 'Puxada frente' });
-  assert.equal(core.sessionsForExercise(base.workouts, alvo).length, 2, 'as duas sessoes antigas');
+  assert.equal(core.sessionsForExercise(base.workouts, alvo).length, 2, 'both old sessions');
   assert.deepEqual(core.lastLoadsForExercise(base.workouts, alvo), { 1: 42.5 });
   assert.equal(core.bestSetForExercise(base.workouts[0], alvo).load, 45);
 
@@ -95,7 +95,7 @@ test('base antiga: historico por nome guardado continua funcionando', () => {
   assert.equal(core.historyTarget({ exerciseId: 'e1', exerciseName: 'Novo' }).exerciseId, 'e1');
 });
 
-test('base antiga: registros sem id e com id se encontram no mesmo historico', () => {
+test('old database: records without an id and with an id meet in the same history', () => {
   const treinos = [
     { id: 'a', date: '2026-09-20', sets: [{ exerciseId: null, exerciseName: 'Puxada frente', number: 1, reps: 12, load: 40 }] },
     { id: 'b', date: '2026-09-27', sets: [{ exerciseId: 'e1', exerciseName: 'Puxada frente supinada', number: 1, reps: 12, load: 42.5 }] }
@@ -106,7 +106,7 @@ test('base antiga: registros sem id e com id se encontram no mesmo historico', (
   assert.deepEqual(core.lastLoadsForExercise(treinos, alvo), { 1: 42.5 });
 });
 
-test('base antiga: agrupamento preserva as series e o aquecimento do registro', () => {
+test('old database: grouping preserves the sets and the warm-up of the record', () => {
   const base = baseAntiga();
   const grupos = core.groupSets(base.workouts[0].sets, base.workouts[0].warmups);
 

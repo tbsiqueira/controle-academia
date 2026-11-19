@@ -1,8 +1,8 @@
 'use strict';
 
-/* Testes do service worker (sw.js) com cache e rede falsos, sem dependências.
-   Regressão: tudo era "rede primeiro"; com sinal fraco (academia) o app esperava a rede
-   desistir antes de usar o cache. Arquivos versionados (?v=N) agora saem direto do cache. */
+/* Tests for the service worker (sw.js) with a fake cache and network, no dependencies.
+   Regression: everything was "network first"; with a weak signal (gym) the app waited for the network
+   to give up before using the cache. Versioned files (?v=N) now come straight from the cache. */
 
 const test = require('node:test');
 const assert = require('node:assert/strict');
@@ -16,7 +16,7 @@ function response(body) {
   return { status: 200, body: body, clone: function () { return this; } };
 }
 
-// Sobe o sw.js num escopo falso. `cached` = { chave: resposta }; `online` liga/desliga a rede.
+// Boots sw.js in a fake scope. `cached` = { key: response }; `online` turns the network on/off.
 function loadWorker(origin, cached) {
   const listeners = {};
   const store = new Map(Object.entries(cached || {}));
@@ -43,7 +43,7 @@ function loadWorker(origin, cached) {
   vm.createContext(scope);
   new vm.Script(SOURCE, { filename: 'sw.js' }).runInContext(scope);
 
-  // Dispara um fetch; devolve a resposta, ou undefined se o worker nao interceptou.
+  // Fires a fetch; returns the response, or undefined if the worker did not intercept it.
   world.request = async function (url, extra) {
     let answer;
     listeners.fetch({
@@ -51,7 +51,7 @@ function loadWorker(origin, cached) {
       respondWith: function (promise) { answer = promise; }
     });
     const result = await answer;
-    await new Promise((resolve) => setTimeout(resolve, 0));   // deixa o putInCache terminar
+    await new Promise((resolve) => setTimeout(resolve, 0));   // lets putInCache finish
     return result;
   };
   return world;
@@ -60,55 +60,55 @@ function loadWorker(origin, cached) {
 const SITE = 'https://usuario.github.io';
 const APP_JS = SITE + '/js/app.js?v=59';
 
-test('producao: arquivo versionado sai do cache sem tocar na rede', async () => {
+test('production: a versioned file comes from the cache without touching the network', async () => {
   const sw = loadWorker(SITE, { [APP_JS]: response('cache') });
   const res = await sw.request(APP_JS);
   assert.equal(res.body, 'cache');
-  assert.deepEqual(sw.fetched, [], 'nao espera a rede (wifi fraco nao trava a abertura)');
+  assert.deepEqual(sw.fetched, [], 'does not wait for the network (weak wifi does not block opening)');
 });
 
-test('producao: arquivo versionado fora do cache vem da rede e fica guardado pela URL completa', async () => {
+test('production: a versioned file outside the cache comes from the network and is stored by the full URL', async () => {
   const sw = loadWorker(SITE, {});
   const res = await sw.request(APP_JS);
   assert.equal(res.body, 'rede:' + APP_JS);
   assert.equal(sw.store.get(APP_JS).body, 'rede:' + APP_JS);
 
-  // versao nova = URL nova: nao reaproveita o cache da antiga
+  // new version = new URL: does not reuse the old one cache
   const novo = SITE + '/js/app.js?v=60';
   assert.equal((await sw.request(novo)).body, 'rede:' + novo);
   assert.equal(sw.store.get(APP_JS).body, 'rede:' + APP_JS);
 });
 
-test('index.html e catalogo continuam rede primeiro, com cache quando esta offline', async () => {
+test('index.html and the catalog stay network first, with cache when offline', async () => {
   const index = SITE + '/index.html';
   const sw = loadWorker(SITE, { [index]: response('cache-velho') });
 
-  assert.equal((await sw.request(index)).body, 'rede:' + index, 'online: sempre a versao mais nova');
-  assert.equal(sw.store.get(index).body, 'rede:' + index, 'e atualiza o cache');
+  assert.equal((await sw.request(index)).body, 'rede:' + index, 'online: always the newest version');
+  assert.equal(sw.store.get(index).body, 'rede:' + index, 'and updates the cache');
 
   sw.online = false;
-  assert.equal((await sw.request(index)).body, 'rede:' + index, 'offline: ultima versao guardada');
-  assert.equal((await sw.request(SITE + '/data/exercises.json')).body, 'network-error', 'sem cache: erro de rede');
+  assert.equal((await sw.request(index)).body, 'rede:' + index, 'offline: last stored version');
+  assert.equal((await sw.request(SITE + '/data/exercises.json')).body, 'network-error', 'no cache: network error');
 });
 
-test('offline: navegacao para uma rota desconhecida cai no index.html do cache', async () => {
+test('offline: navigating to an unknown route falls back to the cached index.html', async () => {
   const sw = loadWorker(SITE, { [SITE + '/index.html']: response('index') });
   sw.online = false;
   assert.equal((await sw.request(SITE + '/qualquer', { mode: 'navigate' })).body, 'index');
 });
 
-test('localhost: arquivo versionado continua rede primeiro (edicao sem trocar a versao aparece)', async () => {
+test('localhost: a versioned file stays network first (an edit without a version change shows up)', async () => {
   for (const host of ['http://localhost:8080', 'http://127.0.0.1:8080']) {
     const url = host + '/js/app.js?v=59';
     const sw = loadWorker(host, { [url]: response('cache') });
     assert.equal((await sw.request(url)).body, 'rede:' + url, host);
 
     sw.online = false;
-    assert.equal((await sw.request(url)).body, 'rede:' + url, 'offline usa o que ficou no cache');
+    assert.equal((await sw.request(url)).body, 'rede:' + url, 'offline uses what stayed in the cache');
   }
 });
 
-test('nao intercepta POST, outras origens nem o proprio sw.js', async () => {
+test('does not intercept POST, other origins or sw.js itself', async () => {
   const sw = loadWorker(SITE, {});
   assert.equal(await sw.request(SITE + '/x', { method: 'POST' }), undefined);
   assert.equal(await sw.request('https://outro.site/js/app.js?v=59'), undefined);

@@ -1,7 +1,7 @@
 'use strict';
 
-/* Testes do registro do modulo core.js.
-   Verificam que, no navegador (sem module.exports), as funcoes viram globais do window. */
+/* Tests for the core.js module registration.
+   They check that, in the browser (without module.exports), the functions become window globals. */
 
 const test = require('node:test');
 const assert = require('node:assert/strict');
@@ -11,14 +11,14 @@ const vm = require('node:vm');
 
 require('../js/core.js');
 
-test('core.js se registra no navegador quando nao existe module.exports', () => {
+test('core.js registers itself in the browser when module.exports does not exist', () => {
   const arquivo = path.join(__dirname, '..', 'js', 'core.js');
   const fonte = fs.readFileSync(arquivo, 'utf8');
-  const escopo = { self: {} };                 // simula o navegador (sem module)
+  const escopo = { self: {} };                 // simulates the browser (no module)
   vm.createContext(escopo);
   new vm.Script(fonte, { filename: arquivo }).runInContext(escopo);
 
-  assert.equal(typeof escopo.self.weekWindow, 'function', 'funcoes viram globais no navegador');
-  assert.equal(typeof escopo.self.exerciseLabel, 'function', 'resolvers tambem ficam globais');
-  assert.equal(typeof escopo.self.backupStatus, 'function', 'backup tambem fica global');
+  assert.equal(typeof escopo.self.weekWindow, 'function', 'functions become globals in the browser');
+  assert.equal(typeof escopo.self.exerciseLabel, 'function', 'resolvers also become globals');
+  assert.equal(typeof escopo.self.backupStatus, 'function', 'backup also becomes global');
 });
