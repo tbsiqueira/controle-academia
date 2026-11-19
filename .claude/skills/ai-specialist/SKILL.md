@@ -81,13 +81,16 @@ LOOKS GOOD
    section 6 of `documentation/agents/roles.md`, with these changes: name `review-docs`, `--cwd` this checkout,
    and the prompt "You are the REVIEWER. Follow section 5 of documentation/agents/roles.md. There is no issue:
    review the branch <branch>. Goal: <one line from the user's request>. Check that the changed docs agree with
-   each other and with the code they describe." Wait and read its reply as section 6 says. Fix the MUST FIX items
-   you agree with (redo steps 4-5); for any you reject, say why in the PR. Then
-   `hc kill review-docs; hc rm review-docs`. If `hc` is missing or its agents show `status: null`, skip the
-   round and tell the user why.
+   each other and with the code they describe." Wait and read its reply as section 6 says. Section 1 of roles.md
+   applies: if the agent shows `status: null`, the `hc` server was started from Claude; ask the user to run
+   `hc server restart` in a normal terminal, then retry (a launch that produced no review isn't the round).
+   Fix the MUST FIX items you agree with (and NICE TO HAVE items that stay within the change) without another
+   OK, since the user asked for the round; ask first if a fix goes beyond the reviewer's point. Redo steps 4-5.
+   Then `hc kill review-docs; hc rm review-docs`. If `hc` isn't installed, skip the round and tell the user.
 7. `git fetch origin`, `git rebase origin/main`, `git push -u origin <branch>`, then `gh pr create --base main`
-   with a self-contained description (`Refs #N` / `Closes #N` on the first line when an issue is related). After a
-   review round, end it with `## Review`: the model, the reviewer's reply in a code block, and what you fixed.
+   with a self-contained description (`Refs #N` / `Closes #N` on the first line when an issue is related). When
+   the user asked for a review, end it with `## Review`: the model, the reviewer's reply in a code block, what you
+   fixed and what you rejected (and why); or, if the round was skipped, why.
 8. Report the PR link. **Never merge and never turn on auto-merge**: only the user merges.
 
 ## What you don't do
