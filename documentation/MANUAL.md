@@ -365,26 +365,30 @@ Depois escolha **Copiar** ou **Compartilhar** (no celular abre a folha de compar
 **Exemplo do texto gerado:**
 
 ```
-MEU TREINO — 08/10/2026
-Ficha: TREINO A - inferiores
+*08/10/2026*
+Ficha: _TREINO A - inferiores_
 
-1. Elevação pélvica (obs.: cotovelos próximos ao corpo, pausa de 1s embaixo)
-   Aquecimento: 15 reps · 20 kg · RIR 3
-   Série 1: 12 reps · 27 kg · RIR 2
-   Série 2: 10 reps · 27 kg · RIR 1
-   Série 3: 8 reps · 32 kg · RIR 1 (caiu a força)
+1. *Elevação pélvica*
+- Aquecimento: 15 reps · 20 kg · RIR 3
+- Série 1: 12 reps · 27 kg · RIR 2
+- Série 2: 10 reps · 27 kg · RIR 1
+- Série 3: 8 reps · 32 kg · RIR 1 _(caiu a força)_
 
-2. Leg press 45
-   Aquecimento: 12 reps · 60 kg · RIR 4
-   Série 1: 12 reps · 100 kg · RIR 2
-   Série 2: 12 reps · 110 kg · RIR 2
+2. *Leg press 45*
+- Aquecimento: 12 reps · 60 kg · RIR 4
+- Série 1: 12 reps · 100 kg · RIR 2
+- Série 2: 12 reps · 110 kg · RIR 2
 
-Cardio: 30 min
-Observações: treino leve hoje, ombro ok.
+*Cardio:* 30 min
+*Observações:* treino leve hoje, ombro ok.
 ```
 
-Traz tudo: data, ficha, aquecimento **dentro de cada exercício**, as séries com reps/carga/RIR,
-as observações e o cardio. Campos vazios são omitidos automaticamente.
+Os `*asteriscos*` e `_sublinhados_` viram **negrito** e _itálico_ no WhatsApp.
+
+Traz: data, ficha, aquecimento **dentro de cada exercício**, as séries com reps/carga/RIR (e a observação
+de cada série), as observações do treino e o cardio. Campos vazios são omitidos automaticamente.
+A **observação da professora** (a que vem da ficha) **não vai** no texto: é dela mesma, então não precisa
+voltar para ela. Ela continua salva e aparece no Treinar e no detalhe do treino.
 
 ---
 
