@@ -60,6 +60,10 @@ you a role.
 
 Never take a role you weren't given. Only the PLANNER and DEVELOPER may start other agents.
 
+There is one more role outside this workflow: the **AI SPECIALIST**, which reviews and improves the docs that govern
+the agents. The human starts it only with `/ai-specialist` in a chat; the planner and developer never start it and
+it has no `hc` name. Its rules are in [.claude/skills/ai-specialist/SKILL.md](../../.claude/skills/ai-specialist/SKILL.md).
+
 The human starts the planner with `/planner` in any Claude Code chat (app or CLI), e.g.
 `/planner plan issue #12` or `/planner pick the next issue from #7`. Or as a background agent they can talk to
 whenever they want:
