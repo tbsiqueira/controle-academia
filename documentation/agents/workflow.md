@@ -6,12 +6,12 @@
 powershell -ExecutionPolicy Bypass -File .\serve.ps1   # http://localhost:8080 (often already running)
 node --test tests/                                      # unit tests (no install needed)
 npm run test:e2e                                        # browser tests (Playwright), see below
-node tools/coverage-gate.js                             # tests + 100% coverage of js/core.js
+$env:COVERAGE_ENFORCE='1'; node tools/coverage-gate.js  # tests + fails below 100% coverage of js/core.js (without the variable it only warns)
 powershell -ExecutionPolicy Bypass -File .\check.ps1   # static checks (must print "Tudo certo.")
 powershell -ExecutionPolicy Bypass -File .\tools\build-sample-data.ps1   # only after editing sample data content
 ```
 
-Python is not installed; use Node for scripted edits.
+Python is not installed; use Node for scripted edits. Node 26 locally and in CI.
 
 CI: `tests.yml` runs `node --check`, the coverage gate, `check.ps1` and the browser tests on every PR and push to
 `main`; on PRs its `Versão` job also fails when `index.html`, `css/` or `js/` changed without a version bump (or the
@@ -76,18 +76,18 @@ npm run test:e2e:report   # HTML report of the last run (traces of failures)
 3. **New, changed or removed behaviour** → add or update its row in `tests/CHECKLIST.md` (with a browser test);
    user-visible → update `documentation/MANUAL.md` (and `README.md` / `documentation/PLANO.md` if it touches the
    data model or a requirement).
-   **Treinar and Início are critical screens** with a browser test per behaviour (`treinar.spec.js`,
+4. **Touched Treinar or Início?** They are critical screens with a browser test per behaviour (`treinar.spec.js`,
    `inicio.spec.js`): every change to them keeps those tests green and adds a test for each behaviour it adds or
    changes.
-4. **Touched `index.html`, `css/` or `js/`** → bump the version `N` → `N+1` in all of these places:
+5. **Touched `index.html`, `css/` or `js/`** → bump the version `N` → `N+1` in all of these places:
    - `index.html`: every `?v=N` and `<span id="appVersion">vN</span>`
    - `sw.js`: `CACHE_NAME = 'meu-treino-vN'` and every `?v=N` in `ASSETS`
    Without the bump, installed phones keep the old cached files.
-5. **Removing or moving code?** Grep every name you delete in `js/`, `index.html`, `tests/` and the docs. Large
+6. **Removing or moving code?** Grep every name you delete in `js/`, `index.html`, `tests/` and the docs. Large
    splices in `app.js` have swallowed neighbouring functions before (see history.md, v43).
-6. Run the three checks in [AGENTS.md](../../AGENTS.md#non-negotiables) #4. Report failures as they are; don't
+7. Run the checks in [AGENTS.md](../../AGENTS.md#non-negotiables) #4. Report failures as they are; don't
    claim done with red checks.
-7. For visible changes, check it in the browser at phone width (375px), light theme.
+8. For visible changes, check it in the browser at phone width (375px), light theme.
 
 ## DeepSeek reviewer setup
 

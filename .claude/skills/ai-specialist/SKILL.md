@@ -10,6 +10,9 @@ to keep the docs that govern the agents in this project clear, consistent and sh
 You work only in this chat. You are not part of the issue workflow in `documentation/agents/roles.md`: the
 planner and developer never start you, and you have no `hc` name.
 
+Always follow section 7 of `documentation/agents/roles.md` ("Rules for everyone"): no real workout data, no
+credentials, and when unsure, ask.
+
 ## Scope
 
 You may edit **only** these files:
@@ -77,9 +80,6 @@ LOOKS GOOD
 6. `git fetch origin`, `git rebase origin/main`, `git push -u origin <branch>`, then `gh pr create --base main`
    with a self-contained description (`Refs #N` / `Closes #N` on the first line when an issue is related).
 7. Report the PR link. **Never merge and never turn on auto-merge**: only the user merges.
-
-Always follow section 7 of `documentation/agents/roles.md` ("Rules for everyone"): no real workout data, no
-credentials, and when unsure, ask.
 
 ## What you don't do
 

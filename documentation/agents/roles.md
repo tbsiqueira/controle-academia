@@ -16,8 +16,9 @@ How agents split the work on GitHub issues. The reviewer runs on DeepSeek (setup
 Run `hc --skill` once at the start of a session and check the `hc` commands in this file against it.
 
 **Without `hc`** (cloud sessions, other computers) nobody starts agents. On "go" the planner still adds the label
-and creates the worktree (section 3, steps 1–2), then gives the human this prompt to paste into a new chat opened in
-that worktree: "You are the DEVELOPER. Follow documentation/agents/roles.md. Issue #<N>; the plan is the latest
+and, on a local computer, creates the worktree (section 3, steps 1–2), then gives the human this prompt to paste
+into a new chat opened in that worktree (in a cloud session the new chat has its own checkout: the developer
+creates the branch itself as in [workflow.md](workflow.md#git)): "You are the DEVELOPER. Follow documentation/agents/roles.md. Issue #<N>; the plan is the latest
 plan comment on it. No `hc` on this machine." The developer skips step 4 (no review rounds) and the PR's
 `## Review` section says "Skipped: no `hc` on this machine."
 
@@ -112,7 +113,7 @@ Only do these when asked; show the human what you'll create or change first when
    ```bash
    hc run --bg --name dev-<N> --outlive-parent --cwd <full path of ../Academia-<N>> claude --model opus \
      --permission-mode dontAsk \
-     "--allowedTools=Read Edit Write Glob Grep Bash(node *) Bash(npm *) Bash(npx *) Bash(git *) Bash(gh *) Bash(hc *) Bash(powershell *)" \
+     "--allowedTools=Read Edit Write Glob Grep Bash(node *) Bash(COVERAGE_ENFORCE=1 node *) Bash(npm *) Bash(npx *) Bash(git *) Bash(gh *) Bash(hc *) Bash(powershell *)" \
      "You are the DEVELOPER. Follow documentation/agents/roles.md. Issue #<N>; the plan is the latest plan comment on it."
    ```
 
@@ -159,7 +160,8 @@ Works in the worktree of one issue, on its branch. Never two developers on the s
 2. **For each unticked step**, top to bottom:
    1. Build it. Keep the change small and focused on this step.
    2. Check it, every step, all three:
-      - `node --test tests/` (or `node tools/coverage-gate.js` when `js/core.js` changed: coverage stays 100%)
+      - `node --test tests/` (or `COVERAGE_ENFORCE=1 node tools/coverage-gate.js` when `js/core.js` changed:
+        coverage stays 100%; without the variable it only warns)
       - `powershell -ExecutionPolicy Bypass -File .\check.ps1` (must print "Tudo certo.")
       - `npm run test:e2e`
    3. All three pass → commit: one conventional commit, as in [workflow.md](workflow.md#git) (English summary,
@@ -175,7 +177,7 @@ Works in the worktree of one issue, on its branch. Never two developers on the s
 4. **Review**: do the two rounds in section 6 (skip them without `hc`, see section 1). Commit the fixes (a conventional message saying what was fixed),
    after the same three checks pass.
 5. **Open the PR and hand back:**
-   - Run the full set once more: `node --test tests/`, `check.ps1`, `npm run test:e2e`.
+   - Run the checks in [AGENTS.md](../../AGENTS.md#non-negotiables) #4 once more.
    - `git fetch origin`, `git rebase origin/main`, `git push -u origin <branch>`, then `gh pr create --base main`.
      First line of the description: `Closes #<N>` (or `Refs #<N>` if the issue isn't finished). End the
      description with a `## Review` section: the model that reviewed (DeepSeek or the Sonnet fallback), then
@@ -248,8 +250,9 @@ hc wait review-<N> --timeout 90   # repeat while it returns reason: timeout
 hc read --lines 120 review-<N>
 ```
 
-Fix what's left if it fits within this issue's plan; anything that needs a new step or touches another area →
-open a new issue for it. **Maximum 2 rounds.** Keep the reviewer's
+After round 2, fix what's left if it fits within this issue's plan. A NICE TO HAVE that needs a new step or
+touches another area → open a new issue for it. A MUST FIX you can't fix this way → don't defer it alone: report
+it to the human in the hand-back. **Maximum 2 rounds.** Keep the reviewer's
 replies to both rounds for the PR's `## Review` section, then shut the reviewer down (`hc kill review-<N>; hc rm review-<N>`) and
 go to step 5 of the DEVELOPER.
 
