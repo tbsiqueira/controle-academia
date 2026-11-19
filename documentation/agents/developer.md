@@ -70,12 +70,15 @@ after the final review without being reviewed:** every code change in the PR has
 **Round 1**: note the reviewed commit (`git rev-parse --short HEAD`) and make a new session id
 ([roles.md](roles.md#checking-an-agents-model)), then start the reviewer (no `-p`, so it stays open for round 2):
 
+The reviewer is read-only on purpose: no `node` and no PowerShell tool, since a script could write files. It reads
+diffs with Read and Grep; if it needs a check run, it says so and you run it.
+
 ```bash
 hc run --bg --name review-<N> --cwd <full path of this worktree> claude \
   --model opus \
   --session-id <id> \
   --permission-mode dontAsk \
-  "--allowedTools=Read Glob Grep Bash(git diff) Bash(git diff *) Bash(git log *) Bash(git show *) Bash(git status *) Bash(gh issue view *)" \
+  "--allowedTools=Read Glob Grep Bash(git diff) Bash(git diff *) Bash(git log *) Bash(git show *) Bash(git status *) Bash(git fetch *) Bash(gh issue view *)" \
   "--disallowedTools=Edit Write NotebookEdit" \
   "You are the REVIEWER. Follow documentation/agents/reviewer.md. Review the branch for issue #<N>."
 hc wait review-<N> --timeout 1800   # background command (roles.md#tools); on reason: timeout, just wait again
