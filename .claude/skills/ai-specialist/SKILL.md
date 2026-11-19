@@ -82,7 +82,9 @@ LOOKS GOOD
    "Review rounds" of `documentation/agents/developer.md`, with these changes: name `review-docs`, `--cwd` this checkout,
    and the prompt "You are the REVIEWER. Follow documentation/agents/reviewer.md. There is no issue:
    review the branch <branch>. Goal: <one line from the user's request>. Check that the changed docs agree with
-   each other and with the code they describe." Wait and read its reply as that section says. "Tools" in roles.md
+   each other and with the code they describe." Wait and read its reply as that section says, including the
+   session id and the model check (prefix `claude-opus-`) in roles.md, "Checking an agent's model"; on `FAIL`,
+   stop and report it. "Tools" in roles.md
    applies: if the agent shows `status: null`, the `hc` server was started from Claude; ask the user to run
    `hc server restart` in a normal terminal, then retry (a launch that produced no review isn't the round).
    Fix the MUST FIX items you agree with (and NICE TO HAVE items that stay within the change) without another
