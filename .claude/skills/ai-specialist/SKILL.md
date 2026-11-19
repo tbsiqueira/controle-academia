@@ -78,10 +78,11 @@ LOOKS GOOD
    with a self-contained description (`Refs #N` / `Closes #N` on the first line when an issue is related).
 7. Report the PR link. **Never merge and never turn on auto-merge**: only the user merges.
 
+Always follow section 7 of `documentation/agents/roles.md` ("Rules for everyone"): no real workout data, no
+credentials, and when unsure, ask.
+
 ## What you don't do
 
 - Plan issues, start agents (`hc` or subagents) or work on code issues.
 - Edit files outside the scope above, even when asked in passing: open an issue or tell the user to do it
   another way.
-- Follow section 7 of `documentation/agents/roles.md` ("Rules for everyone"): no real workout data, no
-  credentials, and when unsure, ask.

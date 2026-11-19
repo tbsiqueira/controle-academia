@@ -3,8 +3,6 @@
 How agents split the work on GitHub issues. The reviewer runs on DeepSeek (setup in
 [workflow.md](workflow.md#deepseek-reviewer-setup)). Only the human merges.
 
-> Check the `hc` commands below against `hc --skill` before relying on them.
-
 ## 1. Tools
 
 | Tool | What it's for |
@@ -15,10 +13,13 @@ How agents split the work on GitHub issues. The reviewer runs on DeepSeek (setup
 | **Label `em andamento`** | The issue has a developer working on it. |
 | **herdr (`hc`)** | Starting and talking to other agents. Names: `planner`, `dev-<N>`, `review-<N>`. |
 
-Run `hc --skill` once at the start of a session so you know the herdr commands. On a machine without `hc` (cloud
-sessions, other computers) nobody starts agents: the human starts the developer in a new chat with the prompt
-"You are the DEVELOPER. Follow documentation/agents/roles.md. Issue #<N>; the plan is the latest plan comment on
-it." There are no review rounds: the PR's `## Review` section says "Skipped: no `hc` on this machine."
+Run `hc --skill` once at the start of a session and check the `hc` commands in this file against it.
+
+**Without `hc`** (cloud sessions, other computers) nobody starts agents. On "go" the planner still adds the label
+and creates the worktree (section 3, steps 1–2), then gives the human this prompt to paste into a new chat opened in
+that worktree: "You are the DEVELOPER. Follow documentation/agents/roles.md. Issue #<N>; the plan is the latest
+plan comment on it. No `hc` on this machine." The developer skips step 4 (no review rounds) and the PR's
+`## Review` section says "Skipped: no `hc` on this machine."
 
 **Start the `hc` server from a normal terminal, never from Claude.** Every agent `hc` starts gets the environment
 of the `hc` server, not of the command that ran `hc run`. Any `hc` command starts the server when it isn't
@@ -33,7 +34,7 @@ human to restart it.
 **Agents started with `hc --bg` run unattended.** A permission prompt would leave them waiting with nobody to
 answer. So they start in `dontAsk` mode (anything not on their allow-list is refused instead of asked) with the
 allow-lists in sections 3 and 6. If one still stops, `hc read <name>` shows why; `hc attach <name>` lets the human
-answer. Check the flags against `claude --help` the first time.
+answer. The exception is a planner started with `hc` (section 2): the human attaches to it and answers its prompts.
 
 **Tool lists take the `=` form** (`"--allowedTools=Read Edit …"`, `"--disallowedTools=Edit …"`). These flags take
 several values, so with a space (`--allowedTools "…" "prompt"`) Claude reads the prompt as one more tool name and
@@ -153,7 +154,8 @@ issue left behind. Run `gh pr view <M> --json state` first: never clean up a PR 
 
 Works in the worktree of one issue, on its branch. Never two developers on the same issue.
 
-1. **Read** the issue and its plan comment.
+1. **Read** the issue and its plan comment. In a fresh worktree, run `npm ci` once (no `node_modules/` yet; the
+   Playwright browser is already installed per machine).
 2. **For each unticked step**, top to bottom:
    1. Build it. Keep the change small and focused on this step.
    2. Check it, every step, all three:
@@ -164,10 +166,13 @@ Works in the worktree of one issue, on its branch. Never two developers on the s
       `(vN)` when the version was bumped, no signature lines). One fails and you can't fix it within this step →
       don't commit; stop and report the failing output in the hand-back. Bump the version once per PR: the first
       step that touches `index.html`, `css/` or `js/` bumps it, later steps keep it.
-   4. Tick the step in the plan comment.
+   4. Tick the step in the plan comment. Find its id with `gh api repos/{owner}/{repo}/issues/<N>/comments`
+      (the latest comment with the plan checklist), then save the body with the box ticked:
+      `gh api -X PATCH repos/{owner}/{repo}/issues/comments/<id> -f body="<full body>"`. Don't use
+      `gh issue comment --edit-last`: it edits your own last comment, which may not be the plan.
 3. **Out of scope?** Anything you found but won't fix → open a new issue (`gh issue create`) and mention it in
    the PR. Don't silently expand scope.
-4. **Review**: do the two rounds in section 6. Commit the fixes (a conventional message saying what was fixed),
+4. **Review**: do the two rounds in section 6 (skip them without `hc`, see section 1). Commit the fixes (a conventional message saying what was fixed),
    after the same three checks pass.
 5. **Open the PR and hand back:**
    - Run the full set once more: `node --test tests/`, `check.ps1`, `npm run test:e2e`.
@@ -219,7 +224,7 @@ One review per issue, after the last step and before the push.
 **Round 1**: start the reviewer (no `-p`, so it stays open for round 2):
 
 ```bash
-hc run --bg --name review-<N> claude \
+hc run --bg --name review-<N> --cwd <full path of this worktree> claude \
   --settings ~/.claude/providers/deepseek.json \
   --model "deepseek-flash[1m]" \
   --permission-mode dontAsk \
@@ -243,7 +248,8 @@ hc wait review-<N> --timeout 90   # repeat while it returns reason: timeout
 hc read --lines 120 review-<N>
 ```
 
-Fix what's left if it's small. Otherwise open a new issue for it. **Maximum 2 rounds.** Keep the reviewer's
+Fix what's left if it fits within this issue's plan; anything that needs a new step or touches another area →
+open a new issue for it. **Maximum 2 rounds.** Keep the reviewer's
 replies to both rounds for the PR's `## Review` section, then shut the reviewer down (`hc kill review-<N>; hc rm review-<N>`) and
 go to step 5 of the DEVELOPER.
 

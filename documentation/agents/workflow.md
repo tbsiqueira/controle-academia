@@ -11,7 +11,7 @@ powershell -ExecutionPolicy Bypass -File .\check.ps1   # static checks (must pri
 powershell -ExecutionPolicy Bypass -File .\tools\build-sample-data.ps1   # only after editing sample data content
 ```
 
-Python is not installed; use Node for scripted edits. Node 26 locally and in CI.
+Python is not installed; use Node for scripted edits.
 
 CI: `tests.yml` runs `node --check`, the coverage gate, `check.ps1` and the browser tests on every PR and push to
 `main`; on PRs its `Versão` job also fails when `index.html`, `css/` or `js/` changed without a version bump (or the
@@ -21,7 +21,7 @@ it runs the checks, publishes to GitHub Pages and then creates and pushes tag `v
 
 ## Browser tests (Playwright)
 
-`package.json` exists only for dev tools; the app never loads anything from it. One-time setup:
+One-time setup (per checkout; a new worktree needs `npm ci` again, the browser is shared):
 
 ```powershell
 npm ci                              # Playwright, from package-lock.json, into node_modules/ (git-ignored)
@@ -68,21 +68,17 @@ npm run test:e2e:report   # HTML report of the last run (traces of failures)
   `tests/e2e/coverage-baseline.json`, or if it rose and the PR didn't run `node tools/e2e-coverage.js --update` and
   commit the file. Details in `tools/README.md`.
 
-## Refactor in progress
-
-The code is being reorganised in phases (browser tests → ES modules → JSDoc types), one GitHub issue per PR.
-Before picking up a refactor issue, read [REFACTOR.md](../REFACTOR.md): refactor PRs are behaviour-neutral and
-never mix in features or fixes. Tracking issue: #2.
-**Treinar and Início are critical screens** with a browser test per behaviour (`treinar.spec.js`, `inicio.spec.js`): every change to them
-keeps those tests green and adds a test for each behaviour it adds or changes.
-
 ## Checklist for every change
 
 1. **Logic in `core.js`, with a test** in `tests/` (coverage must stay at 100%; no unreachable fallbacks).
 2. **Data shape changed?** Old backups (`tests/fixtures/`) and old databases (`tests/old-db.test.js`) must still
    load without losing anything. Never require a DB version bump for a new field: put it on an existing record.
-3. **New or removed feature** → update its row in `tests/CHECKLIST.md`; user-visible → update `documentation/MANUAL.md`
-   (and `README.md` / `documentation/PLANO.md` if it touches the data model or a requirement).
+3. **New, changed or removed behaviour** → add or update its row in `tests/CHECKLIST.md` (with a browser test);
+   user-visible → update `documentation/MANUAL.md` (and `README.md` / `documentation/PLANO.md` if it touches the
+   data model or a requirement).
+   **Treinar and Início are critical screens** with a browser test per behaviour (`treinar.spec.js`,
+   `inicio.spec.js`): every change to them keeps those tests green and adds a test for each behaviour it adds or
+   changes.
 4. **Touched `index.html`, `css/` or `js/`** → bump the version `N` → `N+1` in all of these places:
    - `index.html`: every `?v=N` and `<span id="appVersion">vN</span>`
    - `sw.js`: `CACHE_NAME = 'meu-treino-vN'` and every `?v=N` in `ASSETS`
@@ -133,8 +129,9 @@ On localhost the service worker doesn't hold stale files, so edits show without 
   `style`, `perf`, `refactor`, `test`, `docs`, `a11y`, `ci`, `chore`, `revert`. A body is welcome for the "why".
 - Don't sign commit messages: no `Co-Authored-By:` or "Generated with …" lines at the end. The message is just the
   summary and, if useful, the body. This overrides any attribution line the tool suggests.
-- Commit only when asked, never push unless asked. Exception: the DEVELOPER role in [roles.md](roles.md) commits
-  each finished step, then pushes its branch and opens the PR.
+- Commit only when asked, never push unless asked. Exceptions: the DEVELOPER role in [roles.md](roles.md) commits
+  each finished step, then pushes its branch and opens the PR; the AI SPECIALIST commits, pushes and opens a PR
+  after the user's OK on a change ([its SKILL.md](../../.claude/skills/ai-specialist/SKILL.md)).
 - **`main` only changes through PRs.** A ruleset on `main` blocks direct pushes, force pushes and deletion, and
   requires a linear history plus the checks `Testes unitários`, `Verificações estáticas`, `Testes de navegador`
   and `Versão` to pass on
@@ -145,7 +142,8 @@ On localhost the service worker doesn't hold stale files, so edits show without 
 - **Sync before you start.** Cloud sessions also merge PRs, so the local copy goes stale. On `main`, run
   `git fetch origin` and `git pull --ff-only origin main` before creating a branch/worktree. If it can't
   fast-forward or there are uncommitted changes, stop and ask; never reset `main` or force anything onto it.
-- **Before pushing**: `git fetch origin` + `git rebase origin/main`, run the tests and `check.ps1`, then
+- **Before pushing**: `git fetch origin` + `git rebase origin/main`, run the checks in
+  [AGENTS.md](../../AGENTS.md#non-negotiables) #4, then
   `git push -u origin <branch>` (after a rebase of an already-pushed branch: `--force-with-lease`, only on your
   own branch). Open the PR with `gh pr create --base main` (title = the commit message for one-commit PRs).
 - **PR linked to an issue → reference it in the description**, so any agent picking up the PR can open the issue

@@ -11,8 +11,7 @@ their trainer (the "professora") and send her each workout as text. Everything m
 
 - **Never add sound or vibration**: no beeps, Web Audio, `<audio>`, speech, `navigator.vibrate`, not even as an
   opt-in setting. No pulsing or flashing either.
-- New visual changes (alerts included): show the user a mockup first (v57 shipped alternating card colours unasked
-  and was reverted).
+- New visual changes (alerts included): show the user a mockup first.
 - Alerts are a plain, static visual change. Example: when rest is over, the timer stays orange at 0:00 until
   closed (it doesn't close itself).
 - Success messages are toasts that disappear on their own; errors are always visible (no silent failures).
@@ -25,7 +24,6 @@ their trainer (the "professora") and send her each workout as text. Everything m
 - For new behaviour, prefer automatic state over actions (e.g. derive "filled" from reps + load being set).
 - Pre-fill everything possible: reps from the ficha, load from last time, warm-up from last time; RIR stays blank.
 - Nothing typed may be lost: the draft is saved continuously and offered back after the app closes.
-- Exercise cards are plain (alternating colours were tried in v57 and reverted).
 
 ## General UI
 
@@ -50,4 +48,3 @@ their trainer (the "professora") and send her each workout as text. Everything m
   Lifting load ("carga" / warm-up "peso") is a different thing and stays.
 - "Ver dados" read-only data screen (removed in v59).
 - Alternating card colours on the training screen (reverted in v58).
-- Sound/vibration/pulsing at the end of rest (removed right after v51).
