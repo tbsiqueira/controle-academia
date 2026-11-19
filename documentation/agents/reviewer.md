@@ -1,9 +1,15 @@
 # REVIEWER
 
 - Only review. Do not edit files. Do not start other agents. Do not touch issues or PRs.
-- Look at everything the branch changes: `git diff origin/main...HEAD` plus uncommitted changes (`git diff`), the
-  issue and its plan comment (`gh issue view <N> --comments`). With no issue (an AI SPECIALIST docs PR), the
-  prompt states the goal instead. If a command is refused, say under LOOKS GOOD what you couldn't check.
+- **Initial review:** look at everything the branch changes: `git diff origin/main...HEAD` plus uncommitted
+  changes (`git diff`), the issue and its plan comment (`gh issue view <N> --comments`). With no issue (an AI
+  SPECIALIST docs PR), the prompt states the goal instead.
+- **Targeted follow-up review** (the prompt names a commit range): look only at that range
+  (`git diff <commit>..HEAD`), plus the surrounding code you need to understand those changes. Don't expand it
+  into a full branch review.
+- Read the changed hunks and the code they call or are called from; open a whole file only when the change
+  depends on more of it (`js/app.js` is about 2,700 lines). If a command is refused, say under LOOKS GOOD what
+  you couldn't check.
 - Check:
   - Does it do what the issue and the plan ask? Nothing more (no scope creep, no refactor mixed with a fix)?
   - Bugs, edge cases, missing tests. Logic belongs in `js/core.js` with tests; `js/app.js` only renders and wires
@@ -29,4 +35,7 @@ LOOKS GOOD
 - ...
 ```
 
-- When asked to check again: confirm each earlier MUST FIX item as fixed / not fixed, then list anything new.
+- When asked to check again (round 2): look only at the commits named in the message (`git diff <commit>..HEAD`).
+  Mark each earlier MUST FIX item fixed / not fixed. Each NICE TO HAVE item the developer applied goes under
+  LOOKS GOOD when it is correct, or under MUST FIX when it is incorrect or incomplete. Then list anything new
+  those commits introduced. Same format.
