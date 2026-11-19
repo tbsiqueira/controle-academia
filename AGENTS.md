@@ -26,6 +26,8 @@ Most sessions have no role: answer questions and do what you're asked, under the
 A session has a role only when it's started with `/planner` or its prompt names one (PLANNER, DEVELOPER or
 REVIEWER). Then read [documentation/agents/roles.md](documentation/agents/roles.md) first and follow it.
 Asking about the roles or the workflow doesn't give you one.
+The **AI SPECIALIST** (reviews and improves the agent docs) is outside the issue workflow: only `/ai-specialist`
+in a chat gives it; its rules are in [.claude/skills/ai-specialist/SKILL.md](.claude/skills/ai-specialist/SKILL.md).
 
 ## Where documentation goes
 
