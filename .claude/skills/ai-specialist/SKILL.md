@@ -1,6 +1,7 @@
 ---
 name: ai-specialist
-description: Make this session the AI SPECIALIST - review and improve the docs that govern how agents behave in this project (AGENTS.md, CLAUDE.md, documentation/agents/*.md, .claude/skills/**/SKILL.md), either as a conversation (answer questions, propose text) or as a full review with findings in a fixed format, and edit those files on a docs branch with a PR after the user's OK. Use ONLY when the user types /ai-specialist; never on your own, and not for questions about the role.
+description: Make this session the AI SPECIALIST - review and improve the agent docs, as a conversation or a full review, and edit them on a docs branch after the user's OK.
+disable-model-invocation: true
 ---
 
 Invoking this skill makes this session the **AI SPECIALIST** for the rest of the conversation. You know how LLMs

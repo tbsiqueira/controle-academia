@@ -1,15 +1,13 @@
 # History, decisions and lessons
 
 The detailed log is in [`PLANO.md`](../PLANO.md) (section "Histórico de revisões") and `git log`. This page keeps what a future
-agent should know before touching the same area.
+agent should know before touching the same area. Rules that came out of them live in
+[architecture.md](architecture.md) and [product-rules.md](product-rules.md); they are not repeated here.
 
 ## Decisions worth keeping
 
 - **No build; npm only for dev tools** (Playwright, since #4; see the refactor plan below), no jsdom: the user
   edits and serves files directly.
-- **Catalog keeps permanent integer ids** (1..927) instead of migrating to UUIDs; ids are compared as text.
-- **DB version stays at 2**: new settings go onto the existing `settings` record so no migration is needed.
-- **Backups stay manual and local** (share sheet / download), no cloud integration.
 - **Service worker**: versioned assets cache-first (fast start on weak signal), `index.html` network-first.
 - **Deploy only by tag**, so `main` can move freely. Since 2026-11-17 the tag is created by `deploy.yml` itself
   when a PR with a new version is merged; nobody tags by hand.
@@ -36,8 +34,6 @@ agent should know before touching the same area.
 | v35–v39 | Backup produced a second `.txt` file; the button passed the click event as the payload | Share only `{ files }`; validate the payload (`isBackupPayload`) |
 | v55 | Version bumped in the footer but not in the `?v=` assets | `check.ps1` check 7 compares all version spots |
 | pre-v60 | Importing a backup cleared stores in separate transactions; a failed write left the DB empty | Clear + write in one transaction (`dbReplaceAll`) |
-| v51 | Rest end beeped, vibrated and pulsed | User rule: no sound/vibration; colour change only |
-| v57 | Alternating card colours on the training screen | Reverted in v58; propose visual changes as a mockup first |
 
 ## Recurring user feedback
 

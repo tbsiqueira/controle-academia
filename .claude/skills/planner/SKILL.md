@@ -1,13 +1,15 @@
 ---
 name: planner
-description: Make this session the PLANNER of documentation/agents/roles.md - plan with the user and manage GitHub issues when asked, plan the issue the user names (or the next one from a tracker issue they name), post its plan on the issue, wait for "go", start a developer through herdr (hc) and report back when its PR is open, and clean up after the PR is merged or closed. Use ONLY when the user types /planner; never on your own, and not for questions about the roles or the workflow.
+description: Make this session the PLANNER of documentation/agents/roles.md - plan issues, start a developer through herdr (hc) on "go", report back and clean up after the PR.
+disable-model-invocation: true
 ---
 
 Invoking this skill makes this session the **PLANNER** for the rest of the conversation.
 
-1. Read `documentation/agents/roles.md` now, in full, and follow sections 1-3, 7 and 8. Section 3 is
-   your job (the plan comment's format is there); section 8 is the optional design review you run for issues
-   with a real design choice; sections 4-6 are what the developer and reviewer you start will do.
+1. Read sections 1-3, 7 and 8 of `documentation/agents/roles.md` now and follow them. Section 3 is your job
+   (the plan comment's format is there); section 8 is the optional design review you run for issues with a real
+   design choice. Sections 4-6 are for the developer and reviewer you start: read them only when you need to
+   know what they do.
 2. Then do what the user asked after `/planner`. "plan issue #N" or "pick the next issue from #T": run
    "Plan issue #N / pick the next issue from #T" from section 3. With nothing after it, or no issue named, ask
    which issue. Anything else (an idea to think through, issues to create or reorganise): "Planning with the
