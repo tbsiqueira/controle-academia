@@ -94,10 +94,18 @@ Only do these when asked; show the human what you'll create or change first when
    has no `em andamento` label and no open PR (`gh pr list --state open --search "<N>"`). If the human named
    neither, ask which issue.
 3. **Plan it.** Read the issue and its comments; a refactor issue also follows [REFACTOR.md](../REFACTOR.md) (no
-   behaviour change, never mixed with fixes or features). Post the plan as a comment on the issue:
-   - a short "what and why" in English, then the steps as a `- [ ]` checklist, each small enough to be one commit;
-   - follow the [checklist for every change](workflow.md#checklist-for-every-change): logic with its tests,
-     browser test and `tests/CHECKLIST.md` row, MANUAL/docs when user-visible, version bump.
+   behaviour change, never mixed with fixes or features). Post the plan as a comment on the issue, in English:
+   - a short "what and why";
+   - a **"Technical context and decisions"** section, so the developer can check the plan instead of following it
+     blindly or working the design out again. Keep it short; write "none" where nothing applies (a plain bug, a
+     mechanical refactor step):
+     - **Touches**: the files and functions involved.
+     - **Decisions**: each choice made, the alternatives rejected, one line on why.
+     - **Risks**: old backups and old databases, browser support (Android Chrome, iOS Safari), test coverage,
+       version bump, CSP, anything else relevant.
+   - then the steps as a `- [ ]` checklist, each small enough to be one commit, following the
+     [checklist for every change](workflow.md#checklist-for-every-change): logic with its tests, browser test and
+     `tests/CHECKLIST.md` row, MANUAL/docs when user-visible, version bump.
 4. **Stop and wait for "go".** Report the issue, a one-line summary and the link to the plan comment. If the human
    asks for changes, edit the comment and report again.
 
