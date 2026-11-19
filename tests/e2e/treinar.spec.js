@@ -9,7 +9,7 @@
 // - Último treino da Treino A em 10/03/2025: Supino 40 kg × 11, 42,5 × 9, 45 × 7 (aquecimento 15 reps, 20 kg,
 //   RIR 3); Remada 50 × 10, 50 × 9. Um treino mais velho (03/03/2025) com cargas menores não deve aparecer.
 // - Biblioteca: Supino reto, Remada baixa, Agachamento livre e Rosca na máquina azul. Descanso: 90 s.
-const { test, expect, freshApp, withBackup, storedDraft, storedRecords, goTo, answerConfirm } = require('./helpers');
+const { test, expect, freshApp, withBackup, readFixture, storedDraft, storedRecords, goTo, answerConfirm } = require('./helpers');
 
 const BACKUP = 'treinar-backup.json';
 
@@ -857,6 +857,28 @@ test.describe('Treinar · treino existente', () => {
       '*Cardio:* 15 min',
       '*Observações:* Bom treino'
     ].join('\n'));
+  });
+
+  test("the exported text leaves out the teacher's note, which stays on Treinar and in the saved sets", async ({ page }) => {
+    const backup = readFixture(BACKUP);
+    backup.data.sheets.find((s) => s.id === 's-a').exercises[0].note = 'descer em 3s';
+    await withBackup(page, backup);
+    await goTo(page, 'Treinar');
+    await page.locator('#workoutSheet').selectOption({ label: 'Treino A' });
+    await expect(exerciseCard(page, 'Supino reto')).toContainText('descer em 3s');
+
+    await page.locator('#workoutSave').click();
+    await expect(page.locator('#view-dashboard')).toBeVisible();
+    const saved = (await storedRecords(page, 'workouts')).find((w) => !['w-antigo', 'w-ultimo'].includes(w.id));
+    expect(saved.sets.find((s) => s.exerciseName === 'Supino reto').exerciseNote).toBe('descer em 3s');
+
+    await editSavedWorkout(page, saved.id);
+    await page.locator('#workoutExport').click();
+    await expect(page.locator('#exportModal')).toBeVisible();
+    const text = await page.locator('#exportText').inputValue();
+    expect(text).toContain('1. *Supino reto*\n- Aquecimento:');
+    expect(text).not.toContain('Obs.:');
+    expect(text).not.toContain('descer em 3s');
   });
 });
 
