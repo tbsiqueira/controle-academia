@@ -861,7 +861,7 @@ test.describe('Treinar · treino existente', () => {
 
   test("the exported text leaves out the teacher's note, which stays on Treinar and in the saved sets", async ({ page }) => {
     const backup = readFixture(BACKUP);
-    backup.data.sheets.find((s) => s.id === 's-a').exercises[0].note = 'descer em 3s';
+    backup.data.sheets.find((s) => s.id === 's-a').exercises.find((e) => e.exerciseId === 'ex-supino').note = 'descer em 3s';
     await withBackup(page, backup);
     await goTo(page, 'Treinar');
     await page.locator('#workoutSheet').selectOption({ label: 'Treino A' });
