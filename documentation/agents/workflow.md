@@ -15,7 +15,8 @@ Python is not installed; use Node for scripted edits. Node 26 locally and in CI.
 
 CI: `tests.yml` runs `node --check`, the coverage gate, `check.ps1` and the browser tests on every PR and push to
 `main`; on PRs its `Versão` job also fails when `index.html`, `css/` or `js/` changed without a version bump (or the
-version is already tagged). These four jobs are the required checks of the `main` ruleset.
+version is already tagged). Its four jobs (`Testes unitários` = `node --check` + coverage gate,
+`Verificações estáticas`, `Testes de navegador`, `Versão`) are the required checks of the `main` ruleset.
 `deploy.yml` runs on every push to `main` (= a merged PR): if tag `vN` for the current version doesn't exist yet,
 it runs the checks, publishes to GitHub Pages and then creates and pushes tag `vN`. Otherwise it publishes nothing.
 
