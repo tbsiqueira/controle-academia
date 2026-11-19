@@ -159,4 +159,9 @@ test('no iPhone zoom: every visible form field is at least 16px at phone width',
   // Mais.
   await goTo(page, 'Mais');
   expect(await smallFields(page), 'fields below 16px on Mais').toEqual([]);
+
+  // Mais → "Importar treinos antigos": the other pair of AI text areas.
+  await page.locator('#btnHistoryImport').click();
+  await expect(page.locator('#historyImportText')).toBeVisible();
+  expect(await smallFields(page), 'fields below 16px in "Importar treinos antigos"').toEqual([]);
 });
