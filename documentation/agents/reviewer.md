@@ -7,7 +7,8 @@
 - Check:
   - Does it do what the issue and the plan ask? Nothing more (no scope creep, no refactor mixed with a fix)?
   - Bugs, edge cases, missing tests. Logic belongs in `js/core.js` with tests; `js/app.js` only renders and wires
-    the DOM.
+    the DOM. Changed behaviour → the old tests for it were updated, not left checking the old behaviour. A test
+    that was weakened, skipped or deleted needs a reason. A bug fix has a test that would have caught the bug.
   - Old backups and old databases still load, unknown fields ignored ([architecture.md](architecture.md)).
   - `index.html`, `css/` or `js/` changed → version bumped in every place listed in workflow.md.
   - New or changed behaviour → `tests/CHECKLIST.md` row with a browser test; user-visible → `documentation/MANUAL.md`.
