@@ -379,7 +379,7 @@ test('Importar treinos antigos: card em Mais e janela com o mesmo fluxo do Criar
   assert.ok(modal.indexOf('id="historyIaText"') < modal.indexOf('id="historyImportText"'), 'primeiro copia, depois cola a resposta');
   assert.match(APP, /fetch\('TREINO-JSON\.md'\)/, 'texto para a IA vem do contrato');
   assert.match(APP, /sheetNamesText\(state\.sheets\)[\s\S]*?exerciseNamesText\(/, 'junta fichas e exercicios que ja existem');
-  assert.match(APP, /state\.pendingHistory = null;   \/\/ antes dos awaits/, 'toque duplo nao importa duas vezes');
+  assert.match(APP, /state\.pendingHistory = null;   \/\/ before the awaits/, 'toque duplo nao importa duas vezes');
   assert.match(fs.readFileSync(path.join(__dirname, '..', 'sw.js'), 'utf8'), /'\.\/TREINO-JSON\.md'/, 'contrato funciona offline');
 });
 
