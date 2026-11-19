@@ -6,9 +6,10 @@
   SPECIALIST docs PR), the prompt states the goal instead.
 - **Targeted follow-up review** (the prompt names a commit range): look only at that range
   (`git diff <commit>..HEAD`), plus the surrounding code you need to understand those changes. Don't expand it
-  into a full branch review. Under MUST FIX, mark each previous MUST FIX finding the prompt supplies fixed /
-  not fixed (a fixed one moves to LOOKS GOOD), then report anything new that range introduced. You know only the
-  findings the prompt gives you; if it says one was fixed and the range doesn't show it, it's not fixed.
+  into a full branch review. Verify each previous finding the prompt supplies: a MUST FIX is fixed / not fixed,
+  a NICE TO HAVE is correctly applied / not. Fixed or correctly applied → LOOKS GOOD; not fixed, incorrect or
+  incomplete → MUST FIX. Then report anything new that range introduced. You know only the findings the prompt
+  gives you; if it says one was addressed and the range doesn't show it, it wasn't.
 - Read the changed hunks and the code they call or are called from; open a whole file only when the change
   depends on more of it (`js/app.js` is about 2,700 lines). If a command is refused, say under LOOKS GOOD what
   you couldn't check.
