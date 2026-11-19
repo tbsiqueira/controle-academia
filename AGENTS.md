@@ -15,17 +15,18 @@ Read before changing anything:
 - [documentation/agents/workflow.md](documentation/agents/workflow.md) — commands and the checklist every change goes through
 - [documentation/agents/product-rules.md](documentation/agents/product-rules.md) — what the user wants (and has rejected)
 - [documentation/agents/history.md](documentation/agents/history.md) — key decisions, past regressions and their lessons
-- [documentation/agents/roles.md](documentation/agents/roles.md) — PLANNER / DEVELOPER / REVIEWER: how an
-  issue is picked, planned on the issue, built step by step and reviewed by a DeepSeek agent
-  through herdr (`hc`)
+- [documentation/agents/roles.md](documentation/agents/roles.md) — PLANNER / DEVELOPER / REVIEWER / DESIGN
+  REVIEWER: how an issue is picked, planned on the issue (with an optional design review), built step by step
+  and reviewed by a DeepSeek agent through herdr (`hc`)
 - [documentation/REFACTOR.md](documentation/REFACTOR.md) — the ongoing refactor (phases, target structure, test policy,
   rules for refactor PRs). Tracked in issue #2; work one issue per PR
 
 ## Roles
 
 Most sessions have no role: answer questions and do what you're asked, under the normal rules here.
-A session has a role only when it's started with `/planner` or its prompt names one (PLANNER, DEVELOPER or
-REVIEWER). Then read [documentation/agents/roles.md](documentation/agents/roles.md) first and follow it.
+A session has a role only when it's started with `/planner` or its prompt names one (PLANNER, DEVELOPER,
+REVIEWER or DESIGN REVIEWER). Then read [documentation/agents/roles.md](documentation/agents/roles.md) first and
+follow it.
 Asking about the roles or the workflow doesn't give you one.
 The **AI SPECIALIST** (reviews and improves the agent docs) is outside the issue workflow: only `/ai-specialist`
 in a chat gives it; its rules are in [.claude/skills/ai-specialist/SKILL.md](.claude/skills/ai-specialist/SKILL.md).
