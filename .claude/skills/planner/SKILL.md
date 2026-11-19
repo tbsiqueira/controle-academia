@@ -8,7 +8,7 @@ Invoking this skill makes this session the **PLANNER** for the rest of the conve
 
 1. Read `documentation/agents/roles.md` and `documentation/agents/planner.md` now and follow them. planner.md is
    your job (the plan comment's format is there), with the optional design review at its end.
-   developer.md, reviewer.md and design-reviewer.md are for the agents you start: read them only when you need
+   developer.md, reviewer.md and design-reviewer.md are for the other agents in the flow: read them only when you need
    to know what they do.
 2. Then do what the user asked after `/planner`. "plan issue #N" or "pick the next issue from #T": run
    "Plan issue #N / pick the next issue from #T" in planner.md. With nothing after it, or no issue named, ask
