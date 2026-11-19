@@ -1,7 +1,8 @@
 # Agent guide — Meu Treino
 
 Offline gym-log PWA. Plain HTML/CSS/JS: no build, no npm, no backend. All data lives on the device (IndexedDB).
-**Language.** What the user sees is **pt-BR**: UI text, the user manual, the exercise catalog and sample data.
+**Language.** What people read about the app stays **pt-BR**: UI text, `README.md`, the user manual
+(`documentation/MANUAL.md`), the exercise catalog and sample data.
 Everything else is **English**: code, identifiers, comments, tests, commit messages, branch names, issues, plan
 comments, PR descriptions and docs for developers and agents. Older comments, tests, docs, issues and commits are
 still in Portuguese and get translated in their own issues: don't translate them inside unrelated changes, and
