@@ -206,6 +206,15 @@ test.describe('Treinar · séries', () => {
     await expect(page.locator('#workoutProgress')).toContainText('220 kg');
   });
 
+  test('set observation field is at least 16px on the phone (no iPhone zoom on focus)', async ({ page }) => {
+    await workoutWithSheet(page, 'Treino A');
+    const obs = exerciseCard(page, 'Supino reto').getByLabel('Observação da série 1');
+
+    await expect(obs).toBeVisible();
+    const size = await obs.evaluate((el) => parseFloat(getComputedStyle(el).fontSize));
+    expect(size).toBeGreaterThanOrEqual(16);
+  });
+
   test('adicionar série', async ({ page }) => {
     await workoutWithSheet(page, 'Treino A');
     const supino = exerciseCard(page, 'Supino reto');

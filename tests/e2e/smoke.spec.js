@@ -111,3 +111,52 @@ test('cabe no celular: nenhuma tela rola para o lado em 375px', async ({ page })
     expect(overflow, 'rolagem horizontal na aba ' + name).toBeLessThanOrEqual(0);
   }
 });
+
+/**
+ * Visible form fields (except checkbox/radio/range) whose computed font size is below 16px, named by
+ * aria-label, id or placeholder. iOS Safari zooms in when such a field gets focus.
+ */
+function smallFields(page) {
+  return page.evaluate(() =>
+    [...document.querySelectorAll('input, select, textarea')]
+      .filter((el) => !['checkbox', 'radio', 'range', 'hidden'].includes(el.type))
+      .filter((el) => el.offsetParent !== null || el.getClientRects().length > 0)
+      .map((el) => ({ el, size: parseFloat(getComputedStyle(el).fontSize) }))
+      .filter(({ size }) => size < 16)
+      .map(({ el, size }) => (el.getAttribute('aria-label') || el.id || el.placeholder || el.name || el.tagName) + ' (' + size + 'px)'));
+}
+
+test('no iPhone zoom: every visible form field is at least 16px at phone width', async ({ page }) => {
+  await withSampleData(page);
+
+  // Treinar with a ficha loaded: set rows, warm-up and observation fields exist.
+  await goTo(page, 'Treinar');
+  await page.locator('#workoutSheet').selectOption({ index: 1 });
+  await expect(page.locator('#workoutExercises input[aria-label^="Observação da série"]').first()).toBeVisible();
+  expect(await smallFields(page), 'fields below 16px on Treinar').toEqual([]);
+
+  // Ficha editor.
+  await goTo(page, 'Fichas');
+  await page.getByRole('button', { name: 'Editar ficha' }).first().click();
+  await expect(page.locator('#sheetEditorModal')).toBeVisible();
+  await expect(page.locator('#sheetEditorModal input[aria-label^="Reps da"]').first()).toBeVisible();
+  expect(await smallFields(page), 'fields below 16px in the ficha editor').toEqual([]);
+  await page.locator('#sheetEditorModal').getByRole('button', { name: 'Fechar' }).click();
+  await expect(page.locator('#sheetEditorModal')).toBeHidden();
+
+  // "Criar com IA": the text for the AI and the pasted answer.
+  await page.locator('#btnImportSheet').click();
+  await expect(page.locator('#sheetImportText')).toBeVisible();
+  expect(await smallFields(page), 'fields below 16px in "Criar com IA"').toEqual([]);
+  await page.locator('#sheetImportModal').getByRole('button', { name: 'Fechar' }).click();
+  await expect(page.locator('#sheetImportModal')).toBeHidden();
+
+  // Biblioteca.
+  await page.locator('#tabExercisesBtn').click();
+  await expect(page.locator('#tabExercises')).toBeVisible();
+  expect(await smallFields(page), 'fields below 16px on Biblioteca').toEqual([]);
+
+  // Mais.
+  await goTo(page, 'Mais');
+  expect(await smallFields(page), 'fields below 16px on Mais').toEqual([]);
+});
