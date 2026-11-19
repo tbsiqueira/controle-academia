@@ -1,6 +1,7 @@
 # Agent guide — Meu Treino
 
-Offline gym-log PWA. Plain HTML/CSS/JS: no build, no npm, no backend. All data lives on the device (IndexedDB).
+Offline gym-log PWA. Plain HTML/CSS/JS: no build, no backend, no npm for the app (npm only for
+dev tools: Playwright). All data lives on the device (IndexedDB).
 **Language.** What people read about the app stays **pt-BR**: UI text, `README.md`, the user manual
 (`documentation/MANUAL.md`), the exercise catalog and sample data.
 Everything else is **English**: code, identifiers, comments, tests, commit messages, branch names, issues, plan
@@ -46,12 +47,8 @@ in a chat gives it; its rules are in [.claude/skills/ai-specialist/SKILL.md](.cl
 2. Never break old backups: imports must keep loading old data and silently ignore fields they don't know.
 3. Changing `index.html`, `css/` or `js/` → bump the version (see workflow.md). `check.ps1` fails otherwise.
 4. Before you say done: `node --test tests/`, `powershell -ExecutionPolicy Bypass -File .\check.ps1` and
-   `npm run test:e2e` (browser tests) all pass.
-5. Commit only when asked; never push unless asked. Exception: the DEVELOPER role ([roles.md](documentation/agents/roles.md))
-   commits each finished step on its issue branch, then pushes and opens the PR. **Only the human merges**: never
-   merge a PR and never turn on auto-merge. `main` is protected: every change goes through a branch and a PR,
-   merged **only by rebase** after the required checks pass. Never tag by hand: merging a PR with a new version
-   makes `deploy.yml` publish and tag `vN`. Always `git pull --ff-only origin main` before branching from `main`
-   (cloud sessions merge PRs too), and rebase on `origin/main` before pushing. A PR related to a GitHub issue
-   references it in its description (`Closes #N` or `Refs #N`) so the full context is one click away.
+   `npm run test:e2e` (browser tests) all pass. Docs-only changes: the first two are enough (CI still runs all).
+5. Commit only when asked; never push unless asked (exception: the DEVELOPER role). **Only the human merges**:
+   never merge a PR and never turn on auto-merge. Never tag by hand. Every change goes through a branch and a PR:
+   the full Git rules are in [workflow.md](documentation/agents/workflow.md#git).
 6. No sound, vibration or flashing. No extra taps on the training screen.

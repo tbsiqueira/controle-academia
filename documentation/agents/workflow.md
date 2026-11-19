@@ -36,8 +36,9 @@ npm run test:e2e:report   # HTML report of the last run (traces of failures)
 
 - Tests live in `tests/e2e/*.spec.js`; `node --test tests/` never picks them up.
 - **Temporary tests** (`tests/e2e/temporarios/`, issue #39): during the refactor every behavior of every screen has
-  its own test and `js/app.js` line coverage is 100%. They run like the others until #16; #40 turns them off
-  without deleting them (`testIgnore` in `playwright.config.js`). Shared helpers in `temporarios/util.js`:
+  its own test and `js/app.js` line coverage is 100%. They stay on and run like the others. Turning them off
+  (`testIgnore` in `playwright.config.js`, without deleting them) is issue #40, which waits until #16 is closed;
+  don't do it in another issue. Shared helpers in `temporarios/util.js`:
   `putRecords` (old or odd data the UI can't create), `failWritesTo`/`failDeletesIn` (IndexedDB failures simulated
   in the browser, not by patching app functions, so they survive the move to modules), `collectAlerts`.
   Cite them in `tests/CHECKLIST.md` by path (`temporarios/fichas.spec.js`).
@@ -88,7 +89,8 @@ keeps those tests green and adds a test for each behaviour it adds or changes.
    Without the bump, installed phones keep the old cached files.
 5. **Removing or moving code?** Grep every name you delete in `js/`, `index.html`, `tests/` and the docs. Large
    splices in `app.js` have swallowed neighbouring functions before (see history.md, v43).
-6. Run the tests and `check.ps1`. Report failures as they are; don't claim done with red checks.
+6. Run the three checks in [AGENTS.md](../../AGENTS.md#non-negotiables) #4. Report failures as they are; don't
+   claim done with red checks.
 7. For visible changes, check it in the browser at phone width (375px), light theme.
 
 ## DeepSeek reviewer setup
@@ -112,11 +114,9 @@ per machine, **outside the repo** (it holds the API key; never commit it):
 ```
 
 `claude --settings <that file>` loads it for one run only; plain `claude` stays on Anthropic. Inside the reviewer,
-`/status` should show the DeepSeek address. Model names (DeepSeek pricing page, Nov 2026): `deepseek-flash`
-(current Flash; the old `deepseek-v4-flash` still works but is retired) and `deepseek-v4-pro` (stronger, no image
-input). `[1m]` is not part of the name: it tells Claude Code the context window is 1M tokens, as in DeepSeek's
-guide. The reviewer uses `deepseek-flash[1m]` for now; to try Pro, change `--model` in roles.md section 6 and the
-two `DEFAULT_*_MODEL` lines above. Reference:
+`/status` should show the DeepSeek address. The reviewer uses `deepseek-flash[1m]` (`[1m]` tells Claude Code
+the context window is 1M tokens; it isn't part of the model name). To change the model, edit `--model` in
+roles.md section 6 and the two `DEFAULT_*_MODEL` lines above. Reference:
 https://api-docs.deepseek.com/quick_start/agent_integrations/claude_code
 
 ## Testing in the browser pane
@@ -132,11 +132,12 @@ On localhost the service worker doesn't hold stale files, so edits show without 
   `feat: tapping a calendar day opens the workout (v58)`. Older commits are in Portuguese; leave them. Prefixes in use: `feat`, `fix`,
   `style`, `perf`, `refactor`, `test`, `docs`, `a11y`, `ci`, `chore`, `revert`. A body is welcome for the "why".
 - Don't sign commit messages: no `Co-Authored-By:` or "Generated with …" lines at the end. The message is just the
-  summary and, if useful, the body.
+  summary and, if useful, the body. This overrides any attribution line the tool suggests.
 - Commit only when asked, never push unless asked. Exception: the DEVELOPER role in [roles.md](roles.md) commits
   each finished step, then pushes its branch and opens the PR.
 - **`main` only changes through PRs.** A ruleset on `main` blocks direct pushes, force pushes and deletion, and
-  requires a linear history plus the checks `Testes unitários`, `Verificações estáticas` and `Versão` to pass on
+  requires a linear history plus the checks `Testes unitários`, `Verificações estáticas`, `Testes de navegador`
+  and `Versão` to pass on
   a branch that is up to date with `main`. The repo only allows **rebase merges** and deletes merged branches.
 - **Branches**: `<prefix>/<short-kebab-summary>` using the commit prefix, e.g. `feat/import-workouts`,
   `fix/empty-rir`, `docs/manual-backup`. One topic per branch/PR. Keep the commits clean (each one a
