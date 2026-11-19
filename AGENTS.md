@@ -18,7 +18,7 @@ Read only what your task needs. Questions need none of these unless the answer d
 - Before touching an area it lists: [history.md](documentation/agents/history.md) (key decisions, past
   regressions and their lessons).
 - Before writing or changing browser tests: [e2e-tests.md](documentation/agents/e2e-tests.md).
-- Only with a role (see Roles): [roles.md](documentation/agents/roles.md), the sections your role names.
+- Only with a role: the files your role names (see Roles).
 - Only for a refactor issue: [REFACTOR.md](documentation/REFACTOR.md) (the ongoing refactor, tracked in issue #2;
   one issue per PR).
 
@@ -26,9 +26,11 @@ Read only what your task needs. Questions need none of these unless the answer d
 
 Most sessions have no role: answer questions and do what you're asked, under the normal rules here.
 A session has a role only when it's started with `/planner` or its prompt names one (PLANNER, DEVELOPER,
-REVIEWER or DESIGN REVIEWER). Then read only your sections of
-[documentation/agents/roles.md](documentation/agents/roles.md) and follow them: PLANNER 1–3, 7, 8; DEVELOPER 1,
-4, 6, 7; REVIEWER 5, 7; DESIGN REVIEWER 7 and "The DESIGN REVIEWER" in 8.
+REVIEWER or DESIGN REVIEWER). Then read only your files in `documentation/agents/` and follow them:
+PLANNER [roles.md](documentation/agents/roles.md) + [planner.md](documentation/agents/planner.md); DEVELOPER
+[roles.md](documentation/agents/roles.md) + [developer.md](documentation/agents/developer.md); REVIEWER
+[reviewer.md](documentation/agents/reviewer.md); DESIGN REVIEWER
+[design-reviewer.md](documentation/agents/design-reviewer.md).
 Asking about the roles or the workflow doesn't give you one.
 The **AI SPECIALIST** (reviews and improves the agent docs) is outside the issue workflow: only `/ai-specialist`
 in a chat gives it; its rules are in [.claude/skills/ai-specialist/SKILL.md](.claude/skills/ai-specialist/SKILL.md).
@@ -59,3 +61,6 @@ in a chat gives it; its rules are in [.claude/skills/ai-specialist/SKILL.md](.cl
    and create the branch first, even if you weren't asked to commit; leave the commit for when you are. The full
    Git rules, exceptions included, are in [workflow.md](documentation/agents/workflow.md#git).
 6. No sound, vibration or flashing. No extra taps on the training screen.
+7. Never put real workout data (from your own backups or the phone) in issues, comments, prompts, commit messages
+   or test fixtures; use the sample data or made-up data. Never paste or commit credentials (API keys included):
+   if you see one, stop and tell the human so it can be rotated. When unsure, stop and ask rather than guess.

@@ -1,6 +1,6 @@
 # DeepSeek reviewer setup
 
-The REVIEWER and the DESIGN REVIEWER in [roles.md](roles.md) are Claude Code talking to DeepSeek's
+The REVIEWER ([reviewer.md](reviewer.md)) and the DESIGN REVIEWER ([design-reviewer.md](design-reviewer.md)) are Claude Code talking to DeepSeek's
 Anthropic-compatible API. One-time setup per machine, **outside the repo** (it holds the API key; never commit it):
 
 `~/.claude/providers/deepseek.json`
@@ -21,5 +21,5 @@ Anthropic-compatible API. One-time setup per machine, **outside the repo** (it h
 `claude --settings <that file>` loads it for one run only; plain `claude` stays on Anthropic. Inside either reviewer,
 `/status` should show the DeepSeek address. Both use `deepseek-flash[1m]` (`[1m]` tells Claude Code
 the context window is 1M tokens; it isn't part of the model name). To change the model, edit `--model` in
-roles.md sections 6 and 8 and the two `DEFAULT_*_MODEL` lines above. Reference:
+[developer.md](developer.md#review-rounds) and [planner.md](planner.md#design-review) and the two `DEFAULT_*_MODEL` lines above. Reference:
 https://api-docs.deepseek.com/quick_start/agent_integrations/claude_code
