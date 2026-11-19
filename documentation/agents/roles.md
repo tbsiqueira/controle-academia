@@ -21,7 +21,8 @@ into a new chat opened in that worktree (in a cloud session the new chat has its
 creates the branch itself as in [workflow.md](workflow.md#git)):
 "You are the DEVELOPER. Follow documentation/agents/roles.md. Issue #<N>; the plan is the latest plan comment on
 it. No `hc` on this machine." The developer skips step 4 (no review rounds) and the PR's
-`## Review` section says "Skipped: no `hc` on this machine."
+`## Review` section says "Skipped: no `hc` on this machine." The planner also skips the design review (section 8)
+and the plan says so.
 
 **Start the `hc` server from a normal terminal, never from Claude.** Every agent `hc` starts gets the environment
 of the `hc` server, not of the command that ran `hc run`. Any `hc` command starts the server when it isn't
@@ -35,7 +36,7 @@ human to restart it.
 
 **Agents started with `hc --bg` run unattended.** A permission prompt would leave them waiting with nobody to
 answer. So they start in `dontAsk` mode (anything not on their allow-list is refused instead of asked) with the
-allow-lists in sections 3 and 6. If one still stops, `hc read <name>` shows why; `hc attach <name>` lets the human
+allow-lists in sections 3, 6 and 8. If one still stops, `hc read <name>` shows why; `hc attach <name>` lets the human
 answer. The exception is a planner started with `hc` (section 2): the human attaches to it and answers its prompts.
 
 **Tool lists take the `=` form** (`"--allowedTools=Read Edit …"`, `"--disallowedTools=Edit …"`). These flags take
@@ -103,11 +104,14 @@ Only do these when asked; show the human what you'll create or change first when
      - **Decisions**: each choice made, the alternatives rejected, one line on why.
      - **Risks**: old backups and old databases, browser support (Android Chrome, iOS Safari), test coverage,
        version bump, CSP, anything else relevant.
+   - a "Design review:" line: done (and what changed), not run (and why) or skipped (no `hc`). For an issue with a
+     real design choice, run the optional [design review](#8-design-review-planner-runs-it) (section 8) before
+     going on to step 4;
    - then the steps as a `- [ ]` checklist, each small enough to be one commit, following the
      [checklist for every change](workflow.md#checklist-for-every-change): logic with its tests, browser test and
      `tests/CHECKLIST.md` row, MANUAL/docs when user-visible, version bump.
-4. **Stop and wait for "go".** Report the issue, a one-line summary and the link to the plan comment. If the human
-   asks for changes, edit the comment and report again.
+4. **Stop and wait for "go".** Report the issue, a one-line summary, the link to the plan comment, and whether you
+   ran a design review and why (or why not). If the human asks for changes, edit the comment and report again.
 
 **On "go":**
 
@@ -280,3 +284,57 @@ go to step 5 of the DEVELOPER.
 - Never paste or commit credentials (API keys included). If you see one, stop and tell the human so it can be
   rotated.
 - When unsure, stop and ask the human rather than guessing.
+
+## 8. Design review (PLANNER runs it)
+
+An optional second opinion on a plan's "Technical context and decisions", from a different model than the
+planner's, before the developer starts. One round only.
+
+**When.** Only for an issue with a real design choice: a new browser API, a change to the data format, tooling,
+the module split. Not for small issues (a plain bug, a mechanical refactor step, a text change). Skipped without
+`hc` (section 1); the plan then says "Design review: skipped, no `hc` on this machine."
+
+**Flow.**
+
+1. Post the plan comment as usual (section 3, "Plan it"), with `Draft: design review pending` as its first line.
+   The design reviewer reads it from the issue: no draft in the prompt, no temp file.
+2. Start the design reviewer from the planner's checkout (no `-p`, read-only):
+
+   ```bash
+   hc run --bg --name design-<N> --cwd <full path of the planner's checkout> claude \
+     --settings ~/.claude/providers/deepseek.json \
+     --model "deepseek-flash[1m]" \
+     --permission-mode dontAsk \
+     "--allowedTools=Read Glob Grep Bash(git log *) Bash(git show *) Bash(git diff *) Bash(gh issue view *)" \
+     "--disallowedTools=Edit Write NotebookEdit" \
+     "You are the DESIGN REVIEWER. Follow section 8 of documentation/agents/roles.md. Review the draft plan on issue #<N>."
+   ```
+
+   If DeepSeek fails to start or errors, run the same command without `--settings` and with `--model sonnet`.
+3. Wait with one **background** `hc wait design-<N> --timeout 600` (section 1), then
+   `hc read --lines 120 design-<N>`.
+4. Weigh each point: fold in what you accept (decisions, risks, steps). Then edit the same comment into the final
+   plan: remove the `Draft` line and replace the "Design review" line with what happened, e.g. "Design review: done
+   (DeepSeek). Changed: …; not taken: … (why)."
+5. Shut it down: `hc kill design-<N>; hc rm design-<N>`. Then report as in section 3, step 4.
+
+**The DESIGN REVIEWER.**
+
+- Only review the plan. Do not edit files. Do not start other agents. Do not touch issues or PRs.
+- Read the issue and its latest plan comment (`gh issue view <N> --comments`), then the code the plan touches.
+  Check its decisions against the code and the docs ([architecture.md](architecture.md),
+  [product-rules.md](product-rules.md), [history.md](history.md)): a better alternative, a decision that breaks
+  something, a missing step, a risk not listed (old backups and old databases, Android Chrome and iOS Safari,
+  test coverage, version bump, CSP).
+- Reply in this format, one line per point, nothing else:
+
+```
+DISAGREE
+- decision or file – problem – what instead
+
+RISKS MISSED
+- ...
+
+LOOKS GOOD
+- ...
+```
