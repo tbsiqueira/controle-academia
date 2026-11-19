@@ -1,20 +1,20 @@
 'use strict';
 
-/* Meu Treino — lógica pura, compartilhada entre o app e os testes.
-   Nada aqui acessa o DOM nem o estado global: são funções puras.
-   No navegador os nomes viram globais (usados pelo app.js); no Node são exportados
-   para os testes (tests/core.test.js). */
+/* Meu Treino — pure logic, shared between the app and the tests.
+   Nothing here touches the DOM or global state: these are pure functions.
+   In the browser the names become globals (used by app.js); in Node they are exported
+   for the tests (tests/core.test.js). */
 
 (function (root, factory) {
   const api = factory();
   if (typeof module === 'object' && module.exports) {
-    module.exports = api;      // Node (testes)
+    module.exports = api;      // Node (tests)
   } else {
-    Object.assign(root, api);  // Navegador
+    Object.assign(root, api);  // Browser
   }
 })(typeof self !== 'undefined' ? self : this, function () {
 
-  /* ---------- datas ---------- */
+  /* ---------- dates ---------- */
 
   function pad2(n) {
     return String(n).padStart(2, '0');
@@ -39,8 +39,8 @@
     return fmtDate(d);
   }
 
-  // Primeiro dia do mês que fica `delta` meses depois (ou antes) da data.
-  // Sempre parte do dia 1: setMonth() num dia 31 pula ou repete um mês.
+  // First day of the month `delta` months after (or before) the date.
+  // Always starts from day 1: setMonth() on the 31st skips or repeats a month.
   function shiftMonth(date, delta) {
     return new Date(date.getFullYear(), date.getMonth() + delta, 1);
   }
@@ -54,8 +54,8 @@
   const WEEKDAYS_SHORT = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb'];
   const MONTHS = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
 
-  // Partes de uma data para a lista de treinos do Início: bloco com dia grande,
-  // mês e dia da semana ("hoje"/"ontem" quando for o caso) e a chave do mês para agrupar.
+  // Parts of a date for the workout list on Início: a block with a big day,
+  // month and weekday ("hoje"/"ontem" when it applies) and the month key for grouping.
   function dateParts(iso, todayIso) {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(String(iso || ''))) return null;
     const d = parseDate(iso);
@@ -74,16 +74,16 @@
     };
   }
 
-  /* ---------- navegação ---------- */
+  /* ---------- navigation ---------- */
 
-  // "#/detail/abc" -> { view: 'detail', id: 'abc' }. Com o id no endereço, o treino aberto
-  // sobrevive a recarregar a página (antes o id ficava só na memória).
+  // "#/detail/abc" -> { view: 'detail', id: 'abc' }. With the id in the address, the open workout
+  // survives a page reload (the id used to live only in memory).
   function parseRoute(hash) {
     const parts = String(hash || '').replace(/^#\/?/, '').split('/');
     return { view: parts[0] || 'dashboard', id: parts[1] || '' };
   }
 
-  // Texto do card "Instalar o app": já instalado, botão do navegador, iPhone (só pelo Safari) ou menu do navegador.
+  // Text of the "Instalar o app" card: already installed, browser button, iPhone (Safari only) or browser menu.
   function installHint(standalone, canPrompt, ios) {
     if (standalone) return 'O app já está instalado neste aparelho.';
     if (canPrompt) return 'Toque em Instalar: o Meu Treino ganha um ícone próprio e abre em tela cheia, sem a barra do navegador.';
@@ -92,7 +92,7 @@
     return 'Abra o menu do navegador (⋮ ou ⋯) e escolha "Instalar app" ou "Adicionar à tela inicial".';
   }
 
-  /* ---------- texto e números ---------- */
+  /* ---------- text and numbers ---------- */
 
   function esc(value) {
     if (value === null || value === undefined) return '';
@@ -106,8 +106,8 @@
     return isNaN(n) ? 0 : n;
   }
 
-  // Aceita virgula ou ponto como separador decimal (pt-BR usa virgula, e no iPhone o
-  // teclado numerico oferece a virgula).
+  // Accepts a comma or a dot as the decimal separator (pt-BR uses the comma, and the
+  // iPhone numeric keypad offers the comma).
   // "27,5" -> 27.5 | "1.100,50" -> 1100.5 | "12" -> 12 | "abc" -> NaN
   function parseLocalNumber(value) {
     if (value === null || value === undefined) return NaN;
@@ -133,7 +133,7 @@
     return isNaN(n) ? null : n;
   }
 
-  // Formata um numero para exibir em campo (virgula quando o idioma usa virgula).
+  // Formats a number for display in a field (comma when the language uses a comma).
   function formatDecimal(value, useComma) {
     if (value === '' || value === null || value === undefined) return '';
     const n = parseLocalNumber(value);
@@ -142,7 +142,7 @@
     return useComma ? text.replace('.', ',') : text;
   }
 
-  // Busca sem acentos (ex.: "puxada maquina" encontra "Puxada máquina").
+  // Accent-insensitive search (e.g. "puxada maquina" finds "Puxada máquina").
   function normalizeText(value) {
     return String(value === null || value === undefined ? '' : value)
       .normalize('NFD')
@@ -151,7 +151,7 @@
       .trim();
   }
 
-  /* ---------- configurações e semana ---------- */
+  /* ---------- settings and week ---------- */
 
   function defaultSettings() {
     return {
@@ -162,14 +162,14 @@
     };
   }
 
-  // Janela de 7 dias a partir da data marcada (inclusive).
+  // 7-day window starting at the anchor date (inclusive).
   function weekWindow(anchorISO) {
     const anchor = anchorISO || todayISO();
     return { anchor: anchor, end: addDaysISO(anchor, 6) };
   }
 
-  // Início da próxima semana de metas: avança de 7 em 7 dias (sempre pelo menos uma vez)
-  // até a janela alcançar hoje. Quem ficou 3 semanas sem abrir o app não precisa tocar 3 vezes.
+  // Start of the next goal week: moves forward 7 days at a time (always at least once)
+  // until the window reaches today. Someone who didn't open the app for 3 weeks doesn't need to tap 3 times.
   function nextWeekAnchor(anchorISO, todayIso) {
     let anchor = addDaysISO(anchorISO, 7);
     while (addDaysISO(anchor, 6) < todayIso) anchor = addDaysISO(anchor, 7);
@@ -183,7 +183,7 @@
     return hasSet || toNum(w.cardioMinutes) > 0;
   }
 
-  /* ---------- aquecimento ---------- */
+  /* ---------- warm-up ---------- */
 
   function warmupHasData(warm) {
     if (!warm) return false;
@@ -192,7 +192,7 @@
     });
   }
 
-  // useComma: mostra a carga com vírgula (pt-BR), igual ao campo do formulário.
+  // useComma: shows the load with a comma (pt-BR), like the form field.
   function warmupLine(warm, useComma) {
     if (!warm) return '';
     const parts = [];
@@ -202,7 +202,7 @@
     return parts.join(' · ');
   }
 
-  /* ---------- séries ---------- */
+  /* ---------- sets ---------- */
 
   function setLine(s, useComma) {
     const parts = [];
@@ -212,7 +212,7 @@
     return parts.join(' · ');
   }
 
-  // Lista (ul) das séries, no mesmo estilo da lista de exercícios das fichas.
+  // List (ul) of the sets, in the same style as the sheets' exercise list.
   function setsSummaryLines(sets, useComma) {
     const ordered = (sets || []).slice().sort(function (a, b) { return toNum(a.number) - toNum(b.number); });
     if (!ordered.length) return '';
@@ -226,10 +226,10 @@
     }).join('') + '</ul>';
   }
 
-  /* ---------- formulário do Treinar: linha de uma série ---------- */
+  /* ---------- Treinar form: one set row ---------- */
 
-  // Larguras (grade de 12 do Bootstrap). A carga fica com col-3: "102,5" não cabia em col-2.
-  // O número da série é um botão (marca a série como feita), por isso precisa de col-2 para o dedo.
+  // Widths (Bootstrap 12-column grid). The load gets col-3: "102,5" didn't fit in col-2.
+  // The set number is a button (marks the set as done), so it needs col-2 for a finger.
   const SET_COLS = { number: 'col-2', reps: 'col-2', load: 'col-3', rir: 'col-2', note: 'col-3' };
 
   function setHeaderHtml() {
@@ -240,9 +240,9 @@
       '</div>';
   }
 
-  // Os campos chamam setField(exercício, série, campo, valor), definido no app.js.
-  // O botão do número chama toggleSetDone(exercício, série): marca como feita e inicia o descanso.
-  // Série feita só muda de cor (sem som, vibração ou animação).
+  // The fields call setField(exercise, set, field, value), defined in app.js.
+  // The number button calls toggleSetDone(exercise, set): marks the set as done and starts the rest timer.
+  // A done set only changes color (no sound, vibration or animation).
   function setRowHtml(exIdx, setIdx, s, useComma) {
     function field(name) {
       return ' oninput="setField(' + exIdx + ',' + setIdx + ",'" + name + "',this.value)\"";
@@ -258,10 +258,10 @@
       '</div>';
   }
 
-  /* ---------- referência por id (evita nome congelado) ---------- */
+  /* ---------- reference by id (avoids a frozen name) ---------- */
 
-  // Normaliza a referência de um exercício. Aceita { exerciseId, exerciseName }
-  // ou só o nome (chamadas antigas).
+  // Normalizes an exercise reference. Accepts { exerciseId, exerciseName }
+  // or just the name (old callers).
   function exerciseTarget(target) {
     if (!target) return { exerciseId: null, exerciseName: '' };
     if (typeof target === 'string') return { exerciseId: null, exerciseName: target };
@@ -271,8 +271,8 @@
     };
   }
 
-  // Nome ATUAL do exercício: resolve pelo id na lista (biblioteca + catálogo) e só cai
-  // no nome guardado quando não existe id (dados antigos) ou o exercício foi excluído.
+  // CURRENT name of the exercise: resolved by id in the list (library + catalog); falls back
+  // to the stored name only when there's no id (old data) or the exercise was deleted.
   function exerciseLabel(item, exercises) {
     const ref = item || {};
     const list = exercises || [];
@@ -286,35 +286,35 @@
     return ref.exerciseName || ref.name || '';
   }
 
-  // Mesmo exercício? Compara pelo id quando a referência tem id; senão, pelo nome.
-  // O id é comparado como TEXTO: o mesmo id pode chegar como número (registro) ou
-  // texto (atributo data-* do HTML), e os dois precisam casar.
+  // Same exercise? Compares by id when the reference has an id; otherwise by name.
+  // The id is compared as TEXT: the same id can arrive as a number (record) or
+  // text (HTML data-* attribute), and the two must match.
   function exerciseMatches(entry, target) {
     const e = entry || {};
     const t = exerciseTarget(target);
 
     if (t.exerciseId && e.exerciseId) return String(e.exerciseId) === String(t.exerciseId);
-    if (!t.exerciseName && !e.exerciseName) return false;   // nada para comparar
+    if (!t.exerciseName && !e.exerciseName) return false;   // nothing to compare
     return (e.exerciseName || '(sem nome)') === (t.exerciseName || '(sem nome)');
   }
 
-  // O exercício já está na lista? Vale para o formulário do treino (exerciseName) e para os
-  // itens da ficha (name). O mesmo exercício duas vezes num treino vira um grupo só ao salvar
-  // (séries embaralhadas e um aquecimento perdido), então o app não deixa repetir.
+  // Is the exercise already in the list? Works for the workout form (exerciseName) and for the
+  // sheet items (name). The same exercise twice in a workout becomes a single group on save
+  // (shuffled sets and a lost warm-up), so the app doesn't allow repeats.
   function hasExercise(list, ref) {
     const target = exerciseTarget(ref);
     return (list || []).some(function (item) { return exerciseMatches(exerciseTarget(item), target); });
   }
 
-  // Chave de agrupamento: id quando existe, nome como fallback (dados antigos).
-  // Normalizada como texto pelo mesmo motivo do exerciseMatches.
+  // Grouping key: the id when there is one, the name as a fallback (old data).
+  // Normalized as text for the same reason as exerciseMatches.
   function exerciseKey(entry) {
     const e = entry || {};
     return e.exerciseId ? 'id:' + String(e.exerciseId) : 'nome:' + (e.exerciseName || '(sem nome)');
   }
 
-  // Alvo de busca para o histórico de um exercício: usa o id quando o registro tem id;
-  // sem id, usa o nome GUARDADO (dados antigos só têm esse nome para casar).
+  // Search target for an exercise's history: uses the id when the record has one;
+  // without an id, uses the STORED name (old data only has that name to match on).
   function historyTarget(group) {
     return {
       exerciseId: (group && group.exerciseId) || null,
@@ -322,10 +322,10 @@
     };
   }
 
-  // Agrupa as séries planas do treino por exercício (id-first, na ordem em que aparecem),
-  // juntando a observação do exercício e o aquecimento salvo.
-  // Exercícios que só têm aquecimento também viram grupo (senão o aquecimento se perderia
-  // ao editar o treino).
+  // Groups the workout's flat sets by exercise (id-first, in the order they appear),
+  // adding the exercise note and the saved warm-up.
+  // Exercises with only a warm-up also become a group (otherwise the warm-up would be lost
+  // when editing the workout).
   function groupSets(flatSets, warmups) {
     const groups = [];
     const index = {};
@@ -354,7 +354,7 @@
       if (Object.prototype.hasOwnProperty.call(index, key)) {
         group = groups[index[key]];
       } else {
-        // Aquecimento de um exercício sem séries de trabalho (ou registro antigo).
+        // Warm-up of an exercise with no working sets (or an old record).
         for (let i = 0; i < groups.length; i++) {
           if (exerciseMatches(w, groups[i])) { group = groups[i]; break; }
         }
@@ -378,8 +378,8 @@
     return groups;
   }
 
-  // Histórico por exercício: sempre pelo id quando o registro tem id, com o nome
-  // como fallback (dados antigos sem id).
+  // History per exercise: always by id when the record has one, with the name
+  // as a fallback (old data without an id).
   function lastLoadsForExercise(workouts, target) {
     const sorted = (workouts || []).filter(function (w) {
       return (w.sets || []).some(function (s) { return exerciseMatches(s, target); });
@@ -401,7 +401,7 @@
 
     if (!sorted.length) return null;
     const last = sorted[0];
-    // A lista ja foi filtrada por aquecimento deste exercicio, entao o find sempre acha.
+    // The list was already filtered by this exercise's warm-up, so find always finds one.
     return last.warmups.find(function (x) { return exerciseMatches(x, target); });
   }
 
@@ -434,7 +434,7 @@
     return best;
   }
 
-  // Maior carga já registrada no exercício; 0 quando ele nunca teve carga (peso do corpo).
+  // Highest load ever logged for the exercise; 0 when it never had a load (bodyweight).
   function maxBestLoad(workouts, target) {
     return (workouts || []).reduce(function (max, w) {
       const best = bestSetForExercise(w, target);
@@ -442,9 +442,9 @@
     }, 0);
   }
 
-  // 1RM estimado (a carga que daria para levantar uma vez), fórmula de Epley: carga × (1 + reps/30).
-  // Uma repetição é a própria carga; sem carga ou sem reps não há estimativa (0).
-  // shortcut: Epley perde precisão acima de ~12 reps; serve para comparar treinos, não como carga-alvo.
+  // Estimated 1RM (the load you could lift once), Epley formula: load × (1 + reps/30).
+  // One rep is the load itself; without a load or reps there's no estimate (0).
+  // shortcut: Epley loses precision above ~12 reps; it's for comparing workouts, not a target load.
   function estimate1RM(load, reps) {
     const kg = toNum(load);
     const n = toNum(reps);
@@ -452,8 +452,8 @@
     return n === 1 ? kg : Math.round(kg * (1 + n / 30) * 10) / 10;
   }
 
-  // Maior 1RM estimado do exercício num treino: mostra progresso mesmo quando a carga não subiu
-  // (mais reps com a mesma carga).
+  // Highest estimated 1RM of the exercise in a workout: shows progress even when the load didn't go up
+  // (more reps with the same load).
   function best1RMForExercise(workout, target) {
     let best = 0;
     ((workout && workout.sets) || []).forEach(function (s) {
@@ -462,11 +462,11 @@
     return best;
   }
 
-  /* ---------- recordes pessoais ---------- */
+  /* ---------- personal records ---------- */
 
-  // Exercícios em que este treino bateu o recorde de carga, comparando só com treinos de
-  // datas ANTERIORES. A primeira vez que um exercício é feito não conta como recorde.
-  // Calculado na hora (nada é gravado), então funciona para todo o histórico.
+  // Exercises where this workout beat the load record, compared only with workouts on
+  // EARLIER dates. The first time an exercise is done doesn't count as a record.
+  // Computed on the fly (nothing is stored), so it works for the whole history.
   function workoutRecords(workouts, workout) {
     const w = workout || {};
     const earlier = (workouts || []).filter(function (x) {
@@ -495,16 +495,16 @@
     return records;
   }
 
-  // Quantos recordes cada treino bateu ({ id: n }), numa passada só pelo histórico.
-  // Mesmo resultado de workoutRecords(workouts, w).length para cada w (ids únicos), mas sem
-  // varrer o histórico inteiro por treino: com centenas de treinos o Início travava.
-  // Mantém a regra do exerciseMatches: id com id; sem id de um dos lados, compara o nome.
+  // How many records each workout beat ({ id: n }), in a single pass over the history.
+  // Same result as workoutRecords(workouts, w).length for each w (unique ids), but without
+  // scanning the whole history per workout: with hundreds of workouts Início froze.
+  // Keeps the exerciseMatches rule: id against id; with no id on one side, compare the name.
   function recordCounts(workouts) {
     const list = (workouts || []).filter(function (w) { return w && w.date != null; })
       .sort(function (a, b) { return a.date < b.date ? -1 : (a.date > b.date ? 1 : 0); });
-    const byId = Object.create(null);        // maior carga por id
-    const noIdByName = Object.create(null);  // maior carga das séries sem id, por nome
-    const byName = Object.create(null);      // maior carga de todas as séries, por nome
+    const byId = Object.create(null);        // highest load per id
+    const noIdByName = Object.create(null);  // highest load of the sets without an id, per name
+    const byName = Object.create(null);      // highest load of all sets, per name
     const counts = {};
     (workouts || []).forEach(function (w) { if (w) counts[w.id] = 0; });
 
@@ -512,7 +512,7 @@
     while (i < list.length) {
       let j = i;
       while (j < list.length && list[j].date === list[i].date) j++;
-      // treinos do mesmo dia comparam só com dias anteriores: conta tudo antes de somar o dia
+      // workouts on the same day compare only with earlier days: count them all before adding the day
       for (let k = i; k < j; k++) {
         const w = list[k];
         groupSets(w.sets, []).forEach(function (g) {
@@ -537,10 +537,10 @@
     return counts;
   }
 
-  /* ---------- formulário: última sessão, repetir treino, rascunho ---------- */
+  /* ---------- form: last session, repeat workout, draft ---------- */
 
-  // Mais recente primeiro. No mesmo dia, desempata pelo horário em que o treino foi criado:
-  // sem isso, com dois treinos no dia, "Última vez" podia pegar qualquer um dos dois.
+  // Most recent first. On the same day, ties are broken by the time the workout was created:
+  // without that, with two workouts in a day, "Última vez" could pick either one.
   function byDateDesc(a, b) {
     if (a.date !== b.date) return a.date < b.date ? 1 : -1;
     const ca = a.createdAt || '';
@@ -552,8 +552,8 @@
     return (v === null || v === undefined) ? '' : v;
   }
 
-  // Séries da última vez que este exercício foi feito (ignorando o treino em edição),
-  // para a dica "última vez" no formulário.
+  // Sets from the last time this exercise was done (ignoring the workout being edited),
+  // for the "última vez" hint in the form.
   function lastSessionForExercise(workouts, target, excludeId) {
     const sorted = (workouts || []).filter(function (w) {
       if (excludeId && String(w.id) === String(excludeId)) return false;
@@ -567,7 +567,7 @@
     return { date: sorted[0].date, sets: sets };
   }
 
-  // "27 kg × 12 (RIR 2) · 27 kg × 10" — compacto, para caber numa linha no celular.
+  // "27 kg × 12 (RIR 2) · 27 kg × 10" — compact, to fit on one line on a phone.
   function lastSessionLine(session, useComma) {
     if (!session) return '';
     return session.sets.map(function (s) {
@@ -577,7 +577,7 @@
     }).join(' · ');
   }
 
-  // Último treino registrado com esta ficha (ignorando o treino em edição).
+  // Last workout logged with this sheet (ignoring the workout being edited).
   function lastWorkoutForSheet(workouts, sheetId, excludeId) {
     if (!sheetId) return null;
     const sorted = (workouts || []).filter(function (w) {
@@ -588,8 +588,8 @@
     return sorted[0] || null;
   }
 
-  // Ficha sugerida para o próximo treino: a que vem depois da última usada, em ordem alfabética
-  // (TREINO A -> B -> C -> A). Sem histórico, ou se a última ficha não está mais ativa, é a primeira.
+  // Suggested sheet for the next workout: the one after the last one used, in alphabetical order
+  // (TREINO A -> B -> C -> A). With no history, or if the last sheet is no longer active, the first one.
   function nextSheet(workouts, sheets) {
     const active = (sheets || []).filter(function (s) { return s && s.active !== false; })
       .sort(function (a, b) { return String(a.name).localeCompare(String(b.name), 'pt-BR'); });
@@ -602,8 +602,8 @@
     return active[(index + 1) % active.length];
   }
 
-  // Formulário a partir de um treino anterior: mesmos exercícios, reps e cargas.
-  // RIR e observações ficam em branco (são do treino de hoje).
+  // Form from an earlier workout: same exercises, reps and loads.
+  // RIR and notes stay blank (they belong to today's workout).
   function formFromWorkout(workout) {
     const w = workout || {};
     return groupSets(w.sets, w.warmups).map(function (g) {
@@ -620,47 +620,47 @@
     });
   }
 
-  // A série do formulário tem algo preenchido (reps, carga, RIR ou observação)?
+  // Does the form set have anything filled in (reps, load, RIR or note)?
   function setHasData(s) {
     return [s.reps, s.load, s.rir, s.note].some(function (v) { return blankIfNull(v) !== ''; });
   }
 
-  // O exercício do formulário tem algo que se perderia ao remover (série ou aquecimento preenchido)?
+  // Does the form exercise have anything that would be lost on removal (a filled-in set or warm-up)?
   function groupHasData(group) {
     const g = group || {};
     return warmupHasData(g.warmup) || (g.sets || []).some(setHasData);
   }
 
-  // Rascunho do treino em andamento: vale a pena guardar/oferecer só se tem algo preenchido.
+  // Draft of the workout in progress: worth saving/offering only if something is filled in.
   function draftHasContent(draft) {
     if (!draft) return false;
     return (draft.formSets || []).length > 0 || toNum(draft.cardio) > 0 || String(draft.notes || '').trim() !== '';
   }
 
-  /* ---------- descanso ---------- */
+  /* ---------- rest ---------- */
 
-  // Tempo de descanso padrão (segundos): o do usuário se for razoável, senão 90.
+  // Default rest time (seconds): the user's if it's reasonable, otherwise 90.
   function restSecondsOf(settings) {
     const n = Math.round(toNum(settings && settings.restSeconds));
     return (n >= 10 && n <= 900) ? n : 90;
   }
 
-  // 75 -> "1:15"; negativo vira 0:00.
+  // 75 -> "1:15"; negative becomes 0:00.
   function fmtClock(seconds) {
     const s = Math.max(0, Math.ceil(toNum(seconds)));
     return Math.floor(s / 60) + ':' + pad2(s % 60);
   }
 
-  /* ---------- lista do Início ---------- */
+  /* ---------- Início list ---------- */
 
-  // Primeiro dia do mês anterior: o Início mostra o mês atual e o anterior.
+  // First day of the previous month: Início shows the current month and the previous one.
   function recentCutoff(todayIso) {
     const d = parseDate(todayIso);
     return fmtDate(new Date(d.getFullYear(), d.getMonth() - 1, 1));
   }
 
-  // Quantos treinos (de uma lista em ordem decrescente de data) mostrar sem expandir:
-  // os do mês atual e do anterior, e no mínimo `minCount` (para quem ficou um tempo parado).
+  // How many workouts (from a list in descending date order) to show without expanding:
+  // those of the current and previous month, and at least `minCount` (for someone who took a break).
   function visibleWorkoutCount(sortedDesc, todayIso, minCount) {
     const list = sortedDesc || [];
     const cutoff = recentCutoff(todayIso);
@@ -668,7 +668,7 @@
     return Math.min(list.length, Math.max(recent, minCount));
   }
 
-  // Nomes de ficha presentes nos treinos (para o filtro do Início), em ordem alfabética.
+  // Sheet names found in the workouts (for the Início filter), in alphabetical order.
   function sheetFilterOptions(workouts, sheets) {
     const seen = {};
     (workouts || []).forEach(function (w) {
@@ -678,9 +678,9 @@
     return Object.keys(seen).sort(function (a, b) { return a.localeCompare(b, 'pt-BR'); });
   }
 
-  /* ---------- calendário ---------- */
+  /* ---------- calendar ---------- */
 
-  // Treinos por dia: { "2026-10-08": [mais recente, ...] }. Treino sem data válida fica de fora.
+  // Workouts per day: { "2026-10-08": [most recent, ...] }. A workout without a valid date is left out.
   function workoutsByDate(workouts) {
     const map = {};
     (workouts || []).slice().sort(byDateDesc).forEach(function (w) {
@@ -690,23 +690,23 @@
     return map;
   }
 
-  /* ---------- evolução semanal ---------- */
+  /* ---------- weekly progress ---------- */
 
-  // Volume (tonelagem) de um treino: soma de reps × carga das séries de trabalho.
-  // O aquecimento não entra (regra do app).
+  // Volume (tonnage) of a workout: sum of reps × load of the working sets.
+  // The warm-up doesn't count (app rule).
   function workoutVolume(workout) {
     return ((workout && workout.sets) || []).reduce(function (sum, s) {
       return sum + toNum(s.reps) * toNum(s.load);
     }, 0);
   }
 
-  // 12400 -> "12.400" (milhar com ponto, pt-BR). Feito à mão para não depender do idioma do aparelho.
+  // 12400 -> "12.400" (thousands with a dot, pt-BR). Done by hand so it doesn't depend on the device language.
   function fmtThousands(n) {
     return String(Math.round(toNum(n))).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
   }
 
-  // Resumo de um treino para o card do Início: "5 exercícios · 12.400 kg · 30 min cardio".
-  // Partes zeradas ficam de fora; treino sem nada devolve ''.
+  // Summary of a workout for the Início card: "5 exercícios · 12.400 kg · 30 min cardio".
+  // Zero parts are left out; an empty workout returns ''.
   function workoutSummary(workout) {
     const w = workout || {};
     const parts = [];
@@ -719,7 +719,7 @@
     return parts.join(' · ');
   }
 
-  // Totais das últimas `count` semanas (janelas de 7 dias como as metas), da mais antiga para a atual.
+  // Totals of the last `count` weeks (7-day windows like the goals), from the oldest to the current one.
   function weeklyTotals(workouts, anchorIso, count) {
     const out = [];
     for (let i = count - 1; i >= 0; i--) {
@@ -738,11 +738,11 @@
     return out;
   }
 
-/* ---------- nome atual da ficha ---------- */
+/* ---------- current sheet name ---------- */
 
-  // O treino guarda o nome da ficha como estava no dia em que foi registrado (snapshot).
-  // Para MOSTRAR, resolvemos pelo id: assim renomear a ficha aparece em todo o app.
-  // Se a ficha foi excluída (ou o registro é antigo, sem id), usamos o nome guardado.
+  // The workout stores the sheet name as it was on the day it was logged (snapshot).
+  // To DISPLAY it, we resolve by id: that way renaming the sheet shows across the app.
+  // If the sheet was deleted (or the record is old, without an id), we use the stored name.
   function sheetLabel(workout, sheets) {
     const w = workout || {};
     const list = sheets || [];
@@ -756,9 +756,9 @@
     return w.sheetName || w.typeName || '';
   }
 
-  /* ---------- exportar treino como texto ---------- */
+  /* ---------- export workout as text ---------- */
 
-  // Formatado para o WhatsApp: *negrito*, _itálico_, "1." e "- " viram listas lá.
+  // Formatted for WhatsApp: *bold*, _italic_, "1." and "- " become lists there.
   function workoutAsText(workout, sheets, exercises, useComma) {
     const lines = [];
     lines.push('*' + fmtBR(workout.date) + '*');
@@ -791,10 +791,10 @@
     return lines.join('\n').trim();
   }
 
-/* ---------- dados de exemplo ---------- */
+/* ---------- sample data ---------- */
 
-  // Os dados de exemplo guardam as datas como deslocamento em dias (dayOffset),
-  // para a demonstracao ficar sempre recente em relacao a hoje.
+  // The sample data stores dates as an offset in days (dayOffset),
+  // so the demo always stays recent relative to today.
   function materializeSampleData(payload, today) {
     const base = today || todayISO();
     const data = payload && payload.data ? payload.data : payload;
@@ -814,10 +814,10 @@
     return copy;
   }
 
-  // ---------- referência por id (chave estrangeira) ----------
+  // ---------- reference by id (foreign key) ----------
 
-  // Liga itens de ficha antigos (só com nome) ao exercício da Biblioteca, quando o nome casa
-  // de forma inequívoca. É a migração que dá "chave estrangeira" às fichas já existentes.
+  // Links old sheet items (name only) to the Biblioteca exercise when the name matches
+  // unambiguously. It's the migration that gives existing sheets a "foreign key".
   function linkSheetItemsToExercises(sheets, exercises) {
     const idsByName = {};
     (exercises || []).forEach(function (e) {
@@ -834,7 +834,7 @@
       const items = (sheet.exercises || []).map(function (item) {
         if (item.exerciseId) return item;
         const ids = idsByName[normalizeText(item.name)] || [];
-        if (ids.length !== 1) return item;   // nome ambíguo ou inexistente: não mexe
+        if (ids.length !== 1) return item;   // ambiguous or unknown name: leave it alone
         changed++;
         sheetChanged = true;
         return Object.assign({}, item, { exerciseId: ids[0] });
@@ -845,8 +845,8 @@
     return { sheets: updated, changed: changed };
   }
 
-  // Renomear um exercício precisa refletir nas fichas: por id (preferencial) e, para itens
-  // antigos sem id, pelo nome anterior.
+  // Renaming an exercise must carry over to the sheets: by id (preferred) and, for old
+  // items without an id, by the previous name.
   function renameInSheets(sheets, exerciseId, oldName, newName) {
     const oldKey = normalizeText(oldName);
     let changed = 0;
@@ -868,8 +868,8 @@
     return { sheets: updated, changed: changed };
   }
 
-  // No histórico só atualizamos registros que apontam para o id do exercício
-  // (não reescrevemos lançamentos antigos que têm apenas o nome).
+  // In the history we only update records that point to the exercise id
+  // (we don't rewrite old entries that only have the name).
   function renameInWorkouts(workouts, exerciseId, newName) {
     if (!exerciseId) return { workouts: workouts || [], changed: 0 };
 
@@ -898,11 +898,11 @@
     return { workouts: updated, changed: changed };
   }
 
-  /* ---------- busca de exercício (seletor do treino, da ficha e do cadastro) ---------- */
+  /* ---------- exercise search (picker for the workout, the sheet and the exercise form) ---------- */
 
-  // Lista de resultados da busca: "Criar …", Biblioteca (quando pedida e com resultado) e Catálogo.
-  // fn = nomes das funções do app.js chamadas no toque: { create, library, catalog }.
-  // Sem fn.library a Biblioteca fica de fora (cadastro de exercício: só o catálogo interessa).
+  // Search result list: "Criar …", Biblioteca (when asked for and with results) and Catálogo.
+  // fn = names of the app.js functions called on tap: { create, library, catalog }.
+  // Without fn.library the Biblioteca is left out (exercise form: only the catalog matters).
   function pickerHtml(query, library, catalog, fn) {
     const q = String(query || '').trim();
     const lower = normalizeText(q);
@@ -932,8 +932,8 @@
 
   /* ---------- backup ---------- */
 
-  // Nome do arquivo com data e hora, para diferenciar backups do mesmo dia.
-  // Ex.: meu-treino-backup-2026-10-12_13-35-42.json
+  // File name with date and time, to tell apart backups from the same day.
+  // E.g. meu-treino-backup-2026-10-12_13-35-42.json
   function backupFileName(date) {
     const d = date || new Date();
     return 'meu-treino-backup-' + fmtDate(d) +
@@ -941,7 +941,7 @@
       '.json';
   }
 
-  // Data e hora local no formato brasileiro: 12/10/2026 13:35
+  // Local date and time in Brazilian format: 12/10/2026 13:35
   function fmtDateTimeBR(iso) {
     const d = new Date(iso);
     if (isNaN(d.getTime())) return '';
@@ -949,7 +949,7 @@
       ' ' + pad2(d.getHours()) + ':' + pad2(d.getMinutes());
   }
 
-  // Situação do backup: quando foi o último e se já é hora de lembrar o usuário.
+  // Backup status: when the last one was and whether it's time to remind the user.
   function backupStatus(settings, now, daysLimit) {
     const limit = daysLimit || 7;
     const current = now || new Date();
@@ -978,40 +978,40 @@
     };
   }
 
-  // Decide o que fazer quando o usuário pede backup: abrir o menu de compartilhamento
-  // (celular/tablet, que sabe compartilhar arquivos) ou baixar o arquivo (computador).
-  // Assim uma ação gera UM arquivo só.
+  // Decides what to do when the user asks for a backup: open the share menu
+  // (phone/tablet, which can share files) or download the file (computer).
+  // That way one action produces only ONE file.
   function backupAction(options) {
     const opts = options || {};
     if (opts.canShareFiles && opts.touch) return 'share';
     return 'download';
   }
 
-  // Conteúdo enviado ao menu de compartilhamento: SÓ o arquivo, nada mais.
-  // Sem "text" e sem "title": alguns aparelhos tratam título/texto como um segundo
-  // item e salvam um arquivo .txt junto com o JSON.
+  // Content sent to the share menu: ONLY the file, nothing else.
+  // No "text" and no "title": some devices treat the title/text as a second
+  // item and save a .txt file along with the JSON.
   function backupSharePayload(file) {
     return { files: [file] };
   }
 
-  // Um backup montado de verdade tem o JSON e o nome do arquivo. Qualquer outro valor
-  // (por exemplo, o evento de clique que o handler recebe) é ignorado.
+  // A real backup has the JSON and the file name. Any other value
+  // (for example, the click event the handler receives) is ignored.
   function isBackupPayload(value) {
     return !!(value && typeof value.json === 'string' && typeof value.name === 'string' && value.name);
   }
 
-  // Dica mostrada embaixo do botão Exportar: diz para onde o arquivo vai neste aparelho.
+  // Hint shown under the Exportar button: says where the file goes on this device.
   function backupHint(action) {
     return action === 'share'
       ? 'Abre o menu do celular para salvar no Drive, WhatsApp ou Arquivos.'
       : 'Baixa o arquivo .json do backup para guardar onde quiser.';
   }
 
-  /* ---------- biblioteca do usuário ---------- */
+  /* ---------- user library ---------- */
 
-  // Um exercício aparece na Biblioteca a menos que seja comprovadamente do catálogo
-  // (source 'catalog' COM catalogId). Nada é inferido pelo nome: adivinhar escondia
-  // exercícios criados pelo usuário.
+  // An exercise shows in the Biblioteca unless it's provably from the catalog
+  // (source 'catalog' WITH a catalogId). Nothing is inferred from the name: guessing hid
+  // exercises the user created.
   function isUserExercise(exercise) {
     if (!exercise) return false;
     if (exercise.source === 'catalog' && exercise.catalogId) return false;
@@ -1024,8 +1024,8 @@
     });
   }
 
-  // Decisão pura do reparo de sources: o que está marcado como "catalog" sem catalogId
-  // volta a ser "custom" (a adivinhação antiga escondia exercícios criados pelo usuário).
+  // Pure decision of the source repair: anything marked "catalog" without a catalogId
+  // goes back to "custom" (the old guessing hid exercises the user created).
   function fixLibrarySources(exercises) {
     let changed = 0;
 
@@ -1038,7 +1038,7 @@
     return { exercises: updated, changed: changed };
   }
 
-  /* ---------- compatibilidade de backup entre versões ---------- */
+  /* ---------- backup compatibility across versions ---------- */
 
   function normalizeSet(s, fallbackNumber) {
     if (!s) return null;
@@ -1065,7 +1065,7 @@
     };
   }
 
-  // Mesmo limite do editor de ficha (que desenha no máximo 20 campos de reps).
+  // Same limit as the sheet editor (which draws at most 20 reps fields).
   const MAX_SETS = 20;
 
   function normalizeSheetItem(item) {
@@ -1078,7 +1078,7 @@
     const sets = Math.min(MAX_SETS, Math.max(1, parseInt(raw.sets, 10) || reps.length || 3));
 
     if (legacySingle) {
-      // v2: a ficha guardava um único valor de reps (ex.: 3x12) -> vale para todas as séries.
+      // v2: the sheet stored a single reps value (e.g. 3x12) -> it applies to every set.
       reps = new Array(sets).fill(raw.reps);
     } else {
       while (reps.length < sets) reps.push(null);
@@ -1104,8 +1104,8 @@
     };
   }
 
-  // Ficha importada em JSON (formato em FICHA-JSON.md): um objeto { name, exercises }, uma lista
-  // deles, ou { fichas: [...] }. Devolve [{ name, exercises }] já normalizado ou lança Error com o motivo.
+  // Sheet imported as JSON (format in FICHA-JSON.md): an object { name, exercises }, a list
+  // of them, or { fichas: [...] }. Returns [{ name, exercises }] already normalized or throws an Error with the reason.
   function parseSheetImport(payload) {
     const list = Array.isArray(payload) ? payload : (payload && Array.isArray(payload.fichas) ? payload.fichas : [payload]);
     if (!list.length) throw new Error('Nenhuma ficha no arquivo.');
@@ -1126,8 +1126,8 @@
     });
   }
 
-  // Texto colado (resposta da IA) -> fichas. A IA costuma cercar o JSON com ```json ... ```: tiramos a cerca.
-  // JSON quebrado lança SyntaxError; JSON válido fora do contrato lança Error com o motivo.
+  // Pasted text (the AI's answer) -> sheets. The AI often fences the JSON with ```json ... ```: we strip the fence.
+  // Broken JSON throws SyntaxError; valid JSON outside the contract throws an Error with the reason.
   function parseSheetImportText(text) {
     return parseSheetImport(parseAiJson(text));
   }
@@ -1136,9 +1136,9 @@
     return JSON.parse(String(text).replace(/^\s*```(?:json)?|```\s*$/g, ''));
   }
 
-  /* ---------- importar treinos antigos + fichas recriadas (TREINO-JSON.md) ---------- */
+  /* ---------- import old workouts + recreated sheets (TREINO-JSON.md) ---------- */
 
-  // Data do JSON: AAAA-MM-DD ou DD/MM/AAAA, e precisa existir no calendário (31/02 não passa).
+  // JSON date: YYYY-MM-DD or DD/MM/YYYY, and it must exist in the calendar (31/02 doesn't pass).
   function importDate(value) {
     const text = String(value === undefined || value === null ? '' : value).trim();
     const br = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(text);
@@ -1146,7 +1146,7 @@
     return ISO_DATE.test(iso) && fmtDate(parseDate(iso)) === iso ? iso : '';
   }
 
-  // Número opcional: ausente vira null; texto que não é número (ou negativo) é erro, nunca um palpite.
+  // Optional number: missing becomes null; text that isn't a number (or is negative) is an error, never a guess.
   function importNumber(value, where) {
     if (value === undefined || value === null || value === '') return null;
     const n = parseLocalNumber(value);
@@ -1166,8 +1166,8 @@
     };
   }
 
-  // Lista de treinos feitos -> [{ date, sheetName, cardioMinutes, notes, exercises: [{ name, note, warmup, sets }] }]
-  // em ordem de data, ou Error dizendo qual treino e qual campo. Datas depois de `today` são recusadas.
+  // List of workouts done -> [{ date, sheetName, cardioMinutes, notes, exercises: [{ name, note, warmup, sets }] }]
+  // in date order, or an Error naming the workout and the field. Dates after `today` are rejected.
   function parseWorkoutList(list, today) {
     return list.map(function (w, i) {
       if (!w || typeof w !== 'object') throw new Error('Treino ' + (i + 1) + ': formato inválido.');
@@ -1198,8 +1198,8 @@
     }).sort(function (a, b) { return a.date.localeCompare(b.date); });
   }
 
-  // Formato de TREINO-JSON.md: { "fichas": [...], "treinos": [...] }. As fichas seguem FICHA-JSON.md
-  // e são opcionais; uma lista solta conta como só treinos. Devolve { sheets, workouts } ou lança Error.
+  // TREINO-JSON.md format: { "fichas": [...], "treinos": [...] }. The sheets follow FICHA-JSON.md
+  // and are optional; a bare list counts as workouts only. Returns { sheets, workouts } or throws an Error.
   function parseHistoryImport(payload, today) {
     const data = Array.isArray(payload) ? { treinos: payload } : (payload || {});
     if (!Array.isArray(data.treinos) || !data.treinos.length) throw new Error('Falta a lista "treinos" (com pelo menos um treino).');
@@ -1216,14 +1216,14 @@
     return parseHistoryImport(parseAiJson(text), today);
   }
 
-  // Ficha do app com o mesmo nome (sem diferenciar maiúscula/acento), ativa primeiro.
+  // App sheet with the same name (ignoring case and accents), active ones first.
   function sheetByName(sheets, name) {
     const key = normalizeText(name);
     const same = key ? (sheets || []).filter(function (s) { return normalizeText(s.name) === key; }) : [];
     return same.find(function (s) { return s.active !== false; }) || same[0] || null;
   }
 
-  // Fichas do JSON: as que já existem no app (mesmo nome) são reaproveitadas, não duplicadas.
+  // Sheets from the JSON: those already in the app (same name) are reused, not duplicated.
   function splitImportedSheets(sheets, existing) {
     const fresh = [];
     const reused = [];
@@ -1233,8 +1233,8 @@
     return { fresh: fresh, reused: reused };
   }
 
-  // Treino importado -> registro do banco (sem id e datas de criação). A ficha é ligada pelo nome;
-  // sem par, o treino guarda só o nome. exerciseFor(nome) devolve { id, name }.
+  // Imported workout -> database record (without id and creation dates). The sheet is linked by name;
+  // with no match, the workout keeps just the name. exerciseFor(name) returns { id, name }.
   function importedWorkout(item, sheets, exerciseFor) {
     const sheet = sheetByName(sheets, item.sheetName);
     const sets = [];
@@ -1268,8 +1268,8 @@
     };
   }
 
-  // "Impressão digital" de um treino: data, cardio e reps×carga de cada série, em ordem.
-  // Não usa nomes: renomear exercício ou ficha não faz um treino reimportado parecer novo.
+  // "Fingerprint" of a workout: date, cardio and reps×load of each set, in order.
+  // Uses no names: renaming an exercise or sheet doesn't make a reimported workout look new.
   function workoutFingerprint(w) {
     const sets = w.exercises
       ? w.exercises.reduce(function (all, ex) { return all.concat(ex.sets); }, [])
@@ -1279,7 +1279,7 @@
     })).join('|');
   }
 
-  // Separa os treinos do JSON em novos e repetidos (já no app, ou duas vezes no mesmo JSON).
+  // Splits the JSON's workouts into new and repeated (already in the app, or twice in the same JSON).
   function splitImportedWorkouts(items, existing) {
     const seen = {};
     (existing || []).forEach(function (w) { seen[workoutFingerprint(w)] = true; });
@@ -1293,7 +1293,7 @@
     return { fresh: fresh, repeated: repeated };
   }
 
-  // Nomes de exercício usados no JSON (fichas + treinos), sem repetir, na ordem em que aparecem.
+  // Exercise names used in the JSON (sheets + workouts), without repeats, in the order they appear.
   function historyExerciseNames(parsed) {
     const seen = {};
     const names = [];
@@ -1312,7 +1312,7 @@
     return n + ' ' + (n === 1 ? one : many);
   }
 
-  // Resumo da revisão: treinos novos (com o período), repetidos que serão pulados e fichas novas/reaproveitadas.
+  // Review summary: new workouts (with the date range), repeated ones that will be skipped and new/reused sheets.
   // workouts = splitImportedWorkouts(...), sheets = splitImportedSheets(...).
   function historyImportSummaryHtml(workouts, sheets) {
     const fresh = workouts.fresh;
@@ -1332,7 +1332,7 @@
         : '<p class="small text-muted mb-3">Nenhuma ficha no JSON: os treinos ficam ligados às fichas de mesmo nome que já existem.</p>');
   }
 
-  // Aviso depois de importar: "3 treinos importados e 2 fichas criadas." (cada parte só se houver).
+  // Notice after importing: "3 treinos importados e 2 fichas criadas." (each part only when there is one).
   function historyImportToast(workoutCount, sheetCount) {
     const parts = [];
     if (workoutCount) parts.push(countLabel(workoutCount, 'treino importado', 'treinos importados'));
@@ -1340,7 +1340,7 @@
     return parts.join(' e ') + '.';
   }
 
-  // Lista das fichas do app para colar na IA junto com TREINO-JSON.md.
+  // List of the app's sheets to paste into the AI along with TREINO-JSON.md.
   function sheetNamesText(sheets) {
     const lines = (sheets || []).filter(function (s) { return s && s.name; }).map(function (s) {
       return '- ' + s.name + (s.active === false ? ' (desativada)' : '');
@@ -1358,8 +1358,8 @@
     });
   }
 
-  // Exercícios parecidos com um nome (palavras em comum / tamanho do nome maior).
-  // Empate fica na ordem da lista: passe a Biblioteca antes do catálogo. minScore (0..1) corta os fracos.
+  // Exercises similar to a name (words in common / length of the longer name).
+  // Ties keep the list order: pass the Biblioteca before the catalog. minScore (0..1) drops the weak ones.
   function suggestExercises(name, list, limit, minScore) {
     const query = nameWords(name);
     return (list || []).map(function (e, i) {
@@ -1372,7 +1372,7 @@
       .map(function (r) { return r.e; });
   }
 
-  // Lista de nomes (Biblioteca + catálogo, sem repetir) para colar na IA junto com FICHA-JSON.md.
+  // List of names (Biblioteca + catalog, no repeats) to paste into the AI along with FICHA-JSON.md.
   function exerciseNamesText(library, catalog) {
     const seen = {};
     function lines(list) {
@@ -1394,13 +1394,13 @@
   function normalizeWorkout(w) {
     const workout = Object.assign({}, w);
 
-    // v1: as fichas eram "tipos de treino" (typeId/typeName).
+    // v1: sheets were "workout types" (typeId/typeName).
     workout.sheetId = (w.sheetId === undefined || w.sheetId === null) ? (w.typeId || null) : w.sheetId;
     workout.sheetName = w.sheetName || w.typeName || '';
     delete workout.typeId;
     delete workout.typeName;
 
-    // Data fora do formato vira "sem data" (o treino não se perde, só sai do calendário).
+    // A date in the wrong format becomes "no date" (the workout isn't lost, it just leaves the calendar).
     workout.date = ISO_DATE.test(String(w.date)) ? w.date : '';
     workout.cardioMinutes = toNum(w.cardioMinutes);
     workout.notes = w.notes || '';
@@ -1431,18 +1431,18 @@
 
   const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 
-  // O arquivo de backup pode ter sido editado à mão ou vir de outra pessoa, e o id vai
-  // parar em atributos onclick do HTML. Só entram ids com letras, números, "-" e "_"
-  // (é tudo o que o app já gerou: UUID, "id-123-abc", "w1", inteiro do catálogo).
+  // The backup file may have been edited by hand or come from someone else, and the id ends up
+  // in HTML onclick attributes. Only ids with letters, digits, "-" and "_" get in
+  // (that's everything the app has ever generated: UUID, "id-123-abc", "w1", catalog integer).
   function hasSafeId(record) {
     return !!record && !!record.id && /^[\w-]+$/.test(String(record.id));
   }
 
-  // Converte qualquer backup (v1 ou atual) para o formato atual, sem perder dados.
+  // Converts any backup (v1 or current) to the current format, without losing data.
   function normalizeBackup(data) {
     const source = data || {};
 
-    // v1: as fichas eram "tipos de treino" (só nome, sem exercícios).
+    // v1: sheets were "workout types" (name only, no exercises).
     const rawSheets = source.sheets || (source.workoutTypes || []).map(function (t) {
       return {
         id: t.id,
@@ -1464,7 +1464,7 @@
   }
 
   return {
-    // datas
+    // dates
     pad2: pad2,
     fmtDate: fmtDate,
     parseDate: parseDate,
@@ -1475,21 +1475,21 @@
     parseRoute: parseRoute,
     installHint: installHint,
     dateParts: dateParts,
-    // texto e números
+    // text and numbers
     esc: esc,
     toNum: toNum,
     toNumOrNull: toNumOrNull,
     parseLocalNumber: parseLocalNumber,
     formatDecimal: formatDecimal,
     normalizeText: normalizeText,
-    // configurações e semana
+    // settings and week
     defaultSettings: defaultSettings,
     weekWindow: weekWindow,
     nextWeekAnchor: nextWeekAnchor,
     isValidWorkout: isValidWorkout,
-    // dados de exemplo
+    // sample data
     materializeSampleData: materializeSampleData,
-    // referência por id
+    // reference by id
     linkSheetItemsToExercises: linkSheetItemsToExercises,
     renameInSheets: renameInSheets,
     renameInWorkouts: renameInWorkouts,
@@ -1501,12 +1501,12 @@
     backupSharePayload: backupSharePayload,
     isBackupPayload: isBackupPayload,
     backupHint: backupHint,
-    // biblioteca
+    // library
     isUserExercise: isUserExercise,
     libraryExercises: libraryExercises,
     pickerHtml: pickerHtml,
     fixLibrarySources: fixLibrarySources,
-    // aquecimento e séries
+    // warm-up and sets
     warmupHasData: warmupHasData,
     warmupLine: warmupLine,
     setLine: setLine,
@@ -1514,7 +1514,7 @@
     setHeaderHtml: setHeaderHtml,
     setRowHtml: setRowHtml,
     groupSets: groupSets,
-    // histórico
+    // history
     lastLoadsForExercise: lastLoadsForExercise,
     lastWarmupForExercise: lastWarmupForExercise,
     previousWarmupFields: previousWarmupFields,
@@ -1523,10 +1523,10 @@
     maxBestLoad: maxBestLoad,
     estimate1RM: estimate1RM,
     best1RMForExercise: best1RMForExercise,
-    // recordes
+    // records
     workoutRecords: workoutRecords,
     recordCounts: recordCounts,
-    // formulário, descanso, Início e evolução
+    // form, rest, Início and progress
     byDateDesc: byDateDesc,
     lastSessionForExercise: lastSessionForExercise,
     lastSessionLine: lastSessionLine,
@@ -1546,7 +1546,7 @@
     fmtThousands: fmtThousands,
     workoutSummary: workoutSummary,
     weeklyTotals: weeklyTotals,
-    // exportação
+    // export
     workoutAsText: workoutAsText,
     sheetLabel: sheetLabel,
     exerciseTarget: exerciseTarget,
@@ -1555,14 +1555,14 @@
     exerciseKey: exerciseKey,
     hasExercise: hasExercise,
     historyTarget: historyTarget,
-    // compatibilidade de dados
+    // data compatibility
     normalizeBackup: normalizeBackup,
     normalizeSheetItem: normalizeSheetItem,
     parseSheetImport: parseSheetImport,
     parseSheetImportText: parseSheetImportText,
     suggestExercises: suggestExercises,
     exerciseNamesText: exerciseNamesText,
-    // importar treinos antigos + fichas recriadas (TREINO-JSON.md)
+    // import old workouts + recreated sheets (TREINO-JSON.md)
     parseHistoryImport: parseHistoryImport,
     parseHistoryImportText: parseHistoryImportText,
     sheetByName: sheetByName,
