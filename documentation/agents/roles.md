@@ -13,7 +13,7 @@ How agents split the work on GitHub issues. The reviewer and the design reviewer
 | **Label `em andamento`** | The issue has a developer working on it. |
 | **herdr (`hc`)** | Starting and talking to other agents. Names: `planner`, `dev-<N>`, `review-<N>`, `design-<N>`. |
 
-Run `hc --skill` once at the start of a session and check the `hc` commands in this file against it.
+Every agent that uses `hc` runs `hc --skill` once at the start of its session and checks the `hc` commands in this file against it.
 
 **Without `hc`** (cloud sessions, other computers) nobody starts agents. On "go" the planner still adds the label
 and, on a local computer, creates the worktree (section 3, steps 1–2), then gives the human this prompt to paste
@@ -61,7 +61,8 @@ Never sleep or poll in a loop of your own.
 
 Who has a role, and who doesn't, is in [AGENTS.md](../../AGENTS.md#roles). Never take a role you weren't given.
 Only the PLANNER and DEVELOPER may start other agents. The AI SPECIALIST is outside this workflow (see
-[its SKILL.md](../../.claude/skills/ai-specialist/SKILL.md)).
+[its SKILL.md](../../.claude/skills/ai-specialist/SKILL.md)); its one exception is a single REVIEWER round on its
+own docs PR, and only when the human asks for it.
 
 The human starts the planner with `/planner` in any Claude Code chat (app or CLI), e.g.
 `/planner plan issue #12` or `/planner pick the next issue from #7`. Or as a background agent they can talk to
@@ -183,12 +184,9 @@ Works in the worktree of one issue, on its branch. Never two developers on the s
    updates the plan comment once they decide, and tells you to continue (without `hc`: see section 1).
 2. **For each unticked step**, top to bottom:
    1. Build it. Keep the change small and focused on this step.
-   2. Check it, every step, all three:
-      - `node --test tests/` (or `COVERAGE_ENFORCE=1 node tools/coverage-gate.js` when `js/core.js` changed:
-        coverage stays 100%; without the variable it only warns)
-      - `powershell -ExecutionPolicy Bypass -File .\check.ps1` (must print "Tudo certo.")
-      - `npm run test:e2e`
-   3. All three pass → commit: one conventional commit, as in [workflow.md](workflow.md#git) (English summary,
+   2. Check it, every step: run the checks in [AGENTS.md](../../AGENTS.md#non-negotiables) #4 (coverage gate
+      with enforcement when `js/core.js` changed; a docs-only step needs only the unit tests and `check.ps1`).
+   3. All checks pass → commit: one conventional commit, as in [workflow.md](workflow.md#git) (English summary,
       `(vN)` when the version was bumped, no signature lines). One fails and you can't fix it within this step →
       don't commit; stop and report the failing output in the hand-back. Bump the version once per PR: the first
       step that touches `index.html`, `css/` or `js/` bumps it, later steps keep it.
@@ -215,8 +213,8 @@ Works in the worktree of one issue, on its branch. Never two developers on the s
 
 - Only review. Do not edit files. Do not start other agents. Do not touch issues or PRs.
 - Look at everything the branch changes: `git diff origin/main...HEAD` plus uncommitted changes (`git diff`), the
-  issue and its plan comment (`gh issue view <N> --comments`). If a command is refused, say under LOOKS GOOD
-  what you couldn't check.
+  issue and its plan comment (`gh issue view <N> --comments`). With no issue (an AI SPECIALIST docs PR), the
+  prompt states the goal instead. If a command is refused, say under LOOKS GOOD what you couldn't check.
 - Check:
   - Does it do what the issue and the plan ask? Nothing more (no scope creep, no refactor mixed with a fix)?
   - Bugs, edge cases, missing tests. Logic belongs in `js/core.js` with tests; `js/app.js` only renders and wires

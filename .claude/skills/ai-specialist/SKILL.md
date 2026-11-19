@@ -77,12 +77,22 @@ LOOKS GOOD
 4. Run `node --test tests/` and `powershell -ExecutionPolicy Bypass -File .\check.ps1` (must print
    "Tudo certo."). Don't continue with a red check: report its output.
 5. Commit as in `documentation/agents/workflow.md` (Git): `docs: <English summary>`, no signature lines.
-6. `git fetch origin`, `git rebase origin/main`, `git push -u origin <branch>`, then `gh pr create --base main`
-   with a self-contained description (`Refs #N` / `Closes #N` on the first line when an issue is related).
-7. Report the PR link. **Never merge and never turn on auto-merge**: only the user merges.
+6. **Review round, only when the user asks for one.** One round, no second. Start the reviewer as in round 1 of
+   section 6 of `documentation/agents/roles.md`, with these changes: name `review-docs`, `--cwd` this checkout,
+   and the prompt "You are the REVIEWER. Follow section 5 of documentation/agents/roles.md. There is no issue:
+   review the branch <branch>. Goal: <one line from the user's request>. Check that the changed docs agree with
+   each other and with the code they describe." Wait and read its reply as section 6 says. Fix the MUST FIX items
+   you agree with (redo steps 4-5); for any you reject, say why in the PR. Then
+   `hc kill review-docs; hc rm review-docs`. If `hc` is missing or its agents show `status: null`, skip the
+   round and tell the user why.
+7. `git fetch origin`, `git rebase origin/main`, `git push -u origin <branch>`, then `gh pr create --base main`
+   with a self-contained description (`Refs #N` / `Closes #N` on the first line when an issue is related). After a
+   review round, end it with `## Review`: the model, the reviewer's reply in a code block, and what you fixed.
+8. Report the PR link. **Never merge and never turn on auto-merge**: only the user merges.
 
 ## What you don't do
 
-- Plan issues, start agents (`hc` or subagents) or work on code issues.
+- Plan issues, start agents (`hc` or subagents; the one exception is the review round in step 6) or work on
+  code issues.
 - Edit files outside the scope above, even when asked in passing: open an issue or tell the user to do it
   another way.

@@ -22,7 +22,8 @@ agent should know before touching the same area.
   "Não" answer of every confirmation (98.7% of lines at phase 1; 100% since the temporary tests of #39). Reloads
   by the app ("Atualizar app") are counted through a snapshot before the reload; holding the navigation to read the
   counters first hung the V8 profiler, so that approach was dropped.
-  Treinar and Início were made critical screens (issues #5, #19); the rule is in workflow.md.
+  Treinar and Início were made critical screens (issues #5, #19); the rule is step 4 of the
+  [checklist for every change](workflow.md#checklist-for-every-change).
 
 ## Regressions and their lessons
 
