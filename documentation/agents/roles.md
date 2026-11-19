@@ -18,8 +18,9 @@ Run `hc --skill` once at the start of a session and check the `hc` commands in t
 **Without `hc`** (cloud sessions, other computers) nobody starts agents. On "go" the planner still adds the label
 and, on a local computer, creates the worktree (section 3, steps 1–2), then gives the human this prompt to paste
 into a new chat opened in that worktree (in a cloud session the new chat has its own checkout: the developer
-creates the branch itself as in [workflow.md](workflow.md#git)): "You are the DEVELOPER. Follow documentation/agents/roles.md. Issue #<N>; the plan is the latest
-plan comment on it. No `hc` on this machine." The developer skips step 4 (no review rounds) and the PR's
+creates the branch itself as in [workflow.md](workflow.md#git)):
+"You are the DEVELOPER. Follow documentation/agents/roles.md. Issue #<N>; the plan is the latest plan comment on
+it. No `hc` on this machine." The developer skips step 4 (no review rounds) and the PR's
 `## Review` section says "Skipped: no `hc` on this machine."
 
 **Start the `hc` server from a normal terminal, never from Claude.** Every agent `hc` starts gets the environment
@@ -155,8 +156,9 @@ issue left behind. Run `gh pr view <M> --json state` first: never clean up a PR 
 
 Works in the worktree of one issue, on its branch. Never two developers on the same issue.
 
-1. **Read** the issue and its plan comment. In a fresh worktree, run `npm ci` once (no `node_modules/` yet; the
-   Playwright browser is already installed per machine).
+1. **Read** the issue and its plan comment. With no worktree (a cloud session without `hc`), first create the
+   branch from the latest `origin/main` as in [workflow.md](workflow.md#git). In a fresh worktree or checkout, run
+   `npm ci` once (no `node_modules/` yet; the Playwright browser is already installed per machine).
 2. **For each unticked step**, top to bottom:
    1. Build it. Keep the change small and focused on this step.
    2. Check it, every step, all three:
