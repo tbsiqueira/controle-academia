@@ -46,9 +46,12 @@ in a chat gives it; its rules are in [.claude/skills/ai-specialist/SKILL.md](.cl
 1. Logic goes in `js/core.js` (pure, 100% covered by tests); `js/app.js` only renders and wires the DOM.
 2. Never break old backups: imports must keep loading old data and silently ignore fields they don't know.
 3. Changing `index.html`, `css/` or `js/` → bump the version (see workflow.md). `check.ps1` fails otherwise.
-4. Before you say done: `node --test tests/`, `powershell -ExecutionPolicy Bypass -File .\check.ps1` and
-   `npm run test:e2e` (browser tests) all pass. Docs-only changes: the first two are enough (CI still runs all).
-5. Commit only when asked; never push unless asked (exception: the DEVELOPER role). **Only the human merges**:
-   never merge a PR and never turn on auto-merge. Never tag by hand. Every change goes through a branch and a PR:
-   the full Git rules are in [workflow.md](documentation/agents/workflow.md#git).
+4. Before you say done: `node --test tests/` (`node tools/coverage-gate.js` instead when `js/core.js` changed),
+   `powershell -ExecutionPolicy Bypass -File .\check.ps1` and `npm run test:e2e` (browser tests) all pass.
+   Docs-only changes: the first two are enough (CI still runs all).
+5. Commit only when asked; never push unless asked (exceptions: see [workflow.md](documentation/agents/workflow.md#git)).
+   **Only the human merges**: never merge a PR and never turn on auto-merge. Never tag by hand. Every change goes
+   through a branch and a PR: when asked to change files, sync and create the branch first, even if you weren't
+   asked to commit; leave the commit for when you are. The full Git rules are in
+   [workflow.md](documentation/agents/workflow.md#git).
 6. No sound, vibration or flashing. No extra taps on the training screen.

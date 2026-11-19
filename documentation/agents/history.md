@@ -3,17 +3,6 @@
 The detailed log is in [`PLANO.md`](../PLANO.md) (section "Histórico de revisões") and `git log`. This page keeps what a future
 agent should know before touching the same area.
 
-## Timeline at a glance
-
-| When | Versions | What happened |
-|---|---|---|
-| 2026-10-12 | v1–v24 | MVP: fichas with ordered exercises and reps per set, warm-up per exercise, export as text, library, catalog, tag-based deploy |
-| 2026-10-12/13 | v25–v48 | Logic extracted to `core.js` with tests; 100% coverage gate; references by id; backup share flow; sample data |
-| 2026-11-13 | v49–v52 | Persistent storage, draft, "last time" hint, repeat last workout, rest timer, weekly evolution, PRs |
-| 2026-11-14 | v53–v59 | Import ficha from AI-generated JSON (`FICHA-JSON.md`), deactivate fichas, Debug card |
-| 2026-11-15 | v60–v67 | Bug-fix sweep, one-tap "Treinar agora", 1RM, lime theme (v62), iPhone layout polish, body weight removed |
-| 2026-11-16/17 | v68–v74 | AI ficha flow in one dialog, workout text for WhatsApp, install card, old-workout import, leaner Mais with Debug always visible (v74); PR flow on `main`; refactor phase 1 done: Playwright browser tests for every user-triggered path, CHECKLIST guard, `app.js` coverage ratchet |
-
 ## Decisions worth keeping
 
 - **No build; npm only for dev tools** (Playwright, since #4; see the refactor plan below), no jsdom: the user

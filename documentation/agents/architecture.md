@@ -67,8 +67,7 @@ New core functions must be added to the export object at the bottom of `core.js`
 
 ## Things that look odd but are on purpose
 
-- No bundler and no jsdom: the app is edited and served as-is. `package.json` exists **only for dev tools**
-  (Playwright); the app loads nothing from it and the unit tests need no install. DOM code is covered by the
-  browser tests in `tests/e2e/`, by static checks and by keeping logic in `core.js`.
+- No bundler and no jsdom: the app is edited and served as-is. DOM code is covered by the browser tests in
+  `tests/e2e/`, by static checks and by keeping logic in `core.js`.
 - Icon font is base64 inside the CSS (avoids "square" icons when the font fails to load).
 - `reset.html` is an escape page that unregisters the service worker and clears caches.
