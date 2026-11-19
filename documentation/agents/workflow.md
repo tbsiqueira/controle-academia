@@ -128,8 +128,8 @@ On localhost the service worker doesn't hold stale files, so edits show without 
 
 ## Git
 
-- Commit messages: Conventional prefix + short **Portuguese** summary without accents, version in parentheses
-  when bumped, e.g. `feat: tocar num dia do calendario abre o treino (v58)`. Prefixes in use: `feat`, `fix`,
+- Commit messages: Conventional prefix + short **English** summary, version in parentheses when bumped, e.g.
+  `feat: tapping a calendar day opens the workout (v58)`. Older commits are in Portuguese; leave them. Prefixes in use: `feat`, `fix`,
   `style`, `perf`, `refactor`, `test`, `docs`, `a11y`, `ci`, `chore`, `revert`. A body is welcome for the "why".
 - Don't sign commit messages: no `Co-Authored-By:` or "Generated with …" lines at the end. The message is just the
   summary and, if useful, the body.
@@ -138,8 +138,8 @@ On localhost the service worker doesn't hold stale files, so edits show without 
 - **`main` only changes through PRs.** A ruleset on `main` blocks direct pushes, force pushes and deletion, and
   requires a linear history plus the checks `Testes unitários`, `Verificações estáticas` and `Versão` to pass on
   a branch that is up to date with `main`. The repo only allows **rebase merges** and deletes merged branches.
-- **Branches**: `<prefix>/<short-kebab-summary>` using the commit prefix, e.g. `feat/importar-treinos`,
-  `fix/rir-vazio`, `docs/manual-backup`. One topic per branch/PR. Keep the commits clean (each one a
+- **Branches**: `<prefix>/<short-kebab-summary>` using the commit prefix, e.g. `feat/import-workouts`,
+  `fix/empty-rir`, `docs/manual-backup`. One topic per branch/PR. Keep the commits clean (each one a
   conventional message) because rebase merge puts every commit on `main` as is.
 - **Sync before you start.** Cloud sessions also merge PRs, so the local copy goes stale. On `main`, run
   `git fetch origin` and `git pull --ff-only origin main` before creating a branch/worktree. If it can't
