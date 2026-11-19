@@ -283,7 +283,9 @@ test('workoutAsText monta a mensagem com o aquecimento dentro de cada exercicio'
 
   assert.equal(lines[0], '*08/10/2026*');
   assert.equal(lines[1], 'Ficha: _TREINO A - inferiores_');
-  assert.ok(text.indexOf('1. *Elevação pélvica*\n_Obs.: pausa de 1s_') !== -1);
+  assert.ok(text.indexOf('1. *Elevação pélvica*\n- Aquecimento:') !== -1, 'the exercise line is followed by its sets, no note line');
+  assert.ok(text.indexOf('Obs.:') === -1, "the teacher's note line is left out");
+  assert.ok(text.indexOf('pausa de 1s') === -1, "the teacher's note text is left out");
   assert.ok(text.indexOf('- Aquecimento: 15 reps · 20 kg · RIR 3') !== -1);
   assert.ok(text.indexOf('- Série 1: 12 reps · 27 kg · RIR 2') !== -1);
   assert.ok(text.indexOf('- Série 2: 10 reps · 27 kg · RIR 1 _(caiu a força)_') !== -1);
