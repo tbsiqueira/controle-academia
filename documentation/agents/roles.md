@@ -8,17 +8,51 @@ How agents split the work on GitHub issues. The PLANNER and DEVELOPER read this 
 
 Sonnet builds, Opus challenges.
 
-| Role | Model | Started by |
-|---|---|---|
-| PLANNER | Sonnet | The human: `/planner` in a chat set to Sonnet, or `hc run` below. Opus only when the human asks for it, for an exceptional architectural decision. |
-| DEVELOPER | Sonnet | The planner ([planner.md](planner.md), "On go") |
-| REVIEWER | Opus (Anthropic), whenever agent review is available | The developer ([developer.md](developer.md#review-rounds)); never swapped for another model without the human's OK. Without `hc` there is no agent review ([Tools](#tools)). |
-| DESIGN REVIEWER (optional) | DeepSeek Flash | The planner ([planner.md](planner.md#design-review)); setup in [deepseek-setup.md](deepseek-setup.md) |
+| Role | Model | Launch flags (always explicit) | Accepted model prefix | Started by |
+|---|---|---|---|---|
+| PLANNER | Sonnet | Chat: none; the chat must already be on Sonnet (`/planner` doesn't switch the model). `hc`: `--model sonnet`, no `--settings`. | `claude-sonnet-` (system-prompt-reported) | The human: `/planner` in a chat, or `hc run` below. Opus only when the human asks for it, for an exceptional architectural decision. |
+| DEVELOPER | Sonnet | `--model sonnet --session-id <id>`, no `--settings` (Anthropic) | `claude-sonnet-` | The planner ([planner.md](planner.md), "On go") |
+| REVIEWER | Opus (Anthropic), whenever agent review is available | `--model opus --session-id <id>`, no `--settings` | `claude-opus-` | The developer ([developer.md](developer.md#review-rounds)); never swapped for another model without the human's OK, and never for DeepSeek. Without `hc` there is no agent review ([Tools](#tools)). |
+| DESIGN REVIEWER (optional) | DeepSeek Flash | `--settings ~/.claude/providers/deepseek.json --model "deepseek-flash[1m]" --session-id <id>` | `deepseek-flash` | The planner ([planner.md](planner.md#design-review)); setup in [deepseek-setup.md](deepseek-setup.md) |
+| DESIGN REVIEWER on Opus (only on the human's explicit OK) | Opus | `--model opus --session-id <id>`, no `--settings` | `claude-opus-` | The planner ([planner.md](planner.md#design-review)) |
 
-**Cost.** Since 2026-11-19 the REVIEWER runs on Opus instead of DeepSeek Flash, so each review costs more than it
-did; planning and building moved from Opus to Sonnet. Whether the flow costs less overall is measured over
-complete issues (the usage of whole issues before and after), never assumed from per-model prices. No automatic
-model switching: a model changes only when this table changes.
+**Cost.** Since 2026-11-19 the REVIEWER runs on Opus instead of DeepSeek Flash, and planning and building moved
+from Opus to Sonnet. Opus costs more per token than DeepSeek Flash, but what a review actually costs depends on
+how many tokens it uses. The cost of the flow is measured across complete issues, before and after this change;
+never claim a saving from model prices alone. No automatic model switching: a model changes only when this table
+changes.
+
+## Checking an agent's model
+
+Never rely on a model inherited from the parent session, and never pass `--fallback-model`. Every launched
+agent is **transcript-verified**:
+
+1. Before `hc run`, make a session id: `node -e "console.log(crypto.randomUUID())"`. Pass it as
+   `--session-id <id>` and keep it for the report.
+2. When an `hc wait` on that agent returns (only the waits named in the role files; no extra wait or poll),
+   run the check **before** you use its output. It works as is in Bash and in Windows PowerShell:
+
+   ```bash
+   node -e "const fs=require('fs'),p=require('path'),[id,want]=process.argv.slice(1),r=p.join(require('os').homedir(),'.claude','projects');let f;try{f=fs.readdirSync(r).map(d=>p.join(r,d,id+'.jsonl')).find(x=>fs.existsSync(x))}catch(e){}if(f===undefined){console.log('FAIL: no transcript '+id+'.jsonl under '+r);process.exit(1)}const m=new Set();for(const l of fs.readFileSync(f,'utf8').split('\n')){try{const j=JSON.parse(l);if(j.type==='assistant'&&j.message&&j.message.model)m.add(j.message.model)}catch(e){}}const all=[...m],ok=all.filter(x=>x.startsWith(want)),bad=all.filter(x=>(x.startsWith(want)||x==='<synthetic>')===false);if(bad.length){console.log('FAIL: unexpected model(s) '+bad.join(', ')+'; expected '+want+'*');process.exit(1)}if(ok.length===0){console.log('FAIL: no model answered'+(all.length?' (only <synthetic>, a Claude Code error)':''));process.exit(1)}console.log('OK transcript-verified: '+ok.join(', '))" <id> <accepted prefix>
+   ```
+
+   It reads the agent's transcript (`~/.claude/projects/<folder>/<id>.jsonl`, where Claude Code records the
+   model each API reply came from) and prints one line, never the transcript:
+   - `OK transcript-verified: <model>` (exit 0): every model found has the accepted prefix in the table above;
+     `<synthetic>` entries (Claude Code's own error text, not a model) are allowed alongside. Note the model for
+     the report.
+   - `FAIL: …` (exit 1): an unexpected model, no transcript (transcript saving is off: see the `hc` server
+     rule below) or no model answered (only `<synthetic>`). **Fail closed:** `hc kill <name>; hc rm <name>`,
+     don't use its output, don't start it again on another model; stop and report the `FAIL` line. The human
+     decides.
+
+**Verification strength.** Reports label each model:
+- **transcript-verified**: the check above passed. It shows the model name in each API reply, i.e. what the
+  provider says served the agent, not only what was asked for. It can't prove what a third-party provider ran
+  behind that name.
+- **system-prompt-reported**: the model the agent's system prompt names (Claude Code states it there). This is
+  only what Claude Code requested. It's the only check for the PLANNER (a `/planner` chat or an `hc` planner
+  has no session id to pass) and the developer's early self-check.
 
 ## Tools
 

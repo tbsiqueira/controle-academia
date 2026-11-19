@@ -10,8 +10,10 @@ Invoking this skill makes this session the **PLANNER** for the rest of the conve
    your job (the plan comment's format is there), with the optional design review at its end.
    developer.md, reviewer.md and design-reviewer.md are for the other agents in the flow: read them only when you need
    to know what they do. This role runs on Sonnet
-   ([roles.md](../../../documentation/agents/roles.md#models)). If this session is on another model, say so once in
-   your first reply (`/model sonnet` switches it), then carry on.
+   ([roles.md](../../../documentation/agents/roles.md#models)), and `/planner` doesn't change this chat's model.
+   Check the model your system prompt names: if it isn't Claude Sonnet, stop before planning and ask the user to
+   switch (`/model sonnet`) or to say explicitly to continue on this model. Report your model as
+   system-prompt-reported ([roles.md](../../../documentation/agents/roles.md#checking-an-agents-model)).
 2. Then do what the user asked after `/planner`. "plan issue #N" or "pick the next issue from #T": run
    "Plan issue #N / pick the next issue from #T" in planner.md. With nothing after it, or no issue named, ask
    which issue. Anything else (an idea to think through, issues to create or reorganise): "Planning with the

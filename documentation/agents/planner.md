@@ -47,13 +47,13 @@ Only do these when asked; show the human what you'll create or change first when
 1. Add the label: `gh issue edit <N> --add-label "em andamento"`.
 2. Create the worktree from the latest `main` (branch name as in [workflow.md](workflow.md#git)):
    `git fetch origin` then `git worktree add ../Academia-<N> -b <prefix>/<short-kebab-summary> origin/main`.
-3. Start the developer **in that worktree**:
+3. Start the developer **in that worktree**, with a new session id ([roles.md](roles.md#checking-an-agents-model)):
 
    `--outlive-parent` keeps the developer running if the planner's session ends; `--cwd` takes the worktree's
    full path.
 
    ```bash
-   hc run --bg --name dev-<N> --outlive-parent --cwd <full path of ../Academia-<N>> claude --model sonnet \
+   hc run --bg --name dev-<N> --outlive-parent --cwd <full path of ../Academia-<N>> claude --model sonnet --session-id <id> \
      --permission-mode dontAsk \
      "--allowedTools=Read Edit Write Glob Grep Bash(node *) Bash(COVERAGE_ENFORCE=1 node *) Bash(npm *) Bash(npx *) Bash(git *) Bash(gh *) Bash(hc *) Bash(powershell *)" \
      "You are the DEVELOPER. Follow documentation/agents/roles.md and documentation/agents/developer.md. Issue #<N>; the plan is the latest plan comment on it."
@@ -63,13 +63,19 @@ Only do these when asked; show the human what you'll create or change first when
 5. **Follow the developer and tell the human.** Run `hc wait dev-<N> --timeout 3600` as one background command
    ([roles.md](roles.md#tools)), so the chat stays free and you wake only when the developer stops (done, `blocked`, `error`);
    on `reason: timeout`, start it again. If the background command is refused or isn't supported, fall back to
-   `--timeout 90` in the foreground. When the developer finishes, read its hand-back (`hc read --lines
-   200 dev-<N>`) and report in the chat:
+   `--timeout 90` in the foreground. Each time the wait returns, first run the model check on the developer's id
+   with prefix `claude-sonnet-` ([roles.md](roles.md#checking-an-agents-model)); on `FAIL`, don't use or relay
+   its hand-back: report the `FAIL` line and stop. Then read its hand-back (`hc read --lines 200 dev-<N>`) and
+   report in the chat:
    - PR opened → the PR link, a two-line summary of what changed, the review's MUST FIX items and what happened
      to them, new issues opened. Remind the human that merging is theirs, and to tell you once the PR is merged
-     or closed so you can clean up.
+     or closed so you can clean up. End with the models, labelled as in roles.md: `Models: planner <model>
+     (system-prompt-reported); design reviewer <model> (transcript-verified) | skipped: <why> | failed: <FAIL
+     line>; developer <model> (transcript-verified); reviewer <model per review cycle> (transcript-verified, from
+     the developer's hand-back) | skipped: <why> | failed: <FAIL line>.`
    - Stopped without a PR → why (failing check with its output, refused command, open question, a challenged
-     decision: what, why and what the developer would do instead) and what the human needs to decide.
+     decision: what, why and what the developer would do instead) and what the human needs to decide, then the
+     same `Models:` line as far as it goes.
 6. **Relay the human's answer.** When the human answers a stopped developer in the chat, and the answer changes
    the plan (a challenged decision, a new or changed step), first edit the plan comment to match. Then pass the
    answer on as they said it with `hc send dev-<N> "<their answer>"` and go back to step 5. The developer keeps
@@ -109,28 +115,31 @@ the module split. Not for small issues (a plain bug, a mechanical refactor step,
 1. Post the plan comment as usual (step 3 of "Plan issue #N" above), with `Draft: design review pending` as its first line
    and `Design review: pending` as its "Design review" line.
    The design reviewer reads it from the issue: no draft in the prompt, no temp file.
-2. Start the design reviewer from the planner's checkout (no `-p`, read-only):
+2. Start the design reviewer from the planner's checkout (no `-p`, read-only), with a new session id
+   ([roles.md](roles.md#checking-an-agents-model)):
 
    ```bash
    hc run --bg --name design-<N> --cwd <full path of the planner's checkout> claude \
      --settings ~/.claude/providers/deepseek.json \
      --model "deepseek-flash[1m]" \
+     --session-id <id> \
      --permission-mode dontAsk \
      "--allowedTools=Read Glob Grep Bash(git log *) Bash(git show *) Bash(git diff *) Bash(gh issue view *)" \
      "--disallowedTools=Edit Write NotebookEdit" \
      "You are the DESIGN REVIEWER. Follow documentation/agents/design-reviewer.md. Review the draft plan on issue #<N>."
    ```
 
-   If DeepSeek fails to start or errors, don't run it on another model: `hc kill design-<N>; hc rm design-<N>`,
-   finish the plan without it (step 4: remove the `Draft` line; "Design review: not run (DeepSeek failed:
-   <error>)") and say so in your report.
+   If DeepSeek fails to start, errors or fails the model check, don't run it on another model:
+   `hc kill design-<N>; hc rm design-<N>`, finish the plan without it (step 4: remove the `Draft` line; "Design
+   review: not run (DeepSeek failed: <error or FAIL line>)") and say so in your report.
    For an exceptional architectural decision (data format, module split), the human may ask for this review on
-   Opus instead: the same command without `--settings` and with `--model opus`. Suggest it in your report when it
-   fits; never pick it alone.
+   Opus instead: the same command without `--settings` and with `--model opus` (accepted prefix `claude-opus-`).
+   Suggest it in your report when it fits; never pick it alone.
    `status: null` after it starts: see [roles.md](roles.md#tools).
 3. Wait with one **background** `hc wait design-<N> --timeout 600` ([roles.md](roles.md#tools)); on `reason: timeout` it is still
-   working, so start the wait again. Once it returns `done`, `hc read --lines 120 design-<N>`.
+   working, so start the wait again. Once it returns `done`, run the model check on its id with prefix
+   `deepseek-flash` ([roles.md](roles.md#checking-an-agents-model)), then `hc read --lines 120 design-<N>`.
 4. Weigh each point: fold in what you accept (decisions, risks, steps). Then edit the same comment into the final
    plan: remove the `Draft` line and replace the "Design review" line with what happened, e.g. "Design review: done
-   (DeepSeek). Changed: …; not taken: … (why)."
+   (deepseek-flash, transcript-verified). Changed: …; not taken: … (why)."
 5. Shut it down: `hc kill design-<N>; hc rm design-<N>`. Then report as in step 4 of "Plan issue #N" above.

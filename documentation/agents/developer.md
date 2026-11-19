@@ -4,7 +4,9 @@ Read [roles.md](roles.md) first (tools, `hc`, working without `hc`).
 
 Works in the worktree of one issue, on its branch. Never two developers on the same issue.
 
-1. **Read and check the decisions.** Read the issue and its plan comment. With no worktree (a cloud session
+1. **Read and check the decisions.** First check the model your system prompt names: if it isn't a Claude
+   Sonnet model, stop before anything else and say so in the hand-back (the planner's transcript check is the
+   one that counts; this one only catches a wrong launch early). Read the issue and its plan comment. With no worktree (a cloud session
    without `hc`), first create the branch from the latest `origin/main` as in [workflow.md](workflow.md#git). In a
    fresh worktree or checkout, run `npm ci` once (no `node_modules/` yet; the Playwright browser is already
    installed per machine). Then check the plan's "Technical context and decisions" against the actual code before
@@ -49,48 +51,52 @@ Works in the worktree of one issue, on its branch. Never two developers on the s
      #4 again only if the rebase brought in new commits; the last green run still counts otherwise.
    - `git push -u origin <branch>`, then `gh pr create --base main`.
      First line of the description: `Closes #<N>` (or `Refs #<N>` if the issue isn't finished). End the
-     description with a `## Review` section: the model that reviewed (Opus, or the fallback the human approved),
-     then `### Round 1` and, if it ran, `### Round 2`, each with the reviewer's reply as it came, in a code block,
+     description with a `## Review` section: the model that reviewed each review cycle, as the model check
+     printed it (`claude-opus-…`, transcript-verified, or the fallback the human approved), then `### Round 1` and, if it ran, `### Round 2`, each with the reviewer's reply as it came, in a code block,
      and what you fixed or applied. With no round 2, write `Round 2: not needed (no MUST FIX in round 1).` Then
      `### Not applied`: every NICE TO HAVE you didn't apply, with the issue you opened for it, if any. If the
      review was skipped, say so and why. Never turn on auto-merge and never merge: the human merges, and merging
      is what publishes.
    - Report: the PR link, what changed, what the reviewer found each round, what you fixed or applied and what
-     you didn't (and why), new issues opened, and which model did the review (Opus, or the fallback the human
-     approved).
+     you didn't (and why), new issues opened, and the models: `Models: developer <model> (system-prompt-reported);
+     reviewer <model per review cycle> (transcript-verified) | skipped: <why> | failed: <FAIL line>`.
 
 ## Review rounds
 
 One review cycle per issue, by Claude Opus, after the last step and before the push: **at most two rounds**,
-round 2 only when round 1 had MUST FIX items. **Nothing changes in the code after the final review without being
-reviewed:** every code change in the PR has been reviewed.
+round 2 only when round 1 had MUST FIX items or you chose to apply a NICE TO HAVE. **Nothing changes in the code
+after the final review without being reviewed:** every code change in the PR has been reviewed.
 
-**Round 1**: note the reviewed commit (`git rev-parse --short HEAD`), then start the reviewer (no `-p`, so it
-stays open for round 2):
+**Round 1**: note the reviewed commit (`git rev-parse --short HEAD`) and make a new session id
+([roles.md](roles.md#checking-an-agents-model)), then start the reviewer (no `-p`, so it stays open for round 2):
 
 ```bash
 hc run --bg --name review-<N> --cwd <full path of this worktree> claude \
   --model opus \
+  --session-id <id> \
   --permission-mode dontAsk \
   "--allowedTools=Read Glob Grep Bash(git diff) Bash(git diff *) Bash(git log *) Bash(git show *) Bash(git status *) Bash(gh issue view *)" \
   "--disallowedTools=Edit Write NotebookEdit" \
   "You are the REVIEWER. Follow documentation/agents/reviewer.md. Review the branch for issue #<N>."
 hc wait review-<N> --timeout 1800   # background command (roles.md#tools); on reason: timeout, wait again
+# then the model check on <id> with prefix claude-opus- (roles.md#checking-an-agents-model), before reading
 hc read --lines 120 review-<N>
 ```
 
-**Opus fails** (it doesn't start, `hc get` shows `error`, or the reply is an API error instead of a review):
+**Opus fails** (it doesn't start, `hc get` shows `error`, the reply is an API error instead of a review, or the
+model check prints `FAIL`):
 `hc kill review-<N>; hc rm review-<N>` and start it once more. If it fails again, don't review with another
 model and don't push: stop and report the error in the hand-back. The human decides: retry later, or a review by
-another model, which the PR's `## Review` then names as the fallback.
+another Anthropic model (never DeepSeek), which the PR's `## Review` then names as the fallback.
 
 Copy the reply now for the PR (round 2 scrolls it out of `hc read`). Then:
 
-- **MUST FIX** → fix them all. You may also apply NICE TO HAVE items that fit this issue's plan: round 2 reviews
-  them too. Commit after the checks pass, then round 2.
-- **No MUST FIX** → no round 2 and no more code changes. NICE TO HAVE items go in the PR under `### Not applied`
-  (one that needs a new step or touches another area also gets a new issue). If you think one is important
-  enough to apply now, applying it means running round 2: apply it, commit after the checks pass, then round 2.
+- **MUST FIX** → always fix them all and have them verified: commit after the checks pass, then round 2. You
+  may also apply NICE TO HAVE items that fit this issue's plan; round 2 reviews them too.
+- **No MUST FIX** → by default, no round 2 and no more code changes: NICE TO HAVE items go in the PR under
+  `### Not applied` (one that needs a new step or touches another area also gets a new issue). Applying a
+  NICE TO HAVE is your choice, and choosing it means round 2: apply it, commit after the checks pass, then
+  round 2.
 
 **Round 2**: the same reviewer checks only the changes since round 1:
 
@@ -98,16 +104,24 @@ Copy the reply now for the PR (round 2 scrolls it out of `hc read`). Then:
 hc send review-<N> "I changed <round-1 commit>..HEAD. MUST FIX items I fixed: <list>. NICE TO HAVE items I applied: <list, or none>. Check that each MUST FIX is resolved, that each NICE TO HAVE I applied is implemented correctly, and that these commits introduced nothing new."
 ```
 
-Wait and read as in round 1. Round 2 is the final review: after it, change no code. NICE TO HAVE items from
+Wait, check and read as in round 1: the same session id, so the check covers every model in the whole review
+session. A `FAIL` now means round 2 failed: don't use its reply; stop and report it. Round 2 is the final review: after it, change no code. NICE TO HAVE items from
 round 2 go under `### Not applied`. A MUST FIX still open after round 2 → don't fix it unreviewed and don't defer
 it alone: report it to the human in the hand-back and at the top of the PR's `## Review`. The human decides.
 
 **Code changes after the final review** (a MUST FIX the human tells you to fix, a CI failure, a conflict you
 resolve by hand) get a **separate, targeted review cycle**, not a third round of the one above: commit after the
-checks pass, then start a fresh reviewer as in round 1 with the prompt "You are the REVIEWER. Follow
-documentation/agents/reviewer.md. Targeted follow-up review: review only <last reviewed commit>..HEAD on the
-branch for issue #<N>." It follows the same rules: at most two rounds, round 2 only for MUST FIX items, no code
-changes after its final review. Add its replies to the PR's `## Review` under `### Follow-up review`. A rebase
-with no conflicts changes no code of yours and needs no review.
+checks pass, then start a fresh reviewer as in round 1 (a new session id, the same model check after each wait)
+with this prompt. A fresh reviewer knows nothing of
+earlier reviews, so copy the findings in word for word:
+
+"You are the REVIEWER. Follow documentation/agents/reviewer.md. Targeted follow-up review: review only
+<last reviewed commit>..HEAD on the branch for issue #<N>. Why these changes: <the human's request, the CI
+failure or the conflict>. Previous MUST FIX findings these commits address: <each finding as the reviewer wrote
+it, or none>."
+
+It follows the same rules: at most two rounds, round 2 only when its round 1 had MUST FIX items or you chose to
+apply a NICE TO HAVE, no code changes after its final review. Add its replies to the PR's `## Review` under
+`### Follow-up review`. A rebase with no conflicts changes no code of yours and needs no review.
 
 Shut the reviewer down as soon as you're done with it (`hc kill review-<N>; hc rm review-<N>`), then go to step 5.
