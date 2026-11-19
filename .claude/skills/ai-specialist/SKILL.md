@@ -80,7 +80,7 @@ LOOKS GOOD
 5. Commit as in `documentation/agents/workflow.md` (Git): `docs: <English summary>`, no signature lines.
 6. **Review round, only when the user asks for one.** One round, no second. Start the reviewer as in round 1 of
    section 6 of `documentation/agents/roles.md`, with these changes: name `review-docs`, `--cwd` this checkout,
-   and the prompt "You are the REVIEWER. Follow section 5 of documentation/agents/roles.md. There is no issue:
+   and the prompt "You are the REVIEWER. Follow sections 5 and 7 of documentation/agents/roles.md. There is no issue:
    review the branch <branch>. Goal: <one line from the user's request>. Check that the changed docs agree with
    each other and with the code they describe." Wait and read its reply as section 6 says. Section 1 of roles.md
    applies: if the agent shows `status: null`, the `hc` server was started from Claude; ask the user to run

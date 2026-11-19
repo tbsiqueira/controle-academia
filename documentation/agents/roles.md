@@ -19,7 +19,7 @@ Every agent that uses `hc` runs `hc --skill` once at the start of its session an
 and, on a local computer, creates the worktree (section 3, steps 1–2), then gives the human this prompt to paste
 into a new chat opened in that worktree (in a cloud session the new chat has its own checkout: the developer
 creates the branch itself as in [workflow.md](workflow.md#git)):
-"You are the DEVELOPER. Follow sections 1, 4, 6 and 7 of documentation/agents/roles.md. Issue #<N>; the plan is
+"You are the DEVELOPER. Follow sections 1, 4 and 7 of documentation/agents/roles.md. Issue #<N>; the plan is
 the latest plan comment on it. No `hc` on this machine." The developer skips step 4 (no review rounds) and the PR's
 `## Review` section says "Skipped: no `hc` on this machine." The planner also skips the design review (section 8)
 and the plan says so. When the developer challenges a decision (section 4, step 1), the human answers in that chat;
@@ -69,7 +69,7 @@ The human starts the planner with `/planner` in any Claude Code chat (app or CLI
 whenever they want:
 
 ```bash
-hc run --bg --name planner claude --model opus "You are the PLANNER. Follow documentation/agents/roles.md."
+hc run --bg --name planner claude --model opus "You are the PLANNER. Follow sections 1-3, 7 and 8 of documentation/agents/roles.md."
 hc send planner "plan issue #12"
 hc attach planner
 ```
@@ -255,7 +255,7 @@ hc run --bg --name review-<N> --cwd <full path of this worktree> claude \
   --permission-mode dontAsk \
   "--allowedTools=Read Glob Grep Bash(git diff) Bash(git diff *) Bash(git log *) Bash(git show *) Bash(git status *) Bash(gh issue view *)" \
   "--disallowedTools=Edit Write NotebookEdit" \
-  "You are the REVIEWER. Follow section 5 of documentation/agents/roles.md. Review the branch for issue #<N>."
+  "You are the REVIEWER. Follow sections 5 and 7 of documentation/agents/roles.md. Review the branch for issue #<N>."
 hc wait review-<N> --timeout 90   # repeat while it returns reason: timeout
 hc read --lines 120 review-<N>
 ```
@@ -310,7 +310,7 @@ the module split. Not for small issues (a plain bug, a mechanical refactor step,
      --permission-mode dontAsk \
      "--allowedTools=Read Glob Grep Bash(git log *) Bash(git show *) Bash(git diff *) Bash(gh issue view *)" \
      "--disallowedTools=Edit Write NotebookEdit" \
-     "You are the DESIGN REVIEWER. Follow section 8 of documentation/agents/roles.md. Review the draft plan on issue #<N>."
+     "You are the DESIGN REVIEWER. Follow section 7 and \"The DESIGN REVIEWER\" in section 8 of documentation/agents/roles.md. Review the draft plan on issue #<N>."
    ```
 
    If DeepSeek fails to start or errors, run the same command without `--settings` and with `--model sonnet`.

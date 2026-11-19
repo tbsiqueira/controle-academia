@@ -1,8 +1,9 @@
 # History, decisions and lessons
 
 The detailed log is in [`PLANO.md`](../PLANO.md) (section "Histórico de revisões") and `git log`. This page keeps what a future
-agent should know before touching the same area. Rules that came out of them live in
-[architecture.md](architecture.md) and [product-rules.md](product-rules.md); they are not repeated here.
+agent should know before touching the same area. Rules that came out of them live in the
+docs they point to ([architecture.md](architecture.md), [product-rules.md](product-rules.md),
+[workflow.md](workflow.md)); they are not repeated here.
 
 ## Decisions worth keeping
 

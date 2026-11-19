@@ -91,8 +91,9 @@ On localhost the service worker doesn't hold stale files, so edits show without 
 - **Sync before you start.** Cloud sessions also merge PRs, so the local copy goes stale. On `main`, run
   `git fetch origin` and `git pull --ff-only origin main` before creating a branch/worktree. If it can't
   fast-forward or there are uncommitted changes, stop and ask; never reset `main` or force anything onto it.
-- **Before pushing**: `git fetch origin` + `git rebase origin/main`, run the checks in
-  [AGENTS.md](../../AGENTS.md#non-negotiables) #4, then
+- **Before pushing**: `git fetch origin` + `git rebase origin/main`, then run the checks in
+  [AGENTS.md](../../AGENTS.md#non-negotiables) #4 if the rebase brought in new commits or nothing has passed them
+  since your last change (otherwise the last green run still counts), then
   `git push -u origin <branch>` (after a rebase of an already-pushed branch: `--force-with-lease`, only on your
   own branch). Open the PR with `gh pr create --base main` (title = the commit message for one-commit PRs).
 - **PR linked to an issue → reference it in the description**, so any agent picking up the PR can open the issue
