@@ -2,8 +2,23 @@
 
 How agents split the work on GitHub issues. The PLANNER and DEVELOPER read this file, then their own
 ([planner.md](planner.md), [developer.md](developer.md)); the REVIEWER and DESIGN REVIEWER read only theirs
-([reviewer.md](reviewer.md), [design-reviewer.md](design-reviewer.md)). The reviewer and the design reviewer run on DeepSeek (setup in
-[deepseek-setup.md](deepseek-setup.md)). Only the human merges.
+([reviewer.md](reviewer.md), [design-reviewer.md](design-reviewer.md)). Only the human merges.
+
+## Models
+
+Sonnet builds, Opus challenges.
+
+| Role | Model | Started by |
+|---|---|---|
+| PLANNER | Sonnet | The human: `/planner` in a chat set to Sonnet, or `hc run` below. Opus only when the human asks for it, for an exceptional architectural decision. |
+| DEVELOPER | Sonnet | The planner ([planner.md](planner.md), "On go") |
+| REVIEWER | Opus (Anthropic), whenever agent review is available | The developer ([developer.md](developer.md#review-rounds)); never swapped for another model without the human's OK. Without `hc` there is no agent review ([Tools](#tools)). |
+| DESIGN REVIEWER (optional) | DeepSeek Flash | The planner ([planner.md](planner.md#design-review)); setup in [deepseek-setup.md](deepseek-setup.md) |
+
+**Cost.** Since 2026-11-19 the REVIEWER runs on Opus instead of DeepSeek Flash, so each review costs more than it
+did; planning and building moved from Opus to Sonnet. Whether the flow costs less overall is measured over
+complete issues (the usage of whole issues before and after), never assumed from per-model prices. No automatic
+model switching: a model changes only when this table changes.
 
 ## Tools
 
@@ -31,7 +46,7 @@ the developer edits the plan comment to match and carries on.
 of the `hc` server, not of the command that ran `hc run`. Any `hc` command starts the server when it isn't
 running; if that command came from a Claude session (the desktop app or an agent), the server keeps Claude's
 `ANTHROPIC_*`/`CLAUDE_CODE_*` variables and every agent breaks: `hc` never sees its status (`status: null`, so
-`hc wait` only returns on timeout), the DeepSeek reviewer sends the Claude login to DeepSeek (401, "issue with the
+`hc wait` only returns on timeout), the DeepSeek design reviewer sends the Claude login to DeepSeek (401, "issue with the
 selected model") and transcripts are not saved. So the human runs `hc server restart` in a normal terminal
 (Windows Terminal, not one opened from Claude) before using the flow. An agent that shows `status: null` after
 starting, or the warning "Transcript saving is off", means the server was started from Claude: stop and ask the
@@ -50,11 +65,14 @@ the agent starts with an empty prompt. Keep the prompt as the last argument.
 **Waiting on another agent.** `hc wait <name>` returns the moment the agent stops working (done, `blocked`,
 `error` or exit); `--timeout` is only a cap, and `reason: timeout` just means "still working": wait again.
 
-- **Long waits (the planner waiting for a developer):** one **background** command,
-  `hc wait <name> --timeout 3600`. Background commands have no 2-minute limit and you are woken only when it
-  ends, so you hear back as soon as the agent stops, without spending a turn every few minutes.
-- **Short waits in the foreground (the developer waiting for a review):** `hc wait <name> --timeout 90`, under
-  the 2-minute limit Claude Code puts on a shell command; repeat on timeout.
+- **How to wait:** run `hc wait <name> --timeout <seconds>` as a Claude Code **background command**: the shell
+  tool (Bash or PowerShell) called with `run_in_background: true`. Don't use `&`, `nohup` or `Start-Process`:
+  they detach the command from Claude Code, so nothing wakes you when it ends. Claude Code wakes you when the
+  command exits; until then, don't read its output and don't run `hc get` in a loop. Then `hc read` the agent.
+  On `reason: timeout` the agent is still working: start the background wait again.
+  Timeouts: 3600 when the planner waits for a developer, 1800 for a review, 600 for a design review.
+- **Fallback, only when background commands are refused or unavailable:** `hc wait <name> --timeout 90` in the
+  foreground (under Claude Code's 2-minute limit on a shell command); repeat it on timeout.
 
 `hc get <name>` shows its status: `working`, `done`, `blocked` (it needs a person: read its screen), `error`.
 Never sleep or poll in a loop of your own.
@@ -71,7 +89,7 @@ The human starts the planner with `/planner` in any Claude Code chat (app or CLI
 whenever they want:
 
 ```bash
-hc run --bg --name planner claude --model opus "You are the PLANNER. Follow documentation/agents/roles.md and documentation/agents/planner.md."
+hc run --bg --name planner claude --model sonnet "You are the PLANNER. Follow documentation/agents/roles.md and documentation/agents/planner.md."
 hc send planner "plan issue #12"
 hc attach planner
 ```

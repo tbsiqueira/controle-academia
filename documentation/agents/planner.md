@@ -53,7 +53,7 @@ Only do these when asked; show the human what you'll create or change first when
    full path.
 
    ```bash
-   hc run --bg --name dev-<N> --outlive-parent --cwd <full path of ../Academia-<N>> claude --model opus \
+   hc run --bg --name dev-<N> --outlive-parent --cwd <full path of ../Academia-<N>> claude --model sonnet \
      --permission-mode dontAsk \
      "--allowedTools=Read Edit Write Glob Grep Bash(node *) Bash(COVERAGE_ENFORCE=1 node *) Bash(npm *) Bash(npx *) Bash(git *) Bash(gh *) Bash(hc *) Bash(powershell *)" \
      "You are the DEVELOPER. Follow documentation/agents/roles.md and documentation/agents/developer.md. Issue #<N>; the plan is the latest plan comment on it."
@@ -121,7 +121,12 @@ the module split. Not for small issues (a plain bug, a mechanical refactor step,
      "You are the DESIGN REVIEWER. Follow documentation/agents/design-reviewer.md. Review the draft plan on issue #<N>."
    ```
 
-   If DeepSeek fails to start or errors, run the same command without `--settings` and with `--model sonnet`.
+   If DeepSeek fails to start or errors, don't run it on another model: `hc kill design-<N>; hc rm design-<N>`,
+   finish the plan without it (step 4: remove the `Draft` line; "Design review: not run (DeepSeek failed:
+   <error>)") and say so in your report.
+   For an exceptional architectural decision (data format, module split), the human may ask for this review on
+   Opus instead: the same command without `--settings` and with `--model opus`. Suggest it in your report when it
+   fits; never pick it alone.
    `status: null` after it starts: see [roles.md](roles.md#tools).
 3. Wait with one **background** `hc wait design-<N> --timeout 600` ([roles.md](roles.md#tools)); on `reason: timeout` it is still
    working, so start the wait again. Once it returns `done`, `hc read --lines 120 design-<N>`.
