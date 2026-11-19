@@ -9,7 +9,7 @@ How agents split the work on GitHub issues. The reviewer and the design reviewer
 |---|---|
 | **GitHub issues** | The work. One issue = one branch = one PR. Read with `gh issue view <N> --comments`. |
 | **Tracker issue** | Optional order: an issue whose checklist lists issues to do, top to bottom; ticked = done. The human names it when they want one used ("pick the next issue from #T"). |
-| **Plan comment** | The steps for one issue: a `- [ ]` checklist the planner posts on the issue and the developer ticks. |
+| **Plan comment** | The plan for one issue, posted by the planner: what and why, "Technical context and decisions", a "Design review:" line, and the steps as a `- [ ]` checklist the developer ticks (section 3). |
 | **Label `em andamento`** | The issue has a developer working on it. |
 | **herdr (`hc`)** | Starting and talking to other agents. Names: `planner`, `dev-<N>`, `review-<N>`, `design-<N>`. |
 
@@ -180,7 +180,7 @@ Works in the worktree of one issue, on its branch. Never two developers on the s
    so in the hand-back** (what, why, what you'd do instead). Don't build it, and don't silently take a different
    route. The same applies when a later step shows that a decision is wrong. Challenging a decision is expected and
    welcome, not a failure: the plan was written before anyone touched the code. The planner takes it to the human,
-   updates the plan comment once they decide, and tells you to continue.
+   updates the plan comment once they decide, and tells you to continue (without `hc`: see section 1).
 2. **For each unticked step**, top to bottom:
    1. Build it. Keep the change small and focused on this step.
    2. Check it, every step, all three:
@@ -299,7 +299,8 @@ the module split. Not for small issues (a plain bug, a mechanical refactor step,
 
 **Flow.**
 
-1. Post the plan comment as usual (section 3, "Plan it"), with `Draft: design review pending` as its first line.
+1. Post the plan comment as usual (section 3, "Plan it"), with `Draft: design review pending` as its first line
+   and `Design review: pending` as its "Design review" line.
    The design reviewer reads it from the issue: no draft in the prompt, no temp file.
 2. Start the design reviewer from the planner's checkout (no `-p`, read-only):
 
