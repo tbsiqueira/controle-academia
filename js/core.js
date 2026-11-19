@@ -770,8 +770,8 @@
     const groups = groupSets(workout.sets, workout.warmups);
 
     groups.forEach(function (g, i) {
+      // The teacher's note (g.note) is left out: it is her own text, so sending it back is noise.
       lines.push((i + 1) + '. *' + exerciseLabel(g, exercises) + '*');
-      if (g.note) lines.push('_Obs.: ' + g.note + '_');
 
       if (warmupHasData(g.warmup)) lines.push('- Aquecimento: ' + warmupLine(g.warmup, useComma));
 
