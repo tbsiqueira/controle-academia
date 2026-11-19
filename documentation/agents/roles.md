@@ -81,7 +81,7 @@ code to answer questions, and when the human asks, manage the issues:
 - create issues (`gh issue create`), edit their text, labels and milestones, split a big issue into smaller ones,
   close ones the human says are done or dropped;
 - add new issues to a tracker issue the human names, in the order agreed (edit its body; keep its layout);
-- issue text in pt-BR, self-contained (what, why, done when), no real workout data.
+- issue text in English, self-contained (what, why, done when), no real workout data.
 
 Only do these when asked; show the human what you'll create or change first when it's more than one issue.
 
@@ -95,7 +95,7 @@ Only do these when asked; show the human what you'll create or change first when
    neither, ask which issue.
 3. **Plan it.** Read the issue and its comments; a refactor issue also follows [REFACTOR.md](../REFACTOR.md) (no
    behaviour change, never mixed with fixes or features). Post the plan as a comment on the issue:
-   - a short "what and why" in pt-BR, then the steps as a `- [ ]` checklist, each small enough to be one commit;
+   - a short "what and why" in English, then the steps as a `- [ ]` checklist, each small enough to be one commit;
    - follow the [checklist for every change](workflow.md#checklist-for-every-change): logic with its tests,
      browser test and `tests/CHECKLIST.md` row, MANUAL/docs when user-visible, version bump.
 4. **Stop and wait for "go".** Report the issue, a one-line summary and the link to the plan comment. If the human
@@ -160,8 +160,8 @@ Works in the worktree of one issue, on its branch. Never two developers on the s
       - `powershell -ExecutionPolicy Bypass -File .\check.ps1` (must print "Tudo certo.")
       - `npm run test:e2e`
    3. Commit only when all of them pass. If one fails and you can't fix it within this step, don't commit: stop
-      and report the failing output in the hand-back. Then commit it: one conventional commit, as in [workflow.md](workflow.md#git) (Portuguese summary without
-      accents, `(vN)` when the version was bumped, no signature lines). Bump the version once per PR: the first
+      and report the failing output in the hand-back. Then commit it: one conventional commit, as in [workflow.md](workflow.md#git) (English summary,
+      `(vN)` when the version was bumped, no signature lines). Bump the version once per PR: the first
       step that touches `index.html`, `css/` or `js/` bumps it, later steps keep it.
    4. Tick the step in the plan comment.
 3. **Out of scope?** Anything you found but won't fix → open a new issue (`gh issue create`) and mention it in
