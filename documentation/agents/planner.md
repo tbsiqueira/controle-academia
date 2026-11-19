@@ -63,15 +63,16 @@ Only do these when asked; show the human what you'll create or change first when
 5. **Follow the developer and tell the human.** Run `hc wait dev-<N> --timeout 3600` as one background command
    ([roles.md](roles.md#tools)), so the chat stays free and you wake only when the developer stops (done, `blocked`, `error`);
    on `reason: timeout`, start it again. If the background command is refused or isn't supported, fall back to
-   `--timeout 90` in the foreground. Each time the wait returns, first run the model check on the developer's id
+   `--timeout 90` in the foreground. Each time the wait returns a terminal result (`done`, `blocked`, `error` or
+   exit; never on `reason: timeout`), first run the model check on the developer's id
    with prefix `claude-sonnet-` ([roles.md](roles.md#checking-an-agents-model)); on `FAIL`, don't use or relay
    its hand-back: report the `FAIL` line and stop. Then read its hand-back (`hc read --lines 200 dev-<N>`) and
    report in the chat:
    - PR opened → the PR link, a two-line summary of what changed, the review's MUST FIX items and what happened
      to them, new issues opened. Remind the human that merging is theirs, and to tell you once the PR is merged
      or closed so you can clean up. End with the models, labelled as in roles.md: `Models: planner <model>
-     (system-prompt-reported); design reviewer <model> (transcript-verified) | skipped: <why> | failed: <FAIL
-     line>; developer <model> (transcript-verified); reviewer <model per review cycle> (transcript-verified, from
+     (system-prompt-reported in a `/planner` chat; transcript-verified when started with `hc`); design reviewer
+     <model> (transcript-verified) | skipped: <why> | failed: <FAIL line>; developer <model> (transcript-verified); reviewer <model per review cycle> (transcript-verified, from
      the developer's hand-back) | skipped: <why> | failed: <FAIL line>.`
    - Stopped without a PR → why (failing check with its output, refused command, open question, a challenged
      decision: what, why and what the developer would do instead) and what the human needs to decide, then the
@@ -137,7 +138,8 @@ the module split. Not for small issues (a plain bug, a mechanical refactor step,
    Suggest it in your report when it fits; never pick it alone.
    `status: null` after it starts: see [roles.md](roles.md#tools).
 3. Wait with one **background** `hc wait design-<N> --timeout 600` ([roles.md](roles.md#tools)); on `reason: timeout` it is still
-   working, so start the wait again. Once it returns `done`, run the model check on its id with prefix
+   working, so start the wait again (no model check). Once it returns a terminal result (`done`, `blocked`,
+   `error` or exit), run the model check on its id with prefix
    `deepseek-flash` ([roles.md](roles.md#checking-an-agents-model)), then `hc read --lines 120 design-<N>`.
 4. Weigh each point: fold in what you accept (decisions, risks, steps). Then edit the same comment into the final
    plan: remove the `Draft` line and replace the "Design review" line with what happened, e.g. "Design review: done

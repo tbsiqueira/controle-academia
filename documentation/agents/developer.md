@@ -78,8 +78,9 @@ hc run --bg --name review-<N> --cwd <full path of this worktree> claude \
   "--allowedTools=Read Glob Grep Bash(git diff) Bash(git diff *) Bash(git log *) Bash(git show *) Bash(git status *) Bash(gh issue view *)" \
   "--disallowedTools=Edit Write NotebookEdit" \
   "You are the REVIEWER. Follow documentation/agents/reviewer.md. Review the branch for issue #<N>."
-hc wait review-<N> --timeout 1800   # background command (roles.md#tools); on reason: timeout, wait again
-# then the model check on <id> with prefix claude-opus- (roles.md#checking-an-agents-model), before reading
+hc wait review-<N> --timeout 1800   # background command (roles.md#tools); on reason: timeout, just wait again
+# on a terminal result (done, blocked, error, exit): the model check on <id> with prefix claude-opus-
+# (roles.md#checking-an-agents-model), then read
 hc read --lines 120 review-<N>
 ```
 
@@ -111,14 +112,14 @@ it alone: report it to the human in the hand-back and at the top of the PR's `##
 
 **Code changes after the final review** (a MUST FIX the human tells you to fix, a CI failure, a conflict you
 resolve by hand) get a **separate, targeted review cycle**, not a third round of the one above: commit after the
-checks pass, then start a fresh reviewer as in round 1 (a new session id, the same model check after each wait)
-with this prompt. A fresh reviewer knows nothing of
-earlier reviews, so copy the findings in word for word:
+checks pass, then start a fresh reviewer as in round 1 (a new session id, the same model check after each
+terminal wait result) with this prompt. A fresh reviewer knows nothing of earlier reviews, so copy the findings
+in word for word:
 
 "You are the REVIEWER. Follow documentation/agents/reviewer.md. Targeted follow-up review: review only
 <last reviewed commit>..HEAD on the branch for issue #<N>. Why these changes: <the human's request, the CI
-failure or the conflict>. Previous MUST FIX findings these commits address: <each finding as the reviewer wrote
-it, or none>."
+failure or the conflict>. Previous findings these commits address, MUST FIX and NICE TO HAVE: <each finding as
+the reviewer wrote it, labelled MUST FIX or NICE TO HAVE, or none>."
 
 It follows the same rules: at most two rounds, round 2 only when its round 1 had MUST FIX items or you chose to
 apply a NICE TO HAVE, no code changes after its final review. Add its replies to the PR's `## Review` under

@@ -10,7 +10,7 @@ Sonnet builds, Opus challenges.
 
 | Role | Model | Launch flags (always explicit) | Accepted model prefix | Started by |
 |---|---|---|---|---|
-| PLANNER | Sonnet | Chat: none; the chat must already be on Sonnet (`/planner` doesn't switch the model). `hc`: `--model sonnet`, no `--settings`. | `claude-sonnet-` (system-prompt-reported) | The human: `/planner` in a chat, or `hc run` below. Opus only when the human asks for it, for an exceptional architectural decision. |
+| PLANNER | Sonnet | Chat: none; the chat must already be on Sonnet (`/planner` doesn't switch the model). `hc`: `--model sonnet --session-id <id>`, no `--settings`. | `claude-sonnet-` (chat: system-prompt-reported; `hc`: transcript-verified) | The human: `/planner` in a chat, or `hc run` below. Opus only when the human asks for it, for an exceptional architectural decision. |
 | DEVELOPER | Sonnet | `--model sonnet --session-id <id>`, no `--settings` (Anthropic) | `claude-sonnet-` | The planner ([planner.md](planner.md), "On go") |
 | REVIEWER | Opus (Anthropic), whenever agent review is available | `--model opus --session-id <id>`, no `--settings` | `claude-opus-` | The developer ([developer.md](developer.md#review-rounds)); never swapped for another model without the human's OK, and never for DeepSeek. Without `hc` there is no agent review ([Tools](#tools)). |
 | DESIGN REVIEWER (optional) | DeepSeek Flash | `--settings ~/.claude/providers/deepseek.json --model "deepseek-flash[1m]" --session-id <id>` | `deepseek-flash` | The planner ([planner.md](planner.md#design-review)); setup in [deepseek-setup.md](deepseek-setup.md) |
@@ -29,8 +29,10 @@ agent is **transcript-verified**:
 
 1. Before `hc run`, make a session id: `node -e "console.log(crypto.randomUUID())"`. Pass it as
    `--session-id <id>` and keep it for the report.
-2. When an `hc wait` on that agent returns (only the waits named in the role files; no extra wait or poll),
-   run the check **before** you use its output. It works as is in Bash and in Windows PowerShell:
+2. When an `hc wait` on that agent returns a **terminal result** (`done`, `blocked`, `error` or exit; only the
+   waits named in the role files, no extra wait or poll), run the check **before** you use its output. Never
+   on `reason: timeout`: the agent is still working, so just start another background wait. The check works as
+   is in Bash and in Windows PowerShell:
 
    ```bash
    node -e "const fs=require('fs'),p=require('path'),[id,want]=process.argv.slice(1),r=p.join(require('os').homedir(),'.claude','projects');let f;try{f=fs.readdirSync(r).map(d=>p.join(r,d,id+'.jsonl')).find(x=>fs.existsSync(x))}catch(e){}if(f===undefined){console.log('FAIL: no transcript '+id+'.jsonl under '+r);process.exit(1)}const m=new Set();for(const l of fs.readFileSync(f,'utf8').split('\n')){try{const j=JSON.parse(l);if(j.type==='assistant'&&j.message&&j.message.model)m.add(j.message.model)}catch(e){}}const all=[...m],ok=all.filter(x=>x.startsWith(want)),bad=all.filter(x=>(x.startsWith(want)||x==='<synthetic>')===false);if(bad.length){console.log('FAIL: unexpected model(s) '+bad.join(', ')+'; expected '+want+'*');process.exit(1)}if(ok.length===0){console.log('FAIL: no model answered'+(all.length?' (only <synthetic>, a Claude Code error)':''));process.exit(1)}console.log('OK transcript-verified: '+ok.join(', '))" <id> <accepted prefix>
@@ -51,8 +53,9 @@ agent is **transcript-verified**:
   provider says served the agent, not only what was asked for. It can't prove what a third-party provider ran
   behind that name.
 - **system-prompt-reported**: the model the agent's system prompt names (Claude Code states it there). This is
-  only what Claude Code requested. It's the only check for the PLANNER (a `/planner` chat or an `hc` planner
-  has no session id to pass) and the developer's early self-check.
+  only what Claude Code requested. It's the only check for a `/planner` chat (this workflow has no session id
+  for it) and the developer's early self-check. A planner started with `hc` has a session id and is
+  transcript-verified like the other launched agents.
 
 ## Tools
 
@@ -120,10 +123,14 @@ round on its own docs branch, before opening the PR, and only when the human ask
 
 The human starts the planner with `/planner` in any Claude Code chat (app or CLI), e.g.
 `/planner plan issue #12` or `/planner pick the next issue from #7`. Or as a background agent they can talk to
-whenever they want:
+whenever they want, with a new session id ([Checking an agent's model](#checking-an-agents-model)):
 
 ```bash
-hc run --bg --name planner claude --model sonnet "You are the PLANNER. Follow documentation/agents/roles.md and documentation/agents/planner.md."
+hc run --bg --name planner claude --model sonnet --session-id <id> "You are the PLANNER. Follow documentation/agents/roles.md and documentation/agents/planner.md. Your session id is <id>."
 hc send planner "plan issue #12"
+hc wait planner --timeout 600   # on reason: timeout, wait again; on a terminal result, run the model check on <id> with prefix claude-sonnet-
 hc attach planner
 ```
+
+On `FAIL`, don't use what it posted: `hc kill planner; hc rm planner`. The planner itself runs the same check on
+its own id before each report and labels itself transcript-verified (or reports the `FAIL` line and stops).
