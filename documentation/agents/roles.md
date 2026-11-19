@@ -135,10 +135,11 @@ Only do these when asked; show the human what you'll create or change first when
    - PR opened → the PR link, a two-line summary of what changed, the review's MUST FIX items and what happened
      to them, new issues opened. Remind the human that merging is theirs, and to tell you once the PR is merged
      or closed so you can clean up.
-   - Stopped without a PR → why (failing check with its output, refused command, open question) and what the
-     human needs to decide.
-6. **Relay the human's answer.** When the human answers a stopped developer in the chat, pass it on as they said
-   it with `hc send dev-<N> "<their answer>"` and go back to step 5. The developer keeps its context (it was
+   - Stopped without a PR → why (failing check with its output, refused command, open question, a challenged
+     decision: what, why and what the developer would do instead) and what the human needs to decide.
+6. **Relay the human's answer.** When the human answers a stopped developer in the chat, and the answer changes
+   the plan (a challenged decision, a new or changed step), first edit the plan comment to match. Then pass the
+   answer on as they said it with `hc send dev-<N> "<their answer>"` and go back to step 5. The developer keeps its context (it was
    started without `-p`). The human can also talk to it directly with `hc attach dev-<N>` (ctrl+\ detaches) or
    take over the worktree; then wait until they say it's back in the developer's hands.
 7. **After the PR is open.** If its CI fails or GitHub asks for the branch to be updated, report it to the human;
@@ -164,9 +165,15 @@ issue left behind. Run `gh pr view <M> --json state` first: never clean up a PR 
 
 Works in the worktree of one issue, on its branch. Never two developers on the same issue.
 
-1. **Read** the issue and its plan comment. With no worktree (a cloud session without `hc`), first create the
-   branch from the latest `origin/main` as in [workflow.md](workflow.md#git). In a fresh worktree or checkout, run
-   `npm ci` once (no `node_modules/` yet; the Playwright browser is already installed per machine).
+1. **Read and check the decisions.** Read the issue and its plan comment. With no worktree (a cloud session
+   without `hc`), first create the branch from the latest `origin/main` as in [workflow.md](workflow.md#git). In a
+   fresh worktree or checkout, run `npm ci` once (no `node_modules/` yet; the Playwright browser is already
+   installed per machine). Then check the plan's "Technical context and decisions" against the actual code before
+   building anything. If a decision looks wrong, something must happen first, or a step is missing: **stop and say
+   so in the hand-back** (what, why, what you'd do instead). Don't build it, and don't silently take a different
+   route. The same applies when a later step shows that a decision is wrong. Challenging a decision is expected and
+   welcome, not a failure: the plan was written before anyone touched the code. The planner takes it to the human,
+   updates the plan comment once they decide, and tells you to continue.
 2. **For each unticked step**, top to bottom:
    1. Build it. Keep the change small and focused on this step.
    2. Check it, every step, all three:
