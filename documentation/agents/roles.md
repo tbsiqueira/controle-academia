@@ -15,7 +15,7 @@ How agents split the work on GitHub issues. The PLANNER and DEVELOPER read this 
 | **Label `em andamento`** | The issue has a developer working on it. |
 | **herdr (`hc`)** | Starting and talking to other agents. Names: `planner`, `dev-<N>`, `review-<N>`, `design-<N>`, `review-docs` (AI SPECIALIST). |
 
-Every agent that uses `hc` runs `hc --skill` once at the start of its session and checks the `hc` commands in this file against it.
+Every agent that uses `hc` runs `hc --skill` once at the start of its session and checks the `hc` commands in this file and in its role file against it.
 
 **Without `hc`** (cloud sessions, other computers) nobody starts agents. On "go" the planner still adds the label
 and, on a local computer, creates the worktree ([planner.md](planner.md), "On go", steps 1–2), then gives the human this prompt to paste
