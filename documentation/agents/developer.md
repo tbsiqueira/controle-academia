@@ -39,7 +39,9 @@ Works in the worktree of one issue, on its branch. Never two developers on the s
       `gh issue comment --edit-last`: it edits your own last comment, which may not be the plan.
 3. **Out of scope?** Anything you found but won't fix → open a new issue (`gh issue create`) and mention it in
    the PR. Don't silently expand scope.
-4. **Review**: do the two rounds in [Review rounds](#review-rounds) below (skip them without `hc`, see
+4. **Review**: first check the whole branch (`git diff origin/main...HEAD`): every behaviour it adds, changes or
+   removes has its test written or updated, and its `tests/CHECKLIST.md` row. Add what's missing in its own
+   commit after the checks pass. Then do the two rounds in [Review rounds](#review-rounds) below (skip them without `hc`, see
    [roles.md](roles.md#tools)). Commit the fixes (a
    conventional message saying what was fixed) after the same checks pass. No fixes → no new check run.
 5. **Open the PR and hand back:**
