@@ -85,10 +85,12 @@ hc read --lines 120 review-<N>
 ```
 
 **Opus fails** (it doesn't start, `hc get` shows `error`, the reply is an API error instead of a review, or the
-model check prints `FAIL`):
-`hc kill review-<N>; hc rm review-<N>` and start it once more. If it fails again, don't review with another
-model and don't push: stop and report the error in the hand-back. The human decides: retry later, or a review by
-another Anthropic model (never DeepSeek), which the PR's `## Review` then names as the fallback.
+model check prints `FAIL`): never use that first output. `hc kill review-<N>; hc rm review-<N>` and retry
+**once, on Opus again**, with a new session id; this single retry is the only exception to the fail-closed rule in
+[roles.md](roles.md#checking-an-agents-model). If the retry also fails, don't review with another model and don't
+push: stop and report both errors (or `FAIL` lines) in the hand-back. The human decides: retry later, or a review
+by another Anthropic model (never DeepSeek), which the PR's `## Review` then names as the fallback. A different
+model is never chosen automatically.
 
 Copy the reply now for the PR (round 2 scrolls it out of `hc read`). Then:
 

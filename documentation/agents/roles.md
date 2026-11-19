@@ -46,7 +46,8 @@ agent is **transcript-verified**:
    - `FAIL: …` (exit 1): an unexpected model, no transcript (transcript saving is off: see the `hc` server
      rule below) or no model answered (only `<synthetic>`). **Fail closed:** `hc kill <name>; hc rm <name>`,
      don't use its output, don't start it again on another model; stop and report the `FAIL` line. The human
-     decides.
+     decides. One exception: a REVIEWER may be retried once, on Opus again with a new session id
+     ([developer.md](developer.md#review-rounds), "Opus fails"); if that retry also fails, stop and report.
 
 **Verification strength.** Reports label each model:
 - **transcript-verified**: the check above passed. It shows the model name in each API reply, i.e. what the
