@@ -67,8 +67,12 @@ jobs:
       - name: Instalar ferramentas (package-lock.json)
         run: npm ci
 
+      # No --with-deps: it runs apt-get for Chromium's Linux libraries, and slow Ubuntu mirrors made that take
+      # 4-6 minutes. The ubuntu-latest image already ships those libraries (it has Google Chrome preinstalled).
+      # If Playwright reports "Host system is missing dependencies", add only the packages it names
+      # (sudo apt-get install -y <pkg>), or move this job to the Playwright container image.
       - name: Instalar o Chromium do Playwright
-        run: npx playwright install --with-deps chromium
+        run: npx playwright install chromium
 
       - name: Rodar os testes de navegador
         run: npx playwright test
