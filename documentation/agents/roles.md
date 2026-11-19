@@ -1,8 +1,7 @@
 # Roles: planner, developer, reviewer
 
-How agents split the work on GitHub issues. Planner and developer run on Claude Code with Opus; the reviewer runs on
-Claude Code with a DeepSeek model (setup in [workflow.md](workflow.md#deepseek-reviewer-setup)). Only the human
-merges.
+How agents split the work on GitHub issues. The reviewer runs on DeepSeek (setup in
+[workflow.md](workflow.md#deepseek-reviewer-setup)). Only the human merges.
 
 > Check the `hc` commands below against `hc --skill` before relying on them.
 
@@ -17,8 +16,9 @@ merges.
 | **herdr (`hc`)** | Starting and talking to other agents. Names: `planner`, `dev-<N>`, `review-<N>`. |
 
 Run `hc --skill` once at the start of a session so you know the herdr commands. On a machine without `hc` (cloud
-sessions, other computers) nobody starts agents: the human starts the developer, the review rounds are skipped, and
-the hand-back says so.
+sessions, other computers) nobody starts agents: the human starts the developer in a new chat with the prompt
+"You are the DEVELOPER. Follow documentation/agents/roles.md. Issue #<N>; the plan is the latest plan comment on
+it." There are no review rounds: the PR's `## Review` section says "Skipped: no `hc` on this machine."
 
 **Start the `hc` server from a normal terminal, never from Claude.** Every agent `hc` starts gets the environment
 of the `hc` server, not of the command that ran `hc run`. Any `hc` command starts the server when it isn't
@@ -53,16 +53,9 @@ Never sleep or poll in a loop of your own.
 
 ## 2. Roles
 
-A session is the **PLANNER**, the **DEVELOPER** or the **REVIEWER** only when it was started with `/planner` or
-its prompt names the role. **If your prompt doesn't name a role, you have none:** answer questions and do what
-you're asked, under the normal rules (commit only when asked). Reading this file or asking about it doesn't give
-you a role.
-
-Never take a role you weren't given. Only the PLANNER and DEVELOPER may start other agents.
-
-There is one more role outside this workflow: the **AI SPECIALIST**, which reviews and improves the docs that govern
-the agents. The human starts it only with `/ai-specialist` in a chat; the planner and developer never start it and
-it has no `hc` name. Its rules are in [.claude/skills/ai-specialist/SKILL.md](../../.claude/skills/ai-specialist/SKILL.md).
+Who has a role, and who doesn't, is in [AGENTS.md](../../AGENTS.md#roles). Never take a role you weren't given.
+Only the PLANNER and DEVELOPER may start other agents. The AI SPECIALIST is outside this workflow (see
+[its SKILL.md](../../.claude/skills/ai-specialist/SKILL.md)).
 
 The human starts the planner with `/planner` in any Claude Code chat (app or CLI), e.g.
 `/planner plan issue #12` or `/planner pick the next issue from #7`. Or as a background agent they can talk to
@@ -125,8 +118,8 @@ Only do these when asked; show the human what you'll create or change first when
 4. Report: issue, branch, worktree path, `hc read dev-<N>` to follow it.
 5. **Follow the developer and tell the human.** Run `hc wait dev-<N> --timeout 3600` as one background command
    (section 1), so the chat stays free and you wake only when the developer stops (done, `blocked`, `error`);
-   on `reason: timeout`, start it again. Only without background commands, fall back to `--timeout 90` in the
-   foreground. When the developer finishes, read its hand-back (`hc read --lines
+   on `reason: timeout`, start it again. If the background command is refused or isn't supported, fall back to
+   `--timeout 90` in the foreground. When the developer finishes, read its hand-back (`hc read --lines
    200 dev-<N>`) and report in the chat:
    - PR opened → the PR link, a two-line summary of what changed, the review's MUST FIX items and what happened
      to them, new issues opened. Remind the human that merging is theirs, and to tell you once the PR is merged
@@ -137,12 +130,16 @@ Only do these when asked; show the human what you'll create or change first when
    it with `hc send dev-<N> "<their answer>"` and go back to step 5. The developer keeps its context (it was
    started without `-p`). The human can also talk to it directly with `hc attach dev-<N>` (ctrl+\ detaches) or
    take over the worktree; then wait until they say it's back in the developer's hands.
+7. **After the PR is open.** If its CI fails or GitHub asks for the branch to be updated, report it to the human;
+   on their word, `hc send dev-<N> "<what to fix, or: rebase on origin/main>"` and go back to step 5.
+
+**Developer abandoned.** When the human says to give up on a developer that stopped without a PR, run steps 1–4
+of "After a PR is merged or closed" (below), then ask about the issue as in its step 5.
 
 **After a PR is merged or closed.** When the human says PR #M (issue #N) was merged or closed, clean up what the
 issue left behind. Run `gh pr view <M> --json state` first: never clean up a PR that is still open.
 
-1. **Agents:** `hc kill dev-<N>; hc rm dev-<N>`, and the same for `review-<N>` if `hc ls` still lists it. An idle
-   agent costs nothing, but one woken hours later re-reads its whole conversation.
+1. **Agents:** `hc kill dev-<N>; hc rm dev-<N>`, and the same for `review-<N>` if `hc ls` still lists it.
 2. **Worktree:** `git -C <worktree> status --short` first. If it shows only `node_modules/` (or nothing),
    `git worktree remove --force <worktree>`. Anything else is unsaved work: stop and ask the human.
 3. **Branch:** `git branch -D <branch>`. A merged PR already deleted the branch on GitHub; after a PR closed
@@ -163,9 +160,9 @@ Works in the worktree of one issue, on its branch. Never two developers on the s
       - `node --test tests/` (or `node tools/coverage-gate.js` when `js/core.js` changed: coverage stays 100%)
       - `powershell -ExecutionPolicy Bypass -File .\check.ps1` (must print "Tudo certo.")
       - `npm run test:e2e`
-   3. Commit only when all of them pass. If one fails and you can't fix it within this step, don't commit: stop
-      and report the failing output in the hand-back. Then commit it: one conventional commit, as in [workflow.md](workflow.md#git) (English summary,
-      `(vN)` when the version was bumped, no signature lines). Bump the version once per PR: the first
+   3. All three pass → commit: one conventional commit, as in [workflow.md](workflow.md#git) (English summary,
+      `(vN)` when the version was bumped, no signature lines). One fails and you can't fix it within this step →
+      don't commit; stop and report the failing output in the hand-back. Bump the version once per PR: the first
       step that touches `index.html`, `css/` or `js/` bumps it, later steps keep it.
    4. Tick the step in the plan comment.
 3. **Out of scope?** Anything you found but won't fix → open a new issue (`gh issue create`) and mention it in
@@ -176,8 +173,8 @@ Works in the worktree of one issue, on its branch. Never two developers on the s
    - Run the full set once more: `node --test tests/`, `check.ps1`, `npm run test:e2e`.
    - `git fetch origin`, `git rebase origin/main`, `git push -u origin <branch>`, then `gh pr create --base main`.
      First line of the description: `Closes #<N>` (or `Refs #<N>` if the issue isn't finished). End the
-     description with a `## Revisão` section: the model that reviewed (DeepSeek or the Sonnet fallback), then
-     `### Rodada 1` and `### Rodada 2`, each with the reviewer's reply to that round as it came, in a code block,
+     description with a `## Review` section: the model that reviewed (DeepSeek or the Sonnet fallback), then
+     `### Round 1` and `### Round 2`, each with the reviewer's reply to that round as it came, in a code block,
      and under round 1 what you fixed; if the review was skipped, say so and why. Never turn on
      auto-merge and never merge: the human merges, and merging is what publishes.
    - Report: the PR link, what changed, what the reviewer found each round and what you didn't fix (and why), new
@@ -187,7 +184,8 @@ Works in the worktree of one issue, on its branch. Never two developers on the s
 
 - Only review. Do not edit files. Do not start other agents. Do not touch issues or PRs.
 - Look at everything the branch changes: `git diff origin/main...HEAD` plus uncommitted changes (`git diff`), the
-  issue and its plan comment (`gh issue view <N> --comments`).
+  issue and its plan comment (`gh issue view <N> --comments`). If a command is refused, say under LOOKS GOOD
+  what you couldn't check.
 - Check:
   - Does it do what the issue and the plan ask? Nothing more (no scope creep, no refactor mixed with a fix)?
   - Bugs, edge cases, missing tests. Logic belongs in `js/core.js` with tests; `js/app.js` only renders and wires
@@ -216,8 +214,7 @@ LOOKS GOOD
 
 ## 6. Review rounds (DEVELOPER runs these)
 
-One review per issue, after the last step and before the push. A large issue may also get one after a step that
-stands on its own.
+One review per issue, after the last step and before the push.
 
 **Round 1**: start the reviewer (no `-p`, so it stays open for round 2):
 
@@ -226,7 +223,7 @@ hc run --bg --name review-<N> claude \
   --settings ~/.claude/providers/deepseek.json \
   --model "deepseek-flash[1m]" \
   --permission-mode dontAsk \
-  "--allowedTools=Read Glob Grep Bash(git diff *) Bash(git log *) Bash(git show *) Bash(git status *) Bash(gh issue view *)" \
+  "--allowedTools=Read Glob Grep Bash(git diff) Bash(git diff *) Bash(git log *) Bash(git show *) Bash(git status *) Bash(gh issue view *)" \
   "--disallowedTools=Edit Write NotebookEdit" \
   "You are the REVIEWER. Follow section 5 of documentation/agents/roles.md. Review the branch for issue #<N>."
 hc wait review-<N> --timeout 90   # repeat while it returns reason: timeout
@@ -247,7 +244,7 @@ hc read --lines 120 review-<N>
 ```
 
 Fix what's left if it's small. Otherwise open a new issue for it. **Maximum 2 rounds.** Keep the reviewer's
-replies to both rounds for the PR's `## Revisão` section, then shut the reviewer down (`hc kill review-<N>; hc rm review-<N>`) and
+replies to both rounds for the PR's `## Review` section, then shut the reviewer down (`hc kill review-<N>; hc rm review-<N>`) and
 go to step 5 of the DEVELOPER.
 
 ## 7. Rules for everyone

@@ -11,6 +11,8 @@ their trainer (the "professora") and send her each workout as text. Everything m
 
 - **Never add sound or vibration**: no beeps, Web Audio, `<audio>`, speech, `navigator.vibrate`, not even as an
   opt-in setting. No pulsing or flashing either.
+- New visual changes (alerts included): show the user a mockup first (v57 shipped alternating card colours unasked
+  and was reverted).
 - Alerts are a plain, static visual change. Example: when rest is over, the timer stays orange at 0:00 until
   closed (it doesn't close itself).
 - Success messages are toasts that disappear on their own; errors are always visible (no silent failures).
