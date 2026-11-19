@@ -47,7 +47,10 @@ Only do these when asked; show the human what you'll create or change first when
 1. Add the label: `gh issue edit <N> --add-label "em andamento"`.
 2. Create the worktree from the latest `main` (branch name as in [workflow.md](workflow.md#git)):
    `git fetch origin` then `git worktree add ../Academia-<N> -b <prefix>/<short-kebab-summary> origin/main`.
-3. Start the developer **in that worktree**, with a new session id ([roles.md](roles.md#checking-an-agents-model)):
+3. Start the developer **in that worktree**, with a new session id ([roles.md](roles.md#checking-an-agents-model)).
+   **Before the first `hc run` of the session**, make sure the `hc` server was started from a normal terminal, not
+   from Claude ([roles.md](roles.md#tools)). If you don't know, ask the human to run `hc server restart` in
+   Windows Terminal first. `status: null` or "Transcript saving is off" after a start means it was started from Claude.
 
    `--outlive-parent` keeps the developer running if the planner's session ends; `--cwd` takes the worktree's
    full path.
@@ -55,7 +58,7 @@ Only do these when asked; show the human what you'll create or change first when
    ```bash
    hc run --bg --name dev-<N> --outlive-parent --cwd <full path of ../Academia-<N>> claude --model sonnet --session-id <id> \
      --permission-mode dontAsk \
-     "--allowedTools=Read Edit Write Glob Grep Bash(node *) Bash(COVERAGE_ENFORCE=1 node *) Bash(npm *) Bash(npx *) Bash(git *) Bash(gh *) Bash(hc *) Bash(powershell *)" \
+     "--allowedTools=Read Edit Write Glob Grep Bash(node *) Bash(COVERAGE_ENFORCE=1 node *) Bash(npm *) Bash(npx *) Bash(git *) Bash(gh *) Bash(hc *) Bash(powershell *) PowerShell(node *) PowerShell(npm *) PowerShell(git *) PowerShell(gh *) PowerShell(hc *) PowerShell(powershell *)" \
      "You are the DEVELOPER. Follow documentation/agents/roles.md and documentation/agents/developer.md. Issue #<N>; the plan is the latest plan comment on it."
    ```
 

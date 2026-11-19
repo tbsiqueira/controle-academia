@@ -96,6 +96,12 @@ allow-lists in [planner.md](planner.md) and [developer.md](developer.md). If one
 human answer. The exception is a planner started with `hc` (below): the human attaches to it and answers its
 prompts.
 
+**One simple command per shell call.** No `;`, `&&`, `|`, `2>&1` or heredocs: a chain is refused when any part
+of it isn't on the allow-list (on #57, `npm ci 2>&1 | tail -2; grep … | wc -l` was refused while each command
+alone worked). Use Grep and Read, not `grep`/`wc`/`tail`/`head`/`cat`. The Bash and PowerShell tools have separate
+allow entries (`Bash(…)` doesn't cover the PowerShell tool). Run the checks as
+`powershell -ExecutionPolicy Bypass -File ./check.ps1` (forward slash: bash eats the backslash).
+
 **Tool lists take the `=` form** (`"--allowedTools=Read Edit …"`, `"--disallowedTools=Edit …"`). These flags take
 several values, so with a space (`--allowedTools "…" "prompt"`) Claude reads the prompt as one more tool name and
 the agent starts with an empty prompt. Keep the prompt as the last argument.
