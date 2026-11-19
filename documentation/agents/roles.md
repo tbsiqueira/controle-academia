@@ -11,7 +11,7 @@ How agents split the work on GitHub issues. The reviewer and the design reviewer
 | **Tracker issue** | Optional order: an issue whose checklist lists issues to do, top to bottom; ticked = done. The human names it when they want one used ("pick the next issue from #T"). |
 | **Plan comment** | The plan for one issue, posted by the planner: what and why, "Technical context and decisions", a "Design review:" line, and the steps as a `- [ ]` checklist the developer ticks (section 3). |
 | **Label `em andamento`** | The issue has a developer working on it. |
-| **herdr (`hc`)** | Starting and talking to other agents. Names: `planner`, `dev-<N>`, `review-<N>`, `design-<N>`. |
+| **herdr (`hc`)** | Starting and talking to other agents. Names: `planner`, `dev-<N>`, `review-<N>`, `design-<N>`, `review-docs` (AI SPECIALIST). |
 
 Every agent that uses `hc` runs `hc --skill` once at the start of its session and checks the `hc` commands in this file against it.
 
@@ -61,8 +61,8 @@ Never sleep or poll in a loop of your own.
 
 Who has a role, and who doesn't, is in [AGENTS.md](../../AGENTS.md#roles). Never take a role you weren't given.
 Only the PLANNER and DEVELOPER may start other agents. The AI SPECIALIST is outside this workflow (see
-[its SKILL.md](../../.claude/skills/ai-specialist/SKILL.md)); its one exception is a single REVIEWER round on its
-own docs PR, and only when the human asks for it.
+[its SKILL.md](../../.claude/skills/ai-specialist/SKILL.md)). Separately, the AI SPECIALIST may start one REVIEWER
+round on its own docs branch, before opening the PR, and only when the human asks.
 
 The human starts the planner with `/planner` in any Claude Code chat (app or CLI), e.g.
 `/planner plan issue #12` or `/planner pick the next issue from #7`. Or as a background agent they can talk to
