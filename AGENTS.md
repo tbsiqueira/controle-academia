@@ -9,24 +9,26 @@ comments, PR descriptions and docs for developers and agents. Older comments, te
 still in Portuguese and get translated in their own issues: don't translate them inside unrelated changes, and
 never rewrite old commits.
 
-Read before changing anything:
+Read only what your task needs. Questions need none of these unless the answer depends on them.
 
-- [documentation/agents/architecture.md](documentation/agents/architecture.md) — where code lives, domain terms, data rules
-- [documentation/agents/workflow.md](documentation/agents/workflow.md) — commands and the checklist every change goes through
-- [documentation/agents/product-rules.md](documentation/agents/product-rules.md) — what the user wants (and has rejected)
-- [documentation/agents/history.md](documentation/agents/history.md) — key decisions, past regressions and their lessons
-- [documentation/agents/roles.md](documentation/agents/roles.md) — PLANNER / DEVELOPER / REVIEWER / DESIGN
-  REVIEWER: how an issue is picked, planned on the issue (with an optional design review), built step by step
-  and reviewed by a DeepSeek agent through herdr (`hc`)
-- [documentation/REFACTOR.md](documentation/REFACTOR.md) — the ongoing refactor (phases, target structure, test policy,
-  rules for refactor PRs). Tracked in issue #2; work one issue per PR
+- Before changing code: [architecture.md](documentation/agents/architecture.md) (where code lives, domain terms,
+  data rules) and [product-rules.md](documentation/agents/product-rules.md) (what the user wants and has rejected).
+- Before changing any file, running the checks, committing or opening a PR:
+  [workflow.md](documentation/agents/workflow.md) (commands, the checklist every change goes through, Git).
+- Before touching an area it lists: [history.md](documentation/agents/history.md) (key decisions, past
+  regressions and their lessons).
+- Before writing or changing browser tests: [e2e-tests.md](documentation/agents/e2e-tests.md).
+- Only with a role (see Roles): [roles.md](documentation/agents/roles.md), the sections your role names.
+- Only for a refactor issue: [REFACTOR.md](documentation/REFACTOR.md) (the ongoing refactor, tracked in issue #2;
+  one issue per PR).
 
 ## Roles
 
 Most sessions have no role: answer questions and do what you're asked, under the normal rules here.
 A session has a role only when it's started with `/planner` or its prompt names one (PLANNER, DEVELOPER,
-REVIEWER or DESIGN REVIEWER). Then read [documentation/agents/roles.md](documentation/agents/roles.md) first and
-follow it.
+REVIEWER or DESIGN REVIEWER). Then read only your sections of
+[documentation/agents/roles.md](documentation/agents/roles.md) and follow them: PLANNER 1–3, 7, 8; DEVELOPER 1,
+4, 6, 7; REVIEWER 5, 7; DESIGN REVIEWER 7 and "The DESIGN REVIEWER" in 8.
 Asking about the roles or the workflow doesn't give you one.
 The **AI SPECIALIST** (reviews and improves the agent docs) is outside the issue workflow: only `/ai-specialist`
 in a chat gives it; its rules are in [.claude/skills/ai-specialist/SKILL.md](.claude/skills/ai-specialist/SKILL.md).

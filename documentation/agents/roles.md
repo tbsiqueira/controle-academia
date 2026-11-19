@@ -1,7 +1,7 @@
 # Roles: planner, developer, reviewer, design reviewer
 
 How agents split the work on GitHub issues. The reviewer and the design reviewer run on DeepSeek (setup in
-[workflow.md](workflow.md#deepseek-reviewer-setup)). Only the human merges.
+[deepseek-setup.md](deepseek-setup.md)). Only the human merges.
 
 ## 1. Tools
 
@@ -19,8 +19,8 @@ Every agent that uses `hc` runs `hc --skill` once at the start of its session an
 and, on a local computer, creates the worktree (section 3, steps 1–2), then gives the human this prompt to paste
 into a new chat opened in that worktree (in a cloud session the new chat has its own checkout: the developer
 creates the branch itself as in [workflow.md](workflow.md#git)):
-"You are the DEVELOPER. Follow documentation/agents/roles.md. Issue #<N>; the plan is the latest plan comment on
-it. No `hc` on this machine." The developer skips step 4 (no review rounds) and the PR's
+"You are the DEVELOPER. Follow sections 1, 4, 6 and 7 of documentation/agents/roles.md. Issue #<N>; the plan is
+the latest plan comment on it. No `hc` on this machine." The developer skips step 4 (no review rounds) and the PR's
 `## Review` section says "Skipped: no `hc` on this machine." The planner also skips the design review (section 8)
 and the plan says so. When the developer challenges a decision (section 4, step 1), the human answers in that chat;
 the developer edits the plan comment to match and carries on.
@@ -130,7 +130,7 @@ Only do these when asked; show the human what you'll create or change first when
    hc run --bg --name dev-<N> --outlive-parent --cwd <full path of ../Academia-<N>> claude --model opus \
      --permission-mode dontAsk \
      "--allowedTools=Read Edit Write Glob Grep Bash(node *) Bash(COVERAGE_ENFORCE=1 node *) Bash(npm *) Bash(npx *) Bash(git *) Bash(gh *) Bash(hc *) Bash(powershell *)" \
-     "You are the DEVELOPER. Follow documentation/agents/roles.md. Issue #<N>; the plan is the latest plan comment on it."
+     "You are the DEVELOPER. Follow sections 1, 4, 6 and 7 of documentation/agents/roles.md. Issue #<N>; the plan is the latest plan comment on it."
    ```
 
 4. Report: issue, branch, worktree path, `hc read dev-<N>` to follow it.
@@ -196,11 +196,12 @@ Works in the worktree of one issue, on its branch. Never two developers on the s
       `gh issue comment --edit-last`: it edits your own last comment, which may not be the plan.
 3. **Out of scope?** Anything you found but won't fix → open a new issue (`gh issue create`) and mention it in
    the PR. Don't silently expand scope.
-4. **Review**: do the two rounds in section 6 (skip them without `hc`, see section 1). Commit the fixes (a conventional message saying what was fixed),
-   after the same three checks pass.
+4. **Review**: do the two rounds in section 6 (skip them without `hc`, see section 1). Commit the fixes (a
+   conventional message saying what was fixed) after the same checks pass. No fixes → no new check run.
 5. **Open the PR and hand back:**
-   - Run the checks in [AGENTS.md](../../AGENTS.md#non-negotiables) #4 once more.
-   - `git fetch origin`, `git rebase origin/main`, `git push -u origin <branch>`, then `gh pr create --base main`.
+   - `git fetch origin`, `git rebase origin/main`. Run the checks in [AGENTS.md](../../AGENTS.md#non-negotiables)
+     #4 again only if the rebase brought in new commits; the last green run still counts otherwise.
+   - `git push -u origin <branch>`, then `gh pr create --base main`.
      First line of the description: `Closes #<N>` (or `Refs #<N>` if the issue isn't finished). End the
      description with a `## Review` section: the model that reviewed (DeepSeek or the Sonnet fallback), then
      `### Round 1` and `### Round 2`, each with the reviewer's reply to that round as it came, in a code block,
@@ -313,8 +314,7 @@ the module split. Not for small issues (a plain bug, a mechanical refactor step,
    ```
 
    If DeepSeek fails to start or errors, run the same command without `--settings` and with `--model sonnet`.
-   `status: null` after it starts is the `hc` server, not the command: ask the human to restart the server
-   (section 1).
+   `status: null` after it starts: see section 1.
 3. Wait with one **background** `hc wait design-<N> --timeout 600` (section 1); on `reason: timeout` it is still
    working, so start the wait again. Once it returns `done`, `hc read --lines 120 design-<N>`.
 4. Weigh each point: fold in what you accept (decisions, risks, steps). Then edit the same comment into the final
