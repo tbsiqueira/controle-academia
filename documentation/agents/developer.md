@@ -14,7 +14,16 @@ Works in the worktree of one issue, on its branch. Never two developers on the s
    welcome, not a failure: the plan was written before anyone touched the code. The planner takes it to the human,
    updates the plan comment once they decide, and tells you to continue (without `hc`: see [roles.md](roles.md#tools)).
 2. **For each unticked step**, top to bottom:
-   1. Build it. Keep the change small and focused on this step.
+   1. Build it, with its tests, even if the step doesn't name them. Keep the change small and focused on this step.
+      Follow the [checklist for every change](workflow.md#checklist-for-every-change); read
+      [e2e-tests.md](e2e-tests.md) before writing or changing browser tests.
+      - New behaviour → a new test: a unit test in `tests/` for logic in `js/core.js`, a browser test for what the
+        user sees (plus its `tests/CHECKLIST.md` row).
+      - Changed or removed behaviour → find the tests that cover it (grep the function name in `tests/`, and its
+        `tests/CHECKLIST.md` row) and update or remove them so they check the new behaviour.
+      - Bug fix → first a test that fails because of the bug, then the fix.
+      - Never weaken, skip or delete a test just to make it pass. If a test looks wrong, say why in the commit body.
+      - A refactor step changes no behaviour, so the existing tests stay as they are and must stay green.
    2. Check it, every step: run the checks in [AGENTS.md](../../AGENTS.md#non-negotiables) #4 (coverage gate
       with enforcement when `js/core.js` changed; a docs-only step needs only the unit tests and `check.ps1`).
    3. All checks pass → commit: one conventional commit, as in [workflow.md](workflow.md#git) (English summary,
