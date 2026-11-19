@@ -91,8 +91,8 @@ npm run test:e2e:report   # HTML report of the last run (traces of failures)
 
 ## DeepSeek reviewer setup
 
-The REVIEWER in [roles.md](roles.md) is Claude Code talking to DeepSeek's Anthropic-compatible API. One-time setup
-per machine, **outside the repo** (it holds the API key; never commit it):
+The REVIEWER and the DESIGN REVIEWER in [roles.md](roles.md) are Claude Code talking to DeepSeek's
+Anthropic-compatible API. One-time setup per machine, **outside the repo** (it holds the API key; never commit it):
 
 `~/.claude/providers/deepseek.json`
 
@@ -109,10 +109,10 @@ per machine, **outside the repo** (it holds the API key; never commit it):
 }
 ```
 
-`claude --settings <that file>` loads it for one run only; plain `claude` stays on Anthropic. Inside the reviewer,
-`/status` should show the DeepSeek address. The reviewer uses `deepseek-flash[1m]` (`[1m]` tells Claude Code
+`claude --settings <that file>` loads it for one run only; plain `claude` stays on Anthropic. Inside either reviewer,
+`/status` should show the DeepSeek address. Both use `deepseek-flash[1m]` (`[1m]` tells Claude Code
 the context window is 1M tokens; it isn't part of the model name). To change the model, edit `--model` in
-roles.md section 6 and the two `DEFAULT_*_MODEL` lines above. Reference:
+roles.md sections 6 and 8 and the two `DEFAULT_*_MODEL` lines above. Reference:
 https://api-docs.deepseek.com/quick_start/agent_integrations/claude_code
 
 ## Testing in the browser pane

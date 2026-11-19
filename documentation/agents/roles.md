@@ -1,6 +1,6 @@
-# Roles: planner, developer, reviewer
+# Roles: planner, developer, reviewer, design reviewer
 
-How agents split the work on GitHub issues. The reviewer runs on DeepSeek (setup in
+How agents split the work on GitHub issues. The reviewer and the design reviewer run on DeepSeek (setup in
 [workflow.md](workflow.md#deepseek-reviewer-setup)). Only the human merges.
 
 ## 1. Tools
@@ -11,7 +11,7 @@ How agents split the work on GitHub issues. The reviewer runs on DeepSeek (setup
 | **Tracker issue** | Optional order: an issue whose checklist lists issues to do, top to bottom; ticked = done. The human names it when they want one used ("pick the next issue from #T"). |
 | **Plan comment** | The steps for one issue: a `- [ ]` checklist the planner posts on the issue and the developer ticks. |
 | **Label `em andamento`** | The issue has a developer working on it. |
-| **herdr (`hc`)** | Starting and talking to other agents. Names: `planner`, `dev-<N>`, `review-<N>`. |
+| **herdr (`hc`)** | Starting and talking to other agents. Names: `planner`, `dev-<N>`, `review-<N>`, `design-<N>`. |
 
 Run `hc --skill` once at the start of a session and check the `hc` commands in this file against it.
 
@@ -22,7 +22,8 @@ creates the branch itself as in [workflow.md](workflow.md#git)):
 "You are the DEVELOPER. Follow documentation/agents/roles.md. Issue #<N>; the plan is the latest plan comment on
 it. No `hc` on this machine." The developer skips step 4 (no review rounds) and the PR's
 `## Review` section says "Skipped: no `hc` on this machine." The planner also skips the design review (section 8)
-and the plan says so.
+and the plan says so. When the developer challenges a decision (section 4, step 1), the human answers in that chat;
+the developer edits the plan comment to match and carries on.
 
 **Start the `hc` server from a normal terminal, never from Claude.** Every agent `hc` starts gets the environment
 of the `hc` server, not of the command that ran `hc run`. Any `hc` command starts the server when it isn't
@@ -36,8 +37,9 @@ human to restart it.
 
 **Agents started with `hc --bg` run unattended.** A permission prompt would leave them waiting with nobody to
 answer. So they start in `dontAsk` mode (anything not on their allow-list is refused instead of asked) with the
-allow-lists in sections 3, 6 and 8. If one still stops, `hc read <name>` shows why; `hc attach <name>` lets the human
-answer. The exception is a planner started with `hc` (section 2): the human attaches to it and answers its prompts.
+allow-lists in sections 3, 6 and 8. If one still stops, `hc read <name>` shows why; `hc attach <name>` lets the
+human answer. The exception is a planner started with `hc` (section 2): the human attaches to it and answers its
+prompts.
 
 **Tool lists take the `=` form** (`"--allowedTools=Read Edit …"`, `"--disallowedTools=Edit …"`). These flags take
 several values, so with a space (`--allowedTools "…" "prompt"`) Claude reads the prompt as one more tool name and
@@ -143,9 +145,9 @@ Only do these when asked; show the human what you'll create or change first when
      decision: what, why and what the developer would do instead) and what the human needs to decide.
 6. **Relay the human's answer.** When the human answers a stopped developer in the chat, and the answer changes
    the plan (a challenged decision, a new or changed step), first edit the plan comment to match. Then pass the
-   answer on as they said it with `hc send dev-<N> "<their answer>"` and go back to step 5. The developer keeps its context (it was
-   started without `-p`). The human can also talk to it directly with `hc attach dev-<N>` (ctrl+\ detaches) or
-   take over the worktree; then wait until they say it's back in the developer's hands.
+   answer on as they said it with `hc send dev-<N> "<their answer>"` and go back to step 5. The developer keeps
+   its context (it was started without `-p`). The human can also talk to it directly with `hc attach dev-<N>`
+   (ctrl+\ detaches) or take over the worktree; then wait until they say it's back in the developer's hands.
 7. **After the PR is open.** If its CI fails or GitHub asks for the branch to be updated, report it to the human;
    on their word, `hc send dev-<N> "<what to fix, or: rebase on origin/main>"` and go back to step 5.
 
@@ -155,7 +157,8 @@ of "After a PR is merged or closed" (below), then ask about the issue as in its 
 **After a PR is merged or closed.** When the human says PR #M (issue #N) was merged or closed, clean up what the
 issue left behind. Run `gh pr view <M> --json state` first: never clean up a PR that is still open.
 
-1. **Agents:** `hc kill dev-<N>; hc rm dev-<N>`, and the same for `review-<N>` if `hc ls` still lists it.
+1. **Agents:** `hc kill dev-<N>; hc rm dev-<N>`, and the same for `review-<N>` and `design-<N>` if
+   `hc ls` still lists them.
 2. **Worktree:** `git -C <worktree> status --short` first. If it shows only `node_modules/` (or nothing),
    `git worktree remove --force <worktree>`. Anything else is unsaved work: stop and ask the human.
 3. **Branch:** `git branch -D <branch>`. A merged PR already deleted the branch on GitHub; after a PR closed
@@ -311,8 +314,10 @@ the module split. Not for small issues (a plain bug, a mechanical refactor step,
    ```
 
    If DeepSeek fails to start or errors, run the same command without `--settings` and with `--model sonnet`.
-3. Wait with one **background** `hc wait design-<N> --timeout 600` (section 1), then
-   `hc read --lines 120 design-<N>`.
+   `status: null` after it starts is the `hc` server, not the command: ask the human to restart the server
+   (section 1).
+3. Wait with one **background** `hc wait design-<N> --timeout 600` (section 1); on `reason: timeout` it is still
+   working, so start the wait again. Once it returns `done`, `hc read --lines 120 design-<N>`.
 4. Weigh each point: fold in what you accept (decisions, risks, steps). Then edit the same comment into the final
    plan: remove the `Draft` line and replace the "Design review" line with what happened, e.g. "Design review: done
    (DeepSeek). Changed: …; not taken: … (why)."
