@@ -33,16 +33,16 @@ const state = {
   workoutFilter: ''
 };
 
-// Rascunho do treino em andamento: um registro extra no store "settings" (id próprio).
-// Não muda o formato do banco nem entra no backup (o backup exporta só o registro "app").
+// Draft of the workout in progress: one extra record in the "settings" store (its own id).
+// Doesn't change the database format and isn't part of the backup (the backup exports only the "app" record).
 const DRAFT_ID = 'workoutDraft';
 const HOME_MIN_WORKOUTS = 10;
 
 /* ---------- helpers ----------
-   As funções puras (datas, esc/toNum, semana, agrupamento, exportação) vivem em js/core.js,
-   carregado antes deste arquivo. Aqui ficam só as que dependem do estado do app. */
+   The pure functions (dates, esc/toNum, week, grouping, export) live in js/core.js,
+   loaded before this file. Only the ones that depend on app state stay here. */
 
-// Em pt-BR o separador decimal e a virgula: mostramos e aceitamos os dois.
+// In pt-BR the decimal separator is the comma: we show and accept both.
 const commaDecimal = (navigator.language || '').toLowerCase().indexOf('pt') === 0;
 
 function uid() {
@@ -89,10 +89,10 @@ function navigate() {
   const hash = location.hash || '#/dashboard';
   const route = parseRoute(hash);
   const viewName = route.view;
-  // #/detail/<id>: o id vem do endereço, então recarregar a página mantém o treino aberto.
+  // #/detail/<id>: the id comes from the address, so reloading the page keeps the workout open.
   if (viewName === 'detail' && route.id) state.viewingWorkoutId = route.id;
 
-  flushDraft();   // grava o que foi digitado agora há pouco antes de sair do formulário
+  flushDraft();   // saves what was just typed before leaving the form
   if (viewName !== 'workout') state.editingWorkoutId = null;
 
   document.querySelectorAll('.view').forEach(function (v) {
@@ -149,8 +149,8 @@ function renderDashboard() {
   renderWorkoutList();
 }
 
-// Botão "Treinar: <ficha>" no Início: abre o Treinar já com a próxima ficha carregada.
-// Com um treino em andamento ele some (o aviso do rascunho já tem o "Continuar").
+// "Treinar: <ficha>" button on Início: opens Treinar with the next sheet already loaded.
+// It disappears while a workout is in progress (the draft notice already has "Continuar").
 function renderQuickStart() {
   const el = document.getElementById('quickStart');
   const sheet = draftHasContent(state.draft) ? null : nextSheet(state.workouts, state.sheets);
@@ -220,21 +220,21 @@ function renderWorkoutList() {
     return;
   }
 
-  // Filtro por ficha (só aparece com 2+ fichas usadas).
+  // Filter by sheet (only shown when 2+ sheets are in use).
   const options = sheetFilterOptions(workouts, state.sheets);
   if (state.workoutFilter && options.indexOf(state.workoutFilter) === -1) state.workoutFilter = '';
   const filtered = state.workoutFilter
     ? workouts.filter(function (w) { return sheetLabel(w, state.sheets) === state.workoutFilter; })
     : workouts;
 
-  // Lista curta: mês atual e anterior (mínimo de 10); o resto em "Ver meses anteriores".
+  // Short list: current and previous month (minimum of 10); the rest under "Ver meses anteriores".
   const today = todayISO();
   const defaultCount = visibleWorkoutCount(filtered, today, HOME_MIN_WORKOUTS);
   const shown = state.showAllWorkouts ? filtered : filtered.slice(0, defaultCount);
   const hiddenCount = filtered.length - shown.length;
 
-  // Agrupa por mês (cabeçalho com a contagem) e mostra a data como um bloco à esquerda,
-  // para dar para achar um treino rápido mesmo com muitos registros.
+  // Groups by month (header with the count) and shows the date as a block on the left,
+  // so a workout is quick to find even with many records.
   const monthCounts = {};
   filtered.forEach(function (w) {
     const p = dateParts(w.date);
@@ -327,26 +327,26 @@ function renderWorkoutList() {
 
 }
 
-/* ---------- referências por id (nome sempre atual) ---------- */
+/* ---------- references by id (name always current) ---------- */
 
-// Biblioteca do usuário + catálogo: usado para resolver o nome ATUAL pelo id.
+// User's library + catalog: used to resolve the CURRENT name by id.
 function allExercises() {
   return (state.exercises || []).concat(state.catalog || []);
 }
 
-// Nome atual de um exercício guardado em um registro (resolve pelo id).
+// Current name of an exercise stored in a record (resolved by id).
 function labelOf(item) {
   return exerciseLabel(item, allExercises());
 }
 
-// Referência (id + nome atual) usada nas buscas de histórico e ao gravar.
+// Reference (id + current name) used in history lookups and when saving.
 function refOf(item) {
   return { exerciseId: (item && item.exerciseId) || null, exerciseName: labelOf(item) };
 }
 
 /* ---------- read-only workout detail ---------- */
 
-// Linha "Recorde" no resumo do treino, para o exercício que bateu a maior carga anterior.
+// "Recorde" line in the workout summary, for the exercise that beat the previous highest load.
 function prLine(records, group) {
   const rec = (records || []).find(function (r) { return exerciseMatches(r, group); });
   if (!rec) return '';
@@ -441,7 +441,7 @@ function renderExerciseHistory() {
   const topRM = rows.reduce(function (max, r) { return Math.max(max, r.rm); }, 0);
 
   const prLoad = maxBestLoad(sessions, target);
-  const maxLoad = prLoad || 1;   // só para a largura das barras (evita dividir por zero)
+  const maxLoad = prLoad || 1;   // only for the bar widths (avoids dividing by zero)
 
   const withLoad = rows.filter(function (r) { return r.best; });
   let trendIcon = '<i class="bi bi-dash text-muted"></i>';
@@ -491,7 +491,7 @@ function renderExerciseHistory() {
 
   el.innerHTML = html;
 }
-/* ---------- workout draft (treino em andamento) ---------- */
+/* ---------- workout draft (workout in progress) ---------- */
 
 let draftTimer = null;
 
@@ -512,15 +512,15 @@ function currentDraft() {
   };
 }
 
-// Chamado a cada alteração no formulário: grava o rascunho logo depois (sem travar a digitação).
+// Called on every form change: saves the draft shortly after (without blocking typing).
 function scheduleDraftSave() {
   if (!isWorkoutFormOpen()) return;
   clearTimeout(draftTimer);
   draftTimer = setTimeout(saveDraftNow, 500);
 }
 
-// Monta o rascunho de forma síncrona (antes de qualquer await), então dá para chamar
-// no começo do navigate(), antes de a troca de tela limpar o treino em edição.
+// Builds the draft synchronously (before any await), so it can be called
+// at the start of navigate(), before the screen switch clears the workout being edited.
 async function saveDraftNow() {
   clearTimeout(draftTimer);
   draftTimer = null;
@@ -535,11 +535,11 @@ async function saveDraftNow() {
       await dbDelete('settings', DRAFT_ID);
     }
   } catch (e) {
-    // sem rascunho o app continua funcionando como antes
+    // without a draft the app keeps working as before
   }
 }
 
-// Ao sair do app (trocar de app, bloquear a tela), grava na hora o que estiver pendente.
+// When leaving the app (switching apps, locking the screen), saves whatever is pending right away.
 function flushDraft() {
   if (draftTimer) saveDraftNow();
 }
@@ -551,7 +551,7 @@ async function clearDraft() {
   try {
     await dbDelete('settings', DRAFT_ID);
   } catch (e) {
-    // nada a fazer
+    // nothing to do
   }
 }
 
@@ -599,9 +599,9 @@ async function discardDraft() {
   renderDashboard();
 }
 
-// Decide se o formulário abre a partir do rascunho. Se o rascunho é de OUTRO treino
-// (ex.: começou um treino novo e agora abriu "Editar" de um antigo), pergunta antes,
-// para nunca sobrescrever um rascunho sem querer.
+// Decides whether the form opens from the draft. If the draft belongs to ANOTHER workout
+// (e.g. a new workout was started and now "Editar" was opened on an old one), asks first,
+// so a draft is never overwritten by accident.
 function draftForForm() {
   const draft = state.draft;
   if (!draftHasContent(draft)) return null;
@@ -629,7 +629,7 @@ function sameId(a, b) {
   return a !== null && a !== undefined && a !== '' && String(a) === String(b);
 }
 
-// fallbackName: nome guardado no treino em edição, usado quando a ficha foi excluída.
+// fallbackName: name stored in the workout being edited, used when the sheet was deleted.
 function renderSheetOptions(selectedId, fallbackName) {
   const sel = document.getElementById('workoutSheet');
   let html = '<option value="">— Selecione a ficha —</option>';
@@ -640,7 +640,7 @@ function renderSheetOptions(selectedId, fallbackName) {
     html += '<option value="' + esc(s.id) + '"' + (selected ? ' selected' : '') + '>' + esc(s.name) + '</option>';
   });
 
-  // Ficha excluída ou inativa: mantém a opção, para não perder o nome ao salvar a edição.
+  // Deleted or inactive sheet: keeps the option, so the name isn't lost when saving the edit.
   if (selectedId && !found) {
     const sheet = findSheet(selectedId);
     const label = sheet ? sheet.name + ' (inativa)' : (fallbackName || 'Ficha') + ' (excluída)';
@@ -669,7 +669,7 @@ function renderSheetHint(sheetId) {
     : 'Esta ficha ainda não tem exercícios. Adicione na aba Fichas.';
 }
 
-// Botão "Repetir último treino desta ficha": preenche com os mesmos exercícios, reps e cargas.
+// "Repetir último treino desta ficha" button: fills in the same exercises, reps and loads.
 function renderRepeatLast(sheetId) {
   const el = document.getElementById('repeatLast');
   if (!el) return;
@@ -750,7 +750,7 @@ function onSheetChange() {
 function renderWorkoutForm() {
   const draft = draftForForm();
   if (draft) {
-    // o treino do rascunho pode ter sido excluído nesse meio-tempo: aí vira treino novo
+    // the draft's workout may have been deleted in the meantime: then it becomes a new workout
     const exists = draft.editingWorkoutId && state.workouts.some(function (w) { return w.id === draft.editingWorkoutId; });
     state.editingWorkoutId = exists ? draft.editingWorkoutId : null;
   }
@@ -788,7 +788,7 @@ function renderWorkoutForm() {
   document.getElementById('workoutExport').classList.toggle('d-none', !editing);
   renderFormSets();
 
-  // Veio do botão "Treinar: <ficha>" do Início: seleciona a ficha e carrega os exercícios dela.
+  // Came from the "Treinar: <ficha>" button on Início: selects the sheet and loads its exercises.
   const quickSheet = state.pendingSheetId ? findSheet(state.pendingSheetId) : null;
   state.pendingSheetId = null;
   if (quickSheet && !draft && !editing) {
@@ -835,7 +835,7 @@ function renderFormSets() {
   }).join('');
 }
 
-// Conta só as séries marcadas como feitas: cargas e reps já vêm preenchidas da ficha/último treino.
+// Counts only the sets marked as done: loads and reps already come filled in from the sheet/last workout.
 function renderWorkoutProgress() {
   const el = document.getElementById('workoutProgress');
   if (!el) return;
@@ -890,8 +890,8 @@ function addFormSet(exIdx) {
   scheduleDraftSave();
 }
 
-// Toque no número da série: marca como feita e já inicia o descanso. Tocar de novo só desmarca.
-// "done" vive no formulário e no rascunho; não é gravado no treino salvo.
+// Tap on the set number: marks it as done and starts the rest. Tapping again only unmarks it.
+// "done" lives in the form and the draft; it isn't saved in the stored workout.
 function toggleSetDone(exIdx, setIdx) {
   const group = state.formSets[exIdx];
   if (!group || !group.sets[setIdx]) return;
@@ -901,8 +901,8 @@ function toggleSetDone(exIdx, setIdx) {
   scheduleDraftSave();
 }
 
-// Tira a ÚLTIMA série do exercício (a ficha pede 4 e hoje só deu para fazer 3, ou um toque a mais
-// no "+ série"). Sempre sobra pelo menos uma; pergunta antes se ela tem algo preenchido.
+// Removes the LAST set of the exercise (the sheet asks for 4 and today only 3 were possible, or one tap too many
+// on "+ série"). At least one always remains; asks first if it has anything filled in.
 function removeFormSet(exIdx) {
   const group = state.formSets[exIdx];
   if (!group || group.sets.length <= 1) return;
@@ -916,7 +916,7 @@ function removeFormSet(exIdx) {
 function removeFormExercise(exIdx) {
   const group = state.formSets[exIdx];
   if (!group) return;
-  // Um toque errado na lixeira apagava o exercício inteiro, sem volta.
+  // A wrong tap on the trash can used to delete the whole exercise, with no way back.
   if (groupHasData(group) && !confirm('Remover "' + labelOf(group) + '" do treino?\n\nO que foi preenchido neste exercício será perdido.')) return;
   state.formSets.splice(exIdx, 1);
   renderFormSets();
@@ -925,8 +925,8 @@ function removeFormExercise(exIdx) {
 
 /* ---------- rest timer ---------- */
 
-// De propósito: sem som, sem vibração, sem piscar. No fim do descanso o contador
-// só fica laranja e permanece assim até tocar no ✕ (ou iniciar outro descanso).
+// On purpose: no sound, no vibration, no flashing. When the rest ends the counter
+// just turns orange and stays that way until the ✕ is tapped (or another rest starts).
 const rest = { end: 0, total: 0, interval: null };
 
 function startRest(seconds) {
@@ -953,8 +953,8 @@ function stopRest() {
   document.getElementById('restBar').classList.add('d-none');
 }
 
-// Conta pelo horário de término (e não por "ticks"), então continua certo mesmo se o
-// celular pausar o app em segundo plano.
+// Counts by the end time (not by "ticks"), so it stays correct even if the
+// phone pauses the app in the background.
 function tickRest() {
   const left = (rest.end - Date.now()) / 1000;
   const bar = document.getElementById('restBar');
@@ -1061,7 +1061,7 @@ async function saveWorkout() {
     ? state.workouts.find(function (w) { return w.id === state.editingWorkoutId; })
     : null;
 
-  // Ficha excluída: mantém o id e o nome guardados no treino em edição (antes eles se perdiam).
+  // Deleted sheet: keeps the id and name stored in the workout being edited (they used to be lost).
   const editingSheetId = editing ? (editing.sheetId || editing.typeId) : null;
   const keepsOldSheet = !sheet && sameId(editingSheetId, sheetId);
 
@@ -1375,7 +1375,7 @@ async function saveExerciseForm() {
   renderExercises();
 }
 
-// Ao renomear um exercício, mantém fichas e histórico coerentes (referência por id).
+// When an exercise is renamed, keeps sheets and history consistent (reference by id).
 async function applyExerciseRename(exerciseId, oldName, newName) {
   const sheetResult = renameInSheets(state.sheets, exerciseId, oldName, newName);
   if (sheetResult.changed) {
@@ -1653,8 +1653,8 @@ async function createExerciseFromSheetPicker() {
   renderSheetPickerResults(state.sheetPickerQuery);
 }
 
-// Depois de renomear/excluir uma ficha, atualiza tudo que mostra o nome dela:
-// a lista de fichas, o seletor do treino, os últimos treinos (Início) e o calendário.
+// After renaming/deleting a sheet, updates everything that shows its name:
+// the sheet list, the workout selector, the latest workouts (Início) and the calendar.
 function refreshAfterSheetChange() {
   renderSheets();
   renderSheetOptions(document.getElementById('workoutSheet').value || null);
@@ -1671,7 +1671,7 @@ async function saveSheetEditor() {
 
   const id = document.getElementById('sheetId').value;
   const existing = id ? findSheet(id) : null;
-  // Nome único só entre as ativas: uma desativada pode ter o mesmo nome de uma ativa.
+  // Name must be unique only among the active ones: an inactive one may share a name with an active one.
   if ((!existing || existing.active !== false) && sheetNameExists(name, id)) {
     alert('Já existe uma ficha com esse nome.');
     return;
@@ -1682,7 +1682,7 @@ async function saveSheetEditor() {
     name: name,
     active: existing ? existing.active !== false : true,
     exercises: state.sheetExercises.map(function (item) {
-      // Mesma normalização da importação: séries entre 1 e 20, uma rep (ou null) por série.
+      // Same normalization as the import: between 1 and 20 sets, one rep (or null) per set.
       const clean = normalizeSheetItem({
         exerciseId: item.exerciseId,
         name: labelOf(item),
@@ -1703,7 +1703,7 @@ async function saveSheetEditor() {
   refreshAfterSheetChange();
 }
 
-// Desativar esconde a ficha do seletor do Treinar sem apagar nada; reativar traz de volta.
+// Deactivating hides the sheet from the Treinar selector without deleting anything; reactivating brings it back.
 async function toggleSheetActive(id) {
   const sheet = findSheet(id);
   if (!sheet) return;
@@ -1716,7 +1716,7 @@ async function toggleSheetActive(id) {
   refreshAfterSheetChange();
 }
 
-// Exercícios que a importação pode usar: Biblioteca (ativos) antes do catálogo.
+// Exercises the import can use: Library (active ones) before the catalog.
 function importCandidates() {
   return state.exercises.filter(function (e) { return e.active !== false; }).concat(state.catalog || []);
 }
@@ -1726,12 +1726,12 @@ function exactExercise(name) {
   return importCandidates().find(function (e) { return normalizeText(e.name) === key; }) || null;
 }
 
-// Lê o arquivo, valida e abre a revisão: nomes sem par exato pedem escolha (parecido ou criar novo).
+// Reads the file, validates and opens the review: names with no exact match ask for a choice (similar or create new).
 function setImportButton(label) {
   document.getElementById('sheetImportConfirm').innerHTML = '<i class="bi bi-check-lg"></i> ' + label;
 }
 
-// Passo 1: caixa de texto para colar o JSON.
+// Step 1: text box to paste the JSON.
 function openSheetImport() {
   state.pendingImport = null;
   document.getElementById('sheetImportText').value = '';
@@ -1742,7 +1742,7 @@ function openSheetImport() {
   bootstrap.Modal.getOrCreateInstance(document.getElementById('sheetImportModal')).show();
 }
 
-// Passo 2: valida o texto e mostra a revisão (o botão vira "Importar").
+// Step 2: validates the text and shows the review (the button becomes "Importar").
 async function reviewSheetImport() {
   let sheets;
   try {
@@ -1768,7 +1768,7 @@ async function reviewSheetImport() {
 
 async function confirmSheetImport() {
   const pending = state.pendingImport;
-  state.pendingImport = null;   // antes dos awaits: toque duplo não grava duas vezes
+  state.pendingImport = null;   // before the awaits: a double tap doesn't save twice
   if (!pending) return;
 
   const chosen = chosenExercises(pending.unmatched, 'imp-');
@@ -1784,14 +1784,14 @@ async function confirmSheetImport() {
   renderExercises();
 }
 
-/* ---------- revisão de nomes de exercício (fichas e treinos antigos) ---------- */
+/* ---------- exercise name review (old sheets and workouts) ---------- */
 
-// Nomes que não têm par exato na Biblioteca/catálogo (sem repetir).
+// Names with no exact match in the Library/catalog (without repeats).
 function unmatchedExerciseNames(names) {
   return names.filter(function (name) { return !exactExercise(name); });
 }
 
-// Um seletor por nome sem par: exercícios parecidos (o mais forte já escolhido) ou "Criar novo".
+// One selector per unmatched name: similar exercises (the strongest already chosen) or "Criar novo".
 function exerciseChoicesHtml(unmatched, prefix) {
   if (!unmatched.length) {
     return '<p class="mb-0"><i class="bi bi-check-circle-fill text-success"></i> Todos os exercícios já existem no app.</p>';
@@ -1809,7 +1809,7 @@ function exerciseChoicesHtml(unmatched, prefix) {
     }).join('');
 }
 
-// O que a pessoa escolheu em cada seletor: { nome normalizado: exercício | null (criar novo) }.
+// What the person chose in each selector: { normalized name: exercise | null (create new) }.
 function chosenExercises(unmatched, prefix) {
   const chosen = {};
   unmatched.forEach(function (name, i) {
@@ -1834,13 +1834,13 @@ async function createImportedSheet(name, items, chosen) {
   state.sheets = await dbAll('sheets');
 }
 
-/* ---------- importar treinos antigos + fichas (Mais, contrato TREINO-JSON.md) ---------- */
+/* ---------- import old workouts + sheets (Mais, TREINO-JSON.md contract) ---------- */
 
 function setHistoryButton(label) {
   document.getElementById('historyImportConfirm').innerHTML = '<i class="bi bi-check-lg"></i> ' + label;
 }
 
-// Passo 1: texto para a IA (contrato + fichas + exercícios) e caixa para colar a resposta.
+// Step 1: text for the AI (contract + sheets + exercises) and a box to paste the reply.
 function openHistoryImport() {
   state.pendingHistory = null;
   document.getElementById('historyImportText').value = '';
@@ -1860,7 +1860,7 @@ async function renderHistoryIa() {
     exerciseNamesText(libraryExercises(state.exercises), await loadCatalog());
 }
 
-// Passo 2: valida e mostra o que vai entrar (o botão vira "Importar").
+// Step 2: validates and shows what will be imported (the button becomes "Importar").
 async function reviewHistoryImport() {
   let parsed;
   try {
@@ -1886,10 +1886,10 @@ async function reviewHistoryImport() {
   setHistoryButton('Importar');
 }
 
-// Passo 3: grava exercícios novos, fichas novas e os treinos (ligados às fichas pelo nome).
+// Step 3: saves new exercises, new sheets and the workouts (linked to the sheets by name).
 async function confirmHistoryImport() {
   const pending = state.pendingHistory;
-  state.pendingHistory = null;   // antes dos awaits: toque duplo não grava duas vezes
+  state.pendingHistory = null;   // before the awaits: a double tap doesn't save twice
   if (!pending) return;
 
   const chosen = chosenExercises(pending.unmatched, 'imph-');
@@ -1918,7 +1918,7 @@ async function confirmHistoryImport() {
   showToast(historyImportToast(pending.workouts.length, pending.sheets.length));
 }
 
-/* ---------- contrato para a IA (modal Criar com IA) ---------- */
+/* ---------- contract for the AI ("Criar com IA" modal) ---------- */
 
 async function renderIa() {
   const area = document.getElementById('iaText');
@@ -1966,7 +1966,7 @@ function renderCalendar() {
     const count = dayWorkouts.length;
     total += count;
     const classes = 'cal-cell' + (count ? ' has-workout' : '') + (iso === today ? ' today' : '');
-    // Dia com treino é um link para o treino (com dois no dia, abre o mais recente).
+    // A day with a workout is a link to the workout (with two on the day, opens the most recent).
     cells.push(count
       ? '<a class="' + classes + '" href="#/detail/' + esc(dayWorkouts[0].id) + '" aria-label="' + esc('Abrir treino de ' + fmtBR(iso) + (count > 1 ? ' (' + count + ' treinos no dia)' : '')) + '">' + day + '<span class="cal-badge">' + count + '</span></a>'
       : '<div class="' + classes + '">' + day + '</div>');
@@ -1978,7 +1978,7 @@ function renderCalendar() {
   renderWeeklyProgress();
 }
 
-/* ---------- evolução semanal (volume, treinos, cardio) ---------- */
+/* ---------- weekly progress (volume, workouts, cardio) ---------- */
 
 function fmtKg(n) {
   return Math.round(n).toLocaleString('pt-BR') + ' kg';
@@ -2020,7 +2020,7 @@ function renderWeeklyProgress() {
     '</div></div>';
 }
 
-/* ---------- colinha ---------- */
+/* ---------- colinha (cheat sheet) ---------- */
 
 function renderColinhaList() {
   const el = document.getElementById('colinhaList');
@@ -2093,9 +2093,9 @@ function renderMore() {
   renderInstall();
 }
 
-/* ---------- instalar o app (PWA) ---------- */
+/* ---------- install the app (PWA) ---------- */
 
-let installPrompt = null;   // evento beforeinstallprompt guardado até o toque em Instalar
+let installPrompt = null;   // beforeinstallprompt event kept until the tap on Instalar
 
 function renderInstall() {
   const standalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
@@ -2105,7 +2105,7 @@ function renderInstall() {
 
 async function installApp() {
   const prompt = installPrompt;
-  installPrompt = null;   // o navegador só aceita usar o evento uma vez
+  installPrompt = null;   // the browser only accepts using the event once
   if (prompt) {
     prompt.prompt();
     await prompt.userChoice;
@@ -2113,10 +2113,10 @@ async function installApp() {
   renderInstall();
 }
 
-/* ---------- armazenamento persistente ---------- */
+/* ---------- persistent storage ---------- */
 
-// Pede ao navegador para nao apagar os dados quando o aparelho ficar sem espaco.
-// O navegador pode recusar; nesse caso o app continua funcionando como antes.
+// Asks the browser not to erase the data when the device runs out of space.
+// The browser may refuse; in that case the app keeps working as before.
 async function requestPersistentStorage() {
   try {
     if (!navigator.storage || !navigator.storage.persist) return null;
@@ -2134,7 +2134,7 @@ function formatBytes(bytes) {
   return (bytes / (1024 * 1024 * 1024)).toFixed(1).replace('.', ',') + ' GB';
 }
 
-// Mostra em Mais -> Dados quanto espaco o app usa e se o armazenamento e persistente.
+// Shows in Mais -> Dados how much space the app uses and whether storage is persistent.
 async function renderStorageInfo() {
   const el = document.getElementById('storageInfo');
   if (!el) return;
@@ -2280,8 +2280,8 @@ async function shareExportText(areaId) {
   copyExportText(areaId);
 }
 
-// Aviso de sucesso que some sozinho. Erros, validações e perguntas continuam em alert/confirm,
-// porque esses a pessoa precisa ler antes de seguir.
+// Success notice that disappears on its own. Errors, validations and questions stay in alert/confirm,
+// because the person needs to read those before going on.
 function showToast(message) {
   document.getElementById('appToastBody').textContent = message;
   bootstrap.Toast.getOrCreateInstance(document.getElementById('appToast'), { delay: 3000 }).show();
@@ -2292,9 +2292,9 @@ function appVersionLabel() {
   return el ? el.textContent.trim() : '';
 }
 
-/* ---------- backup (arquivo, compartilhar e lembrete) ---------- */
+/* ---------- backup (file, share and reminder) ---------- */
 
-// Depois de quantos dias sem backup o app lembra o usuário.
+// After how many days without a backup the app reminds the user.
 const BACKUP_REMINDER_DAYS = 7;
 
 function buildBackup() {
@@ -2335,7 +2335,7 @@ function renderBackupStatus() {
   renderExportHint();
 }
 
-// Lembrete no Início quando o último backup está velho (ou nunca foi feito).
+// Reminder on Início when the last backup is old (or was never made).
 function renderBackupReminder() {
   const el = document.getElementById('backupReminder');
   if (!el) return;
@@ -2371,7 +2371,7 @@ function backupActionStatus(message) {
   if (el) el.textContent = message || '';
 }
 
-// O navegador deste aparelho sabe compartilhar arquivos?
+// Can this device's browser share files?
 function canShareBackupFile() {
   if (!navigator.canShare) return false;
   try {
@@ -2381,7 +2381,7 @@ function canShareBackupFile() {
   }
 }
 
-// Dica embaixo do botão Exportar: diz para onde o arquivo vai neste aparelho (e ajusta o ícone).
+// Hint under the Exportar button: says where the file goes on this device (and adjusts the icon).
 function renderExportHint() {
   const hint = document.getElementById('backupAction');
   const btn = document.getElementById('btnExport');
@@ -2395,10 +2395,10 @@ function renderExportHint() {
   }
 }
 
-// Salva o arquivo no aparelho (download). Aceita um backup já montado para não gerar
-// nomes diferentes na mesma ação.
+// Saves the file on the device (download). Accepts an already built backup so it doesn't generate
+// different names in the same action.
 async function downloadBackup(prebuilt) {
-  // Atenção: o handler de clique passa o evento como argumento; só usamos um backup de verdade.
+  // Careful: the click handler passes the event as an argument; we only use a real backup.
   const backup = isBackupPayload(prebuilt) ? prebuilt : buildBackup();
   const url = URL.createObjectURL(new Blob([backup.json], { type: 'application/json' }));
   const a = document.createElement('a');
@@ -2413,9 +2413,9 @@ async function downloadBackup(prebuilt) {
   backupActionStatus('Arquivo gerado: ' + backup.name);
 }
 
-// Botão "Exportar": abre o menu de compartilhamento do aparelho (Drive, WhatsApp, Arquivos)
-// no celular/tablet e baixa o arquivo no computador. Se o compartilhamento falhar,
-// NÃO baixa sozinho — assim nunca aparecem dois arquivos.
+// "Exportar" button: opens the device's share menu (Drive, WhatsApp, Arquivos)
+// on phone/tablet and downloads the file on the computer. If sharing fails,
+// it does NOT download on its own, so two files never show up.
 async function exportBackup() {
   const backup = buildBackup();
 
@@ -2453,7 +2453,7 @@ async function forceUpdate() {
       await Promise.all(keys.map(function (key) { return caches.delete(key); }));
     }
   } catch (e) {
-    // segue e recarrega mesmo assim
+    // carries on and reloads anyway
   }
 
   location.reload();
@@ -2470,7 +2470,7 @@ async function importData(file) {
     return;
   }
 
-  // O arquivo de exemplo usa datas relativas (dayOffset); materializamos na importação também.
+  // The sample file uses relative dates (dayOffset); we materialize them on import too.
   const data = (payload && payload.sample)
     ? materializeSampleData(payload, todayISO())
     : (payload && payload.data ? payload.data : payload);
@@ -2501,10 +2501,10 @@ async function importData(file) {
 }
 
 async function restoreAll(data) {
-  // normalizeBackup converte backups antigos (v1) para o formato atual sem perder dados.
+  // normalizeBackup converts old backups (v1) to the current format without losing data.
   const normalized = normalizeBackup(data);
 
-  // Apagar e gravar na MESMA transação: se algo falhar, os dados antigos não se perdem.
+  // Erase and write in the SAME transaction: if anything fails, the old data isn't lost.
   await dbReplaceAll({
     workouts: normalized.workouts,
     exercises: normalized.exercises,
@@ -2585,7 +2585,7 @@ function bindEvents() {
     document.getElementById(id).addEventListener('change', scheduleDraftSave);
   });
   document.getElementById('workoutCardio').addEventListener('input', renderWorkoutProgress);
-  // Celular: ao trocar de app ou bloquear a tela, grava o rascunho na hora.
+  // Phone: when switching apps or locking the screen, saves the draft right away.
   document.addEventListener('visibilitychange', function () {
     if (document.visibilityState === 'hidden') flushDraft();
   });
@@ -2677,12 +2677,12 @@ function guard(fn) {
   };
 }
 
-// Versões anteriores escondiam da Biblioteca os exercícios cujo NOME existia no catálogo.
-// Isso escondia exercícios criados pelo usuário — aqui desfazemos essa marcação
-// (mantemos 'catalog' apenas quando houver catalogId, que comprova a origem).
-// Dá "chave estrangeira" aos itens de ficha antigos: liga pelo nome ao exercício da Biblioteca.
+// Earlier versions hid from the Library the exercises whose NAME existed in the catalog.
+// That hid exercises created by the user — here we undo that marking
+// (we keep 'catalog' only when there is a catalogId, which proves the origin).
+// Gives a "foreign key" to old sheet items: links by name to the Library exercise.
 async function linkSheetItems() {
-  // Biblioteca + catalogo: fichas antigas ganham o id do catalogo quando o nome casa exatamente.
+  // Library + catalog: old sheets get the catalog id when the name matches exactly.
   const result = linkSheetItemsToExercises(state.sheets, allExercises());
   if (!result.changed) return 0;
 
@@ -2713,12 +2713,12 @@ async function init() {
   try {
     await loadCatalog();
   } catch (e) {
-    // o catálogo é opcional para o app funcionar
+    // the catalog is optional for the app to work
   }
   bindEvents();
   navigate();
 
-  // nao bloqueia a abertura do app; atualiza o card Dados quando o navegador responder
+  // doesn't block the app from opening; updates the Dados card when the browser responds
   requestPersistentStorage().then(function () { renderStorageInfo(); });
 
   if ('serviceWorker' in navigator) {
