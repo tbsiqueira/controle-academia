@@ -2516,9 +2516,9 @@ async function restoreAll(data) {
 
 async function loadSampleData() {
   const status = document.getElementById('sampleStatus');
-  status.textContent = 'Carregando...';
+  status.textContent = 'Carregando…';
 
-  const ok = confirm('Carregar os dados de exemplo?\n\nSao 3 fichas, 12 treinos e 6 exercicios. Isso substitui os dados atuais, mas voce pode desfazer em Mais > Dados.');
+  const ok = confirm('Carregar os dados de exemplo?\n\nSão 3 fichas, 12 treinos e 6 exercícios. Isso substitui os dados atuais, mas você pode desfazer em Mais → Dados.');
   if (!ok) {
     status.textContent = '';
     return;
@@ -2544,7 +2544,7 @@ async function loadSampleData() {
   await repairLibrarySources();
 
   status.textContent = 'Dados de exemplo carregados: ' + data.sheets.length + ' fichas, ' +
-    data.workouts.length + ' treinos e ' + data.exercises.length + ' exercicios.';
+    data.workouts.length + ' treinos e ' + data.exercises.length + ' exercícios.';
 
   renderMore();
 }

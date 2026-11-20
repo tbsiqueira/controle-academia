@@ -26,7 +26,7 @@ $listener = New-Object System.Net.HttpListener
 $listener.Prefixes.Add("http://localhost:$Port/")
 $listener.Start()
 
-Write-Host "Meu Treino sendo servido em http://localhost:$Port/ (Ctrl+C para parar)"
+Write-Host "Meu Treino serving on http://localhost:$Port/ (Ctrl+C to stop)"
 
 while ($listener.IsListening) {
   try {

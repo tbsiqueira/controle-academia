@@ -1,7 +1,7 @@
 {
   "name": "meu-treino-dev",
   "private": true,
-  "description": "Ferramentas de desenvolvimento do Meu Treino (testes de navegador). O app nao usa nada daqui: roda direto dos arquivos.",
+  "description": "Meu Treino development tools (browser tests). The app uses nothing from here: it runs straight from the files.",
   "scripts": {
     "test": "node --test tests/",
     "test:e2e": "playwright test",

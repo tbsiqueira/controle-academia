@@ -295,7 +295,7 @@ test.describe('Treinar · sets', () => {
 });
 
 test.describe('Treinar · rest', () => {
-  test('starts when the set is marked, with the time from Ajustes', async ({ page }) => {
+  test('starts when the set is marked, with the time from Mais', async ({ page }) => {
     await page.clock.install();
     await withBackup(page, BACKUP);
     await goTo(page, 'Mais');

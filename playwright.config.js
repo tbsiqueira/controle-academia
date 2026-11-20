@@ -1,5 +1,5 @@
-// Testes de navegador (Playwright). Veja documentation/REFACTOR.md, seção 4, e documentation/agents/workflow.md.
-// Mesmas condições no PC e no CI: Chromium, celular de 375px, tema claro, servidor próprio na porta 4173.
+// Browser tests (Playwright). See documentation/REFACTOR.md, section 4, and documentation/agents/workflow.md.
+// Same conditions on the PC and in CI: Chromium, a 375px phone, light theme, its own server on port 4173.
 const { defineConfig } = require('@playwright/test');
 
 const PORT = 4173;
@@ -8,7 +8,7 @@ const CI = !!process.env.CI;
 module.exports = defineConfig({
   testDir: 'tests/e2e',
   testMatch: '**/*.spec.js',
-  // tests/e2e/temporarios/: testes temporários da refatoração (issue #39). Para desligar sem apagar (issue #40):
+  // tests/e2e/temporarios/: temporary refactor tests (issue #39). To turn them off without deleting (issue #40):
   // testIgnore: 'temporarios/**',
   outputDir: 'tests/e2e/results',
   globalSetup: './tests/e2e/global-setup.js',

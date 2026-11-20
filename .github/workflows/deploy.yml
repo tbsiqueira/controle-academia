@@ -21,7 +21,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  versao:
+  version:
     name: Version to publish
     runs-on: ubuntu-latest
     outputs:
@@ -37,32 +37,32 @@ jobs:
           MANUAL: ${{ github.event_name == 'workflow_dispatch' }}
         run: |
           version=$(grep -oP 'id="appVersion">v\K\d+' index.html)
-          if [ -z "$version" ]; then echo "::error::versao nao encontrada no index.html"; exit 1; fi
+          if [ -z "$version" ]; then echo "::error::version not found in index.html"; exit 1; fi
           echo "version=$version" >> "$GITHUB_OUTPUT"
           if git ls-remote --exit-code --tags origin "refs/tags/v$version" >/dev/null; then
             if [ "$MANUAL" = "true" ]; then
-              echo "Tag v$version ja existe; publicacao manual segue mesmo assim."
+              echo "Tag v$version already exists; manual publish continues anyway."
               echo "publish=true" >> "$GITHUB_OUTPUT"
             else
-              echo "Tag v$version ja existe: nada novo para publicar."
+              echo "Tag v$version already exists: nothing new to publish."
               echo "publish=false" >> "$GITHUB_OUTPUT"
             fi
           else
-            echo "Versao nova: v$version sera publicada."
+            echo "New version: v$version will be published."
             echo "publish=true" >> "$GITHUB_OUTPUT"
           fi
 
   # Publish gate: runs the entire Tests workflow (tests.yml) instead of copying its steps here, so a publish only
   # happens for a commit that passed unit, static and browser tests. check.ps1 fails if this call disappears.
-  verificar:
+  verify:
     name: Tests and checks
-    needs: versao
-    if: needs.versao.outputs.publish == 'true'
+    needs: version
+    if: needs.version.outputs.publish == 'true'
     uses: ./.github/workflows/tests.yml
 
-  publicar:
+  publish:
     name: Publish
-    needs: [versao, verificar]
+    needs: [version, verify]
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -89,7 +89,7 @@ jobs:
 
   tag:
     name: Create the version tag
-    needs: [versao, publicar]
+    needs: [version, publish]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -99,10 +99,10 @@ jobs:
 
       - name: Create and push vN
         env:
-          VERSION: ${{ needs.versao.outputs.version }}
+          VERSION: ${{ needs.version.outputs.version }}
         run: |
           if git ls-remote --exit-code --tags origin "refs/tags/v$VERSION" >/dev/null; then
-            echo "Tag v$VERSION ja existe."
+            echo "Tag v$VERSION already exists."
             exit 0
           fi
           git config user.name "github-actions[bot]"

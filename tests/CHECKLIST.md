@@ -1,13 +1,13 @@
 # Coverage checklist — feature → tests
 
 Map of **every app feature** to the tests that cover it. It answers
-"is this tested?" without reading the whole tests.
+"is this tested?" without reading the whole test suite.
 
 - Unit tests: `node --test tests/` (no dependencies).
 - Browser tests: `npm run test:e2e` (Playwright, `tests/e2e/` folder; setup in `documentation/agents/workflow.md`).
   **Browser tests** column: every row has at least one (`tests/checklist.test.js` fails a row with "—"
   and a cited file that does not exist). A new feature comes with a row and a browser test. Treinar and
-  Início are **critical screens**: every behaviour of them gets its own row and test.
+  Início are **critical screens**: each of their behaviours gets its own row and test.
 - Every confirmation question (`confirm()` in `app.js`) has a browser test for the **Não** answer, which checks the
   question text: `tests/confirm-no.test.js` fails a new question without that test.
 - Coverage: `node tools/coverage-gate.js` (CI requires **100% of lines and branches in `js/core.js`**).
@@ -47,7 +47,7 @@ Map of **every app feature** to the tests that cover it. It answers
 | Embedded catalog (unique, contiguous, stable ids) | `data/exercises.json` | `core.test.js` (id locks) + `check.ps1` | `smoke.spec.js` (opens offline with the catalog), `treinar.spec.js` and `fichas.spec.js` (catalog exercise) |
 | Browser module registration (globals) | `js/core.js` (UMD) | `module.test.js` (runs the core in a browser scope) | `smoke.spec.js` (opens with no error: the `core.js` functions exist for `app.js`) |
 | Old database (pre-id era) survives init | `core.js`: `fixLibrarySources`, `linkSheetItemsToExercises`, `historyTarget`, `normalizeBackup` | `old-db.test.js` (no set/load/warm-up/item is lost; history by stored name) | `biblioteca.spec.js` (records without ids saved on the device: Biblioteca repaired, sheet linked, history by name) |
-| PWA: consistent version, precache, offline | `index.html`, `sw.js`, `manifest.webmanifest` | `check.ps1` (13 checks) | `smoke.spec.js` (footer version × files × cache; opens offline with the catalog), `dados.spec.js` (new service worker version takes over and deletes the old cache; "Atualizar app"; the draft in progress survives both) |
+| PWA: consistent version, precache, offline | `index.html`, `sw.js`, `manifest.webmanifest` | `check.ps1` (15 checks) | `smoke.spec.js` (footer version × files × cache; opens offline with the catalog), `dados.spec.js` (new service worker version takes over and deletes the old cache; "Atualizar app"; the draft in progress survives both) |
 | Export/import/erase inside the app (screens) | `js/app.js` | `check.ps1` (ids and handlers) + `core.js` logic | `dados.spec.js` (export, import, Apagar dados only after ticking the confirmation, Cancelar does not erase, erasing takes everything including the draft), cancelled or failed sharing warns and does not count as a backup; the Importar button opens the file picker (`dados.spec.js`) |
 | Sheet-import screens (paste, review, Revisar → Importar button), deactivating/reactivating a sheet, Create with AI modal (text for the AI + pasting the answer), Debug card | `js/app.js` | `check.ps1` (ids and handlers) + `core.js` logic (`parseSheetImportText`, `suggestExercises`, `exerciseNamesText`, `normalizeSheet` keeps `active: false`) | `fichas.spec.js` (Create with AI, deactivate/reactivate), `mais.spec.js` (Debug card) |
 | Answering **Não** in the other screens' confirmations changes nothing: deleting a workout from the detail, an exercise, a sheet and a colinha; importing a backup; Undo; sample data; "Atualizar app" | `js/app.js` | `confirm-no.test.js` (every question has a "Não" test) | `historico.spec.js`, `biblioteca.spec.js`, `fichas.spec.js`, `mais.spec.js`, `dados.spec.js` (answering "Não") |
@@ -75,7 +75,7 @@ Map of **every app feature** to the tests that cover it. It answers
 | 16px fields on the phone (no iPhone zoom when tapping) | `css/styles.css`: 16px rule under `max-width: 767.98px` (no more specific rule changes the field size) | `check.ps1` (anti-zoom: the rule exists) | `smoke.spec.js` (computed size of every field visible in Treinar with a sheet, sheet editor, Create with AI, Biblioteca, Mais and Import old workouts), `treinar.spec.js` (set note) |
 | 44px touch area on icon-only buttons | `css/styles.css`: `.btn-sm[aria-label]` | `features.test.js` (rule present; every icon button has `aria-label`) | `fichas.spec.js` (sheet icon buttons are 44px or more) |
 | Debug card visible at the end of Mais, with no collapse (v74), with persistent storage | `index.html`; `app.js`: `requestPersistentStorage`, `renderStorageInfo` | `features.test.js` (last card, contains update/erase/sample/space used, backup stays before it) | `mais.spec.js` (visible at the end of Mais; asks for persistent storage on open: protected or not protected) |
-| Mais → Install the app (browser button, instruction for iPhone and menu, "already installed") | `core.js`: `installHint` (event in `app.js`: `renderInstall`, `installApp`) | `features.test.js` (4 text cases, card between Data and Debug, `beforeinstallprompt` stored, button wired) | `mais.spec.js` (browser menu, Instalar button with the browser prompt, iPhone, already installed) |
+| Mais → Install the app (browser button, instruction for iPhone and menu, "already installed") | `core.js`: `installHint` (event in `app.js`: `renderInstall`, `installApp`) | `features.test.js` (4 text cases, card between Dados and Debug, `beforeinstallprompt` stored, button wired) | `mais.spec.js` (browser menu, Instalar button with the browser prompt, iPhone, already installed) |
 | Colinha (create, edit, delete) | `app.js`: `renderColinhaList`, `saveColinha`, `deleteColinha` | `check.ps1` (ids and handlers) | `mais.spec.js` (create, edit, delete, empty is not saved) |
 | Warm-up fields with a name for screen readers | `app.js`: `renderFormSets` | `features.test.js` (reps, weight and RIR with `aria-label`) | `treinar.spec.js` (fields found by name) |
 
@@ -102,7 +102,7 @@ imported through the Mais screen. The rest uses Playwright's controlled clock (`
 | Removing the last set (one always remains) | `js/app.js` (Treinar) | — | `treinar.spec.js`: remove the last set |
 | Tapping the set number marks it as done and starts the rest; tapping again only unmarks it | `js/app.js` (Treinar) | — | `treinar.spec.js`: tapping the set number marks it as done and starts the rest |
 | Progress counter counts only the sets done | `js/app.js` (Treinar) | — | `treinar.spec.js`: progress counter counts only the sets done |
-| Rest starts when the set is marked, with the time from Ajustes | `js/app.js` (Treinar) | — | `treinar.spec.js`: starts when the set is marked, with the time from Ajustes |
+| Rest starts when the set is marked, with the time from Mais | `js/app.js` (Treinar) | — | `treinar.spec.js`: starts when the set is marked, with the time from Mais |
 | Rest: add-time button (+15s) | `js/app.js` (Treinar) | — | `treinar.spec.js`: add-time button (+15s) |
 | Rest: stop | `js/app.js` (Treinar) | — | `treinar.spec.js`: stop |
 | End of the rest only changes colour: no sound, no vibration, no flashing | `js/app.js` (Treinar) | — | `treinar.spec.js`: at the end it only changes colour |
@@ -129,6 +129,7 @@ imported through the Mais screen. The rest uses Playwright's controlled clock (`
 | Existing workout: open from the detail, edit and save (without duplicating) | `js/app.js` (Treinar) | — | `treinar.spec.js`: open from the detail, edit and save |
 | Existing workout: delete | `js/app.js` (Treinar) | — | `treinar.spec.js`: delete the workout |
 | Existing workout: export as text (WhatsApp format, only the date at the top) | `js/app.js` (Treinar) | — | `treinar.spec.js`: export as text |
+| Exported text leaves out the teacher's note, which stays on Treinar and in the saved sets | `js/app.js` (Treinar) | — | `treinar.spec.js`: the exported text leaves out the teacher's note |
 
 ## Início (critical screen): every behaviour
 
@@ -193,7 +194,7 @@ without touching the app functions.
 | Colinha: only the title is enough; only the content is enough; spaces only is refused | Mais | `temporarios/mais.spec.js` |
 | Colinhas in creation order; editing does not change the order | Mais | `temporarios/mais.spec.js` |
 | Import old workouts: "Copiar texto" copies the text for the AI; Cancelar imports nothing | Mais | `temporarios/mais.spec.js` |
-| Undo does not appear before importing and disappears after reloading the page | Data | `temporarios/dados.spec.js` |
+| Undo does not appear before importing and disappears after reloading the page | Dados | `temporarios/dados.spec.js` |
 | Workout of a deactivated sheet appears as "(inativa)" in the edit | Treinar | `temporarios/treinar.spec.js` |
 | Workout of a deleted sheet appears as "(excluída)" and Treinar explains it | Treinar | `temporarios/treinar.spec.js` |
 | Sheet with no exercises: Treinar explains where to add them | Treinar | `temporarios/treinar.spec.js` |

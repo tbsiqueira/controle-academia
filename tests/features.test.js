@@ -130,7 +130,7 @@ test('groupHasData stays the same after reusing setHasData', () => {
   assert.equal(core.groupHasData({ warmup: { reps: 15 }, sets: [] }), true);
 });
 
-test('Treinar has the "- serie" button: removes the last, never the only one, and confirms if it has data', () => {
+test('Treinar has the "− série" button: removes the last, never the only one, and confirms if it has data', () => {
   const body = APP.slice(APP.indexOf('function removeFormSet'), APP.indexOf('function removeFormExercise'));
   assert.match(body, /group\.sets\.length <= 1\) return;/, 'one set always remains');
   assert.match(body, /setHasData\(last\) && !confirm\(/);

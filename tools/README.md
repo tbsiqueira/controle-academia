@@ -5,7 +5,7 @@ precache, but they are kept in the repo so that every change is reproducible.
 
 | Tool | What it is for |
 |---|---|
-| `build-sample-data.ps1` | Builds `data/sample-data.json` (the "sample data" loaded in **Mais → Dados de exemplo**) |
+| `build-sample-data.ps1` | Builds `data/sample-data.json` (the "sample data" loaded in **Mais → Debug → Carregar dados de exemplo**) |
 | `sample-data-content.json` | Portuguese content of the sample data: custom exercises, sheets (by catalog id), days, cardio, notes and colinhas. This one stays pt-BR: it is what the user sees |
 | `coverage-gate.js` | Runs the unit tests and requires 100% of lines and branches in `js/core.js` |
 | `e2e-coverage.js` | Measures how much of `js/app.js` the browser tests run and applies the CI ratchet (see below) |
@@ -59,5 +59,5 @@ workout have their warm-up filled in.
 
 Windows PowerShell 5.1 reads `.ps1` files without a BOM as ANSI, which would break accents ("Elevação" would
 become garbage). So all Portuguese text lives in `sample-data-content.json`, read explicitly as UTF-8 — so the
-script works the same on PowerShell 7 (Linux/CI). Both `.ps1` files here (`build-sample-data.ps1` and
-`check.ps1`) are ASCII-only for that reason: keep them that way.
+script works the same on PowerShell 7 (Linux/CI). Both `tools/build-sample-data.ps1` and the root `check.ps1` are
+ASCII-only for that reason: keep them that way.

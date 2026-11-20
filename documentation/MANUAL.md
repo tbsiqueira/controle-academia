@@ -38,7 +38,7 @@ Também dá para instalar por **Mais → Instalar o app**: no Chrome e no Edge (
 botão **Instalar**, que coloca o app na tela inicial ou na área de trabalho. No iPhone o card mostra o passo a
 passo do Safari, e no app já instalado ele avisa que está tudo certo.
 
-> **iPhone:** o app instalado guarda os dados separado do Safari e começa vazio. Se você já treinou pelo Safari,
+> **iPhone:** o app instalado guarda os dados separados do Safari e começa vazio. Se você já treinou pelo Safari,
 > use **Mais → Dados → Exportar** lá e depois **Importar** dentro do app instalado.
 
 > **Seus dados ficam só no seu aparelho.** Não há login, conta ou servidor. Por isso, faça backups
@@ -175,7 +175,7 @@ das duas.
 5. Você completa: **reps feitas** (se mudou), **carga**, **RIR** e, se quiser, uma **obs** por série.
 6. **Cardio (minutos)**: ex. `30`, se fez esteira/bike.
 7. **Observações**: como foi o treino no geral.
-8. **Salvar**.
+8. **Salvar treino**.
 
 ### Exemplo de tela preenchida
 
@@ -200,7 +200,7 @@ Elevação pélvica                                    [3 séries]
 - **Série que ficar em branco é ignorada** — se você fez só 2 das 3 séries, pode deixar a terceira vazia e salvar.
 - **Quer treinar algo fora da ficha?** Toque em **Adicionar exercício** (o mesmo buscador da ficha).
 - **Não achou o exercício no catálogo?** Digite o nome e toque em **`Criar "..."`**.
-- **Quer mais séries?** **+ série** (até 20 por exercício). Sobrou uma? **− série** tira a última (pede confirmação se
+- **Quer mais séries?** **+ série** (sem limite no treino; a ficha aceita até 20 séries por exercício). Sobrou uma? **− série** tira a última (pede confirmação se
   ela já tiver dados). Quer tirar um exercício? Ícone da lixeira no cartão dele.
 - **Cada exercício entra uma vez só** no treino e na ficha: o buscador não deixa repetir.
 - **Marcar série como feita:** toque no **número da série** — ela fica marcada e o **timer de descanso** já começa.
@@ -208,7 +208,7 @@ Elevação pélvica                                    [3 séries]
 - **Errou algo?** Toque no **✕** ao lado de **Salvar treino**, no fim do treino — nada é salvo e você volta para a tela anterior.
 - **Progresso (v62):** no topo do Treinar, um cartão mostra quantos **exercícios** já foram concluídos (todas as séries marcadas), as **séries feitas**,
   o **volume feito** (só das séries marcadas) e o **cardio**.
-- **Precisa editar um treino já salvo?** Início → toque no treino → **Editar**.
+- **Precisa editar um treino já salvo?** Início → toque no treino → **Editar treino**.
 
 ### Ajudas durante o treino (v51)
 
@@ -221,7 +221,7 @@ Elevação pélvica                                    [3 séries]
 - **Repetir o último treino desta ficha:** ao escolher a ficha, aparece esse botão. Ele preenche o treino com os
   mesmos exercícios, reps e cargas da última vez; RIR e observações ficam em branco.
 - **Timer de descanso:** o botão escuro **Descanso** em cada exercício abre um cartão acima do menu com a contagem
-  regressiva, **+15s** e **✕**. Quando o tempo acaba, o contador fica **laranja** em 0:00 até você fechar no **✕** (sem som nem vibração).
+  regressiva, **+15s** e **✕**. Quando o tempo acaba, o cartão do descanso fica **laranja** em 0:00 até você fechar no **✕** (sem som nem vibração).
   O tempo padrão (90 s) muda em **Mais → Metas da semana → Descanso entre séries**.
 - **Ficha excluída ou desativada:** o seletor do **Treinar** só mostra as fichas ativas. Ao editar um treino
   antigo cuja ficha foi excluída ou desativada, ela aparece como _"NOME (excluída)"_ ou _"NOME (inativa)"_ e
@@ -248,14 +248,14 @@ por semana (no mesmo ciclo das metas): **volume** (soma de reps × carga, sem aq
 
 **Ver um treino (somente leitura):**
 Início → **toque no treino** na lista *Histórico*. Aparece o resumo do dia (volume, cardio e recordes em destaque), ficha,
-observações e cada exercício com aquecimento, séries e cargas. Nessa tela: **Editar**, **Exportar** e **Excluir**.
+observações e cada exercício com aquecimento, séries e cargas. Nessa tela: **Editar treino** e os ícones **Exportar como texto** e **Excluir treino**.
 
 **Ver a evolução de um exercício:**
 Dentro do treino, **toque no nome do exercício**. Você vê:
 
 ```
-Elevação pélvica                                     PR 32 kg 🏆
-↑ 6 treinos com este exercício
+Elevação pélvica                              Carga máxima 32 kg
+6 treinos
 
 Melhor série por dia
 27/09/2026   ▓▓▓▓▓▓▓▓          27 kg × 12
@@ -270,7 +270,7 @@ Histórico
   ...
 ```
 
-Isso responde a pergunta "estou evoluindo?" sem planilha: a **seta ↑/↓/**–** compara a última sessão com a
+Isso responde à pergunta "estou evoluindo?" sem planilha: a **seta ↑/↓/–** compara a última sessão com a
 anterior, e as **barras** mostram a melhor série de cada dia.
 
 **1RM estimado (v61):** a tela do exercício também mostra o **1RM estimado** — a carga que daria para levantar
@@ -321,7 +321,7 @@ Os **927 exercícios do catálogo** não são copiados para lá — eles já est
 
 O que você pode fazer:
 
-- **Filtrar por grupo muscular** (dropdown) e **buscar por nome**;
+- **Filtrar por grupo muscular** (pílulas de grupo) e **buscar por nome**;
 - Ver **em quais fichas** cada exercício é usado (`📋 usada em: TREINO A, TREINO B` ou `⊖ não usada em nenhuma ficha`);
 - **Editar** (nome, grupo, observação) ou **excluir** um exercício que não usa mais.
 
@@ -446,7 +446,7 @@ antes, caso você queira guardar uma cópia.
 
 ### Atualizar app
 O botão **Atualizar app** (em **Mais → Debug**) limpa o cache e recarrega a versão mais nova. Use se algo parecer "travado" ou
-desatualizado (a versão atual aparece no rodapé desta tela, ex.: `v37`). Se o app não abrir de jeito nenhum,
+desatualizado (a versão atual aparece no rodapé desta tela, ex.: `v84`). Se o app não abrir de jeito nenhum,
 existe uma página de escape: abra o endereço do app terminando em `/reset.html`.
 
 ### Dados de exemplo (para conhecer o app)
