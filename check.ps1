@@ -1,22 +1,22 @@
 param()
 
-# Verificações estáticas do Meu Treino (sem precisar de Node/npm).
-# Uso: powershell -ExecutionPolicy Bypass -File .\check.ps1
+# Static checks for Meu Treino (no Node/npm needed).
+# Usage: powershell -ExecutionPolicy Bypass -File .\check.ps1
 
 $ErrorActionPreference = 'Stop'
 $root = $PSScriptRoot
 $script:fail = 0
 
 function Ok($msg) { Write-Host "  ok    $msg" -ForegroundColor Green }
-function Bad($msg) { Write-Host "  FALHA $msg" -ForegroundColor Red; $script:fail++ }
+function Bad($msg) { Write-Host "  FAIL  $msg" -ForegroundColor Red; $script:fail++ }
 
 function Read-Text($relative) {
   return [System.IO.File]::ReadAllText((Join-Path $root $relative), [System.Text.Encoding]::UTF8)
 }
 
-# Impressao digital do conteudo dos dados de exemplo: compara o SIGNIFICADO do arquivo,
-# nao os bytes. Assim nao importa se o JSON foi serializado pelo Windows PowerShell 5.1
-# ou pelo PowerShell 7 (formatacao/escapes diferentes).
+# Fingerprint of the sample data content: compares the MEANING of the file, not the
+# bytes. So it doesn't matter whether the JSON was serialized by Windows PowerShell 5.1
+# or by PowerShell 7 (different formatting/escapes).
 function Get-FixtureFingerprint([string]$path) {
   $doc = [System.IO.File]::ReadAllText($path, [System.Text.Encoding]::UTF8) | ConvertFrom-Json
   $inv = [System.Globalization.CultureInfo]::InvariantCulture
@@ -60,34 +60,34 @@ function Get-FixtureFingerprint([string]$path) {
   return [System.BitConverter]::ToString($sha.ComputeHash($bytes)).Replace('-', '')
 }
 
-Write-Host "Meu Treino - verificacoes estaticas" -ForegroundColor Cyan
+Write-Host "Meu Treino - static checks" -ForegroundColor Cyan
 
-# 1) JSONs válidos
+# 1) Valid JSON files
 foreach ($file in @('manifest.webmanifest', 'data/exercises.json')) {
   try {
     $null = (Read-Text $file) | ConvertFrom-Json
-    Ok "$file e JSON valido"
+    Ok "$file is valid JSON"
   } catch {
-    Bad "$file invalido: $($_.Exception.Message)"
+    Bad "$file is invalid: $($_.Exception.Message)"
   }
 }
 
-# 2) Catálogo: quantidade e ids únicos
+# 2) Catalog: count and unique ids
 $catalog = (Read-Text 'data/exercises.json') | ConvertFrom-Json
 $ids = @($catalog.exercises | ForEach-Object { $_.id })
 $unique = @($ids | Sort-Object -Unique)
 if ($catalog.exercises.Count -eq $unique.Count) {
-  Ok "catalogo com $($unique.Count) exercicios e ids unicos"
+  Ok "catalog has $($unique.Count) exercises and unique ids"
 } else {
-  Bad "catalogo tem ids duplicados ($($catalog.exercises.Count) itens, $($unique.Count) ids)"
+  Bad "catalog has duplicate ids ($($catalog.exercises.Count) items, $($unique.Count) ids)"
 }
 if ([int]$catalog.meta.nextId -gt [int]($ids | Measure-Object -Maximum).Maximum) {
-  Ok "meta.nextId ($($catalog.meta.nextId)) continua apos o maior id"
+  Ok "meta.nextId ($($catalog.meta.nextId)) is still after the highest id"
 } else {
-  Bad "meta.nextId ($($catalog.meta.nextId)) nao e maior que o maior id"
+  Bad "meta.nextId ($($catalog.meta.nextId)) is not greater than the highest id"
 }
 
-# 3) index.html <-> js/app.js: todo getElementById precisa existir (ou ser criado dinamicamente)
+# 3) index.html <-> js/app.js: every getElementById must exist (or be created dynamically)
 $html = Read-Text 'index.html'
 $js = Read-Text 'js/app.js'
 $dynamicIds = @('btnConfirmWeek', 'eraseAck', 'eraseConfirmBtn', 'reminderBackup', 'reminderDismiss', 'dataCopy', 'dataExport', 'dataStatus',
@@ -97,82 +97,82 @@ $htmlIds = @([regex]::Matches($html, 'id="([^"]+)"') | ForEach-Object { $_.Group
 $usedIds = @([regex]::Matches($js, "getElementById\('([^']+)'\)") | ForEach-Object { $_.Groups[1].Value } | Sort-Object -Unique)
 $missingIds = @($usedIds | Where-Object { $htmlIds -notcontains $_ -and $dynamicIds -notcontains $_ })
 if (-not $missingIds) {
-  Ok "todos os ids usados no JS existem no HTML"
+  Ok "every id used in the JS exists in the HTML"
 } else {
-  Bad "ids sem elemento no HTML: $($missingIds -join ', ')"
+  Bad "ids with no element in the HTML: $($missingIds -join ', ')"
 }
 
-# 4) handlers inline (onclick) precisam existir como função
+# 4) inline handlers (onclick) must exist as a function
 $functions = @([regex]::Matches($js, 'function\s+([A-Za-z0-9_]+)\s*\(') | ForEach-Object { $_.Groups[1].Value })
 $inlineHandlers = @([regex]::Matches($js, 'onclick="([A-Za-z0-9_]+)\(') | ForEach-Object { $_.Groups[1].Value } | Sort-Object -Unique)
 $missingFns = @($inlineHandlers | Where-Object { $functions -notcontains $_ })
 if (-not $missingFns) {
-  Ok "todos os handlers onclick existem ($($inlineHandlers.Count) verificados)"
+  Ok "every onclick handler exists ($($inlineHandlers.Count) checked)"
 } else {
-  Bad "handlers sem funcao: $($missingFns -join ', ')"
+  Bad "handlers with no function: $($missingFns -join ', ')"
 }
 
-# 5) assets referenciados no HTML
+# 5) assets referenced in the HTML
 $refs = @([regex]::Matches($html, '(?:src|href)="([^"]+)"') | ForEach-Object { $_.Groups[1].Value } |
   Where-Object { $_ -notmatch '^#' -and $_ -notmatch '^[a-z]+:' })
 $missingFiles = @($refs | Where-Object { -not (Test-Path (Join-Path $root ($_ -replace '\?.*$', ''))) })
 if (-not $missingFiles) {
-  Ok "todos os assets do HTML existem"
+  Ok "every asset referenced by the HTML exists"
 } else {
-  Bad "assets ausentes: $($missingFiles -join ', ')"
+  Bad "missing assets: $($missingFiles -join ', ')"
 }
 
-# 6) assets do service worker
+# 6) service worker assets
 $sw = Read-Text 'sw.js'
 $swAssets = @([regex]::Matches($sw, "'\./([^']+)'") | ForEach-Object { $_.Groups[1].Value } | Where-Object { $_ -ne '' })
 $missingSw = @($swAssets | Where-Object { -not (Test-Path (Join-Path $root ($_ -replace '\?.*$', ''))) })
 if (-not $missingSw) {
-  Ok "todos os assets do service worker existem ($($swAssets.Count))"
+  Ok "every service worker asset exists ($($swAssets.Count))"
 } else {
-  Bad "assets ausentes no service worker: $($missingSw -join ', ')"
+  Bad "missing service worker assets: $($missingSw -join ', ')"
 }
 
-# 7) versão consistente entre HTML e service worker
+# 7) consistent version between the HTML and the service worker
 $htmlVersion = ([regex]::Match($html, 'id="appVersion">v(\d+)<')).Groups[1].Value
 $swVersion = ([regex]::Match($sw, "meu-treino-v(\d+)")).Groups[1].Value
 $queryVersions = @([regex]::Matches($html, '\?v=(\d+)') | ForEach-Object { $_.Groups[1].Value } | Sort-Object -Unique)
 if ($htmlVersion -and $htmlVersion -eq $swVersion -and $queryVersions.Count -eq 1 -and $queryVersions[0] -eq $htmlVersion) {
-  Ok "versao consistente: v$htmlVersion"
+  Ok "consistent version: v$htmlVersion"
 } else {
-  Bad "versao inconsistente: footer=v$htmlVersion, sw=v$swVersion, ?v=($($queryVersions -join ','))"
+  Bad "inconsistent version: footer=v$htmlVersion, sw=v$swVersion, ?v=($($queryVersions -join ','))"
 }
 
-# 8) núcleo de lógica + testes
+# 8) logic core + tests
 if ($js -match "js/core\.js" -and $html -match "js/core\.js\?v=") {
-  Ok "js/core.js ligado no index.html"
+  Ok "js/core.js is linked in index.html"
 } else {
-  Bad "js/core.js nao esta referenciado no index.html"
+  Bad "js/core.js is not referenced in index.html"
 }
 if ($swAssets -contains "js/core.js?v=$htmlVersion") {
-  Ok "js/core.js no cache do service worker"
+  Ok "js/core.js is in the service worker cache"
 } else {
-  Bad "js/core.js?v=$htmlVersion ausente da lista ASSETS do service worker"
+  Bad "js/core.js?v=$htmlVersion is missing from the service worker ASSETS list"
 }
 if (Test-Path (Join-Path $root 'tests/core.test.js')) {
   $testSource = Read-Text 'tests/core.test.js'
   if ($testSource -match "require\('\.\./js/core\.js'\)") {
-    Ok "testes cobrindo js/core.js"
+    Ok "tests cover js/core.js"
   } else {
-    Bad "tests/core.test.js nao importa js/core.js"
+    Bad "tests/core.test.js does not import js/core.js"
   }
 } else {
-  Bad "tests/core.test.js nao encontrado"
+  Bad "tests/core.test.js not found"
 }
 
-# 9) campos de formulário com 16px no celular (evita o zoom automático do iOS)
+# 9) form fields at 16px on phones (stops iOS from zooming when the field gets focus)
 $css = Read-Text 'css/styles.css'
 if (($css -match 'font-size:\s*16px') -and ($css -match 'max-width:\s*767\.98px')) {
-  Ok "inputs com 16px no celular (sem zoom ao focar)"
+  Ok "inputs at 16px on phones (no zoom on focus)"
 } else {
-  Bad "falta a regra de 16px nos inputs para celular (o iOS da zoom ao focar o campo)"
+  Bad "missing the 16px rule for inputs on phones (iOS zooms when the field gets focus)"
 }
 
-# 10) sintaxe dos scripts (só quando o Node está instalado; no CI isso é obrigatório)
+# 10) script syntax (only when Node is installed; in CI this is required)
 $nodeCmd = Get-Command node -ErrorAction SilentlyContinue
 if ($nodeCmd) {
   $syntaxErrors = @()
@@ -181,22 +181,22 @@ if ($nodeCmd) {
     if ($LASTEXITCODE -ne 0) { $syntaxErrors += $script }
   }
   if (-not $syntaxErrors) {
-    Ok "sintaxe dos scripts validada com node --check"
+    Ok "script syntax validated with node --check"
   } else {
-    Bad "erro de sintaxe em: $($syntaxErrors -join ', ')"
+    Bad "syntax error in: $($syntaxErrors -join ', ')"
   }
 } else {
-  Write-Host "  --    node nao instalado: sintaxe nao verificada localmente (o CI verifica)" -ForegroundColor DarkGray
+  Write-Host "  --    node not installed: syntax not checked locally (CI checks it)" -ForegroundColor DarkGray
 }
 
-# 11) dados de exemplo (mesma fixture usada pelos testes)
+# 11) sample data (same fixture the tests use)
 $samplePath = Join-Path $root 'data/sample-data.json'
 if (Test-Path $samplePath) {
   try {
     $sample = (Read-Text 'data/sample-data.json') | ConvertFrom-Json
   } catch {
     $sample = $null
-    Bad "data/sample-data.json invalido: $($_.Exception.Message)"
+    Bad "data/sample-data.json is invalid: $($_.Exception.Message)"
   }
 
   if ($sample) {
@@ -210,22 +210,22 @@ if (Test-Path $samplePath) {
     }
 
     if ($shapeOk -and $perSheetOk) {
-      Ok "dados de exemplo: 3 fichas (5+ catalogo e 2 custom cada) e 12 treinos"
+      Ok "sample data: 3 sheets (5+ from the catalog and 2 custom each) and 12 workouts"
     } else {
-      Bad "dados de exemplo fora do formato esperado (3 fichas / 12 treinos / 5+2 por ficha)"
+      Bad "sample data is not in the expected shape (3 sheets / 12 workouts / 5+2 per sheet)"
     }
 
     if ($swAssets -contains 'data/sample-data.json') {
-      Bad "data/sample-data.json nao deve entrar no precache (e carregado sob demanda)"
+      Bad "data/sample-data.json must not be precached (it is loaded on demand)"
     } else {
-      Ok "dados de exemplo fora do precache (carregados sob demanda)"
+      Ok "sample data is out of the precache (loaded on demand)"
     }
   }
 } else {
-  Bad "data/sample-data.json nao encontrado"
+  Bad "data/sample-data.json not found"
 }
 
-# 12) ferramentas versionadas e fixture de exemplo em sincronia com o gerador
+# 12) committed tools: the sample fixture is in sync with the generator
 $generator = Join-Path $root 'tools/build-sample-data.ps1'
 if (Test-Path $generator) {
   $tmpSample = Join-Path ([System.IO.Path]::GetTempPath()) ('mt-sample-check-' + [guid]::NewGuid().ToString('N') + '.json')
@@ -234,57 +234,57 @@ if (Test-Path $generator) {
     $fpCommitted = Get-FixtureFingerprint (Join-Path $root 'data/sample-data.json')
     $fpGenerated = Get-FixtureFingerprint $tmpSample
     if ($fpCommitted -eq $fpGenerated) {
-      Ok "dados de exemplo em sincronia com tools/build-sample-data.ps1 (conteudo)"
+      Ok "sample data is in sync with tools/build-sample-data.ps1 (content)"
     } else {
-      Bad "data/sample-data.json difere do gerador - rode: tools/build-sample-data.ps1"
+      Bad "data/sample-data.json differs from the generator - run: tools/build-sample-data.ps1"
     }
   } catch {
-    Bad "falha ao rodar o gerador: $($_.Exception.Message)"
+    Bad "failed to run the generator: $($_.Exception.Message)"
   } finally {
     if (Test-Path $tmpSample) { Remove-Item $tmpSample -Force }
   }
 } else {
-  Bad "tools/build-sample-data.ps1 nao encontrado"
+  Bad "tools/build-sample-data.ps1 not found"
 }
 
-# 13) gate de cobertura obrigatorio + checklist de funcionalidades
+# 13) enforced coverage gate + feature checklist
 if (Test-Path (Join-Path $root 'tools/coverage-gate.js')) {
   $gateSource = Read-Text 'tools/coverage-gate.js'
   $workflowTests = Read-Text '.github/workflows/tests.yml'
 
   if ($workflowTests -match 'tools/coverage-gate\.js') {
-    Ok "gate de cobertura ligado no CI (tools/coverage-gate.js)"
+    Ok "coverage gate wired into CI (tools/coverage-gate.js)"
   } else {
-    Bad "o workflow de testes nao roda tools/coverage-gate.js"
+    Bad "the tests workflow does not run tools/coverage-gate.js"
   }
 
   if ($gateSource -match 'js/core\.js' -and $gateSource -match 'COVERAGE_ENFORCE') {
-    Ok "gate de cobertura exige 100% de js/core.js"
+    Ok "coverage gate requires 100% of js/core.js"
   } else {
-    Bad "tools/coverage-gate.js nao exige 100% de js/core.js"
+    Bad "tools/coverage-gate.js does not require 100% of js/core.js"
   }
 } else {
-  Bad "tools/coverage-gate.js nao encontrado"
+  Bad "tools/coverage-gate.js not found"
 }
 
 if (Test-Path (Join-Path $root 'tests/CHECKLIST.md')) {
   $checklist = Read-Text 'tests/CHECKLIST.md'
   if ($checklist -match 'Feature' -and $checklist -match 'core\.js') {
-    Ok "checklist de funcionalidades x testes presente"
+    Ok "feature x tests checklist is present"
   } else {
-    Bad "tests/CHECKLIST.md sem a tabela de funcionalidades"
+    Bad "tests/CHECKLIST.md has no feature table"
   }
 } else {
-  Bad "tests/CHECKLIST.md nao encontrado"
+  Bad "tests/CHECKLIST.md not found"
 }
 
-# 14) toda funcao chamada no js/app.js precisa existir (evita ReferenceError em runtime,
-#     que o --check de sintaxe do Node NAO detecta)
+# 14) every function called in js/app.js must exist (avoids a runtime ReferenceError,
+#     which Node's --check syntax check does NOT catch)
 $appSource = Read-Text 'js/app.js'
 $coreSource = Read-Text 'js/core.js'
 $dbSource = Read-Text 'js/db.js'
 
-# remove strings e comentarios: sobram so as chamadas e definicoes de verdade
+# strip strings and comments: only real calls and definitions are left
 $limpo = $appSource
 $limpo = [regex]::Replace($limpo, "'([^'\\\n]|\\.)*'", "''")
 $limpo = [regex]::Replace($limpo, '"([^"\\\n]|\\.)*"', '""')
@@ -298,7 +298,7 @@ $definidasApp = @([regex]::Matches($limpo, '(?:function|async function)\s+([A-Za
   ForEach-Object { $_.Groups[1].Value })
 $definidasApp += @([regex]::Matches($limpo, '(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*=') |
   ForEach-Object { $_.Groups[1].Value })
-# nomes de parametros tambem sao chamaveis (callbacks como resolve/reject)
+# parameter names are callable too (callbacks such as resolve/reject)
 $definidasApp += @([regex]::Matches($limpo, 'function\s*[A-Za-z_$\w]*\s*\(([^)]*)\)') |
   ForEach-Object { $_.Groups[1].Value -split ',' } |
   ForEach-Object { $_.Trim() -replace '=.*$', '' } |
@@ -337,16 +337,16 @@ $faltando = @($chamadas | Where-Object {
 })
 
 if (-not $faltando) {
-  Ok "toda funcao chamada no app.js existe ($($chamadas.Count) nomes conferidos)"
+  Ok "every function called in app.js exists ($($chamadas.Count) names checked)"
 } else {
-  Bad "funcoes chamadas no app.js sem definicao (ReferenceError): $($faltando -join ', ')"
+  Bad "functions called in app.js with no definition (ReferenceError): $($faltando -join ', ')"
 }
 
 Write-Host ""
 if ($script:fail -eq 0) {
-  Write-Host "Tudo certo." -ForegroundColor Green
+  Write-Host "All good." -ForegroundColor Green
   exit 0
 }
 
-Write-Host "$($script:fail) verificacao(oes) falharam." -ForegroundColor Red
+Write-Host "$($script:fail) check(s) failed." -ForegroundColor Red
 exit 1

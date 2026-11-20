@@ -1,61 +1,63 @@
-# Ferramentas de desenvolvimento
+# Development tools
 
-Scripts de apoio do projeto. Não fazem parte do app publicado (não entram no precache do service worker),
-mas ficam versionados para que qualquer mudança seja reproduzível.
+Support scripts for the project. They are not part of the published app and don't go into the service worker
+precache, but they are kept in the repo so that every change is reproducible.
 
-| Ferramenta | Para que serve |
+| Tool | What it is for |
 |---|---|
-| `build-sample-data.ps1` | Gera `data/sample-data.json` (os "dados de exemplo" carregados em **Mais → Dados de exemplo**) |
-| `sample-data-content.json` | Conteúdo em português dos dados de exemplo: exercícios custom, fichas (por id do catálogo), dias, cardio, observações e colinhas |
-| `coverage-gate.js` | Roda os testes de unidade e exige 100% de linhas e ramos em `js/core.js` |
-| `e2e-coverage.js` | Mede quanto do `js/app.js` os testes de navegador executam e aplica a catraca do CI (veja abaixo) |
+| `build-sample-data.ps1` | Builds `data/sample-data.json` (the "sample data" loaded in **Mais → Dados de exemplo**) |
+| `sample-data-content.json` | Portuguese content of the sample data: custom exercises, sheets (by catalog id), days, cardio, notes and colinhas. This one stays pt-BR: it is what the user sees |
+| `coverage-gate.js` | Runs the unit tests and requires 100% of lines and branches in `js/core.js` |
+| `e2e-coverage.js` | Measures how much of `js/app.js` the browser tests run and applies the CI ratchet (see below) |
 
-## Cobertura do `js/app.js` pelos testes de navegador
+## `js/app.js` coverage by the browser tests
 
-Cada teste de navegador grava em `tests/e2e/coverage/` (fora do git) as linhas do `js/app.js` que rodaram, pela
-cobertura de JS do Chromium (fixture automático em `tests/e2e/helpers.js`). Depois de `npm run test:e2e`:
+Every browser test records in `tests/e2e/coverage/` (outside git) the `js/app.js` lines that ran, through
+Chromium's JS coverage (automatic fixture in `tests/e2e/helpers.js`). After `npm run test:e2e`:
 
 ```powershell
-npm run test:e2e:coverage                 # número e as funções com linhas que nenhum teste roda
-node tools/e2e-coverage.js --update       # grava o número em tests/e2e/coverage-baseline.json
+npm run test:e2e:coverage                 # number and the functions with lines no test runs
+node tools/e2e-coverage.js --update       # writes the number into tests/e2e/coverage-baseline.json
 ```
 
-Conta como linha toda linha com código (sem linhas em branco e só de comentário); a linha rodou se o bloco mais
-interno que contém o começo dela rodou. Recarregar a página descarta os contadores do V8: `page.reload`/`page.goto`
-nos testes tiram uma foto antes, mas o que roda logo antes de o **próprio app** recarregar ("Atualizar app") não entra.
+Every line with code counts (blank lines and comment-only lines don't); a line ran when the innermost block
+that contains the start of it ran. Reloading the page discards the V8 counters: `page.reload`/`page.goto` in the
+tests take a snapshot before that, but whatever runs right before the **app itself** reloads ("Atualizar app")
+is not counted.
 
-No CI, o job **Testes de navegador** publica o número no resumo e falha se ele cair em relação ao
-`tests/e2e/coverage-baseline.json` da `main`, ou se tiver subido sem o PR atualizar o arquivo (a catraca só sobe:
-rode `--update` e faça commit).
+In CI, the **Testes de navegador** job publishes the number in the summary and fails when it drops compared to
+`main`'s `tests/e2e/coverage-baseline.json`, or when it rose and the PR did not update that file (the ratchet
+only goes up: run `--update` and commit it).
 
-## Gerar os dados de exemplo
+## Building the sample data
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\tools\build-sample-data.ps1
 ```
 
-O `check.ps1` (e a pipeline) **regenera a fixture e compara o conteúdo** com o arquivo commitado — assim o
-gerador e o JSON nunca ficam fora de sincronia (a comparação é por significado, não por bytes, porque o
-Windows PowerShell 5.1 e o PowerShell 7 serializam o JSON de formas diferentes). Se você mudar o conteúdo, rode o comando acima e commite
-o `data/sample-data.json` resultante.
+`check.ps1` (and the pipeline) **regenerates the fixture and compares the content** with the committed file —
+so the generator and the JSON never drift apart (the comparison is by meaning, not by bytes, because
+Windows PowerShell 5.1 and PowerShell 7 serialize the JSON differently). If you change the content, run the
+command above and commit the resulting `data/sample-data.json`.
 
-## Como as fichas de exemplo são montadas
+## How the sample sheets are built
 
-Para cada ficha definida em `sample-data-content.json`:
+For each sheet defined in `sample-data-content.json`:
 
-- `catalogIds` — exercícios que vêm do **catálogo embutido** (`data/exercises.json`), referenciados só pelo
-  **id** (o nome é lido do catálogo, garantindo que esteja sempre igual);
-- `customIds` — exercícios **criados pelo usuário** (definidos em `customExercises`), que entram na
-  Biblioteca e são vinculados às fichas por **chave estrangeira** (`exerciseId`);
-- `dayOffsets` — quantos dias **atrás** cada treino aconteceu (relativo a hoje, para a demonstração ficar
-  sempre recente);
-- `cardioMinutes` e `notes` — cardio e observação de cada treino.
+- `catalogIds` — exercises that come from the **embedded catalog** (`data/exercises.json`), referenced only by
+  **id** (the name is read from the catalog, which keeps it always the same);
+- `customIds` — exercises **created by the user** (defined in `customExercises`), which go into the
+  Library and are linked to the sheets by **foreign key** (`exerciseId`);
+- `dayOffsets` — how many days **ago** each workout happened (relative to today, so the demo always stays
+  recent);
+- `cardioMinutes` and `notes` — cardio and note of each workout.
 
-As cargas crescem a cada sessão (+2,5 kg) para os gráficos de evolução mostrarem progresso, e os três
-primeiros exercícios de cada treino têm aquecimento preenchido.
+Loads grow every session (+2.5 kg) so the progress charts show progress, and the first three exercises of each
+workout have their warm-up filled in.
 
-## Por que o script é só ASCII
+## Why the script is ASCII-only
 
-O Windows PowerShell 5.1 lê arquivos `.ps1` sem BOM como ANSI, o que quebraria acentos ("Elevação" viraria
-lixo). Por isso todo texto em português vive no `sample-data-content.json`, lido explicitamente como UTF-8 —
-e o script funciona igual no PowerShell 7 (Linux/CI).
+Windows PowerShell 5.1 reads `.ps1` files without a BOM as ANSI, which would break accents ("Elevação" would
+become garbage). So all Portuguese text lives in `sample-data-content.json`, read explicitly as UTF-8 — so the
+script works the same on PowerShell 7 (Linux/CI). Both `.ps1` files here (`build-sample-data.ps1` and
+`check.ps1`) are ASCII-only for that reason: keep them that way.

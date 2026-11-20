@@ -7,7 +7,7 @@ powershell -ExecutionPolicy Bypass -File .\serve.ps1   # http://localhost:8080 (
 node --test tests/                                      # unit tests (no install needed)
 npm run test:e2e                                        # browser tests (Playwright), see below
 $env:COVERAGE_ENFORCE='1'; node tools/coverage-gate.js  # tests + fails below 100% coverage of js/core.js (without the variable it only warns)
-powershell -ExecutionPolicy Bypass -File .\check.ps1   # static checks (must print "Tudo certo.")
+powershell -ExecutionPolicy Bypass -File .\check.ps1   # static checks (must print "All good.")
 powershell -ExecutionPolicy Bypass -File .\tools\build-sample-data.ps1   # only after editing sample data content
 ```
 
