@@ -25,7 +25,7 @@ that contains the start of it ran. Reloading the page discards the V8 counters: 
 tests take a snapshot before that, but whatever runs right before the **app itself** reloads ("Atualizar app")
 is not counted.
 
-In CI, the **Testes de navegador** job publishes the number in the summary and fails when it drops compared to
+In CI, the **Browser tests** job publishes the number in the summary and fails when it drops compared to
 `main`'s `tests/e2e/coverage-baseline.json`, or when it rose and the PR did not update that file (the ratchet
 only goes up: run `--update` and commit it).
 
