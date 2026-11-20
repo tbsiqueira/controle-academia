@@ -50,10 +50,10 @@ New core functions must be added to the export object at the bottom of `core.js`
 
 - **Reference by `id`; the name is only a snapshot.** Sets, warm-ups and sheet items store `exerciseId` plus the
   name as it was that day, so history stays readable if the item is later renamed or deleted. Display resolves the
-  **current** name with `exerciseLabel` / `sheetLabel`. Why: comparing names made renames miss screens and made the
-  catalog history open empty (v27, v40, v47); never infer identity from a name, store explicit fields. Fichas that
-  predate ids get them on startup (`linkSheetItemsToExercises`) when the stored name matches one library exercise
-  unambiguously; the name stays as the fallback for records that never match.
+  **current** name with `exerciseLabel` / `sheetLabel`. Why: identity by name caused the v27 (library origin guessed
+  from the name), v40 (ficha rename) and v47 (catalog history) regressions; never infer identity from a name, store
+  explicit fields. Fichas that predate ids get them on startup (`linkSheetItemsToExercises`) when the stored name
+  matches one library exercise unambiguously; the name stays as the fallback for records that never match.
 - **Two id spaces**: user exercises = UUID text, catalog = integer 1..927. **Compare ids as strings**
   (`String(id)`), in one place: `exerciseMatches`, `exerciseKey`, `exerciseLabel`, `sheetLabel`. The id arrives as a
   number from IndexedDB and as text from `data-*` attributes; normalising in one place is what fixed that class of bug.
@@ -64,11 +64,24 @@ New core functions must be added to the export object at the bottom of `core.js`
 - **Backups**: `normalizeBackup` converts any version (fixtures in `tests/fixtures/`) to the current shape, must stay
   idempotent and ignores unknown fields. Imported ids and dates are validated before writing, and
   `dbReplaceAll` clears and writes in **one transaction** so a failed import can't leave the DB empty. Old databases
-  (`tests/old-db.test.js`) must still load: a new field never requires a DB version bump — put it on an existing record.
+  (`tests/old-db.test.js`) must still load. Adding a property to an existing object-store record generally does not
+  require an IndexedDB schema upgrade; adding or changing object stores, key paths or indexes does. Preserve
+  compatibility with existing databases and test migrations whenever the schema changes.
 - Numbers accept a comma (`27,5`): parse with `parseLocalNumber` / `toNum`, show with `formatDecimal`.
   Decimal inputs are `type="text" inputmode="decimal"` (`type="number"` blocks the comma on iPhone).
 - Escape everything that comes from the DB with `esc()` before putting it into HTML.
-- Inline `onclick="fn()"` handlers call global functions, so `check.ps1` verifies every one exists.
+
+## Event handling (current mechanism, don't change it casually)
+
+- Screens are HTML strings built in `app.js`; interactive elements use inline `onclick="fn(...)"` plus a few
+  `oninput`/`onchange`. The scripts in `index.html` are classic scripts (no `type="module"`), so those handlers call
+  functions that must be globally reachable (the top-level functions of `app.js` and the globals `core.js` registers
+  in the browser). `check.ps1` verifies every `onclick` handler names an existing function.
+- `index.html`'s CSP allows this with `'unsafe-inline'` in `script-src` (the `style-src` allowance is separate: the
+  app also uses `style` attributes).
+- Don't remove the inline handlers, the globals or the CSP allowance as part of an unrelated task. The migration to
+  `data-action` + event delegation is refactor issue #9, in the Phase 2 order of
+  [REFACTOR.md](../REFACTOR.md#3-phases-and-pr-order).
 
 ## Features with their own contract
 

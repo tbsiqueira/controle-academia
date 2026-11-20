@@ -123,6 +123,7 @@ Nothing here is scheduled or a requirement; don't build them unasked.
 
 ## 11. History
 
-The revision log is in git: `git log --oneline` and the release tags (`vN`). Decisions that still matter for new
-work are in [agents/history.md](agents/history.md). This document keeps the requirements and the closed decisions;
-planning and the state of each change live in [GitHub issues](https://github.com/tbsiqueira/controle-academia/issues).
+The revision log is in git: `git log --oneline`, where release commits carry the version as `(vN)`. Decisions
+that still matter for new work are in [agents/history.md](agents/history.md). This document keeps the requirements
+and the closed decisions; planning and the state of each change live in
+[GitHub issues](https://github.com/tbsiqueira/controle-academia/issues).

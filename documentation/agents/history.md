@@ -1,6 +1,7 @@
 # History, decisions and lessons
 
-The detailed log is in `git log` and the release tags (`vN`); requirements are in
+The detailed log is in `git log`; release commits carry `(vN)` in the subject. The release tags are not a reliable
+index (e.g. some early ones point at later commits, and `v24`–`v48` are missing). Requirements are in
 [`PLANO.md`](../PLANO.md). This page keeps what a future agent should know before touching the same area. Rules
 that came out of them live in the docs they point to ([architecture.md](architecture.md),
 [product-rules.md](product-rules.md), [workflow.md](workflow.md)); they are not repeated here. User-visible
@@ -31,10 +32,10 @@ behaviour is described in [`MANUAL.md`](../MANUAL.md), and rejected or reverted 
   [checklist for every change](workflow.md#checklist-for-every-change).
 - **Ids over names (v27, v40, v47)**: identity comes from the stored `exerciseId`; the name is a display snapshot,
   and only records without an id fall back to matching by name. Never reintroduce name-based identity.
-- **Numeric catalog ids (Revision 48)**: the catalog stays 1..927 instead of migrating to UUID. Records, backups
+- **Numeric catalog ids (v47)**: the catalog stays 1..927 instead of migrating to UUID. Records, backups
   and history point at those numbers, and comparing ids as text already fixes the number/text mismatch; a migration
   would rewrite user data for no visible gain.
-- **One backup file, import with undo (v15, v35–v40)**: one action produces exactly one `.json`, shared as
+- **One backup file, import with undo (v16, v35–v39)**: one action produces exactly one `.json`, shared as
   `{ files }` only (`title`/`text` became stray `.txt` files on the phone). Import replaces the data after
   confirmation and keeps the previous state in memory for "Desfazer importação" — no automatic second file.
 - **Temporary tests are turned off, not deleted (#40)**: they are the finest net for a future large change, so #40
