@@ -41,7 +41,7 @@ jobs:
           COVERAGE_ENFORCE: '1'
         run: node tools/coverage-gate.js
 
-  estatico:
+  static:
     name: Static checks
     runs-on: ubuntu-latest
     steps:
@@ -53,7 +53,7 @@ jobs:
         run: ./check.ps1
 
   # Browser tests (Playwright): the real app in a mobile Chromium. See documentation/REFACTOR.md.
-  navegador:
+  browser:
     name: Browser tests
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -94,7 +94,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v7
         with:
-          name: relatorio-testes-navegador
+          name: browser-test-report
           path: |
             tests/e2e/report/
             tests/e2e/results/
@@ -102,7 +102,7 @@ jobs:
 
   # PR-only: touched the app (index.html, css/, js/) -> the version must go up and be new,
   # otherwise the merge publishes nothing (deploy.yml only publishes a version without a tag).
-  versao:
+  version:
     name: Version
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
@@ -121,19 +121,19 @@ jobs:
           head=$(grep -oP 'id="appVersion">v\K\d+' index.html)
           echo "main: v$base | PR: v$head"
           if [ "$head" -lt "$base" ]; then
-            echo "::error::a versao do PR (v$head) e menor que a da main (v$base). Faca rebase na main."
+            echo "::error::the PR version (v$head) is lower than main's (v$base). Rebase onto main."
             exit 1
           fi
           if git diff --quiet "origin/$BASE_REF...HEAD" -- index.html css js; then
-            echo "Sem mudanca em index.html, css/ ou js/: bump nao exigido."
+            echo "No change in index.html, css/ or js/: bump not required."
             exit 0
           fi
           if [ "$head" -le "$base" ]; then
-            echo "::error::index.html, css/ ou js/ mudou mas a versao continua v$head. Suba para v$((base + 1)) (veja documentation/agents/workflow.md)."
+            echo "::error::index.html, css/ or js/ changed but the version is still v$head. Bump it to v$((base + 1)) (see documentation/agents/workflow.md)."
             exit 1
           fi
           if git ls-remote --exit-code --tags origin "refs/tags/v$head" >/dev/null; then
-            echo "::error::a tag v$head ja existe. Faca rebase na main e suba a versao."
+            echo "::error::tag v$head already exists. Rebase onto main and bump the version."
             exit 1
           fi
           echo "OK: v$base -> v$head"

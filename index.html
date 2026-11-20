@@ -11,9 +11,9 @@
   <link rel="icon" href="icons/icon-16.png" sizes="16x16" type="image/png">
   <link rel="icon" href="icons/icon-32.png" sizes="32x32" type="image/png">
   <link rel="apple-touch-icon" href="icons/icon-180.png">
-  <link rel="stylesheet" href="vendor/bootstrap/bootstrap.min.css?v=83">
-  <link rel="stylesheet" href="vendor/bootstrap-icons/bootstrap-icons.min.css?v=83">
-  <link rel="stylesheet" href="css/styles.css?v=83">
+  <link rel="stylesheet" href="vendor/bootstrap/bootstrap.min.css?v=84">
+  <link rel="stylesheet" href="vendor/bootstrap-icons/bootstrap-icons.min.css?v=84">
+  <link rel="stylesheet" href="css/styles.css?v=84">
 </head>
 <body>
   <main class="container pb-nav">
@@ -142,9 +142,9 @@
       <h1 class="h4 mt-3 mb-3"><i class="bi bi-calendar3"></i> Frequência</h1>
       <div class="card"><div class="card-body">
       <div class="cal-nav">
-        <button class="btn btn-sm btn-outline-secondary" type="button" id="calPrev" aria-label="Mes anterior"><i class="bi bi-chevron-left"></i></button>
+        <button class="btn btn-sm btn-outline-secondary" type="button" id="calPrev" aria-label="Mês anterior"><i class="bi bi-chevron-left"></i></button>
         <strong id="calMonthLabel"></strong>
-        <button class="btn btn-sm btn-outline-secondary" type="button" id="calNext" aria-label="Proximo mes"><i class="bi bi-chevron-right"></i></button>
+        <button class="btn btn-sm btn-outline-secondary" type="button" id="calNext" aria-label="Próximo mês"><i class="bi bi-chevron-right"></i></button>
       </div>
       <div class="cal-grid cal-header">
         <div>D</div><div>S</div><div>T</div><div>Q</div><div>Q</div><div>S</div><div>S</div>
@@ -246,11 +246,11 @@
         </div>
       </div>
 
-      <p class="text-center text-muted small">Meu Treino <span id="appVersion">v83</span> · dados 100% locais · catálogo: gugeldev/exercicios-bd-ptbr (CC0)</p>
+      <p class="text-center text-muted small">Meu Treino <span id="appVersion">v84</span> · dados 100% locais · catálogo: gugeldev/exercicios-bd-ptbr (CC0)</p>
     </section>
   </main>
 
-  <!-- Rest timer (aparece acima da navegação enquanto conta) -->
+  <!-- Rest timer (shows above the navigation while it counts) -->
   <div id="restBar" class="rest-bar d-none" role="status" aria-live="polite">
     <div class="rest-bar-inner">
       <i class="bi bi-stopwatch"></i>
@@ -262,7 +262,7 @@
     <div class="rest-progress"><div id="restProgress"></div></div>
   </div>
 
-  <!-- Aviso rápido de sucesso: some sozinho, sem precisar tocar em OK -->
+  <!-- Quick success notice: disappears on its own, no need to tap OK -->
   <div class="toast-container position-fixed top-0 start-50 translate-middle-x p-3">
     <div id="appToast" class="toast text-bg-success border-0" role="status" aria-live="polite" aria-atomic="true">
       <div class="toast-body text-center fw-semibold" id="appToastBody"></div>
@@ -388,7 +388,7 @@
     </div>
   </div>
 
-  <!-- Export as text modal -->
+  <!-- AI ficha import modal (Criar com IA) -->
   <div class="modal fade" id="sheetImportModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-scrollable modal-fullscreen-sm-down">
       <div class="modal-content">
@@ -453,6 +453,7 @@
     </div>
   </div>
 
+  <!-- Export as text modal -->
   <div class="modal fade" id="exportModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-fullscreen-sm-down">
       <div class="modal-content">
@@ -472,9 +473,9 @@
     </div>
   </div>
 
-  <script src="vendor/bootstrap/bootstrap.bundle.min.js?v=83"></script>
-  <script src="js/db.js?v=83"></script>
-  <script src="js/core.js?v=83"></script>
-  <script src="js/app.js?v=83"></script>
+  <script src="vendor/bootstrap/bootstrap.bundle.min.js?v=84"></script>
+  <script src="js/db.js?v=84"></script>
+  <script src="js/core.js?v=84"></script>
+  <script src="js/app.js?v=84"></script>
 </body>
 </html>

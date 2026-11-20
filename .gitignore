@@ -6,17 +6,17 @@ $RECYCLE.BIN/
 # macOS
 .DS_Store
 
-# Arquivos temporários
+# Temporary files
 *.tmp
 *.log
 
-# Ferramentas do agente
+# Agent tools
 .reasonix/
 
-# Configuracao local do preview (Claude desktop)
+# Local preview config (Claude desktop)
 .claude/launch.json
 
-# Ferramentas de desenvolvimento (npm) e resultados dos testes de navegador
+# Development tools (npm) and browser-test results
 node_modules/
 tests/e2e/results/
 tests/e2e/report/

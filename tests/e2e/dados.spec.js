@@ -50,7 +50,7 @@ async function importFile(page, name, text) {
   await expect(page.locator('#view-dashboard')).toBeVisible();
 }
 
-/** Opens the Erase data screen, ticks the box and erases everything. */
+/** Opens the Apagar dados screen, ticks the box and erases everything. */
 async function eraseEverything(page) {
   await goTo(page, 'Mais');
   await page.locator('#btnEraseAll').click();
@@ -199,7 +199,7 @@ test.describe('Data · importing old backups through the screen', () => {
     expect(await storedRecords(page, 'sheets')).toHaveLength(1);
   });
 
-  test('does not trust the file: an id with code is discarded and an invalid date becomes "sem data"', async ({ page }) => {
+  test('does not trust the file: an id with code is discarded and an invalid date becomes "Sem data"', async ({ page }) => {
     const set = { exerciseId: 'ex-1', exerciseName: 'Supino reto', number: 1, reps: 10, load: 30 };
     const backup = {
       app: 'meu-treino', version: 2,
@@ -349,7 +349,7 @@ test.describe('Data · sample data', () => {
     await importOld(page, V1);
     await goTo(page, 'Mais');
     await page.locator('#btnLoadSample').click();
-    await expect(page.locator('#sampleStatus')).toHaveText('Dados de exemplo carregados: 3 fichas, 12 treinos e 6 exercicios.');
+    await expect(page.locator('#sampleStatus')).toHaveText('Dados de exemplo carregados: 3 fichas, 12 treinos e 6 exercícios.');
     expect(await storedRecords(page, 'workouts')).toHaveLength(12);
     expect(await storedRecords(page, 'sheets')).toHaveLength(3);
 

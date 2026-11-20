@@ -1,4 +1,4 @@
-/* Meu Treino — mobile-first styles (Bootstrap 5 base), tema verde-limão */
+/* Meu Treino — mobile-first styles (Bootstrap 5 base), lime-green theme */
 
 @font-face {
   font-family: "Plus Jakarta Sans";
@@ -25,10 +25,10 @@
   --mt-shadow: 0 6px 24px rgba(40, 60, 10, 0.06);
   --mt-primary: var(--mt-lime-deep);
   --mt-nav-height: 64px;
-  /* Espaço da barra de início do iPhone embaixo do menu: só o bastante para o texto não encostar nela */
+  /* iPhone home-bar space below the menu: just enough so the text doesn't touch it */
   --mt-nav-safe: max(7px, calc(env(safe-area-inset-bottom, 0px) - 20px));
 
-  /* Bootstrap: fonte, cores de texto e de destaque */
+  /* Bootstrap: font, text and accent colors */
   --bs-body-font-family: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --bs-body-color: var(--mt-ink);
   --bs-body-bg: var(--mt-bg);
@@ -48,8 +48,8 @@
   --bs-focus-ring-color: rgba(200, 245, 60, 0.6);
 }
 
-/* O degradê fica no fundo da página inteira (html), não no body: assim ele começa
-   colado na barra de status, sem uma linha reta onde o body começa. */
+/* The gradient sits on the whole page background (html), not on the body: that way it starts
+   flush with the status bar, with no straight line where the body begins. */
 html {
   background: radial-gradient(120% 420px at 50% -120px, #e6f8b8 0%, var(--mt-bg) 100%) no-repeat, var(--mt-bg);
 }
@@ -65,9 +65,9 @@ body {
   color: var(--mt-muted) !important;
 }
 
-/* viewport-fit=cover estende a página até a barra de status do iPhone: reserva esse espaço em cima */
+/* viewport-fit=cover stretches the page up to the iPhone status bar: reserve that space at the top */
 .pb-nav {
-  display: flow-root;   /* a margem do título não vaza para fora do main */
+  display: flow-root;   /* the title margin doesn't leak out of main */
   padding-top: env(safe-area-inset-top, 0px);
   padding-bottom: calc(var(--mt-nav-height) + var(--mt-nav-safe) + 24px);
 }
@@ -81,7 +81,7 @@ body {
   to   { opacity: 1; }
 }
 
-/* Títulos das telas: grandes e escuros, sem ícone */
+/* Screen titles: large and dark, no icon */
 .view h1 {
   font-size: 1.6rem;
   font-weight: 800;
@@ -93,7 +93,7 @@ body {
   display: none;
 }
 
-/* Cabeçalho com voltar: botão redondo à esquerda, título ao lado */
+/* Header with a back button: round button on the left, title beside it */
 .page-head {
   display: flex;
   align-items: center;
@@ -127,8 +127,7 @@ body {
   color: var(--mt-ink);
 }
 
-/* Bottom navigation: barra flutuante arredondada */
-/* Navegação presa na borda de baixo; a área da barra de início do iPhone fica dentro dela */
+/* Bottom navigation: bar pinned to the bottom edge; the iPhone home-bar area sits inside it */
 .bottom-nav {
   position: fixed;
   left: 0;
@@ -172,7 +171,7 @@ body {
   color: var(--mt-lime-deep);
 }
 
-/* Cards: brancos, sem borda, sombra suave */
+/* Cards: white, no border, soft shadow */
 .card {
   border: 0;
   border-radius: 22px;
@@ -201,7 +200,7 @@ body {
   color: var(--mt-lime-deep);
 }
 
-/* Botões: pílulas */
+/* Buttons: pills */
 .btn {
   --bs-btn-border-radius: 999px;
   --bs-btn-font-weight: 700;
@@ -246,7 +245,7 @@ body {
   color: var(--mt-lime);
 }
 
-/* Contornos viram pílulas cinza-claras, sem borda */
+/* Outlines become light-grey pills, no border */
 .btn-outline-primary,
 .btn-outline-secondary,
 .btn-outline-success,
@@ -299,7 +298,7 @@ body {
   font-weight: 700;
 }
 
-/* Botão tracejado (ações secundárias: repetir treino, adicionar) */
+/* Dashed button (secondary actions: repeat workout, add) */
 .btn-dashed {
   --bs-btn-color: var(--mt-lime-deep);
   --bs-btn-hover-color: var(--mt-ink);
@@ -309,7 +308,7 @@ body {
   background: transparent;
 }
 
-/* Campos: fundo cinza-esverdeado, sem borda */
+/* Fields: grey-green background, no border */
 .form-control,
 .form-select {
   border: 0;
@@ -337,7 +336,7 @@ body {
   font-weight: 500;
 }
 
-/* Textareas: fundo branco e borda visível, para não sumir no fundo do card/página */
+/* Textareas: white background and a visible border, so they don't blend into the card/page */
 textarea.form-control,
 textarea.form-control:focus {
   font-weight: 500;
@@ -361,7 +360,7 @@ textarea.form-control:focus {
   border-color: var(--mt-lime-deep);
 }
 
-/* Avisos: cartões suaves, sem borda */
+/* Alerts: soft cards, no border */
 .alert {
   border: 0;
   border-radius: 18px;
@@ -400,7 +399,7 @@ textarea.form-control:focus {
   color: var(--mt-muted);
 }
 
-/* Dica recolhível (explicações longas ficam a um toque, fora do caminho) */
+/* Collapsible hint (long explanations stay one tap away, out of the way) */
 details.info-hint {
   margin-bottom: 14px;
   font-size: 0.85rem;
@@ -422,7 +421,7 @@ details.info-hint p {
   line-height: 1.5;
 }
 
-/* Etiquetas */
+/* Badges */
 .badge {
   border-radius: 999px;
   font-weight: 700;
@@ -463,7 +462,7 @@ details.info-hint p {
   color: var(--mt-muted);
 }
 
-/* Filtros em pílulas (substituem os selects de filtro) */
+/* Pill filters (replace the filter selects) */
 .chip-row {
   display: flex;
   gap: 8px;
@@ -495,7 +494,7 @@ details.info-hint p {
   color: var(--mt-ink);
 }
 
-/* Abas Fichas/Biblioteca: interruptor escuro */
+/* Fichas/Biblioteca tabs: dark switch */
 .nav-pills {
   background: var(--mt-card);
   border-radius: 999px;
@@ -515,7 +514,7 @@ details.info-hint p {
   color: #ffffff;
 }
 
-/* Barras de progresso */
+/* Progress bars */
 .progress {
   background-color: #e8eedf;
   border-radius: 99px;
@@ -530,7 +529,7 @@ details.info-hint p {
   background-color: var(--mt-ink) !important;
 }
 
-/* ---------- Início ---------- */
+/* ---------- Home (Início) ---------- */
 
 .week-card .week-head {
   display: flex;
@@ -578,7 +577,7 @@ details.info-hint p {
   margin-top: 4px;
 }
 
-/* Botão "Treinar agora": pílula escura com o play limão */
+/* "Treinar agora" button: dark pill with the lime play icon */
 .cta {
   display: flex;
   align-items: center;
@@ -621,7 +620,7 @@ details.info-hint p {
   font-size: 1.1rem;
 }
 
-/* Aviso de backup no Início: discreto, uma ação */
+/* Backup notice on Início: discreet, one action */
 .notice-card {
   display: flex;
   align-items: center;
@@ -665,7 +664,7 @@ details.info-hint p {
   margin: 0;
 }
 
-/* Lista de treinos agrupada por mês, com a data em bloco à esquerda */
+/* Workout list grouped by month, with the date in a block on the left */
 .workout-month {
   margin: 0.4rem 2px 0.6rem;
   font-size: 0.75rem;
@@ -708,7 +707,7 @@ details.info-hint p {
   line-height: 1.1;
 }
 
-/* Treino de hoje em limão, para achar rápido */
+/* Today's workout in lime, so it's quick to find */
 .workout-date.is-today {
   background: var(--mt-lime);
 }
@@ -738,19 +737,19 @@ details.info-hint p {
   min-width: 0;
 }
 
-/* Treino em andamento (rascunho) no Início */
+/* Workout in progress (draft) on Início */
 .draft-banner {
   border-left: 0;
 }
 
-/* Recordes no card do Início */
+/* Records on the Início card */
 .pr-count {
   color: var(--mt-lime-deep);
   font-weight: 700;
   white-space: nowrap;
 }
 
-/* ---------- Treinar ---------- */
+/* ---------- Train (Treinar) ---------- */
 
 .workout-hero {
   display: flex;
@@ -832,7 +831,7 @@ details.info-hint p {
   font-weight: 600;
 }
 
-/* Dica "Última vez" em cada exercício do formulário */
+/* "Last time" hint on each exercise of the form */
 .last-session {
   padding: 10px 12px;
   border-radius: 14px;
@@ -845,7 +844,7 @@ details.info-hint p {
   color: var(--mt-lime-deep);
 }
 
-/* Grade das séries: campos grandes e centralizados */
+/* Set grid: large, centered fields */
 #workoutExercises .row.g-1 {
   --bs-gutter-x: 6px;
   --bs-gutter-y: 6px;
@@ -869,7 +868,7 @@ details.info-hint p {
   letter-spacing: 0.04em;
 }
 
-/* Linha do aquecimento: mesma grade das séries, com a chama no lugar do número */
+/* Warm-up row: same grid as the sets, with the flame instead of the number */
 .warm-tag {
   height: 44px;
   border-radius: 14px;
@@ -880,7 +879,7 @@ details.info-hint p {
   font-size: 1rem;
 }
 
-/* Botão do número da série (vira limão quando a série foi feita) */
+/* Set number button (turns lime once the set is done) */
 .set-done {
   min-height: 44px;
   padding: 0;
@@ -912,7 +911,7 @@ details.info-hint p {
   color: var(--mt-lime);
 }
 
-/* Ações do Treinar: no fim do treino, sem flutuar sobre os exercícios */
+/* Train actions: at the end of the workout, not floating over the exercises */
 .workout-actions .btn {
   min-height: 52px;
 }
@@ -923,7 +922,7 @@ details.info-hint p {
   padding: 0;
 }
 
-/* Timer de descanso: cartão escuro flutuando acima da barra de baixo */
+/* Rest timer: dark card floating above the bottom bar */
 .rest-bar {
   position: fixed;
   left: 12px;
@@ -937,7 +936,7 @@ details.info-hint p {
   box-shadow: 0 10px 30px rgba(20, 30, 5, 0.25);
 }
 
-/* Fim do descanso: só muda de cor (sem som, vibração ou piscar) */
+/* End of the rest: only changes color (no sound, vibration or flashing) */
 .rest-bar.is-done {
   background: var(--mt-warn);
 }
@@ -1004,12 +1003,12 @@ details.info-hint p {
   transition: width 0.25s linear;
 }
 
-/* Com o timer aberto, a página ganha espaço extra para a barra não cobrir o último campo */
+/* With the timer open, the page gets extra room so the bar doesn't cover the last field */
 body:has(.rest-bar:not(.d-none)) .pb-nav {
   padding-bottom: calc(var(--mt-nav-height) + var(--mt-nav-safe) + 100px);
 }
 
-/* ---------- Como foi o treino / evolução ---------- */
+/* ---------- Workout summary / progress ---------- */
 
 .detail-hero {
   display: flex;
@@ -1064,7 +1063,7 @@ body:has(.rest-bar:not(.d-none)) .pb-nav {
   color: #b5bdab;
 }
 
-/* Recordes pessoais (só visual) */
+/* Personal records (visual only) */
 .pr-line {
   margin: 0 0 10px;
   padding: 8px 10px;
@@ -1079,7 +1078,7 @@ body:has(.rest-bar:not(.d-none)) .pb-nav {
   opacity: 0.75;
 }
 
-/* Linhas de séries (detalhe, evolução e ficha) */
+/* Set rows (detail, progress and ficha) */
 .sheet-items {
   margin-top: 6px;
 }
@@ -1136,7 +1135,7 @@ body:has(.rest-bar:not(.d-none)) .pb-nav {
   color: var(--mt-muted);
 }
 
-/* Cada exercicio dentro do editor da ficha */
+/* Each exercise inside the ficha editor */
 .sheet-edit-item {
   border: 0;
   border-radius: 18px;
@@ -1157,7 +1156,7 @@ body:has(.rest-bar:not(.d-none)) .pb-nav {
   gap: 8px;
 }
 
-/* ---------- Calendário ---------- */
+/* ---------- Calendar (Calendário) ---------- */
 
 .cal-grid {
   display: grid;
@@ -1199,7 +1198,7 @@ body:has(.rest-bar:not(.d-none)) .pb-nav {
   color: var(--mt-ink);
 }
 
-/* Dia com treino é um link (abre o treino) */
+/* A day with a workout is a link (opens the workout) */
 a.cal-cell {
   text-decoration: none;
 }
@@ -1240,7 +1239,7 @@ a.cal-cell {
   border-right: none;
 }
 
-/* Modais e aviso rápido */
+/* Modals and quick notice */
 .modal-content {
   border: 0;
   border-radius: 26px;
@@ -1268,7 +1267,7 @@ a.cal-cell {
   border-radius: 999px;
 }
 
-/* Colinha */
+/* Colinha (cheat sheet) */
 .colinha-item {
   padding: 12px 0;
   border-top: 1px solid var(--mt-line);
@@ -1279,7 +1278,7 @@ a.cal-cell {
   padding-top: 0;
 }
 
-/* Passos numerados (Criar com IA) */
+/* Numbered steps (Create with AI) */
 .steps {
   list-style: none;
   counter-reset: step;
@@ -1323,14 +1322,14 @@ a.cal-cell {
   color: var(--mt-muted);
 }
 
-/* Revisão da importação: nome vindo da IA, acima do seletor */
+/* Import review: name coming from the AI, above the selector */
 .form-label.import-name {
   font-size: 0.95rem;
   font-weight: 700;
   color: var(--mt-ink);
 }
 
-/* Texto para a IA e resposta colada: campo claro, monoespaçado, fácil de ler */
+/* Text for the AI and pasted answer: light field, monospaced, easy to read */
 #iaText,
 #sheetImportText {
   font-weight: 400;
@@ -1342,8 +1341,8 @@ a.cal-cell {
   box-shadow: var(--mt-shadow);
 }
 
-/* iOS dá zoom automático ao focar um campo com fonte menor que 16px.
-   Nos tamanhos de celular garantimos 16px em todos os controles de formulário. */
+/* iOS zooms in automatically when a field smaller than 16px gets focus.
+   On phone sizes we force 16px on every form control. */
 @media (max-width: 767.98px) {
   input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
   select,
@@ -1358,8 +1357,8 @@ a.cal-cell {
   }
 }
 
-/* Botões só com ícone (lixeira, lápis, olho, setas): área de toque de 44px, o mínimo confortável.
-   Todos têm aria-label; os botões pequenos com texto ("+ série") não têm e ficam como estão. */
+/* Icon-only buttons (trash, pencil, eye, arrows): 44px touch area, the comfortable minimum.
+   All have aria-label; the small buttons with text ("+ série") don't and stay as they are. */
 .btn-sm[aria-label] {
   min-width: 44px;
   min-height: 44px;

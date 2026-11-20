@@ -9,7 +9,8 @@ Setup and the commands to run them are in [workflow.md](workflow.md#browser-test
   don't do it in another issue. Shared helpers in `temporarios/util.js`:
   `putRecords` (old or odd data the UI can't create), `failWritesTo`/`failDeletesIn` (IndexedDB failures simulated
   in the browser, not by patching app functions, so they survive the move to modules), `collectAlerts`.
-  Cite them in `tests/CHECKLIST.md` by path (`temporarios/fichas.spec.js`).
+  Cite them in `tests/CHECKLIST.md` by path (`temporarios/fichas.spec.js`). Their titles and comments stay in pt-BR
+  on purpose (v80): they are temporary, so don't translate them in unrelated changes.
 - A test where the app itself reloads the page (`location.reload`, "Atualizar app") declares
   `{ annotation: RECARGA_DO_APP }` so its coverage is counted (snapshot at a breakpoint before the reload).
 - They start their own server (`tests/e2e/server.js`, port 4173), so `serve.ps1` on 8080 can keep running.
@@ -28,4 +29,4 @@ Setup and the commands to run them are in [workflow.md](workflow.md#browser-test
 - No fixed waits (`waitForTimeout`): wait for what the user would see. For timers (rest), install `page.clock` before
   opening the app and move time with `runFor`/`setSystemTime` (see `treinar.spec.js`). For a fixed "today" (week,
   backup age), `page.clock.setFixedTime` before opening the app (see `inicio.spec.js`).
-- In CI a failed run uploads the report and traces as the `relatorio-testes-navegador` artifact.
+- In CI a failed run uploads the report and traces as the `browser-test-report` artifact.

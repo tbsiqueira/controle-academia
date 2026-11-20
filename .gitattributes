@@ -1,4 +1,4 @@
-# Normaliza finais de linha (LF) e marca binários para não serem convertidos.
+# Normalizes line endings (LF) and marks binaries so they are not converted.
 * text=auto eol=lf
 
 *.png binary

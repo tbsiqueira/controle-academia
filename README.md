@@ -43,25 +43,26 @@ npm run test:e2e                                       # testes de navegador (Pl
   não usa nada dele. `npm run test:e2e:ui` mostra cada passo; `npm run test:e2e:report` abre o relatório.
   Toda funcionalidade do `tests/CHECKLIST.md` tem teste de navegador (o CI cobra), e `npm run test:e2e:coverage`
   mostra quanto do `js/app.js` eles executam; no CI esse número não pode cair em relação à `main`.
-- **`check.ps1`** confere JSONs, referências de `id`, handlers `onclick`, assets do HTML e do service
-  worker, o catálogo (ids únicos/contíguos/estáveis), o versionamento e se o `core.js` está ligado.
+- **`check.ps1`** confere JSONs, referências de `id`, manipuladores `onclick`, assets do HTML e do service
+  worker, o catálogo (ids únicos e `meta.nextId` depois do maior id), o versionamento e se o `core.js` está ligado.
+  A contiguidade e a estabilidade dos ids do catálogo são conferidas em `tests/core.test.js`.
 
 Os dois rodam automaticamente no GitHub Actions:
 
-| Workflow | Quando roda |
+| Fluxo de trabalho | Quando roda |
 |---|---|
 | `.github/workflows/tests.yml` | em todo pull request (checks obrigatórios do merge) e a cada push na `main` |
 | `.github/workflows/deploy.yml` | a cada merge na `main` com versão nova — **só publica se os testes passarem** |
 
 **O que os testes cobrem:** toda a lógica pura (`js/core.js`) — datas, janela da semana, busca sem acentos,
-agrupamento de séries **por id**, aquecimento, histórico/PR, geração do texto exportado, backup
+agrupamento de séries **por id**, aquecimento, histórico/recordes, geração do texto exportado, backup
 (nome/status/lembrete/payload), importação de ficha em JSON (validação, sugestão de exercício parecido) e, principalmente, **compatibilidade de dados entre versões**: backups antigos
 (v1 com "tipos de treino", v2 com ficha de reps único) são normalizados sem perder nada, e a normalização
 é idempotente. Os arquivos de referência ficam em `tests/fixtures/`.
 
 **Cobertura:** `node tools/coverage-gate.js` roda os testes e exige **100% das linhas de `js/core.js` e
 nenhum trecho da lógica sem teste** (no CI, `COVERAGE_ENFORCE=1` reprova o build se cair). Ele publica o
-resultado como *annotations* do GitHub Actions, então dá para ver o que faltou sem abrir o log.
+resultado como *anotações* do GitHub Actions, então dá para ver o que faltou sem abrir o log.
 
 > O **wrapper de módulo** (as primeiras linhas do `core.js`, que escolhem entre Node e navegador) fica fora
 > da conta: cada ambiente executa só um dos lados — o lado do navegador é validado por
@@ -77,12 +78,12 @@ A `main` é protegida: **nada entra nela por push direto**. Toda mudança vai nu
 request e só entra com **merge por rebase** depois que os checks passam. O site publica sozinho:
 
 ```
-branch + PR               → roda tests.yml (Testes unitários, Verificações estáticas, Testes de navegador, Versão)
+branch + PR               → roda tests.yml (`Unit tests`, `Static checks`, `Browser tests`, `Version`)
 merge do PR (por rebase)  → deploy.yml: versão vN ainda sem tag? testa, publica no Pages e cria a tag vN
 PR só de docs/CI          → mantém a versão → o deploy vê que vN já tem tag e não publica nada
 ```
 
-O job **Versão** reprova o PR se `index.html`, `css/` ou `js/` mudaram e a versão não subiu (ou se a
+O job **Version** reprova o PR se `index.html`, `css/` ou `js/` mudaram e a versão não subiu (ou se a
 versão já tem tag). Ninguém cria tag à mão: quem cria é o `deploy.yml`, depois de publicar.
 
 ### Configurar (uma vez só)
@@ -103,7 +104,7 @@ versão já tem tag). Ninguém cria tag à mão: quem cria é o `deploy.yml`, de
   desligados), **Allow auto-merge** desligado (o merge é sempre feito à mão) e **Automatically delete head
   branches** ligado.
 - **Settings → Rules → Rulesets → `main`**: bloqueia push direto, force push e exclusão; exige PR, histórico
-  linear, merge por rebase e os checks `Testes unitários`, `Verificações estáticas`, `Testes de navegador` e `Versão` com a
+  linear, merge por rebase e os checks `Unit tests`, `Static checks`, `Browser tests` e `Version` com a
   branch atualizada com a `main`. Mudou o nome de um job em `tests.yml`? Atualize o ruleset.
 - **Settings → Environments → `github-pages`**: a regra de branch `main` permite o deploy.
 
@@ -117,8 +118,8 @@ git switch -c feat/minha-mudanca
 
 # 2) desenvolva, suba a versão (index.html + sw.js) e confira
 node --test tests/
-powershell -ExecutionPolicy Bypass -File .check.ps1
-git commit -am "feat: ... (v75)"
+powershell -ExecutionPolicy Bypass -File .\check.ps1
+git commit -am "feat: ... (v84)"
 
 # 3) atualize com a main, envie e abra o PR
 git fetch origin
@@ -130,27 +131,27 @@ gh pr create --base main --fill
 gh pr merge --rebase
 ```
 
-Depois do merge, **Actions → Publicar no GitHub Pages** publica e cria a
+Depois do merge, **Actions → Publish to GitHub Pages** publica e cria a
 tag. Leva ~1–2 minutos. No aparelho, feche e abra o app (ou use **Mais → Debug → Atualizar app**).
 
 ### Voltar para uma versão anterior
 
-Reverta a mudança num PR (`git revert <commit>`) **e suba a versão de novo** (ex.: v75 → v76), senão os
-celulares continuam com o cache. O merge publica a v76 normalmente.
+Reverta a mudança num PR (`git revert <commit>`) **e suba a versão de novo** (ex.: v83 → v84), senão os
+celulares continuam com o cache. O merge publica a v84 normalmente.
 
 ### Se o deploy falhar
 
 | Erro mostrado no Actions | Causa | Solução |
 |---|---|---|
 | `Branch "main" is not allowed to deploy to github-pages due to environment protection rules` | O ambiente `github-pages` não tem a regra da branch `main` | **Settings → Environments → `github-pages` → Deployment branches and tags** → adicione **Ref type: `Branch`**, **Name pattern: `main`**. Depois **Re-run all jobs** |
-| Merge entrou mas nada foi publicado | a versão não subiu, então a tag `vN` já existia | esperado para PRs de docs/CI; se mexeu no app, o job **Versão** deveria ter barrado: confira o ruleset |
+| Merge entrou mas nada foi publicado | a versão não subiu, então a tag `vN` já existia | esperado para PRs de docs/CI; se mexeu no app, o job **Version** deveria ter barrado: confira o ruleset |
 | `Get Pages site failed` / `Pages site not found` | Pages não está com a fonte **GitHub Actions** | **Settings → Pages → Source: GitHub Actions** |
-| Falhou em "Rodar check.ps1" | versão inconsistente ou arquivo/id faltando | rode localmente `powershell -ExecutionPolicy Bypass -File .\check.ps1` e corrija num novo PR |
+| Falhou em "Run check.ps1" | versão inconsistente ou arquivo/id faltando | rode localmente `powershell -ExecutionPolicy Bypass -File .\check.ps1` e corrija num novo PR |
 | Deploy "verde" mas o site não atualizou | cache do navegador/service worker | no aparelho: **Mais → Debug → Atualizar app**; no PC: Ctrl+F5 ou `/reset.html` |
 
 ### Publicar manualmente (emergência)
 
-Aba **Actions** → **Publicar no GitHub Pages** → **Run workflow** (publica o estado atual da `main` e
+Aba **Actions** → **Publish to GitHub Pages** → **Run workflow** (publica o estado atual da `main` e
 cria a tag se faltar). Use só quando precisar.
 
 ## Estrutura
@@ -247,8 +248,8 @@ status do backup mostram a versão carregada). O `check.ps1` reprova o commit se
 
 ## Decisões e trade-offs conhecidos
 
-- **Sem build/toolchain**: dá para manter o app editando os arquivos direto, mas os handlers de eventos são
-  atributos `onclick` (exigem funções globais e `'unsafe-inline'` no CSP). Trocar por *event delegation*
+- **Sem build/toolchain**: dá para manter o app editando os arquivos direto, mas os manipuladores de eventos são
+  atributos `onclick` (exigem funções globais e `'unsafe-inline'` no CSP). Trocar por *delegação de eventos*
   é a próxima melhoria de qualidade, se o projeto crescer.
 - **Catálogo embutido**: arquivo único (≈240 KB) carregado uma vez e cacheado pelo service worker.
 - **Fonte de ícones em base64** dentro do CSS: evita falha de carregamento de fonte (ícones "quadradinhos"),

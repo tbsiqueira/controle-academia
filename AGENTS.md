@@ -50,7 +50,7 @@ in a chat gives it; its rules are in [.claude/skills/ai-specialist/SKILL.md](.cl
 
 1. Logic goes in `js/core.js` (pure, 100% covered by tests); `js/app.js` only renders and wires the DOM.
 2. Never break old backups: imports must keep loading old data and silently ignore fields they don't know.
-3. Changing `index.html`, `css/` or `js/` → bump the version (see workflow.md). `check.ps1` fails otherwise.
+3. Changing `index.html`, `css/` or `js/` → bump the version (see workflow.md). The CI `Version` job fails otherwise.
 4. Before you say done: `node --test tests/`, `powershell -ExecutionPolicy Bypass -File .\check.ps1` and
    `npm run test:e2e` (browser tests) all pass. When `js/core.js` changed, run the coverage gate with enforcement
    instead of `node --test tests/` (without the variable it only warns): `COVERAGE_ENFORCE=1 node

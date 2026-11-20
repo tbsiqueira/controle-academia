@@ -37,7 +37,7 @@ test('the 5 bottom-bar tabs open the right screen', async ({ page }) => {
   }
 });
 
-test('inner screens: Fichas ↔ Biblioteca and Mais → Erase data → back', async ({ page }) => {
+test('inner screens: Fichas ↔ Biblioteca and Mais → Apagar dados → back', async ({ page }) => {
   await freshApp(page);
 
   await goTo(page, 'Fichas');
@@ -140,7 +140,7 @@ test('no iPhone zoom: every visible form field is at least 16px at phone width',
   await page.getByRole('button', { name: 'Editar ficha' }).first().click();
   await expect(page.locator('#sheetEditorModal')).toBeVisible();
   await expect(page.locator('#sheetEditorModal input[aria-label^="Reps da"]').first()).toBeVisible();
-  expect(await smallFields(page), 'fields below 16px in the ficha editor').toEqual([]);
+  expect(await smallFields(page), 'fields below 16px in the sheet editor').toEqual([]);
   await page.locator('#sheetEditorModal').getByRole('button', { name: 'Fechar' }).click();
   await expect(page.locator('#sheetEditorModal')).toBeHidden();
 
