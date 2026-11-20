@@ -60,7 +60,9 @@ test('it only changes the version spots, never other numbers', () => {
 
 test('it refuses a file whose spots changed shape, and writes nothing', () => {
   const dir = tempRepo(9999);
-  const html = read(dir, 'index.html').replace('css/styles.css?v=85', 'css/styles.css');
+  const original = read(dir, 'index.html');
+  const html = original.replace(/css\/styles\.css\?v=\d+/, 'css/styles.css');
+  assert.notEqual(html, original);   // the fixture really lost a spot, whatever the current version is
   fs.writeFileSync(path.join(dir, 'index.html'), html);
   assert.throws(() => stampAll(dir), /index\.html: expected 7 \?v=N asset URLs, found 6/);
   assert.equal(read(dir, 'sw.js'), read(REPO, 'sw.js'));   // sw.js untouched: all or nothing
