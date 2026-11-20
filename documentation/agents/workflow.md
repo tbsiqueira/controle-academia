@@ -14,7 +14,7 @@ powershell -ExecutionPolicy Bypass -File .\tools\build-sample-data.ps1   # only 
 Python is not installed; use Node for scripted edits. Node 26 locally and in CI.
 
 CI: `tests.yml` runs `node --check`, the coverage gate, `check.ps1` and the browser tests on every PR and push to
-`main`; on PRs its `Versão` job also fails when `index.html`, `css/` or `js/` changed without a version bump (or the
+`main`; on PRs its `Version` job also fails when `index.html`, `css/` or `js/` changed without a version bump (or the
 version is already tagged). Its four jobs are the required checks of the `main` ruleset ([Git](#git)).
 CI installs only the Chromium browser, without `--with-deps` (no apt); see the comment in `tests.yml`.
 `deploy.yml` runs on every push to `main` (= a merged PR): if tag `vN` for the current version doesn't exist yet,
@@ -87,8 +87,8 @@ On localhost the service worker doesn't hold stale files, so edits show without 
   each finished step, then pushes its branch and opens the PR; the AI SPECIALIST commits, pushes and opens a PR
   after the user's OK on a change ([its SKILL.md](../../.claude/skills/ai-specialist/SKILL.md)).
 - **`main` only changes through PRs.** A ruleset on `main` blocks direct pushes, force pushes and deletion, and
-  requires a linear history plus the checks `Testes unitários`, `Verificações estáticas`, `Testes de navegador`
-  and `Versão` to pass on
+  requires a linear history plus the checks `Unit tests`, `Static checks`, `Browser tests`
+  and `Version` to pass on
   a branch that is up to date with `main`. The repo only allows **rebase merges** and deletes merged branches.
 - **Branches**: `<prefix>/<short-kebab-summary>` using the commit prefix, e.g. `feat/import-workouts`,
   `fix/empty-rir`, `docs/manual-backup`. One topic per branch/PR. Keep the commits clean (each one a

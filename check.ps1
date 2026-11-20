@@ -343,7 +343,7 @@ if (-not $faltando) {
 }
 
 # 15) the publish gate must include the browser tests (issue #88). Check the wiring, not just the mention:
-#     the "verificar" job calls the whole Testes workflow (tests.yml) and "publicar" needs "verificar", so
+#     the "verificar" job calls the whole Tests workflow (tests.yml) and "publicar" needs "verificar", so
 #     unit, static and browser tests block the deploy. A reference in another job would not gate anything.
 
 # Body of one job: from its "<name>:" line (2-space indent) to the next job or the end of the file.
@@ -361,7 +361,7 @@ if (-not (Test-Path (Join-Path $root '.github/workflows/deploy.yml'))) {
 
   $gate = Get-WorkflowJob $deploy 'verificar'
   if ($gate -and $gate -match '(?m)^\s+uses:\s*\./\.github/workflows/tests\.yml[ \t]*$') {
-    Ok "the publish gate job (verificar) runs the whole Testes workflow (unit, static and browser tests)"
+    Ok "the publish gate job (verificar) runs the whole Tests workflow (unit, static and browser tests)"
   } else {
     Bad "deploy.yml job verificar does not call .github/workflows/tests.yml: a publish would skip the browser tests"
   }

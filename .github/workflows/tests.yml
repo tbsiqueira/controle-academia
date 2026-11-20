@@ -1,8 +1,8 @@
-name: Testes
+name: Tests
 
-# Roda os testes de unidade e as verificações estáticas a cada push na main e em pull requests.
-# Os jobs abaixo são checks obrigatórios do PR na main (ruleset "main"): mudou o nome de um job,
-# atualize o ruleset. O deploy fica em deploy.yml (publica ao entrar versão nova na main).
+# Runs the unit tests and the static checks on every push to main and in pull requests.
+# The jobs below are the required checks of the `main` ruleset ("main"): if a job name changes,
+# update the ruleset. The deploy lives in deploy.yml (publishes when a new version lands on main).
 on:
   push:
     branches:
@@ -18,71 +18,71 @@ permissions:
 
 jobs:
   unit:
-    name: Testes unitários
+    name: Unit tests
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v7
 
-      - name: Configurar Node
+      - name: Set up Node
         uses: actions/setup-node@v7
         with:
           node-version: '26'
 
-      - name: Verificar sintaxe dos scripts de navegador
+      - name: Check the syntax of the browser scripts
         run: |
           for f in js/core.js js/app.js js/db.js sw.js; do
             echo "node --check $f"
             node --check "$f"
           done
 
-      - name: Rodar testes e medir cobertura de js/core.js
+      - name: Run the tests and measure js/core.js coverage
         env:
           COVERAGE_ENFORCE: '1'
         run: node tools/coverage-gate.js
 
   estatico:
-    name: Verificações estáticas
+    name: Static checks
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v7
 
-      - name: Rodar check.ps1
+      - name: Run check.ps1
         shell: pwsh
         run: ./check.ps1
 
-  # Testes de navegador (Playwright): o app de verdade num Chromium de celular. Veja documentation/REFACTOR.md.
+  # Browser tests (Playwright): the real app in a mobile Chromium. See documentation/REFACTOR.md.
   navegador:
-    name: Testes de navegador
+    name: Browser tests
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
       - name: Checkout
         uses: actions/checkout@v7
 
-      - name: Configurar Node
+      - name: Set up Node
         uses: actions/setup-node@v7
         with:
           node-version: '26'
           cache: npm
 
-      - name: Instalar ferramentas (package-lock.json)
+      - name: Install tools (package-lock.json)
         run: npm ci
 
       # No --with-deps: it runs apt-get for Chromium's Linux libraries, and slow Ubuntu mirrors made that take
       # 4-6 minutes. The ubuntu-latest image already ships those libraries (it has Google Chrome preinstalled).
       # If Playwright reports "Host system is missing dependencies", add only the packages it names
       # (sudo apt-get install -y <pkg>), or move this job to the Playwright container image.
-      - name: Instalar o Chromium do Playwright
+      - name: Install Playwright's Chromium
         run: npx playwright install chromium
 
-      - name: Rodar os testes de navegador
+      - name: Run the browser tests
         run: npx playwright test
 
-      # Catraca (documentation/REFACTOR.md, seção 4): a cobertura do js/app.js pelos testes de navegador vai para o
-      # resumo do job e não pode cair em relação à main. Subiu? O PR atualiza tests/e2e/coverage-baseline.json.
-      - name: Cobertura do js/app.js (catraca)
+      # Ratchet (documentation/REFACTOR.md, section 4): the js/app.js coverage from the browser tests goes into the
+      # job summary and cannot drop below main. Rose? The PR updates tests/e2e/coverage-baseline.json.
+      - name: js/app.js coverage (ratchet)
         run: |
           git fetch --no-tags --depth=1 origin main
           if ! git show origin/main:tests/e2e/coverage-baseline.json > "$RUNNER_TEMP/baseline-main.json" 2>/dev/null; then
@@ -90,7 +90,7 @@ jobs:
           fi
           node tools/e2e-coverage.js --baseline "$RUNNER_TEMP/baseline-main.json"
 
-      - name: Guardar relatório e traces das falhas
+      - name: Save the report and failure traces
         if: failure()
         uses: actions/upload-artifact@v7
         with:
@@ -100,10 +100,10 @@ jobs:
             tests/e2e/results/
           retention-days: 14
 
-  # Só em PR: mexeu no app (index.html, css/, js/) → a versão precisa subir e ser nova,
-  # senão o merge não publica nada (deploy.yml só publica versão sem tag).
+  # PR-only: touched the app (index.html, css/, js/) -> the version must go up and be new,
+  # otherwise the merge publishes nothing (deploy.yml only publishes a version without a tag).
   versao:
-    name: Versão
+    name: Version
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
@@ -112,7 +112,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Conferir o bump de versão
+      - name: Check the version bump
         env:
           BASE_REF: ${{ github.base_ref }}
         run: |
