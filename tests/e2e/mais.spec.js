@@ -1,10 +1,10 @@
-// Tela Mais (issue #7): metas e descanso, colinha, importar treinos antigos, Instalar o app e o card Debug
-// (armazenamento persistente). Backup, apagar dados, dados de exemplo e atualização ficam em dados.spec.js.
+// Mais screen (issue #7): goals and rest, colinha, import old workouts, Install the app and the Debug card
+// (persistent storage). Backup, erasing data, sample data and updating live in dados.spec.js.
 const { test, expect, freshApp, withBackup, storedRecords, goTo, answerConfirm } = require('./helpers');
 
 const TODAY = '2026-05-20T10:00:00-03:00';
 
-/** Junta as mensagens de alert() da página; cada uma é aceita. */
+/** Collects the page's alert() messages; each one is accepted. */
 function collectAlerts(page) {
   const messages = [];
   page.on('dialog', (dialog) => {
@@ -14,15 +14,15 @@ function collectAlerts(page) {
   return messages;
 }
 
-/** Abre o app vazio na tela Mais, com o relógio parado em 20/05/2026. */
+/** Opens the empty app on the Mais screen, with the clock fixed at 20/05/2026. */
 async function moreScreen(page) {
   await page.clock.setFixedTime(new Date(TODAY));
   await freshApp(page);
   await goTo(page, 'Mais');
 }
 
-test.describe('Mais · metas e descanso', () => {
-  test('salvar metas e descanso: o Início usa as metas novas, o Treinar o descanso novo, e fica gravado', async ({ page }) => {
+test.describe('Mais · goals and rest', () => {
+  test('save goals and rest: Início uses the new goals, Treinar the new rest time, and it is saved', async ({ page }) => {
     await moreScreen(page);
     await expect(page.locator('#setWorkoutTarget')).toHaveValue('3');
     await expect(page.locator('#setCardioTarget')).toHaveValue('120');
@@ -32,7 +32,7 @@ test.describe('Mais · metas e descanso', () => {
     await page.locator('#setCardioTarget').fill('90');
     await page.locator('#setRestSeconds').fill('120');
     await page.locator('#btnSaveSettings').click();
-    // Aviso de sucesso que some sozinho.
+    // Success toast that disappears on its own.
     await expect(page.locator('#appToastBody')).toHaveText('Metas salvas.');
     await expect(page.locator('#appToast')).toBeVisible();
     await expect(page.locator('#appToast')).toBeHidden({ timeout: 10_000 });
@@ -43,7 +43,7 @@ test.describe('Mais · metas e descanso', () => {
     expect(settings).toMatchObject({ weeklyWorkoutTarget: 4, weeklyCardioTarget: 90, restSeconds: 120 });
   });
 
-  test('"Iniciar semana" começa a semana hoje', async ({ page }) => {
+  test('"Iniciar semana" starts the week today', async ({ page }) => {
     const backup = { app: 'meu-treino', version: 2, data: { workouts: [], sheets: [], exercises: [], colinha: [],
       settings: { id: 'app', weekAnchor: '2026-05-16', weeklyWorkoutTarget: 3, weeklyCardioTarget: 120 } } };
     await page.clock.setFixedTime(new Date(TODAY));
@@ -62,7 +62,7 @@ test.describe('Mais · metas e descanso', () => {
 });
 
 test.describe('Mais · colinha', () => {
-  test('criar, editar e excluir uma colinha', async ({ page }) => {
+  test('create, edit and delete a colinha', async ({ page }) => {
     const alerts = collectAlerts(page);
     await moreScreen(page);
     const list = page.locator('#colinhaList');
@@ -93,7 +93,7 @@ test.describe('Mais · colinha', () => {
     expect(await storedRecords(page, 'colinha')).toHaveLength(0);
   });
 
-  test('responder "Não" ao excluir não apaga a colinha', async ({ page }) => {
+  test('answering "Não" to deleting does not delete the colinha', async ({ page }) => {
     await moreScreen(page);
     const list = page.locator('#colinhaList');
     await page.locator('#btnAddColinha').click();
@@ -110,7 +110,7 @@ test.describe('Mais · colinha', () => {
   });
 });
 
-test.describe('Mais · importar treinos antigos', () => {
+test.describe('Mais · importing old workouts', () => {
   const PASTED = JSON.stringify({
     fichas: [{
       name: 'Treino C - pernas',
@@ -140,7 +140,7 @@ test.describe('Mais · importar treinos antigos', () => {
     await expect(page.locator('#historyImportModal')).toBeVisible();
   }
 
-  test('o texto para a IA traz o contrato, as fichas e os exercícios do app', async ({ page }) => {
+  test('the text for the AI brings the contract, the sheets and the app exercises', async ({ page }) => {
     await openHistoryImport(page);
     const ia = page.locator('#historyIaText');
     await expect(ia).toHaveValue(/^# Contrato: treinos antigos \+ fichas em JSON \(Meu Treino\)/);
@@ -151,7 +151,7 @@ test.describe('Mais · importar treinos antigos', () => {
     await expect(page.locator('#historyImportConfirm')).toHaveText('Revisar');
   });
 
-  test('texto que não é JSON mostra o motivo e não importa nada', async ({ page }) => {
+  test('text that is not JSON shows the reason and imports nothing', async ({ page }) => {
     const alerts = collectAlerts(page);
     await openHistoryImport(page);
     await page.locator('#historyImportText').fill('{ "treinos": [');
@@ -163,7 +163,7 @@ test.describe('Mais · importar treinos antigos', () => {
     expect(await storedRecords(page, 'workouts')).toHaveLength(2);
   });
 
-  test('revisar e importar: treinos no histórico, ficha recriada com a carga da última vez; reimportar não duplica', async ({ page }) => {
+  test('review and import: workouts in history, sheet recreated with the load from last time; importing again does not duplicate', async ({ page }) => {
     const alerts = collectAlerts(page);
     await openHistoryImport(page);
     await page.locator('#historyImportText').fill(PASTED);
@@ -180,7 +180,7 @@ test.describe('Mais · importar treinos antigos', () => {
     await expect(page.locator('#historyImportModal')).toBeHidden();
     await expect(page.locator('#appToastBody')).toHaveText('2 treinos importados e 1 ficha criada.');
 
-    // Histórico: os treinos importados, com a vírgula e o aquecimento.
+    // History: the imported workouts, with the comma and the warm-up.
     await goTo(page, 'Início');
     await expect(page.locator('#recentWorkouts .workout-row')).toHaveCount(4);
     await page.locator('#recentWorkouts .workout-row[aria-label^="Treino C - pernas, 10/02/2025"]').click();
@@ -189,14 +189,14 @@ test.describe('Mais · importar treinos antigos', () => {
     const imported = (await storedRecords(page, 'workouts')).find((w) => w.date === '2025-02-14');
     expect(imported.sets[0]).toMatchObject({ exerciseId: 'ex-supino', reps: 10, load: 27.5 });
 
-    // A ficha recriada já traz a carga da última vez.
+    // The recreated sheet already brings the load from last time.
     await goTo(page, 'Treinar');
     await page.locator('#workoutSheet').selectOption({ label: 'Treino C - pernas' });
     const loads = await page.locator('#workoutExercises input[aria-label^="Carga da série"]').evaluateAll((els) => els.map((el) => el.value));
     expect(loads).toEqual(['40', '45', '15']);
     await page.locator('#workoutCancel').click();
 
-    // Colar de novo: nada novo, nada duplicado.
+    // Paste again: nothing new, nothing duplicated.
     await goTo(page, 'Mais');
     await page.locator('#btnHistoryImport').click();
     await page.locator('#historyImportText').fill(PASTED);
@@ -207,15 +207,15 @@ test.describe('Mais · importar treinos antigos', () => {
   });
 });
 
-test.describe('Mais · Instalar o app', () => {
-  test('sem o botão do navegador: explica como instalar pelo menu', async ({ page }) => {
+test.describe('Mais · Installing the app', () => {
+  test('without the browser button: explains how to install from the menu', async ({ page }) => {
     await moreScreen(page);
     await expect(page.locator('#installStatus')).toHaveText(
       'Abra o menu do navegador (⋮ ou ⋯) e escolha "Instalar app" ou "Adicionar à tela inicial".');
     await expect(page.locator('#btnInstall')).toBeHidden();
   });
 
-  test('com o pedido de instalação do navegador: botão Instalar abre o pedido uma vez', async ({ page }) => {
+  test('with the browser\'s install prompt: the Instalar button opens the prompt once', async ({ page }) => {
     await moreScreen(page);
     await page.evaluate(() => {
       const event = new Event('beforeinstallprompt', { cancelable: true });
@@ -233,7 +233,7 @@ test.describe('Mais · Instalar o app', () => {
     await expect(page.locator('#installStatus')).toContainText('Abra o menu do navegador');
   });
 
-  test('já instalado (tela cheia): avisa e não mostra o botão', async ({ page }) => {
+  test('already installed (full screen): says so and hides the button', async ({ page }) => {
     await page.addInitScript(() => {
       const original = window.matchMedia.bind(window);
       window.matchMedia = (query) => (query === '(display-mode: standalone)'
@@ -245,12 +245,12 @@ test.describe('Mais · Instalar o app', () => {
     await expect(page.locator('#btnInstall')).toBeHidden();
   });
 
-  test.describe('no iPhone', () => {
+  test.describe('on the iPhone', () => {
     test.use({
       userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1'
     });
 
-    test('explica o Compartilhar → "Adicionar à Tela de Início" e o backup antes', async ({ page }) => {
+    test('explains Compartilhar → "Adicionar à Tela de Início" and the backup beforehand', async ({ page }) => {
       await moreScreen(page);
       await expect(page.locator('#installStatus')).toHaveText(
         'No iPhone, abra no Safari, toque em Compartilhar e depois em "Adicionar à Tela de Início". ' +
@@ -260,8 +260,8 @@ test.describe('Mais · Instalar o app', () => {
   });
 });
 
-test.describe('Mais · Debug e armazenamento', () => {
-  /** Simula o armazenamento do navegador: espaço usado e se o pedido de proteção é aceito. */
+test.describe('Mais · Debug and storage', () => {
+  /** Simulates the browser's storage: space used and whether the protection request is accepted. */
   function fakeStorage(page, grant) {
     return page.addInitScript((granted) => {
       let persisted = false;
@@ -272,7 +272,7 @@ test.describe('Mais · Debug e armazenamento', () => {
     }, grant);
   }
 
-  test('o card Debug fica à vista no fim de Mais, com Atualizar app, Apagar dados e dados de exemplo', async ({ page }) => {
+  test('the Debug card is visible at the end of Mais, with Atualizar app, Apagar dados and sample data', async ({ page }) => {
     await moreScreen(page);
     await expect(page.locator('#view-more details')).toHaveCount(0);
     const debug = page.locator('#view-more .card').last();
@@ -282,7 +282,7 @@ test.describe('Mais · Debug e armazenamento', () => {
     }
   });
 
-  test('pede armazenamento persistente ao abrir; aceito, o card mostra "protegido"', async ({ page }) => {
+  test('asks for persistent storage on open; when accepted, the card shows "protegido"', async ({ page }) => {
     await fakeStorage(page, true);
     await moreScreen(page);
     await expect(page.locator('#storageInfo')).toHaveText(
@@ -290,7 +290,7 @@ test.describe('Mais · Debug e armazenamento', () => {
     expect(await page.evaluate(() => window.__persistRequests)).toBe(1);
   });
 
-  test('recusado pelo navegador: o card avisa para manter o backup em dia', async ({ page }) => {
+  test('refused by the browser: the card warns to keep the backup up to date', async ({ page }) => {
     await fakeStorage(page, false);
     await moreScreen(page);
     await expect(page.locator('#storageInfo')).toHaveText('Espaço usado: 2,5 MB de 1,0 GB disponíveis · armazenamento não ' +

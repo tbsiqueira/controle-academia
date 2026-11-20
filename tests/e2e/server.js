@@ -1,6 +1,6 @@
-// Servidor estático mínimo para os testes de navegador (sem dependências).
-// Serve a raiz do repositório como o GitHub Pages serve o site publicado.
-// Uso: node tests/e2e/server.js [porta]
+// Minimal static server for the browser tests (no dependencies).
+// Serves the repository root the way GitHub Pages serves the published site.
+// Usage: node tests/e2e/server.js [port]
 const http = require('node:http');
 const fs = require('node:fs');
 const path = require('node:path');
@@ -41,8 +41,8 @@ http.createServer((req, res) => {
       res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' }).end('404');
       return;
     }
-    // Teste da atualização do app (dados.spec.js): com o cookie `e2e-sw-version=N`, o sw.js sai como se fosse a
-    // versão N (um deploy novo), só para aquele contexto do navegador. Sem o cookie, sai como está no repositório.
+    // App update test (dados.spec.js): with the cookie `e2e-sw-version=N`, sw.js is served as if it were version N
+    // (a new deploy), only for that browser context. Without the cookie, it is served as it is in the repository.
     const swVersion = /(?:^|;\s*)e2e-sw-version=(\d+)/.exec(req.headers.cookie || '');
     if (swVersion && rel === '/sw.js') {
       body = Buffer.from(body.toString('utf8').replace(/meu-treino-v\d+/, 'meu-treino-v' + swVersion[1]));
@@ -54,5 +54,5 @@ http.createServer((req, res) => {
     res.end(body);
   });
 }).listen(PORT, () => {
-  console.log(`Meu Treino em http://localhost:${PORT}/`);
+  console.log(`Meu Treino at http://localhost:${PORT}/`);
 });

@@ -1,11 +1,11 @@
-// Fichas e Criar com IA (issue #7): o caminho principal de cada funcionalidade da aba Fichas.
+// Fichas and Create with AI (issue #7): the main path of every feature on the Fichas tab.
 //
-// Ponto de partida: `fixtures/treinar-backup.json`, importado pela tela Mais.
-// - Treino A (ativa): Supino reto 3 séries (12-10-8) e Remada baixa 2 séries (10-10).
-// - Treino B (ativa): Agachamento livre 4 séries (8-8-6-6).
-// - Treino Antigo (desativada): Remada baixa 3 séries.
-// - Biblioteca: Supino reto, Remada baixa, Agachamento livre e Rosca na máquina azul.
-// - Treinos da Treino A em 03/03/2025 e 10/03/2025.
+// Starting point: `fixtures/treinar-backup.json`, imported through the Mais screen.
+// - Treino A (active): Supino reto 3 sets (12-10-8) and Remada baixa 2 sets (10-10).
+// - Treino B (active): Agachamento livre 4 sets (8-8-6-6).
+// - Treino Antigo (deactivated): Remada baixa 3 sets.
+// - Biblioteca: Supino reto, Remada baixa, Agachamento livre and Rosca na máquina azul.
+// - Workouts of Treino A on 03/03/2025 and 10/03/2025.
 const { test, expect, withBackup, readFixture, storedRecords, goTo, answerConfirm } = require('./helpers');
 
 const BACKUP = 'treinar-backup.json';
@@ -14,48 +14,48 @@ const sheetCards = (page) => page.locator('#sheetsList .card');
 const editor = (page) => page.locator('#sheetEditorModal');
 const importModal = (page) => page.locator('#sheetImportModal');
 
-/** Card de uma ficha na lista, pelo nome exato. */
+/** Card of a sheet in the list, by exact name. */
 function sheetCard(page, name) {
   return sheetCards(page).filter({ has: page.locator('strong').getByText(name, { exact: true }) });
 }
 
-/** Nomes das fichas na lista, na ordem (ativas primeiro, depois as desativadas). */
+/** Sheet names in the list, in order (active first, then deactivated). */
 function listedSheetNames(page) {
   return page.locator('#sheetsList .card strong').allTextContents().then((names) => names.map((n) => n.trim()));
 }
 
-/** Itens de uma ficha na lista: "1 Supino reto 3×12-10-8". */
+/** Items of a sheet in the list: "1 Supino reto 3×12-10-8". */
 function sheetItems(card) {
   return card.locator('.sheet-items li').evaluateAll((els) => els.map((el) =>
     [...el.querySelectorAll('span')].map((s) => s.textContent.trim()).join(' ')));
 }
 
-/** Linha de um exercício no editor de ficha, pelo nome. */
+/** Exercise row in the sheet editor, by name. */
 function editorRow(page, name) {
   return editor(page).locator('.sheet-edit-item').filter({ has: page.locator('strong', { hasText: name }) });
 }
 
-/** Campos de reps por série de uma linha do editor de ficha. */
+/** Reps-per-set fields of a sheet-editor row. */
 const editorRepInputs = (row) => row.locator('input[aria-label$="ª série"]');
 
-/** Valores dos campos de reps por série de uma linha do editor de ficha. */
+/** Values of the reps-per-set fields of a sheet-editor row. */
 function editorReps(row) {
   return editorRepInputs(row).evaluateAll((els) => els.map((el) => el.value));
 }
 
-/** Opções do seletor de ficha do Treinar (sem a opção vazia). */
+/** Options of Treinar's sheet selector (without the empty option). */
 async function workoutSheetOptions(page) {
   const labels = await page.locator('#workoutSheet option').allTextContents();
   return labels.map((l) => l.trim()).filter((l) => l && !/^Selecione/i.test(l) && !/^—/.test(l) && !/^Sem ficha/i.test(l));
 }
 
-/** Abre a aba Fichas com o backup importado. */
+/** Opens the Fichas tab with the backup imported. */
 async function sheetsWithBackup(page, backup = BACKUP) {
   await withBackup(page, backup);
   await goTo(page, 'Fichas');
 }
 
-/** Junta as mensagens de alert() da página; cada uma é aceita. */
+/** Collects the page's alert() messages; each one is accepted. */
 function collectAlerts(page) {
   const messages = [];
   page.on('dialog', (dialog) => {
@@ -65,20 +65,20 @@ function collectAlerts(page) {
   return messages;
 }
 
-/** No editor aberto: abre a busca de exercícios (se fechada), busca e toca no resultado. */
+/** In the open editor: opens the exercise search (if closed), searches and taps the result. */
 async function addFromPicker(page, query, result) {
   const box = page.locator('#sheetPickerBox');
   if (await box.isHidden()) {
     await editor(page).locator('#btnSheetAddExercise').click();
-    // A busca abre vazia depois de carregar o catálogo: só então dá para digitar.
+    // The search opens empty after loading the catalog: only then can you type.
     await expect(page.locator('#sheetPickerResults')).toContainText('Catálogo (pt-BR)');
   }
   await page.locator('#sheetPickerSearch').fill(query);
   await page.locator('#sheetPickerResults').getByRole('button', { name: result }).first().click();
 }
 
-test.describe('Fichas · criar e editar', () => {
-  test('criar ficha com exercícios da Biblioteca, do catálogo e um novo; séries, reps, observação e ordem', async ({ page }) => {
+test.describe('Fichas · create and edit', () => {
+  test('create a sheet with exercises from Biblioteca, the catalog and a new one; sets, reps, note and order', async ({ page }) => {
     await sheetsWithBackup(page);
     await page.locator('#btnNewSheet').click();
     await expect(editor(page)).toBeVisible();
@@ -86,7 +86,7 @@ test.describe('Fichas · criar e editar', () => {
     await expect(page.locator('#sheetExerciseList')).toContainText('Nenhum exercício na ficha ainda');
 
     await page.locator('#sheetName').fill('Treino C - braços');
-    // Biblioteca (busca sem acento acha "máquina"), catálogo e um exercício novo criado pela busca.
+    // Biblioteca (the accent-insensitive search finds "máquina"), catalog and a new exercise created from the search.
     await addFromPicker(page, 'maquina azul', /^Rosca na máquina azul/);
     await addFromPicker(page, 'Rosca 21', /^Rosca 21/);
     await addFromPicker(page, 'Tríceps no banco da praça', /Criar "Tríceps no banco da praça"/);
@@ -94,7 +94,7 @@ test.describe('Fichas · criar e editar', () => {
       '1Rosca na máquina azul', '2Rosca 21', '3Tríceps no banco da praça'
     ]);
 
-    // Séries: 4 campos de reps; reps de cada série e observação da professora.
+    // Sets: 4 reps fields; each set's reps and the teacher's note.
     const rosca = editorRow(page, 'Rosca na máquina azul');
     await rosca.getByLabel('Séries').fill('4');
     await rosca.getByLabel('Séries').blur();
@@ -104,7 +104,7 @@ test.describe('Fichas · criar e editar', () => {
     }
     await rosca.getByLabel('Observação da professora').fill('pausa de 1s em cima');
 
-    // Ordem: a Rosca 21 sobe para o primeiro lugar; o exercício novo sai da ficha.
+    // Order: Rosca 21 goes up to first place; the new exercise leaves the sheet.
     await editorRow(page, 'Rosca 21').getByRole('button', { name: 'Subir exercício' }).click();
     await editorRow(page, 'Tríceps no banco da praça').getByRole('button', { name: 'Remover exercício' }).click();
     await expect(editor(page).locator('.sheet-edit-item strong')).toHaveText(['1Rosca 21', '2Rosca na máquina azul']);
@@ -116,7 +116,7 @@ test.describe('Fichas · criar e editar', () => {
     await expect(card.locator('.badge')).toHaveText('2 exercícios');
     await expect.poll(() => sheetItems(card)).toEqual(['1 Rosca 21 3 séries', '2 Rosca na máquina azul 4×12-10-8-8 pausa de 1s em cima']);
 
-    // Gravada ligada aos exercícios pelo id; o exercício criado pela busca ficou na Biblioteca.
+    // Saved linked to the exercises by id; the exercise created from the search stayed in Biblioteca.
     const saved = (await storedRecords(page, 'sheets')).find((s) => s.name === 'Treino C - braços');
     expect(saved.active).toBe(true);
     expect(saved.exercises.map((e) => [e.exerciseId, e.name, e.sets, e.reps, e.note])).toEqual([
@@ -125,13 +125,13 @@ test.describe('Fichas · criar e editar', () => {
     ]);
     expect((await storedRecords(page, 'exercises')).map((e) => e.name)).toContain('Tríceps no banco da praça');
 
-    // A ficha nova já pode ser escolhida no Treinar.
+    // The new sheet can already be chosen in Treinar.
     await goTo(page, 'Treinar');
     await page.locator('#workoutSheet').selectOption({ label: 'Treino C - braços' });
     await expect(page.locator('#workoutExercises .ex-title')).toHaveText([/^Rosca 21/, /^Rosca na máquina azul/]);
   });
 
-  test('editar ficha: reps, observação e tirar um exercício', async ({ page }) => {
+  test('edit a sheet: reps, note and removing an exercise', async ({ page }) => {
     await sheetsWithBackup(page);
     await sheetCard(page, 'Treino A').getByRole('button', { name: 'Editar ficha' }).click();
     await expect(page.locator('#sheetEditorTitle')).toHaveText('Editar ficha');
@@ -149,7 +149,7 @@ test.describe('Fichas · criar e editar', () => {
     await expect(card.locator('.badge')).toHaveText('1 exercício');
     await expect.poll(() => sheetItems(card)).toEqual(['1 Supino reto 3×12-10-6 descer em 3s']);
 
-    // O Treinar usa a ficha nova: reps 12-10-6, só o supino.
+    // Treinar uses the new sheet: reps 12-10-6, only the supino.
     await goTo(page, 'Treinar');
     await page.locator('#workoutSheet').selectOption({ label: 'Treino A' });
     await expect(page.locator('#workoutExercises .ex-title')).toHaveText([/^Supino reto/]);
@@ -157,7 +157,7 @@ test.describe('Fichas · criar e editar', () => {
       .toEqual(['12', '10', '6']);
   });
 
-  test('renomear: o nome novo aparece na lista, no Treinar, no Início, no detalhe e no histórico do exercício', async ({ page }) => {
+  test('rename: the new name appears in the list, in Treinar, in Início, in the detail and in the exercise history', async ({ page }) => {
     await sheetsWithBackup(page);
     await sheetCard(page, 'Treino A').getByRole('button', { name: 'Editar ficha' }).click();
     await page.locator('#sheetName').fill('Treino A - peito e costas');
@@ -179,7 +179,7 @@ test.describe('Fichas · criar e editar', () => {
     await expect(page.locator('#exerciseHistory .badge').first()).toHaveText('Treino A - peito e costas');
   });
 
-  test('ficha sem exercícios pode ser salva e mostra como adicionar', async ({ page }) => {
+  test('a sheet with no exercises can be saved and shows how to add', async ({ page }) => {
     await sheetsWithBackup(page);
     await page.locator('#btnNewSheet').click();
     await page.locator('#sheetName').fill('Treino E - a montar');
@@ -191,7 +191,7 @@ test.describe('Fichas · criar e editar', () => {
     await expect(card).toContainText('sem exercícios ainda — toque em ✏️ para adicionar');
   });
 
-  test('nome repetido entre as fichas ativas é recusado', async ({ page }) => {
+  test('a repeated name among active sheets is refused', async ({ page }) => {
     const alerts = collectAlerts(page);
     await sheetsWithBackup(page);
     await page.locator('#btnNewSheet').click();
@@ -202,13 +202,13 @@ test.describe('Fichas · criar e editar', () => {
     await expect(editor(page)).toBeVisible();
     expect((await storedRecords(page, 'sheets')).length).toBe(3);
 
-    // Sem nome também não salva.
+    // Without a name it does not save either.
     await page.locator('#sheetName').fill('  ');
     await page.locator('#sheetEditorSave').click();
     await expect.poll(() => alerts).toEqual(['Já existe uma ficha com esse nome.', 'Informe o nome da ficha.']);
   });
 
-  test('no máximo 20 séries por exercício', async ({ page }) => {
+  test('at most 20 sets per exercise', async ({ page }) => {
     await sheetsWithBackup(page);
     await sheetCard(page, 'Treino B').getByRole('button', { name: 'Editar ficha' }).click();
     const row = editorRow(page, 'Agachamento livre');
@@ -224,7 +224,7 @@ test.describe('Fichas · criar e editar', () => {
     expect(saved.exercises[0].reps.slice(0, 5)).toEqual([8, 8, 6, 6, null]);
   });
 
-  test('o mesmo exercício não entra duas vezes na ficha', async ({ page }) => {
+  test('the same exercise does not enter a sheet twice', async ({ page }) => {
     const alerts = collectAlerts(page);
     await sheetsWithBackup(page);
     await sheetCard(page, 'Treino A').getByRole('button', { name: 'Editar ficha' }).click();
@@ -235,8 +235,8 @@ test.describe('Fichas · criar e editar', () => {
   });
 });
 
-test.describe('Fichas · desativar, reativar e excluir', () => {
-  test('desativar esconde do Treinar sem apagar; reativar traz de volta', async ({ page }) => {
+test.describe('Fichas · deactivate, reactivate and delete', () => {
+  test('deactivating hides it from Treinar without deleting; reactivating brings it back', async ({ page }) => {
     await sheetsWithBackup(page);
     await sheetCard(page, 'Treino B').getByRole('button', { name: 'Desativar ficha' }).click();
 
@@ -254,7 +254,7 @@ test.describe('Fichas · desativar, reativar e excluir', () => {
     expect((await storedRecords(page, 'sheets')).find((s) => s.name === 'Treino B').exercises).toHaveLength(1);
   });
 
-  test('reativar com o mesmo nome de uma ficha ativa é recusado', async ({ page }) => {
+  test('reactivating with the same name as an active sheet is refused', async ({ page }) => {
     const alerts = collectAlerts(page);
     const backup = readFixture(BACKUP);
     backup.data.sheets.find((s) => s.id === 's-velha').name = 'Treino A';
@@ -265,7 +265,7 @@ test.describe('Fichas · desativar, reativar e excluir', () => {
     await expect(page.locator('#sheetsList .opacity-50 .card')).toHaveCount(1);
   });
 
-  test('excluir tira a ficha da lista e do Treinar; os treinos já registrados ficam', async ({ page }) => {
+  test('deleting removes the sheet from the list and from Treinar; the workouts already recorded stay', async ({ page }) => {
     await sheetsWithBackup(page);
     await sheetCard(page, 'Treino A').getByRole('button', { name: 'Excluir ficha' }).click();
 
@@ -277,7 +277,7 @@ test.describe('Fichas · desativar, reativar e excluir', () => {
     expect(await storedRecords(page, 'workouts')).toHaveLength(2);
   });
 
-  test('responder "Não" ao excluir não apaga a ficha', async ({ page }) => {
+  test('answering "Não" to deleting does not delete the sheet', async ({ page }) => {
     await sheetsWithBackup(page);
     const before = await listedSheetNames(page);
     const asked = await answerConfirm(page, false);
@@ -290,8 +290,8 @@ test.describe('Fichas · desativar, reativar e excluir', () => {
   });
 });
 
-test.describe('Fichas · segurança e toque', () => {
-  test('nome com HTML aparece como texto (não vira código na tela)', async ({ page }) => {
+test.describe('Fichas · safety and touch', () => {
+  test('a name with HTML appears as text (it does not become code on the screen)', async ({ page }) => {
     await sheetsWithBackup(page);
     const name = '<img src=x onerror="__xss=1"> Treino X';
     await page.locator('#btnNewSheet').click();
@@ -304,7 +304,7 @@ test.describe('Fichas · segurança e toque', () => {
     await expect(sheetCard(page, name).locator('.sheet-item-name')).toHaveText('<b>Remo</b>');
     await expect(page.locator('#sheetsList img, #sheetsList b')).toHaveCount(0);
     expect(await page.evaluate(() => window.__xss)).toBeUndefined();
-    // A Biblioteca só é redesenhada ao abrir a aba Fichas de novo.
+    // Biblioteca is only redrawn when the Fichas tab is opened again.
     await goTo(page, 'Início');
     await goTo(page, 'Fichas');
     await page.locator('#tabExercisesBtn').click();
@@ -312,7 +312,7 @@ test.describe('Fichas · segurança e toque', () => {
     await expect(page.locator('#exercisesList b')).toHaveCount(0);
   });
 
-  test('botões só com ícone têm área de toque de 44px', async ({ page }) => {
+  test('icon-only buttons have a 44px touch area', async ({ page }) => {
     await sheetsWithBackup(page);
     const buttons = page.locator('#sheetsList .btn-sm[aria-label]');
     await expect(buttons).toHaveCount(9);
@@ -324,7 +324,7 @@ test.describe('Fichas · segurança e toque', () => {
   });
 });
 
-test.describe('Fichas · Criar com IA', () => {
+test.describe('Fichas · Create with AI', () => {
   const PASTED = JSON.stringify([
     {
       name: 'Treino D - costas',
@@ -336,7 +336,7 @@ test.describe('Fichas · Criar com IA', () => {
     }
   ]);
 
-  test('o texto para a IA traz o contrato e os exercícios da Biblioteca e do catálogo', async ({ page }) => {
+  test('the text for the AI brings the contract and the exercises from Biblioteca and the catalog', async ({ page }) => {
     await sheetsWithBackup(page);
     await page.locator('#btnImportSheet').click();
     await expect(importModal(page)).toBeVisible();
@@ -352,12 +352,12 @@ test.describe('Fichas · Criar com IA', () => {
     await page.context().grantPermissions(['clipboard-read', 'clipboard-write']);
     await page.locator('#iaCopy').click();
     await expect(page.locator('#appToastBody')).toHaveText('Texto copiado!');
-    // A área de transferência do Windows devolve as quebras de linha como CRLF.
+    // The Windows clipboard returns line breaks as CRLF.
     const copied = await page.evaluate(() => navigator.clipboard.readText());
     expect(copied.replace(/\r\n/g, '\n')).toBe(text);
   });
 
-  test('texto que não é JSON mostra o motivo e não importa nada', async ({ page }) => {
+  test('text that is not JSON shows the reason and imports nothing', async ({ page }) => {
     const alerts = collectAlerts(page);
     await sheetsWithBackup(page);
     await page.locator('#btnImportSheet').click();
@@ -372,20 +372,20 @@ test.describe('Fichas · Criar com IA', () => {
     expect(await storedRecords(page, 'sheets')).toHaveLength(3);
   });
 
-  test('colar, revisar com sugestão de exercício parecido e importar', async ({ page }) => {
+  test('paste, review with a similar-exercise suggestion and import', async ({ page }) => {
     await sheetsWithBackup(page);
     await page.locator('#btnImportSheet').click();
     await page.locator('#sheetImportText').fill('```json\n' + PASTED + '\n```');
     await page.locator('#sheetImportConfirm').click();
 
-    // Revisão: a ficha, e um seletor só para os nomes sem par exato ("SUPINO RETO" já existe).
+    // Review: the sheet, and a selector only for names without an exact match ("SUPINO RETO" already exists).
     const body = page.locator('#sheetImportBody');
     await expect(body).toContainText('Ficha encontrada');
     await expect(body.locator('.sheet-items li')).toHaveText([/Treino D - costas\s*3 exercícios/]);
     await expect(page.locator('#sheetImportPaste')).toBeHidden();
     await expect(page.locator('#sheetImportConfirm')).toHaveText('Importar');
     await expect(body.locator('.import-name')).toHaveText(['Remada baixa na polia', 'Voador invertido da academia']);
-    // Parecido forte já vem escolhido (Biblioteca antes do catálogo); sem parecido forte, "Criar novo".
+    // A strong match comes already chosen (Biblioteca before the catalog); with no strong match, "Criar novo".
     await expect(body.locator('#imp-0 option:checked')).toHaveText('Remada baixa (biblioteca)');
     await expect(body.locator('#imp-1 option:checked')).toHaveText('➕ Criar novo: Voador invertido da academia');
 
@@ -403,12 +403,12 @@ test.describe('Fichas · Criar com IA', () => {
     const created = library.find((e) => e.name === 'Voador invertido da academia');
     expect(saved.exercises.map((e) => e.exerciseId)).toEqual(['ex-supino', 'ex-remada', created.id]);
 
-    // O exercício novo entrou na Biblioteca.
+    // The new exercise entered Biblioteca.
     await page.locator('#tabExercisesBtn').click();
     await expect(page.locator('#exercisesList')).toContainText('Voador invertido da academia');
   });
 
-  test('ficha com o nome de uma que já existe entra como "(importada)"', async ({ page }) => {
+  test('a sheet with the name of an existing one enters as "(importada)"', async ({ page }) => {
     await sheetsWithBackup(page);
     await page.locator('#btnImportSheet').click();
     await page.locator('#sheetImportText').fill(JSON.stringify({ name: 'Treino A', exercises: [{ name: 'Supino reto' }] }));
@@ -417,7 +417,7 @@ test.describe('Fichas · Criar com IA', () => {
     await page.locator('#sheetImportConfirm').click();
     await expect(importModal(page)).toBeHidden();
 
-    // Ativas na ordem em que estão gravadas (a importada tem id novo), a desativada no fim.
+    // Active in the order they are saved (the imported one has a new id), the deactivated one at the end.
     const names = await listedSheetNames(page);
     expect(names.slice(0, 3).sort()).toEqual(['Treino A', 'Treino A (importada)', 'Treino B']);
     expect(names[3]).toBe('Treino Antigo');

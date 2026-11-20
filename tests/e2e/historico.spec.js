@@ -1,17 +1,17 @@
-// Histórico, evolução do exercício, Calendário e detalhe do treino (issue #7).
+// History, exercise progress, Calendário and workout detail (issue #7).
 //
-// Ponto de partida: `fixtures/historico-backup.json`, importado pela tela Mais, com o relógio da página parado em
-// 20/05/2026 (quarta), 10:00 de Brasília. Semana ativa 18/05–24/05, meta de 3 treinos.
-// - Treino A: 30/03 (Supino 40×10, 42,5×8; Barra fixa ×8), 15/04 (Supino 45×8, 42,5×10; Barra ×10; 20 min de
-//   cardio) e 18/05 (aquecimento 15 reps 20 kg RIR 3; Supino 47,5×6, 45×8; Barra ×12; 30 min; observação).
-// - Treino B: 04/05 (Agachamento 50×10) e 18/05 de noite (Agachamento 60×10, 60×9): dois treinos no mesmo dia.
-// - Barra fixa é sempre com o peso do corpo (carga 0).
+// Starting point: `fixtures/historico-backup.json`, imported through the Mais screen, with the page clock fixed at
+// 20/05/2026 (Wednesday), 10:00 in Brasília. Active week 18/05–24/05, goal of 3 workouts.
+// - Treino A: 30/03 (Supino 40×10, 42,5×8; Barra fixa ×8), 15/04 (Supino 45×8, 42,5×10; Barra ×10; 20 min of
+//   cardio) and 18/05 (warm-up 15 reps 20 kg RIR 3; Supino 47,5×6, 45×8; Barra ×12; 30 min; note).
+// - Treino B: 04/05 (Agachamento 50×10) and 18/05 in the evening (Agachamento 60×10, 60×9): two workouts on the same day.
+// - Barra fixa is always bodyweight (load 0).
 const { test, expect, withBackup, readFixture, goTo, answerConfirm } = require('./helpers');
 
 const BACKUP = 'historico-backup.json';
 const TODAY = '2026-05-20T10:00:00-03:00';
 
-/** Importa o backup do histórico (ou uma variação dele) com o relógio parado num dia. */
+/** Imports the history backup (or a variation of it) with the clock fixed on a day. */
 async function historyWith(page, backup = BACKUP, now = TODAY) {
   await page.clock.setFixedTime(new Date(now));
   await withBackup(page, backup);
@@ -21,38 +21,38 @@ const workoutRows = (page) => page.locator('#recentWorkouts .workout-row');
 const detail = (page) => page.locator('#detailBody');
 const history = (page) => page.locator('#exerciseHistory');
 
-/** Nome da ficha e data de cada linha da lista do Início, na ordem da tela. */
+/** Sheet name and date of each Início list row, in screen order. */
 async function listedWorkouts(page) {
   const labels = await workoutRows(page).evaluateAll((els) => els.map((el) => el.getAttribute('aria-label')));
   return labels.map((label) => label.split(', ').slice(0, 2).join(', '));
 }
 
-/** Abre o detalhe do treino da linha do Início com este texto para leitor de tela (ex.: "Treino A, 18/05/2026"). */
+/** Opens the workout detail from the Início row with this screen-reader text (e.g. "Treino A, 18/05/2026"). */
 async function openWorkout(page, label) {
   await page.locator(`#recentWorkouts .workout-row[aria-label^="${label}"]`).click();
   await expect(page.locator('#view-detail')).toBeVisible();
 }
 
-/** Card de um exercício no detalhe do treino. */
+/** Card of an exercise in the workout detail. */
 function detailCard(page, name) {
   return detail(page).locator('.card').filter({ has: page.locator('.ex-link', { hasText: name }) });
 }
 
-/** Abre a evolução de um exercício pelo detalhe do treino. */
+/** Opens an exercise's progress from the workout detail. */
 async function openExercise(page, name) {
   await detail(page).locator('.ex-link', { hasText: name }).click();
   await expect(page.locator('#view-exercise')).toBeVisible();
   await expect(page.locator('#exerciseHistoryTitle')).toHaveText(name);
 }
 
-/** Texto das linhas "Melhor série por dia" (data e série), na ordem. */
+/** Text of the "Best set per day" rows (date and set), in order. */
 function bestSetRows(page) {
   return history(page).locator('.progress').evaluateAll((bars) => bars.map((bar) =>
     [...bar.previousElementSibling.children].map((span) => span.textContent.trim()).join(' ')));
 }
 
-test.describe('Detalhe do treino', () => {
-  test('mostra ficha, data, volume, cardio, recordes, observação, aquecimento e séries com vírgula', async ({ page }) => {
+test.describe('Workout detail', () => {
+  test('shows sheet, date, volume, cardio, records, note, warm-up and sets with a comma', async ({ page }) => {
     await historyWith(page);
     await openWorkout(page, 'Treino A, 18/05/2026');
     await expect(page).toHaveURL(/#\/detail\/h-mai-a$/);
@@ -70,7 +70,7 @@ test.describe('Detalhe do treino', () => {
     await expect(detailCard(page, 'Barra fixa').locator('.pr-line')).toHaveCount(0);
   });
 
-  test('o treino aberto continua aberto depois de recarregar a página; Voltar volta ao Início', async ({ page }) => {
+  test('an open workout stays open after reloading the page; Voltar goes back to Início', async ({ page }) => {
     await historyWith(page);
     await openWorkout(page, 'Treino B, 04/05/2026');
     await expect(page).toHaveURL(/#\/detail\/h-mai-b1$/);
@@ -84,7 +84,7 @@ test.describe('Detalhe do treino', () => {
     await expect(page.locator('#view-dashboard')).toBeVisible();
   });
 
-  test('excluir pelo detalhe volta ao Início sem o treino', async ({ page }) => {
+  test('deleting from the detail goes back to Início without the workout', async ({ page }) => {
     await historyWith(page);
     await openWorkout(page, 'Treino B, 04/05/2026');
     await page.locator('#detailDelete').click();
@@ -95,7 +95,7 @@ test.describe('Detalhe do treino', () => {
     ]);
   });
 
-  test('responder "Não" ao excluir pelo detalhe não apaga o treino', async ({ page }) => {
+  test('answering "Não" to deleting from the detail does not delete the workout', async ({ page }) => {
     await historyWith(page);
     const before = await listedWorkouts(page);
     await openWorkout(page, 'Treino B, 04/05/2026');
@@ -109,7 +109,7 @@ test.describe('Detalhe do treino', () => {
     expect(await listedWorkouts(page)).toEqual(before);
   });
 
-  test('exportar pelo detalhe: texto do treino e Compartilhar', async ({ page }) => {
+  test('export from the detail: workout text and Compartilhar', async ({ page }) => {
     await page.addInitScript(() => {
       window.__shared = [];
       Object.defineProperty(Navigator.prototype, 'share', {
@@ -128,7 +128,7 @@ test.describe('Detalhe do treino', () => {
     await expect.poll(() => page.evaluate(() => window.__shared)).toEqual([{ title: 'Meu Treino', text }]);
   });
 
-  test('treino que não existe mais mostra "Treino não encontrado."', async ({ page }) => {
+  test('a workout that no longer exists shows "Treino não encontrado."', async ({ page }) => {
     await historyWith(page);
     await page.goto('./#/detail/nao-existe');
     await expect(page.locator('#view-detail')).toBeVisible();
@@ -136,8 +136,8 @@ test.describe('Detalhe do treino', () => {
   });
 });
 
-test.describe('Evolução do exercício', () => {
-  test('carga máxima, número de treinos e tendência, 1RM estimado, melhor série por dia e histórico', async ({ page }) => {
+test.describe('Exercise progress', () => {
+  test('max load, number of workouts and trend, estimated 1RM, best set per day and history', async ({ page }) => {
     await historyWith(page);
     await openWorkout(page, 'Treino A, 18/05/2026');
     await openExercise(page, 'Supino reto');
@@ -146,7 +146,7 @@ test.describe('Evolução do exercício', () => {
     await expect(head).toContainText('Carga máxima');
     await expect(head.locator('.stat-big')).toHaveText('47,5 kg');
     await expect(head.locator('.chip')).toHaveText('3 treinos');
-    // Tendência de alta: a melhor carga do último treino (47,5) passou a do anterior (45).
+    // Upward trend: the last workout's best load (47,5) passed the previous one's (45).
     await expect(head.locator('.chip .bi-arrow-up-right')).toHaveCount(1);
     await expect(history(page)).toContainText('1RM estimado: 57 kg');
 
@@ -156,7 +156,7 @@ test.describe('Evolução do exercício', () => {
       '30/03/2026 42,5 kg × 8 · 1RM 53,8'
     ]);
 
-    // Histórico: um card por treino, do mais novo ao mais velho, com a ficha e o aquecimento daquele dia.
+    // History: one card per workout, newest to oldest, with the sheet and that day's warm-up.
     const sessions = history(page).locator('.card-body.py-2');
     await expect(sessions.locator('strong').first()).toHaveText('18/05/2026');
     await expect(sessions).toHaveCount(3);
@@ -169,7 +169,7 @@ test.describe('Evolução do exercício', () => {
     await expect(page.locator('#view-detail')).toBeVisible();
   });
 
-  test('exercício sem carga (peso do corpo): sem selo de carga máxima e sem 1RM', async ({ page }) => {
+  test('exercise with no load (bodyweight): no max-load badge and no 1RM', async ({ page }) => {
     await historyWith(page);
     await openWorkout(page, 'Treino A, 18/05/2026');
     await openExercise(page, 'Barra fixa');
@@ -184,7 +184,7 @@ test.describe('Evolução do exercício', () => {
 });
 
 test.describe('Calendário', () => {
-  test('marca os dias com treino e conta os treinos do mês; trocar de mês', async ({ page }) => {
+  test('marks the days with a workout and counts the month workouts; switching month', async ({ page }) => {
     await historyWith(page);
     await goTo(page, 'Calendário');
     await expect(page.locator('#calMonthLabel')).toHaveText('maio de 2026');
@@ -204,7 +204,7 @@ test.describe('Calendário', () => {
     await expect(page.locator('#calendarGrid .has-workout')).toHaveCount(0);
   });
 
-  test('tocar no dia abre o treino daquele dia (com dois no dia, o mais recente)', async ({ page }) => {
+  test('tapping the day opens that day\'s workout (with two on the day, the newest)', async ({ page }) => {
     await historyWith(page);
     await goTo(page, 'Calendário');
     const day = page.getByRole('link', { name: 'Abrir treino de 18/05/2026 (2 treinos no dia)' });
@@ -221,7 +221,7 @@ test.describe('Calendário', () => {
     ['2026-01-31T10:00:00-03:00', '#calNext', ['janeiro de 2026', 'fevereiro de 2026', 'março de 2026']],
     ['2026-01-31T10:00:00-03:00', '#calPrev', ['janeiro de 2026', 'dezembro de 2025', 'novembro de 2025']]
   ]) {
-    test(`trocar de mês num dia 31 não pula nem repete mês (${today.slice(0, 10)}, ${button === '#calPrev' ? '‹' : '›'})`, async ({ page }) => {
+    test(`switching month on a day 31 neither skips nor repeats a month (${today.slice(0, 10)}, ${button === '#calPrev' ? '‹' : '›'})`, async ({ page }) => {
       await historyWith(page, BACKUP, today);
       await goTo(page, 'Calendário');
       await expect(page.locator('#calMonthLabel')).toHaveText(expected[0]);
@@ -232,14 +232,14 @@ test.describe('Calendário', () => {
     });
   }
 
-  test('evolução das últimas 8 semanas: volume, treinos da meta e cardio', async ({ page }) => {
+  test('progress of the last 8 weeks: volume, goal workouts and cardio', async ({ page }) => {
     await historyWith(page);
     await goTo(page, 'Calendário');
     const card = page.locator('#weeklyProgress');
     await expect(card).toContainText('Evolução das últimas 8 semanas');
     const weeks = card.locator('.week-row');
     await expect(weeks).toHaveCount(8);
-    // Esta semana: 645 kg (Treino A) + 1.140 kg (Treino B), 2 de 3 treinos, 30 min de cardio.
+    // This week: 645 kg (Treino A) + 1.140 kg (Treino B), 2 of 3 workouts, 30 min of cardio.
     await expect(weeks.nth(0)).toContainText('Esta semana');
     await expect(weeks.nth(0)).toContainText('1.785 kg');
     await expect(weeks.nth(0)).toContainText('2/3 treinos · 30 min cardio');
@@ -252,8 +252,8 @@ test.describe('Calendário', () => {
   });
 });
 
-test.describe('Histórico no Início', () => {
-  test('dois treinos no mesmo dia: o mais recente vem primeiro', async ({ page }) => {
+test.describe('History on Início', () => {
+  test('two workouts on the same day: the newest comes first', async ({ page }) => {
     await historyWith(page);
     expect(await listedWorkouts(page)).toEqual([
       'Treino B, 18/05/2026', 'Treino A, 18/05/2026', 'Treino B, 04/05/2026', 'Treino A, 15/04/2026', 'Treino A, 30/03/2026'
@@ -263,8 +263,8 @@ test.describe('Histórico no Início', () => {
       'Treino A, 18/05/2026, 2 exercícios · 645 kg · 30 min cardio, 1 recorde');
   });
 
-  test('lista curta (mês atual e anterior, no mínimo 10) com "Ver meses anteriores", e filtro por ficha', async ({ page }) => {
-    // Mais 8 treinos da Treino A em 2025: 13 no total, 4 em abril/maio de 2026.
+  test('short list (current and previous month, at least 10) with "Ver meses anteriores", and filter by sheet', async ({ page }) => {
+    // 8 more Treino A workouts in 2025: 13 in total, 4 in April/May 2026.
     const backup = readFixture(BACKUP);
     const old = backup.data.workouts[0];
     for (let i = 1; i <= 8; i++) {
@@ -283,7 +283,7 @@ test.describe('Histórico no Início', () => {
     await page.locator('#btnShowLessWorkouts').click();
     await expect(workoutRows(page)).toHaveCount(10);
 
-    // Filtro por ficha: só os treinos da Treino B.
+    // Filter by sheet: only Treino B workouts.
     const chips = page.locator('#workoutFilter button');
     await expect(chips).toHaveText(['Todas', 'Treino A', 'Treino B']);
     await chips.filter({ hasText: 'Treino B' }).click();
@@ -297,8 +297,8 @@ test.describe('Histórico no Início', () => {
   });
 });
 
-test.describe('Detalhe · compartilhar sem o menu do aparelho', () => {
-  test('sem menu de compartilhar, Compartilhar copia o texto', async ({ page }) => {
+test.describe('Detail · sharing without the device menu', () => {
+  test('without a share menu, Compartilhar copies the text', async ({ page }) => {
     await page.addInitScript(() => {
       Object.defineProperty(Navigator.prototype, 'share', { configurable: true, value: undefined });
     });
@@ -315,7 +315,7 @@ test.describe('Detalhe · compartilhar sem o menu do aparelho', () => {
     expect(copied.replace(/\r\n/g, '\n')).toBe(text);
   });
 
-  test('menu cancelado e área de transferência bloqueada: copia selecionando o texto', async ({ page }) => {
+  test('menu cancelled and clipboard blocked: copies by selecting the text', async ({ page }) => {
     await page.addInitScript(() => {
       window.__execCommands = [];
       Object.defineProperty(Navigator.prototype, 'share', {
@@ -335,8 +335,8 @@ test.describe('Detalhe · compartilhar sem o menu do aparelho', () => {
   });
 });
 
-test.describe('Evolução · sem registros', () => {
-  test('abrir a evolução direto pelo endereço, sem exercício escolhido, mostra que não há registros', async ({ page }) => {
+test.describe('Progress · no records', () => {
+  test('opening the progress straight from the address, with no exercise chosen, shows that there are no records', async ({ page }) => {
     await historyWith(page);
     await page.goto('./#/exercise');
     await expect(page.locator('#view-exercise')).toBeVisible();
