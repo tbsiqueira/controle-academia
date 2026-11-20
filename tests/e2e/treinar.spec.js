@@ -1,34 +1,34 @@
-// Treinar (tela crítica), issue #5. Parte A: abrir, ficha, séries, descanso, exercícios e campos.
-// Cada comportamento tem o seu teste (documentation/REFACTOR.md, seção 4). Parte B: rascunho, salvar e treino
-// existente.
+// Treinar (critical screen), issue #5. Part A: opening, sheet, sets, rest, exercises and fields.
+// Every behaviour has its own test (documentation/REFACTOR.md, section 4). Part B: draft, saving and existing
+// workout.
 //
-// Ponto de partida da maioria dos testes: `fixtures/treinar-backup.json`, importado pela tela Mais.
-// - Treino A (ativa): Supino reto 3 séries (reps 12-10-8) e Remada baixa 2 séries (reps 10-10).
-// - Treino B (ativa): Agachamento livre 4 séries (8-8-6-6), nunca treinado.
-// - Treino Antigo (desativada).
-// - Último treino da Treino A em 10/03/2025: Supino 40 kg × 11, 42,5 × 9, 45 × 7 (aquecimento 15 reps, 20 kg,
-//   RIR 3); Remada 50 × 10, 50 × 9. Um treino mais velho (03/03/2025) com cargas menores não deve aparecer.
-// - Biblioteca: Supino reto, Remada baixa, Agachamento livre e Rosca na máquina azul. Descanso: 90 s.
+// Starting point of most tests: `fixtures/treinar-backup.json`, imported through the Mais screen.
+// - Treino A (active): Supino reto 3 sets (reps 12-10-8) and Remada baixa 2 sets (reps 10-10).
+// - Treino B (active): Agachamento livre 4 sets (8-8-6-6), never trained.
+// - Treino Antigo (deactivated).
+// - Last Treino A workout on 10/03/2025: Supino 40 kg × 11, 42,5 × 9, 45 × 7 (warm-up 15 reps, 20 kg,
+//   RIR 3); Remada 50 × 10, 50 × 9. An older workout (03/03/2025) with smaller loads must not appear.
+// - Biblioteca: Supino reto, Remada baixa, Agachamento livre and Rosca na máquina azul. Rest: 90 s.
 const { test, expect, freshApp, withBackup, readFixture, storedDraft, storedRecords, goTo, answerConfirm } = require('./helpers');
 
 const BACKUP = 'treinar-backup.json';
 
-/** Card de um exercício no formulário do Treinar, pelo nome. */
+/** Card of an exercise in the Treinar form, by name. */
 function exerciseCard(page, name) {
   return page.locator('#workoutExercises .card').filter({ has: page.locator('.ex-title', { hasText: name }) });
 }
 
-/** Valores de um campo (Reps/Carga/RIR/Observação) em todas as séries de um card, na ordem. */
+/** Values of a field (Reps/Carga/RIR/Observação) across all sets of a card, in order. */
 async function setValues(card, field) {
   return card.locator(`input[aria-label^="${field} da série"]`).evaluateAll((els) => els.map((el) => el.value));
 }
 
-/** Botão do número da série (marca como feita e inicia o descanso). */
+/** Set-number button (marks it as done and starts the rest). */
 function setButton(card, number) {
   return card.getByRole('button', { name: new RegExp('^Série ' + number + '\\b') });
 }
 
-/** Importa o backup, abre o Treinar e escolhe a ficha no seletor. */
+/** Imports the backup, opens Treinar and picks the sheet in the selector. */
 async function workoutWithSheet(page, sheetName) {
   await withBackup(page, BACKUP);
   await goTo(page, 'Treinar');
@@ -36,8 +36,8 @@ async function workoutWithSheet(page, sheetName) {
 }
 
 /**
- * Para o relógio da página (instalado com `page.clock.install()` antes de abrir o app): daqui em diante o tempo
- * só anda com `page.clock.runFor`/`setSystemTime`, então o descanso é conferido sem esperas fixas.
+ * Fixes the page clock (installed with `page.clock.install()` before opening the app): from now on time
+ * only moves with `page.clock.runFor`/`setSystemTime`, so the rest is checked without fixed waits.
  */
 async function pauseClock(page) {
   const now = await page.evaluate(() => Date.now());
@@ -47,8 +47,8 @@ async function pauseClock(page) {
 const restBar = (page) => page.locator('#restBar');
 const restClock = (page) => page.locator('#restClock');
 
-test.describe('Treinar · abrir', () => {
-  test('pela aba Treinar sem rascunho: formulário vazio e data de hoje', async ({ page }) => {
+test.describe('Treinar · opening', () => {
+  test('from the Treinar tab with no draft: empty form and today\'s date', async ({ page }) => {
     await page.clock.setFixedTime(new Date('2026-05-20T10:00:00-03:00'));
     await withBackup(page, BACKUP);
     await goTo(page, 'Treinar');
@@ -67,9 +67,9 @@ test.describe('Treinar · abrir', () => {
     await expect(page.locator('#workoutExport')).toBeHidden();
   });
 
-  test('pelo atalho "Treinar: <ficha>" do Início: ficha já carregada', async ({ page }) => {
+  test('from Início\'s "Treinar: <ficha>" shortcut: sheet already loaded', async ({ page }) => {
     await withBackup(page, BACKUP);
-    // O último treino foi da Treino A, então o atalho sugere a próxima: Treino B.
+    // The last workout was Treino A's, so the shortcut suggests the next one: Treino B.
     await page.getByRole('button', { name: 'Treinar: Treino B' }).click();
 
     await expect(page.locator('#view-workout')).toBeVisible();
@@ -79,7 +79,7 @@ test.describe('Treinar · abrir', () => {
     expect(await setValues(card, 'Reps')).toEqual(['8', '8', '6', '6']);
   });
 
-  test('fichas desativadas não aparecem no seletor', async ({ page }) => {
+  test('deactivated sheets do not appear in the selector', async ({ page }) => {
     await withBackup(page, BACKUP);
     await goTo(page, 'Treinar');
 
@@ -88,8 +88,8 @@ test.describe('Treinar · abrir', () => {
   });
 });
 
-test.describe('Treinar · ficha', () => {
-  test('escolher a ficha carrega exercícios e séries: reps da ficha, carga do último treino', async ({ page }) => {
+test.describe('Treinar · sheet', () => {
+  test('choosing the sheet loads exercises and sets: reps from the sheet, load from the last workout', async ({ page }) => {
     await workoutWithSheet(page, 'Treino A');
 
     await expect(page.locator('#sheetHint')).toHaveText('2 exercícios na ficha — carregados no treino.');
@@ -106,14 +106,14 @@ test.describe('Treinar · ficha', () => {
     expect(await setValues(remada, 'Reps')).toEqual(['10', '10']);
     expect(await setValues(remada, 'Carga')).toEqual(['50', '50']);
 
-    // Exercício nunca treinado: reps da ficha, carga em branco.
+    // Exercise never trained: reps from the sheet, load blank.
     await page.locator('#workoutSheet').selectOption({ label: 'Treino B' });
     const agachamento = exerciseCard(page, 'Agachamento livre');
     expect(await setValues(agachamento, 'Reps')).toEqual(['8', '8', '6', '6']);
     expect(await setValues(agachamento, 'Carga')).toEqual(['', '', '', '']);
   });
 
-  test('dica "da última vez" da ficha escolhida', async ({ page }) => {
+  test('"last time" hint of the chosen sheet', async ({ page }) => {
     await workoutWithSheet(page, 'Treino A');
 
     await expect(exerciseCard(page, 'Supino reto').locator('.last-session')).toHaveText(
@@ -121,12 +121,12 @@ test.describe('Treinar · ficha', () => {
     await expect(exerciseCard(page, 'Remada baixa').locator('.last-session')).toHaveText(
       'Última vez (10/03/2025): 50 kg × 10 (RIR 2) · 50 kg × 9 (RIR 1)');
 
-    // Sem histórico, sem dica.
+    // No history, no hint.
     await page.locator('#workoutSheet').selectOption({ label: 'Treino B' });
     await expect(exerciseCard(page, 'Agachamento livre').locator('.last-session')).toHaveCount(0);
   });
 
-  test('aquecimento pré-preenchido com reps e peso do treino anterior, RIR em branco', async ({ page }) => {
+  test('warm-up pre-filled with reps and weight from the previous workout, RIR blank', async ({ page }) => {
     await workoutWithSheet(page, 'Treino A');
 
     const supino = exerciseCard(page, 'Supino reto');
@@ -134,21 +134,21 @@ test.describe('Treinar · ficha', () => {
     await expect(supino.getByLabel('Peso do aquecimento')).toHaveValue('20');
     await expect(supino.getByLabel('RIR do aquecimento')).toHaveValue('');
 
-    // A remada não teve aquecimento da última vez: tudo em branco.
+    // Remada had no warm-up last time: everything blank.
     const remada = exerciseCard(page, 'Remada baixa');
     await expect(remada.getByLabel('Reps do aquecimento')).toHaveValue('');
     await expect(remada.getByLabel('Peso do aquecimento')).toHaveValue('');
     await expect(remada.getByLabel('RIR do aquecimento')).toHaveValue('');
   });
 
-  test('"Repetir o último treino desta ficha" preenche exercícios, reps e cargas', async ({ page }) => {
+  test('"Repetir o último treino desta ficha" fills exercises, reps and loads', async ({ page }) => {
     await workoutWithSheet(page, 'Treino A');
     const supino = exerciseCard(page, 'Supino reto');
     expect(await setValues(supino, 'Reps')).toEqual(['12', '10', '8']);
 
     await page.getByRole('button', { name: 'Repetir o último treino desta ficha (10/03/2025)' }).click();
 
-    // Reps agora vêm do treino de 10/03 (não da ficha); RIR e observações ficam em branco.
+    // Reps now come from the 10/03 workout (not from the sheet); RIR and notes stay blank.
     await expect.poll(() => setValues(supino, 'Reps')).toEqual(['11', '9', '7']);
     expect(await setValues(supino, 'Carga')).toEqual(['40', '42,5', '45']);
     expect(await setValues(supino, 'RIR')).toEqual(['', '', '']);
@@ -162,7 +162,7 @@ test.describe('Treinar · ficha', () => {
     await expect(page.locator('#workoutExercises .card')).toHaveCount(2);
   });
 
-  test('trocar de ficha no meio substitui os exercícios', async ({ page }) => {
+  test('switching sheet halfway replaces the exercises', async ({ page }) => {
     await workoutWithSheet(page, 'Treino A');
     await exerciseCard(page, 'Supino reto').getByLabel('RIR da série 1').fill('2');
     await expect(page.locator('#workoutExercises .card')).toHaveCount(2);
@@ -176,8 +176,8 @@ test.describe('Treinar · ficha', () => {
   });
 });
 
-test.describe('Treinar · séries', () => {
-  test('editar reps, carga, RIR e observação', async ({ page }) => {
+test.describe('Treinar · sets', () => {
+  test('edit reps, load, RIR and note', async ({ page }) => {
     await workoutWithSheet(page, 'Treino A');
     const supino = exerciseCard(page, 'Supino reto');
 
@@ -186,7 +186,7 @@ test.describe('Treinar · séries', () => {
     await supino.getByLabel('RIR da série 2').fill('1');
     await supino.getByLabel('Observação da série 2').fill('falhou na última');
 
-    // Redesenha o formulário (+ série em outro exercício): os valores vêm do estado, não só do campo.
+    // Redraws the form (+ set on another exercise): the values come from state, not only from the field.
     await exerciseCard(page, 'Remada baixa').locator('button:has(.bi-plus)').click();
     expect(await setValues(supino, 'Reps')).toEqual(['12', '9', '8']);
     expect(await setValues(supino, 'Carga')).toEqual(['40', '44', '45']);
@@ -194,12 +194,12 @@ test.describe('Treinar · séries', () => {
     expect(await setValues(supino, 'Observação')).toEqual(['', 'falhou na última', '']);
   });
 
-  test('carga com vírgula (27,5) fica 27,5 (regressão do iPhone)', async ({ page }) => {
+  test('load with a comma (27,5) stays 27,5 (iPhone regression)', async ({ page }) => {
     await workoutWithSheet(page, 'Treino B');
     const agachamento = exerciseCard(page, 'Agachamento livre');
 
     await agachamento.getByLabel('Carga da série 1').fill('27,5');
-    // Marcar a série redesenha o formulário e soma o volume feito: 8 reps × 27,5 kg = 220 kg (27 daria 216).
+    // Marking the set redraws the form and adds the volume done: 8 reps × 27,5 kg = 220 kg (27 would give 216).
     await setButton(agachamento, 1).click();
 
     await expect(agachamento.getByLabel('Carga da série 1')).toHaveValue('27,5');
@@ -215,7 +215,7 @@ test.describe('Treinar · séries', () => {
     expect(size).toBeGreaterThanOrEqual(16);
   });
 
-  test('adicionar série', async ({ page }) => {
+  test('add a set', async ({ page }) => {
     await workoutWithSheet(page, 'Treino A');
     const supino = exerciseCard(page, 'Supino reto');
 
@@ -228,7 +228,7 @@ test.describe('Treinar · séries', () => {
     await expect(page.locator('#workoutProgress')).toContainText('0/6');
   });
 
-  test('tirar a última série', async ({ page }) => {
+  test('remove the last set', async ({ page }) => {
     await workoutWithSheet(page, 'Treino A');
     const supino = exerciseCard(page, 'Supino reto');
     const minus = supino.locator('button:has(.bi-dash)');
@@ -237,14 +237,14 @@ test.describe('Treinar · séries', () => {
     await expect(supino.locator('.ex-title small')).toHaveText('2 séries · descanso 1:30');
     expect(await setValues(supino, 'Reps')).toEqual(['12', '10']);
 
-    // Sempre sobra pelo menos uma série: com uma só, o botão fica desligado.
+    // At least one set always remains: with only one, the button is disabled.
     await minus.click();
     await expect(supino.locator('.ex-title small')).toHaveText('1 série · descanso 1:30');
     expect(await setValues(supino, 'Reps')).toEqual(['12']);
     await expect(minus).toBeDisabled();
   });
 
-  test('tocar no número da série marca como feita e inicia o descanso; tocar de novo só desmarca', async ({ page }) => {
+  test('tapping the set number marks it as done and starts the rest; tapping again only unmarks it', async ({ page }) => {
     await page.clock.install();
     await workoutWithSheet(page, 'Treino A');
     await pauseClock(page);
@@ -260,7 +260,7 @@ test.describe('Treinar · séries', () => {
     await page.clock.runFor(20_000);
     await expect(restClock(page)).toHaveText('1:10');
 
-    // Desmarcar não reinicia nem para o descanso.
+    // Unmarking neither restarts nor stops the rest.
     await setButton(supino, 1).click();
     await expect(setButton(supino, 1)).toHaveAttribute('aria-pressed', 'false');
     await expect(setButton(supino, 1)).not.toHaveClass(/btn-success/);
@@ -268,12 +268,12 @@ test.describe('Treinar · séries', () => {
     await expect(restClock(page)).toHaveText('1:10');
   });
 
-  test('contador de progresso conta só as séries feitas', async ({ page }) => {
+  test('progress counter counts only the sets done', async ({ page }) => {
     await workoutWithSheet(page, 'Treino A');
     const progress = page.locator('#workoutProgress');
     const supino = exerciseCard(page, 'Supino reto');
 
-    // Reps e cargas já vêm preenchidas, mas nada foi feito ainda.
+    // Reps and loads are already filled in, but nothing has been done yet.
     await expect(progress).toContainText('0/5séries feitas');
     await expect(progress).toContainText('0 kgvolume feito');
     await expect(progress.getByRole('img')).toHaveAttribute('aria-label', '0 de 2 exercícios concluídos');
@@ -294,8 +294,8 @@ test.describe('Treinar · séries', () => {
   });
 });
 
-test.describe('Treinar · descanso', () => {
-  test('começa ao marcar a série, com o tempo dos Ajustes', async ({ page }) => {
+test.describe('Treinar · rest', () => {
+  test('starts when the set is marked, with the time from Ajustes', async ({ page }) => {
     await page.clock.install();
     await withBackup(page, BACKUP);
     await goTo(page, 'Mais');
@@ -318,7 +318,7 @@ test.describe('Treinar · descanso', () => {
     await expect(restClock(page)).toHaveText('0:35');
   });
 
-  test('botão de somar tempo (+15s)', async ({ page }) => {
+  test('add-time button (+15s)', async ({ page }) => {
     await page.clock.install();
     await workoutWithSheet(page, 'Treino A');
     await pauseClock(page);
@@ -337,7 +337,7 @@ test.describe('Treinar · descanso', () => {
     await expect(restBar(page)).toHaveClass(/is-done/);
   });
 
-  test('parar', async ({ page }) => {
+  test('stop', async ({ page }) => {
     await page.clock.install();
     await workoutWithSheet(page, 'Treino A');
     await pauseClock(page);
@@ -348,14 +348,14 @@ test.describe('Treinar · descanso', () => {
     await page.getByRole('button', { name: 'Parar descanso' }).click();
     await expect(restBar(page)).toBeHidden();
 
-    // Parado de verdade: passado o tempo, o fim do descanso não reaparece.
+    // Really stopped: after the time passes, the end of the rest does not come back.
     await page.clock.runFor(120_000);
     await expect(restBar(page)).toBeHidden();
     await expect(restBar(page)).not.toHaveClass(/is-done/);
   });
 
-  test('no fim só muda de cor: sem som, sem vibração, sem piscar', async ({ page }) => {
-    // Registra qualquer tentativa de som, fala ou vibração.
+  test('at the end it only changes colour: no sound, no vibration, no flashing', async ({ page }) => {
+    // Records any attempt at sound, speech or vibration.
     await page.addInitScript(() => {
       window.__alertas = [];
       const anota = (nome) => window.__alertas.push(nome);
@@ -386,7 +386,7 @@ test.describe('Treinar · descanso', () => {
     expect(done).toBe('rgb(162, 106, 0)'); // --mt-warn
     expect(done).not.toBe(counting);
 
-    // Fica parado assim até fechar: não some sozinho, não volta a contar, não alterna de cor.
+    // It stays like this until closed: it does not disappear, resume counting or alternate colour.
     for (let i = 0; i < 4; i++) {
       await page.clock.runFor(5_000);
       await expect(bar).toBeVisible();
@@ -395,7 +395,7 @@ test.describe('Treinar · descanso', () => {
       expect(await background()).toBe(done);
     }
 
-    // Nenhuma animação de CSS (piscar/pulsar) na barra nem dentro dela.
+    // No CSS animation (blinking/pulsing) on the bar or inside it.
     const animations = await bar.evaluate((el) => [el, ...el.querySelectorAll('*')]
       .map((node) => getComputedStyle(node).animationName)
       .filter((name) => name && name !== 'none'));
@@ -406,7 +406,7 @@ test.describe('Treinar · descanso', () => {
     expect(await page.evaluate(() => window.__alertas)).toEqual([]);
   });
 
-  test('continua certo depois de o app ir para segundo plano (conta pelo horário de término)', async ({ page }) => {
+  test('stays correct after the app goes to the background (it counts by the end time)', async ({ page }) => {
     await page.clock.install();
     await workoutWithSheet(page, 'Treino A');
     await pauseClock(page);
@@ -414,14 +414,14 @@ test.describe('Treinar · descanso', () => {
     await setButton(exerciseCard(page, 'Supino reto'), 1).click();
     await expect(restClock(page)).toHaveText('1:30');
 
-    // Em segundo plano o celular congela os timers: o relógio anda 60 s sem nenhum tick rodar.
+    // In the background the phone freezes timers: the clock moves 60 s without any tick running.
     const now = await page.evaluate(() => Date.now());
     await page.clock.setSystemTime(now + 60_000);
-    // Ao voltar, o primeiro tick já mostra o tempo certo (contando ticks mostraria 1:30).
+    // On return, the first tick already shows the right time (counting ticks would show 1:30).
     await page.clock.runFor(250);
     await expect(restClock(page)).toHaveText('0:30');
 
-    // E se o descanso acabou enquanto estava fora, volta já no fim.
+    // And if the rest ended while it was away, it comes back already at the end.
     const later = await page.evaluate(() => Date.now());
     await page.clock.setSystemTime(later + 120_000);
     await page.clock.runFor(250);
@@ -430,19 +430,19 @@ test.describe('Treinar · descanso', () => {
   });
 });
 
-test.describe('Treinar · exercícios e campos', () => {
-  /** Abre o seletor de exercício do Treinar e busca um nome. */
+test.describe('Treinar · exercises and fields', () => {
+  /** Opens Treinar's exercise picker and searches for a name. */
   async function searchExercise(page, query) {
     await page.locator('#btnAddExercise').click();
     await expect(page.locator('#exercisePickerModal')).toBeVisible();
     await page.locator('#pickerSearch').fill(query);
   }
 
-  test('adicionar exercício da Biblioteca', async ({ page }) => {
+  test('add an exercise from Biblioteca', async ({ page }) => {
     await withBackup(page, BACKUP);
     await goTo(page, 'Treinar');
 
-    await searchExercise(page, 'maquina azul'); // busca sem acento
+    await searchExercise(page, 'maquina azul'); // accent-insensitive search
     const results = page.locator('#pickerResults');
     await expect(results).toContainText('Biblioteca');
     await results.getByRole('button', { name: /^Rosca na máquina azul/ }).click();
@@ -453,7 +453,7 @@ test.describe('Treinar · exercícios e campos', () => {
     await expect(rosca.locator('.ex-title small')).toHaveText('3 séries · descanso 1:30');
   });
 
-  test('adicionar exercício do catálogo', async ({ page }) => {
+  test('add an exercise from the catalog', async ({ page }) => {
     await freshApp(page);
     await goTo(page, 'Treinar');
 
@@ -467,7 +467,7 @@ test.describe('Treinar · exercícios e campos', () => {
     await expect(page.locator('#workoutExercises .card')).toHaveCount(1);
   });
 
-  test('adicionar exercício criando um novo', async ({ page }) => {
+  test('add an exercise by creating a new one', async ({ page }) => {
     await freshApp(page);
     await goTo(page, 'Treinar');
 
@@ -477,13 +477,13 @@ test.describe('Treinar · exercícios e campos', () => {
     await expect(page.locator('#exercisePickerModal')).toBeHidden();
     await expect(exerciseCard(page, 'Prancha com peso')).toBeVisible();
 
-    // O exercício novo entrou na Biblioteca.
+    // The new exercise entered Biblioteca.
     await goTo(page, 'Fichas');
     await page.locator('#tabExercisesBtn').click();
     await expect(page.locator('#tabExercises')).toContainText('Prancha com peso');
   });
 
-  test('remover um exercício', async ({ page }) => {
+  test('remove an exercise', async ({ page }) => {
     await workoutWithSheet(page, 'Treino A');
     await expect(page.locator('#workoutProgress')).toContainText('0/5séries feitas');
 
@@ -499,7 +499,7 @@ test.describe('Treinar · exercícios e campos', () => {
     await expect(page.locator('#workoutProgress')).toBeEmpty();
   });
 
-  test('aquecimento por exercício: reps, peso e RIR', async ({ page }) => {
+  test('warm-up per exercise: reps, weight and RIR', async ({ page }) => {
     await workoutWithSheet(page, 'Treino A');
     const remada = exerciseCard(page, 'Remada baixa');
 
@@ -507,7 +507,7 @@ test.describe('Treinar · exercícios e campos', () => {
     await remada.getByLabel('Peso do aquecimento').fill('22,5');
     await remada.getByLabel('RIR do aquecimento').fill('4');
 
-    // Redesenha o formulário: o aquecimento ficou guardado no exercício certo.
+    // Redraws the form: the warm-up stayed saved on the right exercise.
     await remada.locator('button:has(.bi-plus)').click();
     await expect(remada.getByLabel('Reps do aquecimento')).toHaveValue('12');
     await expect(remada.getByLabel('Peso do aquecimento')).toHaveValue('22,5');
@@ -518,7 +518,7 @@ test.describe('Treinar · exercícios e campos', () => {
     await expect(supino.getByLabel('RIR do aquecimento')).toHaveValue('');
   });
 
-  test('cardio e observações', async ({ page }) => {
+  test('cardio and notes', async ({ page }) => {
     await workoutWithSheet(page, 'Treino A');
     const progress = page.locator('#workoutProgress');
     await expect(progress).toContainText('0 mincardio');
@@ -527,7 +527,7 @@ test.describe('Treinar · exercícios e campos', () => {
     await expect(progress).toContainText('25 mincardio');
     await page.locator('#workoutNotes').fill('Academia cheia, troquei a ordem');
 
-    // Redesenhar as séries não apaga os dois campos.
+    // Redrawing the sets does not erase the two fields.
     await exerciseCard(page, 'Supino reto').locator('button:has(.bi-plus)').click();
     await expect(page.locator('#workoutCardio')).toHaveValue('25');
     await expect(page.locator('#workoutNotes')).toHaveValue('Academia cheia, troquei a ordem');
@@ -535,9 +535,9 @@ test.describe('Treinar · exercícios e campos', () => {
   });
 });
 
-/* ---------- Parte B: rascunho, salvar e treino existente ---------- */
+/* ---------- Part B: draft, saving and existing workout ---------- */
 
-/** Simula o app indo para segundo plano (trocar de app, bloquear a tela). */
+/** Simulates the app going to the background (switching apps, locking the screen). */
 async function hidePage(page) {
   await page.evaluate(() => {
     Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => 'hidden' });
@@ -545,7 +545,7 @@ async function hidePage(page) {
   });
 }
 
-/** Faz o próximo confirm() responder "Cancelar" e guarda a pergunta em window.__pergunta. */
+/** Makes the next confirm() answer "Cancelar" and stores the question in window.__pergunta. */
 async function answerNextConfirmNo(page) {
   await page.evaluate(() => {
     const original = window.confirm;
@@ -553,7 +553,7 @@ async function answerNextConfirmNo(page) {
   });
 }
 
-/** Abre um treino salvo pelo Início (lista Histórico) e toca em Editar treino. */
+/** Opens a saved workout from Início (Histórico list) and taps Editar treino. */
 async function editSavedWorkout(page, workoutId) {
   await goTo(page, 'Início');
   await page.locator(`#recentWorkouts button[data-view-workout="${workoutId}"]`).click();
@@ -564,13 +564,13 @@ async function editSavedWorkout(page, workoutId) {
 
 const historyCount = (page) => page.locator('#recentWorkouts .section-head .chip');
 
-test.describe('Treinar · rascunho', () => {
-  test('toda alteração grava o rascunho; recarregar a página no meio do treino continua de onde parou', async ({ page }) => {
+test.describe('Treinar · draft', () => {
+  test('every change saves the draft; reloading the page mid-workout continues where it stopped', async ({ page }) => {
     await workoutWithSheet(page, 'Treino A');
     const supino = exerciseCard(page, 'Supino reto');
     const draft = () => storedDraft(page);
 
-    // Cada tipo de alteração chega sozinho ao rascunho, sem precisar sair da tela.
+    // Every kind of change reaches the draft on its own, without leaving the screen.
     await expect.poll(async () => (await draft())?.sheetId).toBe('s-a');
     await supino.getByLabel('Reps da série 2').fill('9');
     await expect.poll(async () => (await draft())?.formSets[0].sets[1].reps).toBe('9');
@@ -605,11 +605,11 @@ test.describe('Treinar · rascunho', () => {
     await expect(exerciseCard(page, 'Remada baixa')).toBeVisible();
   });
 
-  test('sair do app (página oculta) grava o rascunho na hora', async ({ page }) => {
+  test('leaving the app (hidden page) saves the draft right away', async ({ page }) => {
     await page.clock.install();
     await withBackup(page, BACKUP);
     await goTo(page, 'Treinar');
-    // Relógio parado: a gravação de 500 ms depois da alteração nunca chega a rodar.
+    // Clock fixed: the save 500 ms after the change never gets to run.
     await pauseClock(page);
     await page.locator('#workoutSheet').selectOption({ label: 'Treino A' });
     await exerciseCard(page, 'Supino reto').getByLabel('Carga da série 1').fill('41');
@@ -620,7 +620,7 @@ test.describe('Treinar · rascunho', () => {
     await expect.poll(async () => (await storedDraft(page))?.formSets[0].sets[0].load).toBe('41');
   });
 
-  test('Cancelar descarta as alterações e o rascunho', async ({ page }) => {
+  test('Cancelar discards the changes and the draft', async ({ page }) => {
     await workoutWithSheet(page, 'Treino A');
     await page.locator('#workoutNotes').fill('vou desistir');
     await expect.poll(async () => (await storedDraft(page))?.notes).toBe('vou desistir');
@@ -639,12 +639,12 @@ test.describe('Treinar · rascunho', () => {
     await expect(page.locator('#workoutExercises')).toHaveText('Adicione exercícios ao treino.');
   });
 
-  test('rascunho de outro treino: continuar mantém o treino novo, sem misturar com o que foi aberto', async ({ page }) => {
+  test('draft of another workout: continuing keeps the new workout, without mixing it with the one opened', async ({ page }) => {
     await workoutWithSheet(page, 'Treino B');
     await page.locator('#workoutNotes').fill('treino novo de pernas');
     await expect.poll(async () => (await storedDraft(page))?.notes).toBe('treino novo de pernas');
 
-    // Abrir para editar o treino de 10/03 pergunta; "OK" continua o rascunho (treino novo).
+    // Opening the 10/03 workout to edit asks; "OK" continues the draft (new workout).
     await editSavedWorkout(page, 'w-ultimo');
 
     await expect(page.locator('#workoutTitle')).toHaveText('Treinar');
@@ -657,7 +657,7 @@ test.describe('Treinar · rascunho', () => {
     expect((await storedDraft(page)).editingWorkoutId).toBeNull();
   });
 
-  test('rascunho de outro treino: descartar abre o treino escolhido só com os dados dele', async ({ page }) => {
+  test('draft of another workout: discarding opens the chosen workout with only its data', async ({ page }) => {
     await workoutWithSheet(page, 'Treino B');
     await page.locator('#workoutNotes').fill('treino novo de pernas');
     await expect.poll(async () => (await storedDraft(page))?.notes).toBe('treino novo de pernas');
@@ -681,11 +681,11 @@ test.describe('Treinar · rascunho', () => {
   });
 });
 
-test.describe('Treinar · salvar', () => {
-  test('treino inválido não é salvo e mostra o motivo', async ({ page }) => {
+test.describe('Treinar · saving', () => {
+  test('an invalid workout is not saved and shows the reason', async ({ page }) => {
     await freshApp(page);
     await goTo(page, 'Treinar');
-    // Exercício do catálogo sem nenhuma série preenchida, sem aquecimento e sem cardio.
+    // Catalog exercise with no set filled in, no warm-up and no cardio.
     await page.locator('#btnAddExercise').click();
     await page.locator('#pickerSearch').fill('Rosca 21');
     await page.locator('#pickerResults').getByRole('button', { name: /^Rosca 21/ }).click();
@@ -705,21 +705,21 @@ test.describe('Treinar · salvar', () => {
     await expect(page.locator('#recentWorkouts')).toContainText('Nenhum treino registrado ainda');
   });
 
-  test('salvar leva ao Início com o resumo, e o treino aparece no Calendário e no histórico de cada exercício', async ({ page }) => {
+  test('saving goes to Início with the summary, and the workout appears in Calendário and in each exercise\'s history', async ({ page }) => {
     await page.clock.setFixedTime(new Date('2026-05-20T10:00:00-03:00'));
     await workoutWithSheet(page, 'Treino A');
     await page.locator('#workoutCardio').fill('30');
 
     await page.locator('#workoutSave').click();
 
-    // Início: o treino de hoje no topo, com o resumo (2 exercícios, volume 1.265 + 1.000 kg, cardio).
+    // Início: today's workout at the top, with the summary (2 exercises, volume 1.265 + 1.000 kg, cardio).
     await expect(page.locator('#view-dashboard')).toBeVisible();
     await expect(historyCount(page)).toHaveText('3 treinos');
     const first = page.locator('#recentWorkouts button[data-view-workout]').first();
     await expect(first).toHaveAttribute('aria-label', 'Treino A, 20/05/2026, 2 exercícios · 2.265 kg · 30 min cardio');
     await expect(first).toContainText('2 exercícios · 2.265 kg · 30 min cardio');
 
-    // Calendário: o dia de hoje marcado e com link para o treino.
+    // Calendário: today marked and with a link to the workout.
     await goTo(page, 'Calendário');
     await expect(page.locator('#calMonthLabel')).toHaveText('maio de 2026');
     const today = page.getByRole('link', { name: 'Abrir treino de 20/05/2026' });
@@ -730,7 +730,7 @@ test.describe('Treinar · salvar', () => {
     await expect(page.locator('#detailBody')).toContainText('Treino A');
     await expect(page.locator('#detailBody')).toContainText('20/05/2026');
 
-    // Histórico de cada exercício: o treino de hoje é o primeiro.
+    // History of each exercise: today's workout is the first.
     for (const [name, total] of [['Supino reto', '3 treinos'], ['Remada baixa', '2 treinos']]) {
       await page.locator('#detailBody .ex-link', { hasText: name }).click();
       await expect(page.locator('#view-exercise')).toBeVisible();
@@ -744,9 +744,9 @@ test.describe('Treinar · salvar', () => {
     }
   });
 
-  test('linha "Recorde" quando bate a maior carga anterior', async ({ page }) => {
+  test('"Recorde" line when it beats the previous best load', async ({ page }) => {
     await workoutWithSheet(page, 'Treino A');
-    // Maior carga anterior do supino: 45 kg. A remada repete os 50 kg (igual não conta).
+    // Previous best supino load: 45 kg. Remada repeats the 50 kg (equal does not count).
     await exerciseCard(page, 'Supino reto').getByLabel('Carga da série 1').fill('47,5');
     await page.locator('#workoutSave').click();
     await expect(page.locator('#view-dashboard')).toBeVisible();
@@ -761,7 +761,7 @@ test.describe('Treinar · salvar', () => {
     await expect(remada.locator('.pr-line')).toHaveCount(0);
   });
 
-  test('depois de salvar, o rascunho some', async ({ page }) => {
+  test('after saving, the draft disappears', async ({ page }) => {
     await workoutWithSheet(page, 'Treino A');
     await page.locator('#workoutNotes').fill('salvando');
     await expect.poll(async () => (await storedDraft(page))?.notes).toBe('salvando');
@@ -771,7 +771,7 @@ test.describe('Treinar · salvar', () => {
     await expect(page.locator('#view-dashboard')).toBeVisible();
     await expect(page.locator('#draftBanner')).toBeEmpty();
     expect(await storedDraft(page)).toBeNull();
-    // Sem treino em andamento, o atalho do Início volta (a próxima ficha depois da A é a B).
+    // With no workout in progress, Início's shortcut is back (the next sheet after A is B).
     await expect(page.getByRole('button', { name: 'Treinar: Treino B' })).toBeVisible();
 
     await page.reload();
@@ -784,8 +784,8 @@ test.describe('Treinar · salvar', () => {
   });
 });
 
-test.describe('Treinar · treino existente', () => {
-  test('abrir pelo detalhe, editar e salvar (sem duplicar)', async ({ page }) => {
+test.describe('Treinar · existing workout', () => {
+  test('open from the detail, edit and save (without duplicating)', async ({ page }) => {
     await withBackup(page, BACKUP);
     await expect(historyCount(page)).toHaveText('2 treinos');
     await editSavedWorkout(page, 'w-ultimo');
@@ -816,7 +816,7 @@ test.describe('Treinar · treino existente', () => {
     await expect(page.locator('#detailBody')).toContainText('10/03/2025');
   });
 
-  test('excluir o treino', async ({ page }) => {
+  test('delete the workout', async ({ page }) => {
     await withBackup(page, BACKUP);
     await editSavedWorkout(page, 'w-ultimo');
 
@@ -827,13 +827,13 @@ test.describe('Treinar · treino existente', () => {
     await expect(page.locator('#recentWorkouts button[data-view-workout="w-ultimo"]')).toHaveCount(0);
     await expect(page.locator('#recentWorkouts button[data-view-workout="w-antigo"]')).toBeVisible();
 
-    // Excluído de verdade: a "última vez" do supino volta a ser o treino de 03/03.
+    // Really deleted: supino's "last time" becomes the 03/03 workout again.
     await goTo(page, 'Treinar');
     await page.locator('#workoutSheet').selectOption({ label: 'Treino A' });
     await expect(exerciseCard(page, 'Supino reto').locator('.last-session')).toContainText('Última vez (03/03/2025)');
   });
 
-  test('exportar como texto (formato do WhatsApp, só a data no topo)', async ({ page }) => {
+  test('export as text (WhatsApp format, only the date at the top)', async ({ page }) => {
     await withBackup(page, BACKUP);
     await editSavedWorkout(page, 'w-ultimo');
 
@@ -882,8 +882,8 @@ test.describe('Treinar · treino existente', () => {
   });
 });
 
-test.describe('Treinar · exercício repetido', () => {
-  test('o mesmo exercício não entra duas vezes no treino', async ({ page }) => {
+test.describe('Treinar · repeated exercise', () => {
+  test('the same exercise does not enter the workout twice', async ({ page }) => {
     const alerts = [];
     page.on('dialog', (dialog) => { alerts.push(dialog.message()); dialog.accept(); });
     await workoutWithSheet(page, 'Treino A');
@@ -899,8 +899,8 @@ test.describe('Treinar · exercício repetido', () => {
   });
 });
 
-test.describe('Treinar · responder "Não" mantém o que foi preenchido', () => {
-  test('trocar de ficha', async ({ page }) => {
+test.describe('Treinar · answering "Não" keeps what was filled in', () => {
+  test('switching sheet', async ({ page }) => {
     await workoutWithSheet(page, 'Treino A');
     await exerciseCard(page, 'Supino reto').getByLabel('RIR da série 1').fill('2');
     const asked = await answerConfirm(page, false);
@@ -913,7 +913,7 @@ test.describe('Treinar · responder "Não" mantém o que foi preenchido', () => 
     await expect(exerciseCard(page, 'Agachamento livre')).toHaveCount(0);
   });
 
-  test('"Repetir o último treino desta ficha"', async ({ page }) => {
+  test('repeat the last workout of this sheet', async ({ page }) => {
     await workoutWithSheet(page, 'Treino A');
     const asked = await answerConfirm(page, false);
 
@@ -924,7 +924,7 @@ test.describe('Treinar · responder "Não" mantém o que foi preenchido', () => 
     expect(await setValues(exerciseCard(page, 'Supino reto'), 'Reps')).toEqual(['12', '10', '8']);
   });
 
-  test('remover um exercício preenchido', async ({ page }) => {
+  test('remove a filled-in exercise', async ({ page }) => {
     await workoutWithSheet(page, 'Treino A');
     const asked = await answerConfirm(page, false);
 
@@ -935,7 +935,7 @@ test.describe('Treinar · responder "Não" mantém o que foi preenchido', () => 
     expect(await setValues(exerciseCard(page, 'Supino reto'), 'Carga')).toEqual(['40', '42,5', '45']);
   });
 
-  test('Cancelar (pergunta mesmo com só a observação preenchida)', async ({ page }) => {
+  test('Cancelar (asks even with only the note filled in)', async ({ page }) => {
     await freshApp(page);
     await goTo(page, 'Treinar');
     await page.locator('#workoutNotes').fill('só uma anotação');
@@ -950,7 +950,7 @@ test.describe('Treinar · responder "Não" mantém o que foi preenchido', () => 
     expect((await storedDraft(page)).notes).toBe('só uma anotação');
   });
 
-  test('tirar a última série preenchida', async ({ page }) => {
+  test('remove the last filled-in set', async ({ page }) => {
     await workoutWithSheet(page, 'Treino A');
     const supino = exerciseCard(page, 'Supino reto');
     const asked = await answerConfirm(page, false);
@@ -962,7 +962,7 @@ test.describe('Treinar · responder "Não" mantém o que foi preenchido', () => 
     expect(await setValues(supino, 'Carga')).toEqual(['40', '42,5', '45']);
   });
 
-  test('excluir o treino', async ({ page }) => {
+  test('delete the workout', async ({ page }) => {
     await withBackup(page, BACKUP);
     await editSavedWorkout(page, 'w-ultimo');
     const asked = await answerConfirm(page, false);
@@ -975,8 +975,8 @@ test.describe('Treinar · responder "Não" mantém o que foi preenchido', () => 
   });
 });
 
-test.describe('Treinar · cancelar e esvaziar', () => {
-  test('Cancelar na edição de um treino salvo volta ao detalhe dele, sem mudar nada', async ({ page }) => {
+test.describe('Treinar · cancelling and emptying', () => {
+  test('Cancelar while editing a saved workout goes back to its detail, changing nothing', async ({ page }) => {
     await withBackup(page, BACKUP);
     await editSavedWorkout(page, 'w-ultimo');
     await page.locator('#workoutNotes').fill('mudei de ideia');
@@ -990,7 +990,7 @@ test.describe('Treinar · cancelar e esvaziar', () => {
     await expect.poll(() => storedDraft(page)).toBeNull();
   });
 
-  test('apagar tudo o que foi digitado apaga o rascunho', async ({ page }) => {
+  test('erasing everything that was typed erases the draft', async ({ page }) => {
     await freshApp(page);
     await goTo(page, 'Treinar');
     await page.locator('#workoutCardio').fill('20');
@@ -1004,8 +1004,8 @@ test.describe('Treinar · cancelar e esvaziar', () => {
   });
 });
 
-test.describe('Treinar · navegador antigo', () => {
-  test('salva o treino mesmo sem crypto.randomUUID', async ({ page }) => {
+test.describe('Treinar · old browser', () => {
+  test('saves the workout even without crypto.randomUUID', async ({ page }) => {
     await page.addInitScript(() => {
       Object.defineProperty(Crypto.prototype, 'randomUUID', { configurable: true, value: undefined });
     });

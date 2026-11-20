@@ -1,15 +1,15 @@
-// Testes de fumaça: o app abre, navega, funciona offline e não fala com ninguém de fora.
-// Os fluxos de verdade (Treinar, Início, dados, fichas) ficam nos outros arquivos desta pasta.
+// Smoke tests: the app opens, navigates, works offline and does not talk to anyone outside.
+// The real flows (Treinar, Início, data, sheets) live in the other files in this folder.
 const { test, expect, TABS, freshApp, waitForApp, withSampleData, goTo } = require('./helpers');
 
-test('abre sem erro com o banco vazio', async ({ page }) => {
+test('opens with no error with an empty database', async ({ page }) => {
   await freshApp(page);
   await expect(page.locator('#view-dashboard')).toBeVisible();
   await expect(page.locator('#recentWorkouts')).toContainText('Nenhum treino registrado ainda');
   await expect(page.locator('.bottom-nav a.active')).toHaveAttribute('href', '#/dashboard');
 });
 
-test('a versão é a mesma no rodapé, nos arquivos e no cache do service worker', async ({ page }) => {
+test('the version is the same in the footer, in the asset URLs and in the service worker cache', async ({ page }) => {
   await freshApp(page);
   const footer = await page.locator('#appVersion').textContent();
   const version = footer.replace(/^v/, '');
@@ -27,7 +27,7 @@ test('a versão é a mesma no rodapé, nos arquivos e no cache do service worker
   await expect.poll(() => page.evaluate(() => caches.keys())).toContain('meu-treino-v' + version);
 });
 
-test('as 5 abas da barra inferior abrem a tela certa', async ({ page }) => {
+test('the 5 bottom-bar tabs open the right screen', async ({ page }) => {
   await freshApp(page);
   for (const [name, tab] of Object.entries(TABS)) {
     await goTo(page, name);
@@ -37,7 +37,7 @@ test('as 5 abas da barra inferior abrem a tela certa', async ({ page }) => {
   }
 });
 
-test('telas internas: Fichas ↔ Biblioteca e Mais → Apagar dados → voltar', async ({ page }) => {
+test('inner screens: Fichas ↔ Biblioteca and Mais → Erase data → back', async ({ page }) => {
   await freshApp(page);
 
   await goTo(page, 'Fichas');
@@ -57,19 +57,19 @@ test('telas internas: Fichas ↔ Biblioteca e Mais → Apagar dados → voltar',
   await expect(page.locator('#view-more')).toBeVisible();
 });
 
-test('com dados: Início lista treinos e o Calendário marca os dias', async ({ page }) => {
+test('with data: Início lists workouts and Calendário marks the days', async ({ page }) => {
   await withSampleData(page);
   await expect(page.locator('#recentWorkouts')).not.toContainText('Nenhum treino registrado ainda');
   await expect(page.locator('#recentWorkouts button[data-view-workout]').first()).toBeVisible();
   await expect(page.locator('#quickStart button')).toBeVisible();
 
-  // Os dados de exemplo sempre têm um treino hoje, então o mês atual tem pelo menos um dia marcado.
+  // The sample data always has a workout today, so the current month has at least one marked day.
   await goTo(page, 'Calendário');
   await expect(page.locator('#calendarGrid .has-workout').first()).toBeVisible();
   await expect(page.locator('#calendarGrid .today.has-workout')).toHaveCount(1);
 });
 
-test('funciona offline depois do primeiro carregamento', async ({ page, context }) => {
+test('works offline after the first load', async ({ page, context }) => {
   await freshApp(page);
   await page.evaluate(() => navigator.serviceWorker.ready);
   await expect.poll(() => page.evaluate(() => !!navigator.serviceWorker.controller)).toBe(true);
@@ -86,7 +86,7 @@ test('funciona offline depois do primeiro carregamento', async ({ page, context 
   await goTo(page, 'Fichas');
 });
 
-test('nada sai do aparelho: nenhuma requisição para fora do servidor local', async ({ page, baseURL }) => {
+test('nothing leaves the device: no request outside the local server', async ({ page, baseURL }) => {
   const origin = new URL(baseURL).origin;
   const outside = [];
   page.on('request', (req) => {
@@ -103,12 +103,12 @@ test('nada sai do aparelho: nenhuma requisição para fora do servidor local', a
   expect(outside).toEqual([]);
 });
 
-test('cabe no celular: nenhuma tela rola para o lado em 375px', async ({ page }) => {
+test('fits a phone: no screen scrolls sideways at 375px', async ({ page }) => {
   await withSampleData(page);
   for (const name of Object.keys(TABS)) {
     await goTo(page, name);
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
-    expect(overflow, 'rolagem horizontal na aba ' + name).toBeLessThanOrEqual(0);
+    expect(overflow, 'horizontal scroll on the ' + name + ' tab').toBeLessThanOrEqual(0);
   }
 });
 
@@ -129,13 +129,13 @@ function smallFields(page) {
 test('no iPhone zoom: every visible form field is at least 16px at phone width', async ({ page }) => {
   await withSampleData(page);
 
-  // Treinar with a ficha loaded: set rows, warm-up and observation fields exist.
+  // Treinar with a sheet loaded: set rows, warm-up and observation fields exist.
   await goTo(page, 'Treinar');
   await page.locator('#workoutSheet').selectOption({ index: 1 });
   await expect(page.locator('#workoutExercises input[aria-label^="Observação da série"]').first()).toBeVisible();
   expect(await smallFields(page), 'fields below 16px on Treinar').toEqual([]);
 
-  // Ficha editor.
+  // Sheet editor.
   await goTo(page, 'Fichas');
   await page.getByRole('button', { name: 'Editar ficha' }).first().click();
   await expect(page.locator('#sheetEditorModal')).toBeVisible();

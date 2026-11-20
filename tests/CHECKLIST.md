@@ -1,218 +1,218 @@
-# Checklist de cobertura — funcionalidade → testes
+# Coverage checklist — feature → tests
 
-Mapa de **cada funcionalidade do app** para os testes que a cobrem. Serve para responder
-"isso está testado?" sem precisar ler os testes inteiros.
+Map of **every app feature** to the tests that cover it. It answers
+"is this tested?" without reading the whole tests.
 
-- Testes de unidade: `node --test tests/` (sem dependências).
-- Testes de navegador: `npm run test:e2e` (Playwright, pasta `tests/e2e/`; instalação em `documentation/agents/workflow.md`).
-  Coluna **Testes de navegador**: toda linha tem pelo menos um (`tests/checklist.test.js` reprova linha com "—"
-  e arquivo citado que não existe). Funcionalidade nova entra com linha e teste de navegador. Treinar e
-  Início são **telas críticas**: cada comportamento delas ganha linha e teste próprios.
-- Toda pergunta de confirmação (`confirm()` do `app.js`) tem teste de navegador da resposta **Não**, que confere o
-  texto da pergunta: `tests/confirm-no.test.js` reprova pergunta nova sem esse teste.
-- Cobertura: `node tools/coverage-gate.js` (o CI exige **100% de linhas e ramos em `js/core.js`**).
-  Cobertura de `js/app.js` pelos testes de navegador: `node tools/e2e-coverage.js` depois de `npm run test:e2e`;
-  o CI publica o número no resumo do job e reprova se cair em relação à `main` (catraca, `tests/e2e/coverage-baseline.json`).
-- Lógica pura fica em `js/core.js` de propósito: é o que dá para testar sem navegador.
-- Telas/manipulação de DOM (`js/app.js`) são verificadas estaticamente pelo `check.ps1`
-  (ids, handlers, assets, versão, anti-zoom) e, cada vez mais, pelos testes de navegador.
+- Unit tests: `node --test tests/` (no dependencies).
+- Browser tests: `npm run test:e2e` (Playwright, `tests/e2e/` folder; setup in `documentation/agents/workflow.md`).
+  **Browser tests** column: every row has at least one (`tests/checklist.test.js` fails a row with "—"
+  and a cited file that does not exist). A new feature comes with a row and a browser test. Treinar and
+  Início are **critical screens**: every behaviour of them gets its own row and test.
+- Every confirmation question (`confirm()` in `app.js`) has a browser test for the **Não** answer, which checks the
+  question text: `tests/confirm-no.test.js` fails a new question without that test.
+- Coverage: `node tools/coverage-gate.js` (CI requires **100% of lines and branches in `js/core.js`**).
+  `js/app.js` coverage by the browser tests: `node tools/e2e-coverage.js` after `npm run test:e2e`;
+  CI publishes the number in the job summary and fails if it drops against `main` (ratchet, `tests/e2e/coverage-baseline.json`).
+- Pure logic lives in `js/core.js` on purpose: it is what can be tested without a browser.
+- Screens/DOM handling (`js/app.js`) are checked statically by `check.ps1`
+  (ids, handlers, assets, version, anti-zoom) and, more and more, by the browser tests.
 
-| Funcionalidade | Onde vive | Testes | Testes de navegador |
+| Feature | Where it lives | Tests | Browser tests |
 |---|---|---|---|
-| Abrir o app sem erro, as 5 abas e telas internas, nada sai do aparelho, cabe em 375px | `index.html`, `js/app.js` (`navigate`) | — | `smoke.spec.js` |
-| Datas (ISO ↔ BR, somar dias, fuso local) | `core.js`: `pad2`, `fmtDate`, `parseDate`, `todayISO`, `addDaysISO`, `fmtBR`, `dateParts`, `fmtDateTimeBR` | `core.test.js` (datas), `core-edge-cases.test.js` (formato vazio) | `treinar.spec.js` (data de hoje no formulário), `historico.spec.js` (datas no detalhe, na evolução e no Calendário), `mais.spec.js` ("Iniciar semana") |
-| Semana flexível (janela de 7 dias, metas, aviso) | `core.js`: `defaultSettings`, `weekWindow`, `isValidWorkout` | `core.test.js`, `core-edge-cases.test.js` (`weekWindow` sem argumento) | `inicio.spec.js`, `mais.spec.js` (salvar metas e descanso, "Iniciar semana") |
-| Números com vírgula (bug do iPhone) | `core.js`: `parseLocalNumber`, `toNum`, `toNumOrNull`, `formatDecimal` | `core.test.js` (inclui regressão da carga `27,5`) | `treinar.spec.js` (carga `27,5` no Treinar) |
-| Busca sem acentos | `core.js`: `normalizeText` | `core.test.js` | `biblioteca.spec.js` (busca sem acentos e sem maiúsculas), `fichas.spec.js` (busca do editor de ficha) |
-| Escapar HTML (XSS no que vem do banco) | `core.js`: `esc` | `core.test.js`, `setsSummaryLines` | `fichas.spec.js` (nome com HTML aparece como texto), `dados.spec.js` (backup com código no id) |
-| Aquecimento (reps/carga/RIR) | `core.js`: `warmupHasData`, `warmupLine`, `previousWarmupFields` | `core.test.js`, `core-edge-cases.test.js` | `treinar.spec.js` (pré-preenchido e editado no Treinar) |
-| Séries e agrupamento **por id** | `core.js`: `setLine`, `setsSummaryLines`, `groupSets`, `exerciseKey` | `core.test.js`, `core-edge-cases.test.js` (mesmo nome/ids diferentes, só aquecimento, registro sem nome) | `historico.spec.js` (detalhe: séries agrupadas por exercício, na ordem), `biblioteca.spec.js` (renomear mantém o histórico pelo id) |
-| Histórico por exercício (gráfico, PR, tendência) | `core.js`: `workoutRecords`, `lastLoadsForExercise`, `lastWarmupForExercise`, `sessionsForExercise`, `bestSetForExercise`, `exerciseMatches` | `core.test.js`, `core-edge-cases.test.js` (renomear não perde histórico; nomes iguais não se misturam; ordenação), `form-and-progress.test.js` (recordes: primeira vez e carga igual não contam) | `historico.spec.js` (carga máxima, treinos, tendência, melhor série por dia, histórico com ficha e aquecimento), evolução sem registros |
-| Nome **atual** de exercício e de ficha (sem nome congelado) | `core.js`: `exerciseLabel`, `sheetLabel`, `exerciseTarget` | `core.test.js`, `core-edge-cases.test.js` | `inicio.spec.js` (ficha renomeada na lista) |
-| Renomear exercício propaga (fichas antigas e histórico) | `core.js`: `renameInSheets`, `renameInWorkouts`, `linkSheetItemsToExercises` | `core.test.js`, `sample-data.test.js` (fixture antiga religada) | `biblioteca.spec.js` (renomear: fichas, treinos gravados, detalhe, evolução e Treinar) |
-| Dica "Última vez" e repetir o último treino da ficha | `core.js`: `lastSessionForExercise`, `lastSessionLine`, `lastWorkoutForSheet`, `formFromWorkout` | `form-and-progress.test.js` (ignora o treino em edição, `typeId` antigo, RIR/obs em branco) | `treinar.spec.js` |
-| Rascunho do treino em andamento | `core.js`: `draftHasContent` (gravação/restauração no `app.js`) | `form-and-progress.test.js` | `treinar.spec.js` (gravar, recarregar, página oculta, cancelar, outro treino) |
-| Timer de descanso | `core.js`: `restSecondsOf`, `fmtClock` | `form-and-progress.test.js` | `treinar.spec.js` (relógio da página controlado) |
-| Lista curta do Início e filtro por ficha | `core.js`: `recentCutoff`, `visibleWorkoutCount`, `sheetFilterOptions` | `form-and-progress.test.js` (virada do ano, mínimo de treinos) | `historico.spec.js` ("Ver meses anteriores", "Mostrar só os recentes", filtro por ficha) |
-| Evolução semanal (volume, treinos, cardio) | `core.js`: `workoutVolume`, `weeklyTotals` | `form-and-progress.test.js` (aquecimento fora do volume, treino inválido) | `historico.spec.js` (Calendário: últimas 8 semanas, volume, treinos da meta e cardio) |
-| Texto do treino para enviar à professora (sem a observação da professora) | `core.js`: `workoutAsText` | `core.test.js` (inclui: sem a observação da professora), `core-edge-cases.test.js` (nome atual, série sem número, treino vazio) | `treinar.spec.js` (exportar do Treinar; a observação da professora fica fora do texto, mas continua no Treinar e salva nas séries), `historico.spec.js` (Compartilhar; sem menu do aparelho copia; cópia por seleção quando a área de transferência é bloqueada) |
-| Fichas: criar/editar/excluir, itens, migração por nome | `core.js`: `normalizeSheet*`, `linkSheetItemsToExercises` | `core.test.js`, `core-edge-cases.test.js` | `fichas.spec.js` (criar com Biblioteca, catálogo e exercício novo; séries, reps, observação, ordem; editar; renomear; nome repetido; excluir), ficha sem exercícios |
-| Importar ficha em JSON (contrato `FICHA-JSON.md`, sugestão de exercício parecido, lista para a IA) | `core.js`: `parseSheetImportText`, `parseSheetImport`, `suggestExercises`, `exerciseNamesText` | `core.test.js` (cerca ```json, JSON quebrado, formatos aceitos, reps, erros, ordem das sugestões, nomes sem repetir) | `fichas.spec.js` (Criar com IA: texto para a IA e copiar, JSON inválido, revisão com sugestão de parecido, importar, nome repetido vira "(importada)") |
-| Importar treinos antigos + fichas recriadas (contrato `TREINO-JSON.md`, fichas reaproveitadas pelo nome, treinos repetidos pulados) | `core.js`: `parseHistoryImportText`, `parseHistoryImport`, `sheetByName`, `splitImportedSheets`, `importedWorkout`, `workoutFingerprint`, `splitImportedWorkouts`, `historyExerciseNames`, `sheetNamesText`, `historyImportSummaryHtml`, `historyImportToast` | `history-import.test.js` (resumo da revisão e aviso final, exemplo do contrato, datas BR/ISO/futuro, números com vírgula, erros com o lugar exato, carga da última vez pela ficha recriada, reimportar não duplica), `features.test.js` (card em Mais, janela, precache, revisar/importar ligados, fichas gravadas antes dos treinos, revisão de exercícios compartilhada com Criar com IA) | `mais.spec.js` (texto para a IA com fichas e exercícios, JSON inválido, revisão, importar com ficha recriada e carga da última vez, reimportar não duplica) |
-| Biblioteca do usuário × catálogo | `core.js`: `isUserExercise`, `libraryExercises`, `fixLibrarySources` | `core.test.js`, `core-edge-cases.test.js` | `biblioteca.spec.js` (lista só com os exercícios da pessoa e as fichas que usam, filtro por grupo, criar com busca no catálogo, excluir) |
-| Backup: nome do arquivo, status e lembrete | `core.js`: `backupFileName`, `backupStatus` | `core.test.js`, `core-edge-cases.test.js` | `inicio.spec.js` (lembrete no Início) |
-| Backup: exportar/compartilhar (um arquivo só) | `core.js`: `backupAction`, `backupSharePayload`, `isBackupPayload`, `backupHint` | `core.test.js` (payload sem `text`/`title`; evento de clique não vira backup) | `dados.spec.js` (download no computador; no celular, um único `.json` para o menu de compartilhar) |
-| Backup: importar e compatibilidade entre versões | `core.js`: `normalizeBackup`, `normalizeWorkout`, `normalizeSet`, `normalizeWarmup`, `normalizeSettings` | `core.test.js` + `tests/fixtures/backup-v1.json`, `backup-v2-sheets.json` | `dados.spec.js` (cada backup de `tests/fixtures/` importado pela tela: treinos, fichas, Biblioteca, colinha e metas; ida e volta exportar → apagar → reimportar sem perder nada; Desfazer; arquivo que não é backup não apaga nada) |
-| Dados de exemplo (3 fichas, 12 treinos) | `core.js`: `materializeSampleData` + `data/sample-data.json` | `sample-data.test.js` (estrutura, integridade referencial, progressão de cargas, normalização) | `smoke.spec.js` (carregar pela tela Mais; Início e Calendário com dados), `dados.spec.js` (substituem os dados atuais; Desfazer devolve os anteriores), `dados.spec.js` (responder "Não" não troca nada; o arquivo de exemplo importa pela tela com datas a partir de hoje) |
-| Catálogo embutido (ids únicos, contíguos, estáveis) | `data/exercises.json` | `core.test.js` (travas de ids) + `check.ps1` | `smoke.spec.js` (abre offline com o catálogo), `treinar.spec.js` e `fichas.spec.js` (exercício do catálogo) |
-| Registro dos módulos no navegador (globais) | `js/core.js` (UMD) | `module.test.js` (roda o core num escopo de navegador) | `smoke.spec.js` (abre sem erro: as funções do `core.js` existem para o `app.js`) |
-| Base antiga (era sem ids) sobrevive ao init | `core.js`: `fixLibrarySources`, `linkSheetItemsToExercises`, `historyTarget`, `normalizeBackup` | `old-db.test.js` (nenhuma série/carga/aquecimento/item se perde; histórico por nome guardado) | `biblioteca.spec.js` (registros sem ids gravados no aparelho: Biblioteca reparada, ficha ligada, histórico pelo nome) |
-| PWA: versão consistente, precache, offline | `index.html`, `sw.js`, `manifest.webmanifest` | `check.ps1` (13 verificações) | `smoke.spec.js` (versão no rodapé × arquivos × cache; abre offline com o catálogo), `dados.spec.js` (versão nova do service worker assume e apaga o cache antigo; "Atualizar app"; o rascunho em andamento sobrevive aos dois) |
-| Exportar/importar/apagar dentro do app (telas) | `js/app.js` | `check.ps1` (ids e handlers) + lógica do `core.js` | `dados.spec.js` (exportar, importar, Apagar dados só depois de marcar a confirmação, Cancelar não apaga, apagar leva tudo inclusive o rascunho), compartilhamento cancelado ou com erro avisa e não conta como backup; botão Importar abre o seletor de arquivo (`dados.spec.js`) |
-| Telas da importação de ficha (colar, revisão, botão Revisar → Importar), desativar/reativar ficha, modal Criar com IA (texto para a IA + colar a resposta), card Debug | `js/app.js` | `check.ps1` (ids e handlers) + lógica do `core.js` (`parseSheetImportText`, `suggestExercises`, `exerciseNamesText`, `normalizeSheet` mantém `active: false`) | `fichas.spec.js` (Criar com IA, desativar/reativar), `mais.spec.js` (card Debug) |
-| Responder **Não** nas confirmações das outras telas não muda nada: excluir treino pelo detalhe, exercício, ficha e colinha; importar backup; Desfazer; dados de exemplo; "Atualizar app" | `js/app.js` | `confirm-no.test.js` (toda pergunta tem teste do "Não") | `historico.spec.js`, `biblioteca.spec.js`, `fichas.spec.js`, `mais.spec.js`, `dados.spec.js` (responder "Não") |
-| Importar/desfazer/dados de exemplo sem risco de perder tudo (apaga e grava numa transação só) | `db.js`: `dbReplaceAll` (usado por `restoreAll` no `app.js`) | `db.test.js` (IndexedDB falso: uma transação, `clear` antes do `put`, `abort` em registro inválido) | `dados.spec.js` (Desfazer; arquivo que não é backup não apaga nada; dados de exemplo e Desfazer) |
-| Calendário: trocar de mês (inclusive nos dias 29–31) | `core.js`: `shiftMonth` | `core-edge-cases.test.js` (31/out ‹ vai para setembro; 31/jan › vai para fevereiro; virada do ano) | `historico.spec.js` (trocar de mês; dias 31 de outubro e de janeiro, nos dois sentidos e na virada do ano) |
-| Selo de PR na evolução do exercício (some quando não há carga) | `core.js`: `maxBestLoad` | `core-edge-cases.test.js` (peso do corpo = 0, sem "PR 1 kg"; maior carga; carga < 1 kg) | `historico.spec.js` (carga máxima; peso do corpo sem selo e sem 1RM) |
-| Backup importado não confia no arquivo (ids e datas) | `core.js`: `normalizeBackup` (`hasSafeId`), `normalizeWorkout`, `normalizeSettings` | `core-edge-cases.test.js` (id com aspas/tags é descartado; formatos antigos de id mantidos; data inválida vira "sem data"; início da semana inválido; idempotência) | `dados.spec.js` (id com código descartado, data inválida vira "Sem data", semana inválida) |
-| Service worker: `?v=N` sai do cache primeiro (abre rápido com sinal fraco); resto é rede primeiro | `sw.js` | `sw.test.js` (cache e rede falsos: produção × localhost, offline, versão nova = URL nova, o que não é interceptado) | `smoke.spec.js` (abre offline), `dados.spec.js` (versão nova do service worker assume) |
-| Iniciar próxima semana (pula as semanas perdidas de uma vez) | `core.js`: `nextWeekAnchor` | `core-edge-cases.test.js` (1 semana, 3 semanas paradas, virada do ano, mesmo dia da semana) | `inicio.spec.js` |
-| Formulário do Treinar: linha da série (carga larga, número como texto) | `core.js`: `setRowHtml`, `setHeaderHtml` | `form-and-progress.test.js` (colunas 1-2-3-2-4, "102,5" cabe, handlers `setField`, teclados, escape) | `treinar.spec.js` |
-| Remover exercício do treino em andamento (confirma se há algo preenchido) | `core.js`: `groupHasData` (pergunta no `app.js`: `removeFormExercise`) | `form-and-progress.test.js` (série/aquecimento preenchidos, RIR 0, em branco, confirmação antes do `splice`) | `treinar.spec.js` |
-| Carga com vírgula também no resumo, histórico e texto exportado | `core.js`: `setLine`, `warmupLine`, `setsSummaryLines`, `workoutAsText` (parâmetro `useComma`) | `core-edge-cases.test.js` (vírgula quando pedido; sem o parâmetro o formato antigo não muda) | `historico.spec.js` (detalhe e evolução com 47,5 e 42,5), `treinar.spec.js` (texto exportado) |
-| Treino aberto sobrevive a recarregar a página (`#/detail/<id>`) | `core.js`: `parseRoute` (usado pelo `navigate` no `app.js`) | `core-edge-cases.test.js` (id no endereço, endereços antigos sem id, endereço vazio, app sempre navega com id) | `historico.spec.js` (recarregar no detalhe; treino que não existe mais) |
-| Não repetir o mesmo exercício no treino nem na ficha | `core.js`: `hasExercise` (avisos no `app.js`: `addExerciseToForm`, `addSheetExercise`) | `core-edge-cases.test.js` (por id, id do catálogo como texto, item de ficha com `name`, registro antigo sem id; prova do agrupamento que motivou o bloqueio) | `fichas.spec.js` (aviso no editor de ficha), `treinar.spec.js` (aviso no Treinar) |
-| Ficha: no máximo 20 séries por exercício (editor, importação e backup) | `core.js`: `normalizeSheetItem` (usado também por `saveSheetEditor` no `app.js`) | `core-edge-cases.test.js` (500 vira 20, lista de reps longa, formato v2, fichas normais intactas) | `fichas.spec.js` (500 séries no editor viram 20) |
-| Dois treinos no mesmo dia: o mais recente vem primeiro | `core.js`: `byDateDesc` (usado em toda ordenação por data) | `core-edge-cases.test.js` (qualquer ordem de entrada, sem `createdAt`, "última vez"/cargas/aquecimento do treino mais novo) | `historico.spec.js` (Início e Calendário abrem o mais recente) |
-| Busca de exercício (seletor do treino, da ficha e do cadastro) | `core.js`: `pickerHtml` (os três `render*Results` do `app.js`) | `picker.test.js` (Biblioteca × catálogo, busca sem acento, Criar, limites, escape, handlers existem e aceitam id como texto, código morto não voltou) | `treinar.spec.js` (seletor do Treinar: Biblioteca, catálogo, Criar) |
-| Resumo no card do Início (exercícios · volume · cardio · recordes) | `core.js`: `workoutSummary`, `fmtThousands` (+ `workoutRecords`) | `features.test.js` (linha completa, partes zeradas, singular, dados de exemplo, card usa o resumo) | `treinar.spec.js` (salvar leva ao Início com o resumo), `historico.spec.js` (resumo e recordes de cada linha) |
-| Começar o treino em um toque (botão "Treinar: <ficha>" no Início) | `core.js`: `nextSheet` (botão e carga da ficha no `app.js`) | `features.test.js` (próxima ficha em ordem alfabética, volta ao início, ficha desativada/excluída, sem fichas, dados v1) | `inicio.spec.js`, `treinar.spec.js` |
-| Remover a última série de um exercício no Treinar | `core.js`: `setHasData` (botão "− série" no `app.js`: `removeFormSet`) | `features.test.js` (série em branco × preenchida, nunca remove a única, confirma antes) | `treinar.spec.js` |
-| Marcar a série como feita inicia o descanso (botão no número da série) | `core.js`: `setRowHtml` (ação no `app.js`: `toggleSetDone`) | `features.test.js` (botão, estado feito, acessibilidade, carga continua larga, `done` não vai para o treino salvo, sem som/vibração) | `treinar.spec.js` |
-| Calendário: tocar no dia abre o treino daquele dia | `core.js`: `workoutsByDate` (link no `app.js`: `renderCalendar`) | `features.test.js` (agrupa por dia, mais recente primeiro, sem data fica de fora, link `#/detail/<id>`) | `historico.spec.js` (abre o treino; com dois no dia, o mais recente) |
-| 1RM estimado na evolução do exercício (Epley) | `core.js`: `estimate1RM`, `best1RMForExercise` | `features.test.js` (fórmula, 1 rep, sem carga/reps, mais reps com a mesma carga = progresso, melhor série do exercício) | `historico.spec.js` (1RM do exercício e de cada dia; sem carga, sem 1RM) |
-| Avisos de sucesso somem sozinhos (toast); erros e perguntas continuam bloqueando | `index.html`: `#appToast`; `app.js`: `showToast` | `features.test.js` (5 mensagens de sucesso viraram toast, erros continuam `alert`, texto puro) | `mais.spec.js` ("Metas salvas." aparece e some sozinho), `dados.spec.js` (backup importado), `fichas.spec.js` ("Texto copiado!") |
-| Campos com 16px no celular (sem zoom do iPhone ao tocar) | `css/styles.css`: regra de 16px em `max-width: 767.98px` (nenhuma regra mais específica muda o tamanho de campo) | `check.ps1` (anti-zoom: a regra existe) | `smoke.spec.js` (tamanho calculado de cada campo à vista no Treinar com ficha, editor de ficha, Criar com IA, Biblioteca, Mais e Importar treinos antigos), `treinar.spec.js` (observação da série) |
-| Área de toque de 44px nos botões só com ícone | `css/styles.css`: `.btn-sm[aria-label]` | `features.test.js` (regra presente; todo botão de ícone tem `aria-label`) | `fichas.spec.js` (botões de ícone das fichas com 44px ou mais) |
-| Card Debug à vista no fim de Mais, sem recolher (v74), com o armazenamento persistente | `index.html`; `app.js`: `requestPersistentStorage`, `renderStorageInfo` | `features.test.js` (último card, contém atualizar/apagar/exemplo/espaço usado, backup continua antes) | `mais.spec.js` (à vista no fim de Mais; pede armazenamento persistente ao abrir: protegido ou não protegido) |
-| Mais → Instalar o app (botão do navegador, instrução para iPhone e menu, "já instalado") | `core.js`: `installHint` (evento no `app.js`: `renderInstall`, `installApp`) | `features.test.js` (4 casos do texto, card entre Dados e o Debug, `beforeinstallprompt` guardado, botão ligado) | `mais.spec.js` (menu do navegador, botão Instalar com o pedido do navegador, iPhone, já instalado) |
-| Colinha (criar, editar, excluir) | `app.js`: `renderColinhaList`, `saveColinha`, `deleteColinha` | `check.ps1` (ids e handlers) | `mais.spec.js` (criar, editar, excluir, vazia não salva) |
-| Campos do aquecimento com nome para leitor de tela | `app.js`: `renderFormSets` | `features.test.js` (reps, peso e RIR com `aria-label`) | `treinar.spec.js` (campos achados pelo nome) |
+| Opening the app with no error, the 5 tabs and inner screens, nothing leaves the device, fits at 375px | `index.html`, `js/app.js` (`navigate`) | — | `smoke.spec.js` |
+| Dates (ISO ↔ BR, adding days, local time zone) | `core.js`: `pad2`, `fmtDate`, `parseDate`, `todayISO`, `addDaysISO`, `fmtBR`, `dateParts`, `fmtDateTimeBR` | `core.test.js` (dates), `core-edge-cases.test.js` (empty format) | `treinar.spec.js` (today's date in the form), `historico.spec.js` (dates in the detail, in the progress and in Calendário), `mais.spec.js` ("Iniciar semana") |
+| Flexible week (7-day window, goals, warning) | `core.js`: `defaultSettings`, `weekWindow`, `isValidWorkout` | `core.test.js`, `core-edge-cases.test.js` (`weekWindow` with no argument) | `inicio.spec.js`, `mais.spec.js` (saving goals and rest, "Iniciar semana") |
+| Numbers with a comma (iPhone bug) | `core.js`: `parseLocalNumber`, `toNum`, `toNumOrNull`, `formatDecimal` | `core.test.js` (includes the `27,5` load regression) | `treinar.spec.js` (`27,5` load in Treinar) |
+| Search without accents | `core.js`: `normalizeText` | `core.test.js` | `biblioteca.spec.js` (search without accents and case-insensitive), `fichas.spec.js` (sheet-editor search) |
+| Escaping HTML (XSS from the database) | `core.js`: `esc` | `core.test.js`, `setsSummaryLines` | `fichas.spec.js` (a name with HTML appears as text), `dados.spec.js` (backup with code in the id) |
+| Warm-up (reps/load/RIR) | `core.js`: `warmupHasData`, `warmupLine`, `previousWarmupFields` | `core.test.js`, `core-edge-cases.test.js` | `treinar.spec.js` (pre-filled and edited in Treinar) |
+| Sets and grouping **by id** | `core.js`: `setLine`, `setsSummaryLines`, `groupSets`, `exerciseKey` | `core.test.js`, `core-edge-cases.test.js` (same name/different ids, warm-up only, record with no name) | `historico.spec.js` (detail: sets grouped by exercise, in order), `biblioteca.spec.js` (renaming keeps the history by id) |
+| History per exercise (chart, PR, trend) | `core.js`: `workoutRecords`, `lastLoadsForExercise`, `lastWarmupForExercise`, `sessionsForExercise`, `bestSetForExercise`, `exerciseMatches` | `core.test.js`, `core-edge-cases.test.js` (renaming does not lose history; equal names do not mix; ordering), `form-and-progress.test.js` (records: first time and equal load do not count) | `historico.spec.js` (max load, workouts, trend, best set per day, history with sheet and warm-up), progress with no records |
+| **Current** name of exercise and sheet (no frozen name) | `core.js`: `exerciseLabel`, `sheetLabel`, `exerciseTarget` | `core.test.js`, `core-edge-cases.test.js` | `inicio.spec.js` (renamed sheet in the list) |
+| Renaming an exercise propagates (old sheets and history) | `core.js`: `renameInSheets`, `renameInWorkouts`, `linkSheetItemsToExercises` | `core.test.js`, `sample-data.test.js` (old fixture relinked) | `biblioteca.spec.js` (rename: sheets, saved workouts, detail, progress and Treinar) |
+| "Last time" hint and repeating the sheet's last workout | `core.js`: `lastSessionForExercise`, `lastSessionLine`, `lastWorkoutForSheet`, `formFromWorkout` | `form-and-progress.test.js` (ignores the workout being edited, old `typeId`, blank RIR/note) | `treinar.spec.js` |
+| Workout draft in progress | `core.js`: `draftHasContent` (saving/restoring in `app.js`) | `form-and-progress.test.js` | `treinar.spec.js` (save, reload, hidden page, cancel, another workout) |
+| Rest timer | `core.js`: `restSecondsOf`, `fmtClock` | `form-and-progress.test.js` | `treinar.spec.js` (controlled page clock) |
+| Short Início list and filter by sheet | `core.js`: `recentCutoff`, `visibleWorkoutCount`, `sheetFilterOptions` | `form-and-progress.test.js` (year turn, minimum number of workouts) | `historico.spec.js` ("Ver meses anteriores", "Mostrar só os recentes", filter by sheet) |
+| Weekly progress (volume, workouts, cardio) | `core.js`: `workoutVolume`, `weeklyTotals` | `form-and-progress.test.js` (warm-up outside the volume, invalid workout) | `historico.spec.js` (Calendário: last 8 weeks, volume, goal workouts and cardio) |
+| Workout text to send to the teacher (without the teacher's note) | `core.js`: `workoutAsText` | `core.test.js` (includes: without the teacher's note), `core-edge-cases.test.js` (current name, set with no number, empty workout) | `treinar.spec.js` (export from Treinar; the teacher's note stays out of the text but stays in Treinar and is saved in the sets), `historico.spec.js` (Compartilhar; without the device menu it copies; copy by selection when the clipboard is blocked) |
+| Sheets: create/edit/delete, items, migration by name | `core.js`: `normalizeSheet*`, `linkSheetItemsToExercises` | `core.test.js`, `core-edge-cases.test.js` | `fichas.spec.js` (create with Biblioteca, catalog and a new exercise; sets, reps, note, order; edit; rename; repeated name; delete), sheet with no exercises |
+| Import sheet as JSON (`FICHA-JSON.md` contract, similar-exercise suggestion, text for the AI) | `core.js`: `parseSheetImportText`, `parseSheetImport`, `suggestExercises`, `exerciseNamesText` | `core.test.js` (```json fence, broken JSON, accepted formats, reps, errors, suggestion order, names without repetition) | `fichas.spec.js` (Create with AI: text for the AI and copy, invalid JSON, review with a similar suggestion, import, repeated name becomes "(importada)") |
+| Import old workouts + recreated sheets (`TREINO-JSON.md` contract, sheets reused by name, repeated workouts skipped) | `core.js`: `parseHistoryImportText`, `parseHistoryImport`, `sheetByName`, `splitImportedSheets`, `importedWorkout`, `workoutFingerprint`, `splitImportedWorkouts`, `historyExerciseNames`, `sheetNamesText`, `historyImportSummaryHtml`, `historyImportToast` | `history-import.test.js` (review summary and final warning, contract example, BR/ISO/future dates, numbers with a comma, errors with the exact place, last-time load from the recreated sheet, importing again does not duplicate), `features.test.js` (card in Mais, window, precache, review/import wired, sheets saved before the workouts, exercise review shared with Create with AI) | `mais.spec.js` (text for the AI with sheets and exercises, invalid JSON, review, import with a recreated sheet and last-time load, importing again does not duplicate) |
+| User Biblioteca × catalog | `core.js`: `isUserExercise`, `libraryExercises`, `fixLibrarySources` | `core.test.js`, `core-edge-cases.test.js` | `biblioteca.spec.js` (list with only the person's exercises and the sheets that use them, filter by group, create with catalog search, delete) |
+| Backup: file name, status and reminder | `core.js`: `backupFileName`, `backupStatus` | `core.test.js`, `core-edge-cases.test.js` | `inicio.spec.js` (reminder on Início) |
+| Backup: export/share (a single file) | `core.js`: `backupAction`, `backupSharePayload`, `isBackupPayload`, `backupHint` | `core.test.js` (payload without `text`/`title`; a click event is not a backup) | `dados.spec.js` (download on the computer; on the phone, a single `.json` for the share menu) |
+| Backup: import and compatibility between versions | `core.js`: `normalizeBackup`, `normalizeWorkout`, `normalizeSet`, `normalizeWarmup`, `normalizeSettings` | `core.test.js` + `tests/fixtures/backup-v1.json`, `backup-v2-sheets.json` | `dados.spec.js` (each backup from `tests/fixtures/` imported through the screen: workouts, sheets, Biblioteca, colinha and goals; round trip export → erase → import again without losing anything; Undo; a file that is not a backup erases nothing) |
+| Sample data (3 sheets, 12 workouts) | `core.js`: `materializeSampleData` + `data/sample-data.json` | `sample-data.test.js` (structure, referential integrity, load progression, normalization) | `smoke.spec.js` (load through the Mais screen; Início and Calendário with data), `dados.spec.js` (they replace the current data; Undo brings the previous ones back), `dados.spec.js` (answering "Não" changes nothing; the sample file imports through the screen with dates from today) |
+| Embedded catalog (unique, contiguous, stable ids) | `data/exercises.json` | `core.test.js` (id locks) + `check.ps1` | `smoke.spec.js` (opens offline with the catalog), `treinar.spec.js` and `fichas.spec.js` (catalog exercise) |
+| Browser module registration (globals) | `js/core.js` (UMD) | `module.test.js` (runs the core in a browser scope) | `smoke.spec.js` (opens with no error: the `core.js` functions exist for `app.js`) |
+| Old database (pre-id era) survives init | `core.js`: `fixLibrarySources`, `linkSheetItemsToExercises`, `historyTarget`, `normalizeBackup` | `old-db.test.js` (no set/load/warm-up/item is lost; history by stored name) | `biblioteca.spec.js` (records without ids saved on the device: Biblioteca repaired, sheet linked, history by name) |
+| PWA: consistent version, precache, offline | `index.html`, `sw.js`, `manifest.webmanifest` | `check.ps1` (13 checks) | `smoke.spec.js` (footer version × files × cache; opens offline with the catalog), `dados.spec.js` (new service worker version takes over and deletes the old cache; "Atualizar app"; the draft in progress survives both) |
+| Export/import/erase inside the app (screens) | `js/app.js` | `check.ps1` (ids and handlers) + `core.js` logic | `dados.spec.js` (export, import, Apagar dados only after ticking the confirmation, Cancelar does not erase, erasing takes everything including the draft), cancelled or failed sharing warns and does not count as a backup; the Importar button opens the file picker (`dados.spec.js`) |
+| Sheet-import screens (paste, review, Revisar → Importar button), deactivating/reactivating a sheet, Create with AI modal (text for the AI + pasting the answer), Debug card | `js/app.js` | `check.ps1` (ids and handlers) + `core.js` logic (`parseSheetImportText`, `suggestExercises`, `exerciseNamesText`, `normalizeSheet` keeps `active: false`) | `fichas.spec.js` (Create with AI, deactivate/reactivate), `mais.spec.js` (Debug card) |
+| Answering **Não** in the other screens' confirmations changes nothing: deleting a workout from the detail, an exercise, a sheet and a colinha; importing a backup; Undo; sample data; "Atualizar app" | `js/app.js` | `confirm-no.test.js` (every question has a "Não" test) | `historico.spec.js`, `biblioteca.spec.js`, `fichas.spec.js`, `mais.spec.js`, `dados.spec.js` (answering "Não") |
+| Import/undo/sample data without risk of losing everything (erases and writes in a single transaction) | `db.js`: `dbReplaceAll` (used by `restoreAll` in `app.js`) | `db.test.js` (fake IndexedDB: one transaction, `clear` before `put`, `abort` on an invalid record) | `dados.spec.js` (Undo; a file that is not a backup erases nothing; sample data and Undo) |
+| Calendário: switching month (including on days 29–31) | `core.js`: `shiftMonth` | `core-edge-cases.test.js` (31/Oct ‹ goes to September; 31/Jan › goes to February; year turn) | `historico.spec.js` (switching month; 31 October and 31 January, both ways and at the year turn) |
+| PR badge in the exercise progress (disappears when there is no load) | `core.js`: `maxBestLoad` | `core-edge-cases.test.js` (bodyweight = 0, no "PR 1 kg"; max load; load < 1 kg) | `historico.spec.js` (max load; bodyweight with no badge and no 1RM) |
+| Imported backup does not trust the file (ids and dates) | `core.js`: `normalizeBackup` (`hasSafeId`), `normalizeWorkout`, `normalizeSettings` | `core-edge-cases.test.js` (id with quotes/tags is discarded; old id formats kept; invalid date becomes "no date"; invalid week start; idempotence) | `dados.spec.js` (id with code discarded, invalid date becomes "Sem data", invalid week) |
+| Service worker: `?v=N` comes from the cache first (opens fast with a weak signal); the rest is network first | `sw.js` | `sw.test.js` (fake cache and network: production × localhost, offline, new version = new URL, what is not intercepted) | `smoke.spec.js` (opens offline), `dados.spec.js` (new service worker version takes over) |
+| Starting the next week (skips missed weeks at once) | `core.js`: `nextWeekAnchor` | `core-edge-cases.test.js` (1 week, 3 weeks off, year turn, same weekday) | `inicio.spec.js` |
+| Treinar form: set row (wide load, number as text) | `core.js`: `setRowHtml`, `setHeaderHtml` | `form-and-progress.test.js` (columns 1-2-3-2-4, "102,5" fits, `setField` handlers, keyboards, escape) | `treinar.spec.js` |
+| Removing an exercise from the workout in progress (asks if something is filled in) | `core.js`: `groupHasData` (question in `app.js`: `removeFormExercise`) | `form-and-progress.test.js` (set/warm-up filled in, RIR 0, blank, confirmation before `splice`) | `treinar.spec.js` |
+| Load with a comma also in the summary, history and exported text | `core.js`: `setLine`, `warmupLine`, `setsSummaryLines`, `workoutAsText` (`useComma` parameter) | `core-edge-cases.test.js` (comma when requested; without the parameter the old format does not change) | `historico.spec.js` (detail and progress with 47,5 and 42,5), `treinar.spec.js` (exported text) |
+| Open workout survives a page reload (`#/detail/<id>`) | `core.js`: `parseRoute` (used by `navigate` in `app.js`) | `core-edge-cases.test.js` (id in the address, old addresses without id, empty address, app always navigates with id) | `historico.spec.js` (reload in the detail; workout that no longer exists) |
+| Do not repeat the same exercise in a workout or in a sheet | `core.js`: `hasExercise` (warnings in `app.js`: `addExerciseToForm`, `addSheetExercise`) | `core-edge-cases.test.js` (by id, catalog id as text, sheet item with `name`, old record with no id; proof of the grouping that motivated the block) | `fichas.spec.js` (warning in the sheet editor), `treinar.spec.js` (warning in Treinar) |
+| Sheet: at most 20 sets per exercise (editor, import and backup) | `core.js`: `normalizeSheetItem` (also used by `saveSheetEditor` in `app.js`) | `core-edge-cases.test.js` (500 becomes 20, long reps list, format v2, normal sheets untouched) | `fichas.spec.js` (500 sets in the editor become 20) |
+| Two workouts on the same day: the newest comes first | `core.js`: `byDateDesc` (used in every date sort) | `core-edge-cases.test.js` (any input order, no `createdAt`, "last time"/loads/warm-up of the newest workout) | `historico.spec.js` (Início and Calendário open the newest) |
+| Exercise search (workout picker, sheet and form) | `core.js`: `pickerHtml` (the three `render*Results` in `app.js`) | `picker.test.js` (Biblioteca × catalog, accent-insensitive search, Criar, limits, escape, handlers exist and accept id as text, dead code did not come back) | `treinar.spec.js` (Treinar picker: Biblioteca, catalog, Criar) |
+| Summary on the Início card (exercises · volume · cardio · records) | `core.js`: `workoutSummary`, `fmtThousands` (+ `workoutRecords`) | `features.test.js` (full line, zeroed parts, singular, sample data, card uses the summary) | `treinar.spec.js` (saving goes to Início with the summary), `historico.spec.js` (summary and records of each row) |
+| Starting the workout in one tap ("Treinar: <ficha>" button on Início) | `core.js`: `nextSheet` (button and sheet load in `app.js`) | `features.test.js` (next sheet alphabetically, back to the start, deactivated/deleted sheet, no sheets, v1 data) | `inicio.spec.js`, `treinar.spec.js` |
+| Removing the last set of an exercise in Treinar | `core.js`: `setHasData` ("− série" button in `app.js`: `removeFormSet`) | `features.test.js` (blank × filled set, never removes the only one, asks first) | `treinar.spec.js` |
+| Marking the set as done starts the rest (button on the set number) | `core.js`: `setRowHtml` (action in `app.js`: `toggleSetDone`) | `features.test.js` (button, done state, accessibility, load stays wide, `done` is not saved in the workout, no sound/vibration) | `treinar.spec.js` |
+| Calendário: tapping the day opens that day's workout | `core.js`: `workoutsByDate` (link in `app.js`: `renderCalendar`) | `features.test.js` (groups by day, newest first, no date stays out, `#/detail/<id>` link) | `historico.spec.js` (opens the workout; with two on the day, the newest) |
+| Estimated 1RM in the exercise progress (Epley) | `core.js`: `estimate1RM`, `best1RMForExercise` | `features.test.js` (formula, 1 rep, no load/reps, more reps at the same load = progress, best set of the exercise) | `historico.spec.js` (1RM of the exercise and of each day; no load, no 1RM) |
+| Success warnings disappear on their own (toast); errors and questions keep blocking | `index.html`: `#appToast`; `app.js`: `showToast` | `features.test.js` (5 success messages became a toast, errors stay `alert`, plain text) | `mais.spec.js` ("Metas salvas." appears and disappears on its own), `dados.spec.js` (imported backup), `fichas.spec.js` ("Texto copiado!") |
+| 16px fields on the phone (no iPhone zoom when tapping) | `css/styles.css`: 16px rule under `max-width: 767.98px` (no more specific rule changes the field size) | `check.ps1` (anti-zoom: the rule exists) | `smoke.spec.js` (computed size of every field visible in Treinar with a sheet, sheet editor, Create with AI, Biblioteca, Mais and Import old workouts), `treinar.spec.js` (set note) |
+| 44px touch area on icon-only buttons | `css/styles.css`: `.btn-sm[aria-label]` | `features.test.js` (rule present; every icon button has `aria-label`) | `fichas.spec.js` (sheet icon buttons are 44px or more) |
+| Debug card visible at the end of Mais, with no collapse (v74), with persistent storage | `index.html`; `app.js`: `requestPersistentStorage`, `renderStorageInfo` | `features.test.js` (last card, contains update/erase/sample/space used, backup stays before it) | `mais.spec.js` (visible at the end of Mais; asks for persistent storage on open: protected or not protected) |
+| Mais → Install the app (browser button, instruction for iPhone and menu, "already installed") | `core.js`: `installHint` (event in `app.js`: `renderInstall`, `installApp`) | `features.test.js` (4 text cases, card between Data and Debug, `beforeinstallprompt` stored, button wired) | `mais.spec.js` (browser menu, Instalar button with the browser prompt, iPhone, already installed) |
+| Colinha (create, edit, delete) | `app.js`: `renderColinhaList`, `saveColinha`, `deleteColinha` | `check.ps1` (ids and handlers) | `mais.spec.js` (create, edit, delete, empty is not saved) |
+| Warm-up fields with a name for screen readers | `app.js`: `renderFormSets` | `features.test.js` (reps, weight and RIR with `aria-label`) | `treinar.spec.js` (fields found by name) |
 
-## Treinar (tela crítica): cada comportamento
+## Treinar (critical screen): every behaviour
 
-Um teste de navegador por comportamento (issue #5). O rascunho é conferido no IndexedDB do aparelho.
-Ponto de partida: `tests/e2e/fixtures/treinar-backup.json`,
-importado pela tela Mais. O descanso usa o relógio controlado do Playwright (`page.clock`), sem esperas fixas.
+One browser test per behaviour (issue #5). The draft is checked in the device's IndexedDB.
+Starting point: `tests/e2e/fixtures/treinar-backup.json`,
+imported through the Mais screen. The rest uses Playwright's controlled clock (`page.clock`), with no fixed waits.
 
-| Comportamento | Onde vive | Testes | Testes de navegador |
+| Behaviour | Where it lives | Tests | Browser tests |
 |---|---|---|---|
-| Abrir pela aba Treinar sem rascunho: formulário vazio, data de hoje | `js/app.js` (Treinar) | — | `treinar.spec.js`: pela aba Treinar sem rascunho |
-| Abrir pelo atalho "Treinar: <ficha>" do Início: ficha já carregada | `js/app.js` (Treinar) | — | `treinar.spec.js`: pelo atalho |
-| Fichas desativadas não aparecem no seletor | `js/app.js` (Treinar) | — | `treinar.spec.js`: fichas desativadas |
-| Escolher a ficha carrega exercícios e séries (reps de cada série da ficha, carga do último treino) | `js/app.js` (Treinar) | — | `treinar.spec.js`: escolher a ficha |
-| Dica "da última vez" da ficha escolhida | `js/app.js` (Treinar) | — | `treinar.spec.js`: dica "da última vez" |
-| Aquecimento pré-preenchido com reps e peso do treino anterior (RIR em branco) | `js/app.js` (Treinar) | — | `treinar.spec.js`: aquecimento pré-preenchido |
-| "Repetir último treino desta ficha" preenche exercícios, reps e cargas | `js/app.js` (Treinar) | — | `treinar.spec.js`: "Repetir o último treino desta ficha" |
-| Trocar de ficha no meio substitui os exercícios | `js/app.js` (Treinar) | — | `treinar.spec.js`: trocar de ficha no meio |
-| Editar reps, carga, RIR e observação da série | `js/app.js` (Treinar) | — | `treinar.spec.js`: editar reps, carga, RIR e observação |
-| Carga com vírgula (`27,5`) fica 27,5 (regressão do iPhone) | `js/app.js` (Treinar) | — | `treinar.spec.js`: carga com vírgula |
-| Observação da série com 16px no celular (o iPhone não dá zoom ao tocar) | `css/styles.css` | — | `treinar.spec.js`: set observation field is at least 16px |
-| Adicionar série | `js/app.js` (Treinar) | — | `treinar.spec.js`: adicionar série |
-| Tirar a última série (sempre sobra uma) | `js/app.js` (Treinar) | — | `treinar.spec.js`: tirar a última série |
-| Tocar no número da série marca como feita e inicia o descanso; tocar de novo só desmarca | `js/app.js` (Treinar) | — | `treinar.spec.js`: tocar no número da série |
-| Contador de progresso conta só as séries feitas | `js/app.js` (Treinar) | — | `treinar.spec.js`: contador de progresso |
-| Descanso começa ao marcar a série, com o tempo dos Ajustes | `js/app.js` (Treinar) | — | `treinar.spec.js`: começa ao marcar a série |
-| Descanso: botão de somar tempo (+15s) | `js/app.js` (Treinar) | — | `treinar.spec.js`: botão de somar tempo |
-| Descanso: parar | `js/app.js` (Treinar) | — | `treinar.spec.js`: parar |
-| Fim do descanso só muda de cor: sem som, sem vibração, sem piscar | `js/app.js` (Treinar) | — | `treinar.spec.js`: no fim só muda de cor |
-| Descanso continua certo depois de o app ir para segundo plano (conta pelo horário de término) | `js/app.js` (Treinar) | — | `treinar.spec.js`: continua certo depois de o app ir para segundo plano |
-| Adicionar exercício da Biblioteca, do catálogo e criando um novo | `js/app.js` (Treinar) | — | `treinar.spec.js`: adicionar exercício da Biblioteca / do catálogo / criando um novo |
-| Remover um exercício | `js/app.js` (Treinar) | — | `treinar.spec.js`: remover um exercício |
-| Adicionar um exercício que já está no treino avisa e não duplica | `js/app.js` (Treinar) | — | `treinar.spec.js`: o mesmo exercício não entra duas vezes no treino |
-| Responder **Não** mantém o que foi preenchido: trocar de ficha, "Repetir o último treino", remover exercício preenchido, Cancelar | `js/app.js` (Treinar) | — | `treinar.spec.js`: responder "Não" mantém o que foi preenchido (4 testes) |
-| Responder **Não** ao tirar a última série preenchida mantém a série | `js/app.js` (Treinar) | — | `treinar.spec.js`: responder "Não" → tirar a última série preenchida |
-| Responder **Não** ao excluir um treino salvo (na edição) não apaga nada | `js/app.js` (Treinar) | — | `treinar.spec.js`: responder "Não" → excluir o treino |
-| Aquecimento por exercício (reps, peso, RIR) | `js/app.js` (Treinar) | — | `treinar.spec.js`: aquecimento por exercício |
-| Cardio e observações | `js/app.js` (Treinar) | — | `treinar.spec.js`: cardio e observações |
-| Toda alteração grava o rascunho; recarregar a página no meio do treino continua de onde parou | `js/app.js` (Treinar) | — | `treinar.spec.js`: toda alteração grava o rascunho |
-| Sair do app (página oculta) grava o rascunho na hora | `js/app.js` (Treinar) | — | `treinar.spec.js`: sair do app (página oculta) |
-| **Cancelar** descarta as alterações e o rascunho | `js/app.js` (Treinar) | — | `treinar.spec.js`: Cancelar descarta |
-| **Cancelar** na edição de um treino salvo volta ao detalhe dele, sem mudar nada | `js/app.js` (Treinar) | — | `treinar.spec.js`: Cancelar na edição de um treino salvo |
-| Apagar tudo o que foi digitado apaga o rascunho | `js/app.js` (Treinar) | — | `treinar.spec.js`: apagar tudo o que foi digitado |
-| Salvar funciona em navegador sem `crypto.randomUUID` | `js/app.js` (Treinar) | — | `treinar.spec.js`: salva o treino mesmo sem crypto.randomUUID |
-| Rascunho de **outro** treino: abrir um treino diferente não mistura os dados (continuar ou descartar) | `js/app.js` (Treinar) | — | `treinar.spec.js`: rascunho de outro treino (2 testes) |
-| Treino inválido não é salvo e mostra o motivo | `js/app.js` (Treinar) | — | `treinar.spec.js`: treino inválido |
-| Salvar leva ao Início com o resumo; o treino aparece no Calendário e no histórico de cada exercício | `js/app.js` (Treinar) | — | `treinar.spec.js`: salvar leva ao Início |
-| Linha "Recorde" quando bate a maior carga anterior | `js/app.js` (Treinar) | — | `treinar.spec.js`: linha "Recorde" |
-| Depois de salvar, o rascunho some | `js/app.js` (Treinar) | — | `treinar.spec.js`: depois de salvar, o rascunho some |
-| Treino existente: abrir pelo detalhe, editar e salvar (sem duplicar) | `js/app.js` (Treinar) | — | `treinar.spec.js`: abrir pelo detalhe, editar e salvar |
-| Treino existente: excluir | `js/app.js` (Treinar) | — | `treinar.spec.js`: excluir o treino |
-| Treino existente: exportar como texto (formato do WhatsApp, só a data no topo) | `js/app.js` (Treinar) | — | `treinar.spec.js`: exportar como texto |
+| Opening from the Treinar tab with no draft: empty form, today's date | `js/app.js` (Treinar) | — | `treinar.spec.js`: from the Treinar tab with no draft |
+| Opening from Início's "Treinar: <ficha>" shortcut: sheet already loaded | `js/app.js` (Treinar) | — | `treinar.spec.js`: from Início's "Treinar: <ficha>" shortcut |
+| Deactivated sheets do not appear in the selector | `js/app.js` (Treinar) | — | `treinar.spec.js`: deactivated sheets do not appear in the selector |
+| Choosing the sheet loads exercises and sets (reps of each set from the sheet, load from the last workout) | `js/app.js` (Treinar) | — | `treinar.spec.js`: choosing the sheet loads exercises and sets |
+| "Last time" hint of the chosen sheet | `js/app.js` (Treinar) | — | `treinar.spec.js`: "last time" hint of the chosen sheet |
+| Warm-up pre-filled with reps and weight from the previous workout (RIR blank) | `js/app.js` (Treinar) | — | `treinar.spec.js`: warm-up pre-filled with reps and weight |
+| "Repetir o último treino desta ficha" fills exercises, reps and loads | `js/app.js` (Treinar) | — | `treinar.spec.js`: "Repetir o último treino desta ficha" fills exercises, reps and loads |
+| Switching sheet halfway replaces the exercises | `js/app.js` (Treinar) | — | `treinar.spec.js`: switching sheet halfway replaces the exercises |
+| Editing reps, load, RIR and the set note | `js/app.js` (Treinar) | — | `treinar.spec.js`: edit reps, load, RIR and note |
+| Load with a comma (`27,5`) stays 27,5 (iPhone regression) | `js/app.js` (Treinar) | — | `treinar.spec.js`: load with a comma (27,5) stays 27,5 |
+| Set note with 16px on the phone (the iPhone does not zoom when tapping) | `css/styles.css` | — | `treinar.spec.js`: set observation field is at least 16px on the phone |
+| Adding a set | `js/app.js` (Treinar) | — | `treinar.spec.js`: add a set |
+| Removing the last set (one always remains) | `js/app.js` (Treinar) | — | `treinar.spec.js`: remove the last set |
+| Tapping the set number marks it as done and starts the rest; tapping again only unmarks it | `js/app.js` (Treinar) | — | `treinar.spec.js`: tapping the set number marks it as done and starts the rest |
+| Progress counter counts only the sets done | `js/app.js` (Treinar) | — | `treinar.spec.js`: progress counter counts only the sets done |
+| Rest starts when the set is marked, with the time from Ajustes | `js/app.js` (Treinar) | — | `treinar.spec.js`: starts when the set is marked, with the time from Ajustes |
+| Rest: add-time button (+15s) | `js/app.js` (Treinar) | — | `treinar.spec.js`: add-time button (+15s) |
+| Rest: stop | `js/app.js` (Treinar) | — | `treinar.spec.js`: stop |
+| End of the rest only changes colour: no sound, no vibration, no flashing | `js/app.js` (Treinar) | — | `treinar.spec.js`: at the end it only changes colour |
+| Rest stays correct after the app goes to the background (counts by the end time) | `js/app.js` (Treinar) | — | `treinar.spec.js`: stays correct after the app goes to the background |
+| Adding an exercise from Biblioteca, from the catalog and by creating a new one | `js/app.js` (Treinar) | — | `treinar.spec.js`: add an exercise from Biblioteca / from the catalog / by creating a new one |
+| Removing an exercise | `js/app.js` (Treinar) | — | `treinar.spec.js`: remove an exercise |
+| Adding an exercise that is already in the workout warns and does not duplicate | `js/app.js` (Treinar) | — | `treinar.spec.js`: the same exercise does not enter the workout twice |
+| Answering **Não** keeps what was filled in: switching sheet, "Repetir o último treino", removing a filled exercise, Cancelar | `js/app.js` (Treinar) | — | `treinar.spec.js`: answering "Não" keeps what was filled in (4 tests) |
+| Answering **Não** to removing the last filled set keeps the set | `js/app.js` (Treinar) | — | `treinar.spec.js`: remove the last filled-in set (answering "Não") |
+| Answering **Não** to deleting a saved workout (in the edit) deletes nothing | `js/app.js` (Treinar) | — | `treinar.spec.js`: delete the workout (answering "Não") |
+| Warm-up per exercise (reps, weight, RIR) | `js/app.js` (Treinar) | — | `treinar.spec.js`: warm-up per exercise |
+| Cardio and notes | `js/app.js` (Treinar) | — | `treinar.spec.js`: cardio and notes |
+| Every change saves the draft; reloading the page mid-workout continues where it stopped | `js/app.js` (Treinar) | — | `treinar.spec.js`: every change saves the draft |
+| Leaving the app (hidden page) saves the draft right away | `js/app.js` (Treinar) | — | `treinar.spec.js`: leaving the app (hidden page) saves the draft right away |
+| **Cancelar** discards the changes and the draft | `js/app.js` (Treinar) | — | `treinar.spec.js`: Cancelar discards the changes and the draft |
+| **Cancelar** while editing a saved workout goes back to its detail, changing nothing | `js/app.js` (Treinar) | — | `treinar.spec.js`: Cancelar while editing a saved workout |
+| Erasing everything that was typed erases the draft | `js/app.js` (Treinar) | — | `treinar.spec.js`: erasing everything that was typed |
+| Saving works in a browser without `crypto.randomUUID` | `js/app.js` (Treinar) | — | `treinar.spec.js`: saves the workout even without crypto.randomUUID |
+| Draft of **another** workout: opening a different workout does not mix the data (continue or discard) | `js/app.js` (Treinar) | — | `treinar.spec.js`: draft of another workout (2 tests) |
+| An invalid workout is not saved and shows the reason | `js/app.js` (Treinar) | — | `treinar.spec.js`: an invalid workout is not saved |
+| Saving goes to Início with the summary; the workout appears in Calendário and in each exercise's history | `js/app.js` (Treinar) | — | `treinar.spec.js`: saving goes to Início with the summary |
+| "Recorde" line when it beats the previous best load | `js/app.js` (Treinar) | — | `treinar.spec.js`: "Recorde" line when it beats the previous best load |
+| After saving, the draft disappears | `js/app.js` (Treinar) | — | `treinar.spec.js`: after saving, the draft disappears |
+| Existing workout: open from the detail, edit and save (without duplicating) | `js/app.js` (Treinar) | — | `treinar.spec.js`: open from the detail, edit and save |
+| Existing workout: delete | `js/app.js` (Treinar) | — | `treinar.spec.js`: delete the workout |
+| Existing workout: export as text (WhatsApp format, only the date at the top) | `js/app.js` (Treinar) | — | `treinar.spec.js`: export as text |
 
-## Início (tela crítica): cada comportamento
+## Início (critical screen): every behaviour
 
-Um teste de navegador por comportamento (issue #19). Ponto de partida: `tests/e2e/fixtures/inicio-backup.json`,
-importado pela tela Mais, com o relógio da página parado em 20/05/2026 (`page.clock.setFixedTime`). Variações
-(sem backup, meta menor, última ficha diferente) são montadas no próprio teste com `readFixture`.
+One browser test per behaviour (issue #19). Starting point: `tests/e2e/fixtures/inicio-backup.json`,
+imported through the Mais screen, with the page clock fixed at 20/05/2026 (`page.clock.setFixedTime`). Variations
+(no backup, smaller goal, different last sheet) are built in the test itself with `readFixture`.
 
-| Comportamento | Onde vive | Testes | Testes de navegador |
+| Behaviour | Where it lives | Tests | Browser tests |
 |---|---|---|---|
-| Primeiro uso sem dados: estado vazio correto, sem erro no console | `js/app.js` (Início) | — | `inicio.spec.js`: primeiro uso sem dados |
-| Aviso do rascunho aparece com um treino em andamento (descrição do rascunho) | `js/app.js` (Início) | — | `inicio.spec.js`: aparece com um treino em andamento |
-| Aviso do rascunho: **Continuar** abre o Treinar com o rascunho | `js/app.js` (Início) | — | `inicio.spec.js`: Continuar abre o Treinar |
-| Aviso do rascunho: **Descartar** remove o rascunho e o aviso | `js/app.js` (Início) | — | `inicio.spec.js`: Descartar remove o rascunho e o aviso |
-| Aviso do rascunho: responder **Não** ao Descartar mantém o rascunho e o aviso | `js/app.js` (Início) | — | `inicio.spec.js`: responder "Não" ao Descartar |
-| Aviso do rascunho descreve a edição de um treino salvo ("Edição do treino de <data>") | `js/app.js` (Início) | — | `inicio.spec.js`: descreve a edição de um treino salvo |
-| Progresso das metas: treinos (x/meta) e minutos de cardio (x/meta), com as barras | `js/app.js` (Início) | — | `inicio.spec.js`: progresso das metas |
-| Meta batida: selo "Meta batida" e barras cheias, sem passar de 100% | `js/app.js` (Início) | — | `inicio.spec.js`: meta batida |
-| Treino com data fora da janela da semana não conta na semana atual (e não se perde) | `js/app.js` (Início) | — | `inicio.spec.js`: treino com data fora da janela |
-| Aviso de **semana encerrada** depois de 7 dias, com o resultado final | `js/app.js` (Início) | — | `inicio.spec.js`: aviso de semana encerrada |
-| Confirmar o aviso avança para a próxima janela (e fica gravado) | `js/app.js` (Início) | — | `inicio.spec.js`: confirmar o aviso avança |
-| "Treinar: <ficha>" sugere a próxima ficha certa (pela rotina) e abre o Treinar com ela carregada | `js/app.js` (Início) | — | `inicio.spec.js`: "Treinar: <ficha>" sugere a próxima ficha |
-| Atalho Treinar some enquanto existe um rascunho | `js/app.js` (Início) | — | `inicio.spec.js`: some enquanto existe um rascunho |
-| Fichas desativadas não são sugeridas no atalho | `js/app.js` (Início) | — | `inicio.spec.js`: fichas desativadas não são sugeridas |
-| Lembrete de backup aparece quando nunca houve backup | `js/app.js` (Início) | — | `inicio.spec.js`: aparece quando nunca houve backup |
-| Lembrete de backup aparece quando o último backup está velho; some quando está em dia | `js/app.js` (Início) | — | `inicio.spec.js`: aparece quando o último backup está velho |
-| Lembrete de backup some depois de fazer um backup | `js/app.js` (Início) | — | `inicio.spec.js`: some depois de fazer um backup |
-| Lembrete de backup: ✕ "Lembrar depois" esconde | `js/app.js` (Início) | — | `inicio.spec.js`: "Lembrar depois" (✕) esconde o lembrete |
-| Treinos recentes: data e nome da ficha, do mais recente para o mais antigo | `js/app.js` (Início) | — | `inicio.spec.js`: lista com data e nome da ficha |
-| Tocar num treino da lista abre o detalhe | `js/app.js` (Início) | — | `inicio.spec.js`: tocar num treino abre o detalhe |
-| Ficha renomeada aparece com o nome novo na lista | `js/app.js` (Início) | — | `inicio.spec.js`: ficha renomeada aparece com o nome novo |
-| Botão de compartilhar da linha abre o texto do treino | `js/app.js` (Início) | — | `inicio.spec.js`: o botão de compartilhar da linha |
+| First use with no data: correct empty state, no console error | `js/app.js` (Início) | — | `inicio.spec.js`: first use with no data |
+| Draft banner appears with a workout in progress (draft description) | `js/app.js` (Início) | — | `inicio.spec.js`: appears with a workout in progress |
+| Draft banner: **Continuar** opens Treinar with the draft | `js/app.js` (Início) | — | `inicio.spec.js`: Continuar opens Treinar with the draft |
+| Draft banner: **Descartar** removes the draft and the banner | `js/app.js` (Início) | — | `inicio.spec.js`: Descartar removes the draft and the banner |
+| Draft banner: answering **Não** to Descartar keeps the draft and the banner | `js/app.js` (Início) | — | `inicio.spec.js`: answering "Não" to Descartar |
+| Draft banner describes the editing of a saved workout ("Edição do treino de <data>") | `js/app.js` (Início) | — | `inicio.spec.js`: describes the editing of a saved workout |
+| Goal progress: workouts (x/goal) and cardio minutes (x/goal), with the bars | `js/app.js` (Início) | — | `inicio.spec.js`: goal progress |
+| Goal reached: "Meta batida" badge and full bars, without going past 100% | `js/app.js` (Início) | — | `inicio.spec.js`: goal reached |
+| A workout dated outside the week window does not count in the current week (and is not lost) | `js/app.js` (Início) | — | `inicio.spec.js`: a workout dated outside the week window |
+| **Week-over** banner after 7 days, with the final result | `js/app.js` (Início) | — | `inicio.spec.js`: week-over banner after 7 days |
+| Confirming the banner advances to the next window (and is saved) | `js/app.js` (Início) | — | `inicio.spec.js`: confirming the banner advances |
+| "Treinar: <ficha>" suggests the right next sheet (by the routine) and opens Treinar with it loaded | `js/app.js` (Início) | — | `inicio.spec.js`: "Treinar: <ficha>" suggests the next sheet in the routine |
+| Treinar shortcut disappears while a draft exists | `js/app.js` (Início) | — | `inicio.spec.js`: disappears while a draft exists |
+| Deactivated sheets are not suggested in the shortcut | `js/app.js` (Início) | — | `inicio.spec.js`: deactivated sheets are not suggested |
+| Backup reminder appears when there has never been a backup | `js/app.js` (Início) | — | `inicio.spec.js`: appears when there has never been a backup |
+| Backup reminder appears when the last backup is old; disappears when it is up to date | `js/app.js` (Início) | — | `inicio.spec.js`: appears when the last backup is old |
+| Backup reminder disappears after making a backup | `js/app.js` (Início) | — | `inicio.spec.js`: disappears after making a backup |
+| Backup reminder: ✕ "Lembrar depois" hides it | `js/app.js` (Início) | — | `inicio.spec.js`: "Lembrar depois" (✕) hides the reminder |
+| Recent workouts: date and sheet name, newest to oldest | `js/app.js` (Início) | — | `inicio.spec.js`: list with date and sheet name |
+| Tapping a workout in the list opens the detail | `js/app.js` (Início) | — | `inicio.spec.js`: tapping a workout opens the detail |
+| Renamed sheet appears with the new name in the list | `js/app.js` (Início) | — | `inicio.spec.js`: a renamed sheet appears with the new name |
+| The row's share button opens the workout text | `js/app.js` (Início) | — | `inicio.spec.js`: the row's share button opens the workout text |
 
-## Testes temporários da refatoração
+## Temporary refactor tests
 
-**Temporários** (issue #39, `documentation/REFACTOR.md` seção 4, item 6): enquanto durar a refatoração, a regra
-das telas críticas vale para todas as telas e a cobertura de linhas do `js/app.js` fica em 100%. Os arquivos ficam
-em `tests/e2e/temporarios/` e rodam no CI como os demais até o #16; depois o #40 os desliga sem apagar. Falhas
-(aparelho sem espaço, cache bloqueado, `canShare` quebrado) são simuladas no navegador (IndexedDB, Cache Storage),
-sem tocar nas funções do app.
+**Temporary** (issue #39, `documentation/REFACTOR.md` section 4, item 6): while the refactor lasts, the rule
+for the critical screens applies to every screen and `js/app.js` line coverage stays at 100%. The files live
+in `tests/e2e/temporarios/` and run in CI like the others until #16; then #40 turns them off without deleting them. Failures
+(device with no space, blocked cache, broken `canShare`) are simulated in the browser (IndexedDB, Cache Storage),
+without touching the app functions.
 
-| Comportamento | Tela | Testes de navegador |
+| Behaviour | Screen | Browser tests |
 |---|---|---|
-| Salvar ficha sem nome avisa e não fecha o editor | Fichas | `temporarios/fichas.spec.js` |
-| Descer exercício no editor; Subir no primeiro e Descer no último não fazem nada | Fichas | `temporarios/fichas.spec.js` |
-| Diminuir as séries tira os campos de reps que sobram e não grava reps a mais | Fichas | `temporarios/fichas.spec.js` |
-| Fechar o editor de ficha sem salvar não grava nada | Fichas | `temporarios/fichas.spec.js` |
-| Tirar todos os exercícios da ficha mostra como adicionar | Fichas | `temporarios/fichas.spec.js` |
-| "Adicionar exercício" abre e fecha a busca; abrir de novo começa vazia | Fichas | `temporarios/fichas.spec.js` |
-| Editar ficha desativada a mantém desativada, mesmo com o nome de uma ativa | Fichas | `temporarios/fichas.spec.js` |
-| Ficha antiga sem reps por série mostra só o número de séries | Fichas | `temporarios/fichas.spec.js` |
-| Desativadas vêm depois das ativas, com o botão Reativar | Fichas | `temporarios/fichas.spec.js` |
-| Editar grupo e correção sem renomear mantém nome e histórico | Biblioteca | `temporarios/biblioteca.spec.js` |
-| Correção da professora vira a observação ao pôr o exercício numa ficha | Biblioteca | `temporarios/biblioteca.spec.js` |
-| Fechar o cadastro de exercício sem salvar não cria nada | Biblioteca | `temporarios/biblioteca.spec.js` |
-| Busca e filtro de grupo valem juntos | Biblioteca | `temporarios/biblioteca.spec.js` |
-| No cadastro, o botão do catálogo abre e fecha a busca | Biblioteca | `temporarios/biblioteca.spec.js` |
-| Treino só de cardio: o detalhe avisa que não há exercícios registrados | Detalhe do treino | `temporarios/historico.spec.js` |
-| "Editar" no detalhe abre o treino no Treinar | Detalhe do treino | `temporarios/historico.spec.js` |
-| "Voltar" na evolução volta para a tela de onde veio | Evolução do exercício | `temporarios/historico.spec.js` |
-| Meta de treinos zerada vira 1; cardio vazio vira 0 | Mais | `temporarios/mais.spec.js` |
-| Trocar a data de início da semana muda a semana do Início | Mais | `temporarios/mais.spec.js` |
-| Colinha: só o título basta; só o conteúdo basta; só espaços é recusado | Mais | `temporarios/mais.spec.js` |
-| Colinhas na ordem de criação; editar não muda a ordem | Mais | `temporarios/mais.spec.js` |
-| Importar treinos antigos: "Copiar texto" copia o texto para a IA; Cancelar não importa nada | Mais | `temporarios/mais.spec.js` |
-| Desfazer não aparece antes de importar e some depois de recarregar a página | Dados | `temporarios/dados.spec.js` |
-| Treino de ficha desativada aparece como "(inativa)" na edição | Treinar | `temporarios/treinar.spec.js` |
-| Treino de ficha excluída aparece como "(excluída)" e o Treinar explica | Treinar | `temporarios/treinar.spec.js` |
-| Ficha sem exercícios: o Treinar explica onde adicionar | Treinar | `temporarios/treinar.spec.js` |
-| Sem nenhuma ficha, o Treinar aponta para a aba Fichas | Treinar | `temporarios/treinar.spec.js` |
-| Rascunho que não grava no aparelho fica na memória; apagar que falha ainda limpa a tela | Treinar | `temporarios/falhas.spec.js` |
-| Rascunho antigo sem hora de gravação aparece sem "salvo às" | Início | `temporarios/falhas.spec.js` |
-| "Criar" exercício que não grava avisa o erro (Treinar e cadastro da Biblioteca) | Treinar, Biblioteca | `temporarios/falhas.spec.js` |
-| `canShare` que dá erro: Exportar baixa o arquivo como no computador | Mais | `temporarios/falhas.spec.js` |
-| "Atualizar app" recarrega mesmo se limpar o cache falhar | Mais | `temporarios/falhas.spec.js` |
-| Erro inesperado numa ação mostra o aviso "Erro:" e o app continua | Treinar | `temporarios/falhas.spec.js` |
+| Saving a sheet with no name warns and does not close the editor | Fichas | `temporarios/fichas.spec.js` |
+| Moving an exercise down in the editor; Up on the first and Down on the last do nothing | Fichas | `temporarios/fichas.spec.js` |
+| Decreasing the sets removes the reps fields that are left over and does not save extra reps | Fichas | `temporarios/fichas.spec.js` |
+| Closing the sheet editor without saving saves nothing | Fichas | `temporarios/fichas.spec.js` |
+| Removing every exercise from the sheet shows how to add | Fichas | `temporarios/fichas.spec.js` |
+| "Adicionar exercício" opens and closes the search; opening it again starts empty | Fichas | `temporarios/fichas.spec.js` |
+| Editing a deactivated sheet keeps it deactivated, even with the name of an active one | Fichas | `temporarios/fichas.spec.js` |
+| Old sheet with no reps per set shows only the number of sets | Fichas | `temporarios/fichas.spec.js` |
+| Deactivated sheets come after the active ones, with the Reativar button | Fichas | `temporarios/fichas.spec.js` |
+| Editing group and correction without renaming keeps the name and the history | Biblioteca | `temporarios/biblioteca.spec.js` |
+| The teacher's correction becomes the note when putting the exercise in a sheet | Biblioteca | `temporarios/biblioteca.spec.js` |
+| Closing the exercise form without saving creates nothing | Biblioteca | `temporarios/biblioteca.spec.js` |
+| Search and group filter apply together | Biblioteca | `temporarios/biblioteca.spec.js` |
+| In the form, the catalog button opens and closes the search | Biblioteca | `temporarios/biblioteca.spec.js` |
+| Cardio-only workout: the detail warns that there are no exercises recorded | Workout detail | `temporarios/historico.spec.js` |
+| "Editar" in the detail opens the workout in Treinar | Workout detail | `temporarios/historico.spec.js` |
+| "Voltar" in the progress goes back to the screen it came from | Exercise progress | `temporarios/historico.spec.js` |
+| A zero workout goal becomes 1; empty cardio becomes 0 | Mais | `temporarios/mais.spec.js` |
+| Changing the week start date changes Início's week | Mais | `temporarios/mais.spec.js` |
+| Colinha: only the title is enough; only the content is enough; spaces only is refused | Mais | `temporarios/mais.spec.js` |
+| Colinhas in creation order; editing does not change the order | Mais | `temporarios/mais.spec.js` |
+| Import old workouts: "Copiar texto" copies the text for the AI; Cancelar imports nothing | Mais | `temporarios/mais.spec.js` |
+| Undo does not appear before importing and disappears after reloading the page | Data | `temporarios/dados.spec.js` |
+| Workout of a deactivated sheet appears as "(inativa)" in the edit | Treinar | `temporarios/treinar.spec.js` |
+| Workout of a deleted sheet appears as "(excluída)" and Treinar explains it | Treinar | `temporarios/treinar.spec.js` |
+| Sheet with no exercises: Treinar explains where to add them | Treinar | `temporarios/treinar.spec.js` |
+| With no sheet, Treinar points to the Fichas tab | Treinar | `temporarios/treinar.spec.js` |
+| A draft that cannot be saved on the device stays in memory; a delete that fails still clears the screen | Treinar | `temporarios/falhas.spec.js` |
+| An old draft with no save time appears without "salvo às" | Início | `temporarios/falhas.spec.js` |
+| "Criar" exercise that cannot save warns the error (Treinar and Biblioteca form) | Treinar, Biblioteca | `temporarios/falhas.spec.js` |
+| `canShare` that throws: Exportar downloads the file as on the computer | Mais | `temporarios/falhas.spec.js` |
+| "Atualizar app" reloads even if clearing the cache fails | Mais | `temporarios/falhas.spec.js` |
+| An unexpected error in an action shows the "Erro:" warning and the app keeps working | Treinar | `temporarios/falhas.spec.js` |
 
-## Limites conhecidos
+## Known limits
 
-- **Cobertura do `js/app.js`** (`documentation/REFACTOR.md`, seção 4). Com os testes temporários (#39), 100% das
-  linhas. Sem eles (depois do #40), ficam fora da conta os avisos de erro inesperado (`guard`, falha ao criar
-  exercício, falha do IndexedDB ao gravar/apagar o rascunho) e itens de ficha sem lista de reps. "Atualizar app"
-  entra na conta: o teste declara `RECARGA_DO_APP` (`tests/e2e/helpers.js`) e a cobertura tira a foto num ponto de
-  parada logo antes do `location.reload()` do app (o depurador só liga nesses testes: com ele ligado, recarregar
-  offline pelo cache do service worker derruba a página).
-- **Wrapper de módulo do `core.js`** (detecção Node × navegador) fica fora da meta de cobertura: cada
-  ambiente executa um dos lados. O lado do navegador é testado em `module.test.js` (carrega o core num
-  escopo sem `module.exports` e confere que as funções viram globais).
+- **`js/app.js` coverage** (`documentation/REFACTOR.md`, section 4). With the temporary tests (#39), 100% of the
+  lines. Without them (after #40), the unexpected-error warnings stay out of the count (`guard`, failure to create an
+  exercise, IndexedDB failure when saving/deleting the draft) and sheet items with no reps list. "Atualizar app"
+  stays in the count: the test declares `RECARGA_DO_APP` (`tests/e2e/helpers.js`) and coverage takes the snapshot at a
+  breakpoint just before the app's `location.reload()` (the debugger only turns on in those tests: with it on, reloading
+  offline from the service worker cache takes the page down).
+- **`core.js` module wrapper** (Node × browser detection) stays out of the coverage goal: each
+  environment runs one side. The browser side is tested in `module.test.js` (loads the core in a
+  scope without `module.exports` and checks that the functions become globals).

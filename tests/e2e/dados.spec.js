@@ -1,15 +1,15 @@
-// Dados, backup e atualização (issue #6): o não negociável nº 2, dados antigos nunca se perdem.
-// Tudo pela tela Mais, como uma pessoa faria: importar os backups antigos de `tests/fixtures/`, exportar e
-// reimportar, apagar tudo, dados de exemplo, desfazer e a atualização do app (service worker novo e o botão
-// "Atualizar app") sem perder o rascunho do treino em andamento.
-// O lembrete de backup no Início está em `inicio.spec.js` (Início · lembrete de backup).
+// Data, backup and update (issue #6): non-negotiable number 2, old data is never lost.
+// Everything through the Mais screen, the way a person would: import the old backups from `tests/fixtures/`, export and
+// import again, erase everything, sample data, undo, and the app update (new service worker and the
+// "Atualizar app" button) without losing the draft of the workout in progress.
+// The backup reminder on Início is in `inicio.spec.js` (Início · backup reminder).
 //
-// Backups antigos (relógio parado em 16/09/2026 para a lista do Início mostrar todos os treinos):
-// - `backup-v1.json` (formato 1, antes das fichas): "tipos de treino" A e B viram fichas; 2 treinos (30/08 com
-//   Elevação pélvica 27 kg × 12 e 32 kg × 10 "caiu a força"; 25/08 com Puxada frente supinada 45 kg × 10),
-//   Elevação pélvica na Biblioteca (Glúteos), colinha "RIR", metas 4 treinos / 90 min.
-// - `backup-v2-sheets.json` (formato 2): ficha TREINO A com Elevação pélvica (3×12, "pausa de 1s") e Leg press 45
-//   (reps 12-10-8); 1 treino em 14/09 (Elevação pélvica 30 kg × 12, 20 min de cardio), metas 3 / 120.
+// Old backups (clock fixed at 16/09/2026 so the Início list shows every workout):
+// - `backup-v1.json` (format 1, before sheets): workout "types" A and B become sheets; 2 workouts (30/08 with
+//   Elevação pélvica 27 kg × 12 and 32 kg × 10 "caiu a força"; 25/08 with Puxada frente supinada 45 kg × 10),
+//   Elevação pélvica in Biblioteca (Glúteos), colinha "RIR", goals 4 workouts / 90 min.
+// - `backup-v2-sheets.json` (format 2): sheet TREINO A with Elevação pélvica (3×12, "pausa de 1s") and Leg press 45
+//   (reps 12-10-8); 1 workout on 14/09 (Elevação pélvica 30 kg × 12, 20 min of cardio), goals 3 / 120.
 const fs = require('fs');
 const path = require('path');
 const { test, expect, freshApp, waitForApp, withBackup, storedDraft, storedRecords, goTo, answerConfirm, RECARGA_DO_APP } = require('./helpers');
@@ -18,20 +18,20 @@ const OLD_BACKUPS = path.resolve(__dirname, '..', 'fixtures');
 const V1 = path.join(OLD_BACKUPS, 'backup-v1.json');
 const V2 = path.join(OLD_BACKUPS, 'backup-v2-sheets.json');
 
-/** Importa um backup antigo com o relógio parado num dia logo depois dele. */
+/** Imports an old backup with the clock fixed on a day just after it. */
 async function importOld(page, file) {
   await page.clock.setFixedTime(new Date('2026-09-16T10:00:00-03:00'));
   await withBackup(page, file);
 }
 
-/** Sem o menu de compartilhar, Exportar vira um download (o caminho do computador). Chamar antes de abrir o app. */
+/** Without the share menu, Exportar becomes a download (the computer path). Call it before opening the app. */
 async function exportAsDownload(page) {
   await page.addInitScript(() => {
     Object.defineProperty(Navigator.prototype, 'canShare', { configurable: true, value: undefined });
   });
 }
 
-/** Toca em Mais → Exportar e devolve o arquivo baixado: nome e conteúdo. */
+/** Taps Mais → Exportar and returns the downloaded file: name and content. */
 async function exportBackupFile(page) {
   await goTo(page, 'Mais');
   const download = page.waitForEvent('download');
@@ -42,7 +42,7 @@ async function exportBackupFile(page) {
   return { name: file.suggestedFilename(), text, json: JSON.parse(text) };
 }
 
-/** Importa um arquivo pela tela Mais → Importar (o confirm() responde sim). */
+/** Imports a file through the Mais → Importar screen (confirm() answers yes). */
 async function importFile(page, name, text) {
   await goTo(page, 'Mais');
   await page.locator('#importFile').setInputFiles({ name, mimeType: 'application/json', buffer: Buffer.from(text) });
@@ -50,7 +50,7 @@ async function importFile(page, name, text) {
   await expect(page.locator('#view-dashboard')).toBeVisible();
 }
 
-/** Abre a tela Apagar dados, marca a caixa e apaga tudo. */
+/** Opens the Erase data screen, ticks the box and erases everything. */
 async function eraseEverything(page) {
   await goTo(page, 'Mais');
   await page.locator('#btnEraseAll').click();
@@ -60,7 +60,7 @@ async function eraseEverything(page) {
   await expect(page.locator('#eraseBody')).toContainText('Todos os dados do app foram apagados deste aparelho.');
 }
 
-/** Dados de um backup sem o que muda a cada exportação (hora do último backup). */
+/** Backup data without what changes on every export (the last-backup time). */
 function comparable(backup) {
   const data = JSON.parse(JSON.stringify(backup.data));
   delete data.settings.lastBackupAt;
@@ -71,7 +71,7 @@ const recent = (page) => page.locator('#recentWorkouts');
 const sheetsList = (page) => page.locator('#sheetsList');
 const libraryList = (page) => page.locator('#exercisesList');
 
-/** Abre o detalhe do treino da lista do Início que tem esse texto (ex.: o dia "30"). */
+/** Opens the workout detail from the Início list that has this text (e.g. the day "30"). */
 async function openWorkout(page, text) {
   await goTo(page, 'Início');
   await recent(page).locator('button[data-view-workout]').filter({ hasText: text }).click();
@@ -79,8 +79,8 @@ async function openWorkout(page, text) {
   return page.locator('#detailBody');
 }
 
-test.describe('Dados · importar backups antigos pela tela', () => {
-  test('formato 1 (antes das fichas): treinos, fichas, Biblioteca, colinha e metas', async ({ page }) => {
+test.describe('Data · importing old backups through the screen', () => {
+  test('format 1 (before sheets): workouts, sheets, Biblioteca, colinha and goals', async ({ page }) => {
     await importOld(page, V1);
 
     await expect(recent(page)).toContainText('2 treinos');
@@ -113,7 +113,7 @@ test.describe('Dados · importar backups antigos pela tela', () => {
     await expect(page.locator('#setWeekAnchor')).toHaveValue('2026-08-24');
   });
 
-  test('formato 2 (fichas): ficha com reps por série, treino e metas', async ({ page }) => {
+  test('format 2 (sheets): sheet with reps per set, workout and goals', async ({ page }) => {
     await importOld(page, V2);
 
     await expect(recent(page).locator('button[data-view-workout]')).toHaveCount(1);
@@ -136,7 +136,7 @@ test.describe('Dados · importar backups antigos pela tela', () => {
     await expect(page.locator('#setCardioTarget')).toHaveValue('120');
   });
 
-  test('Desfazer volta aos dados de antes da importação', async ({ page }) => {
+  test('Undo returns to the data from before the import', async ({ page }) => {
     await importOld(page, V2);
     await importFile(page, 'backup-v1.json', fs.readFileSync(V1, 'utf8'));
     await expect(recent(page).locator('button[data-view-workout]')).toHaveCount(2);
@@ -154,7 +154,7 @@ test.describe('Dados · importar backups antigos pela tela', () => {
     await expect(sheetsList(page)).not.toContainText('TREINO B - superiores');
   });
 
-  test('responder "Não" ao importar não troca nada', async ({ page }) => {
+  test('answering "Não" to importing changes nothing', async ({ page }) => {
     await importOld(page, V2);
     await goTo(page, 'Mais');
     const asked = await answerConfirm(page, false);
@@ -170,7 +170,7 @@ test.describe('Dados · importar backups antigos pela tela', () => {
     await expect(sheetsList(page)).not.toContainText('TREINO B - superiores');
   });
 
-  test('responder "Não" ao Desfazer mantém os dados importados', async ({ page }) => {
+  test('answering "Não" to Undo keeps the imported data', async ({ page }) => {
     await importOld(page, V2);
     await importFile(page, 'backup-v1.json', fs.readFileSync(V1, 'utf8'));
     await goTo(page, 'Mais');
@@ -183,7 +183,7 @@ test.describe('Dados · importar backups antigos pela tela', () => {
     expect(await storedRecords(page, 'workouts')).toHaveLength(2);
   });
 
-  test('arquivo que não é backup não apaga nada', async ({ page }) => {
+  test('a file that is not a backup erases nothing', async ({ page }) => {
     await importOld(page, V2);
     const alerts = [];
     page.on('dialog', (dialog) => { alerts.push(dialog.message()); dialog.accept(); });
@@ -199,7 +199,7 @@ test.describe('Dados · importar backups antigos pela tela', () => {
     expect(await storedRecords(page, 'sheets')).toHaveLength(1);
   });
 
-  test('não confia no arquivo: id com código é descartado e data inválida vira "sem data"', async ({ page }) => {
+  test('does not trust the file: an id with code is discarded and an invalid date becomes "sem data"', async ({ page }) => {
     const set = { exerciseId: 'ex-1', exerciseName: 'Supino reto', number: 1, reps: 10, load: 30 };
     const backup = {
       app: 'meu-treino', version: 2,
@@ -230,8 +230,8 @@ test.describe('Dados · importar backups antigos pela tela', () => {
   });
 });
 
-test.describe('Dados · exportar e reimportar', () => {
-  test('ida e volta: exportar, apagar tudo e reimportar não perde nada', async ({ page }) => {
+test.describe('Data · export and import again', () => {
+  test('round trip: export, erase everything and import again loses nothing', async ({ page }) => {
     await exportAsDownload(page);
     await importOld(page, V1);
     await expect(page.locator('#backupStatus')).not.toContainText('16/09/2026');
@@ -244,7 +244,7 @@ test.describe('Dados · exportar e reimportar', () => {
     expect(first.json.data.sheets).toHaveLength(2);
     expect(first.json.data.exercises).toHaveLength(1);
     expect(first.json.data.colinha).toHaveLength(1);
-    // Exportar conta como backup feito.
+    // Exportar counts as a backup made.
     expect(first.json.data.settings.lastBackupAt).toBeUndefined();
     expect((await storedRecords(page, 'settings')).find((s) => s.id === 'app').lastBackupAt).toBeTruthy();
 
@@ -260,7 +260,7 @@ test.describe('Dados · exportar e reimportar', () => {
     expect(comparable(second.json)).toEqual(comparable(first.json));
   });
 
-  test('no celular, Exportar entrega um único arquivo .json ao menu de compartilhar', async ({ page }) => {
+  test('on the phone, Exportar hands a single .json file to the share menu', async ({ page }) => {
     await page.addInitScript(() => {
       window.__shared = [];
       Object.defineProperty(Navigator.prototype, 'canShare', { configurable: true, value: () => true });
@@ -291,8 +291,8 @@ test.describe('Dados · exportar e reimportar', () => {
   });
 });
 
-test.describe('Dados · apagar todos os dados', () => {
-  test('o botão só funciona depois de marcar a confirmação; Cancelar não apaga nada', async ({ page }) => {
+test.describe('Data · erasing all data', () => {
+  test('the button only works after ticking the confirmation; Cancelar erases nothing', async ({ page }) => {
     await importOld(page, V1);
     await goTo(page, 'Mais');
     await page.locator('#btnEraseAll').click();
@@ -312,7 +312,7 @@ test.describe('Dados · apagar todos os dados', () => {
     await expect(recent(page).locator('button[data-view-workout]')).toHaveCount(2);
   });
 
-  test('apaga treinos, fichas, Biblioteca, colinha, metas e rascunho', async ({ page }) => {
+  test('erases workouts, sheets, Biblioteca, colinha, goals and the draft', async ({ page }) => {
     await importOld(page, V1);
     await goTo(page, 'Treinar');
     await page.locator('#workoutNotes').fill('rascunho que deve sumir');
@@ -337,15 +337,15 @@ test.describe('Dados · apagar todos os dados', () => {
     await expect(page.locator('#setWorkoutTarget')).toHaveValue('3');
     await expect(page.locator('#setCardioTarget')).toHaveValue('120');
 
-    // Continua apagado depois de abrir o app de novo.
+    // It stays erased after opening the app again.
     await page.goto('./');
     await waitForApp(page);
     await expect(recent(page)).toContainText('Nenhum treino registrado ainda');
   });
 });
 
-test.describe('Dados · dados de exemplo', () => {
-  test('substituem os dados atuais e o Desfazer devolve os anteriores', async ({ page }) => {
+test.describe('Data · sample data', () => {
+  test('they replace the current data and Undo brings back the previous ones', async ({ page }) => {
     await importOld(page, V1);
     await goTo(page, 'Mais');
     await page.locator('#btnLoadSample').click();
@@ -368,8 +368,8 @@ test.describe('Dados · dados de exemplo', () => {
   });
 });
 
-test.describe('Atualização do app', () => {
-  /** Abre o app com um service worker controlando a página e um treino em andamento (rascunho gravado). */
+test.describe('App update', () => {
+  /** Opens the app with a service worker controlling the page and a workout in progress (draft saved). */
   async function appWithDraft(page) {
     await freshApp(page);
     await page.evaluate(() => navigator.serviceWorker.ready);
@@ -380,7 +380,7 @@ test.describe('Atualização do app', () => {
     await expect.poll(async () => (await storedDraft(page) || {}).notes).toBe('treino em andamento');
   }
 
-  /** Abre o app de novo e confere que o rascunho volta inteiro no Treinar. */
+  /** Opens the app again and checks that the draft comes back whole in Treinar. */
   async function expectDraftBack(page) {
     await page.goto('./');
     await waitForApp(page);
@@ -390,20 +390,20 @@ test.describe('Atualização do app', () => {
     await expect(page.locator('#workoutCardio')).toHaveValue('25');
   }
 
-  test('a versão nova do service worker assume e o rascunho em andamento sobrevive', async ({ page, context }) => {
+  test('the new service worker version takes over and the draft in progress survives', async ({ page, context }) => {
     await appWithDraft(page);
     const version = (await page.locator('#appVersion').textContent()).replace(/^v/, '');
     expect(await page.evaluate(() => caches.keys())).toEqual(['meu-treino-v' + version]);
 
-    // O servidor passa a entregar um sw.js de outra versão, como depois de um deploy. Quem troca é o
-    // tests/e2e/server.js, pelo cookie: o Playwright não intercepta o download do script do service worker.
+    // The server starts serving a sw.js from another version, as after a deploy. The one that swaps it is
+    // tests/e2e/server.js, through the cookie: Playwright does not intercept the service worker script download.
     await context.addCookies([{ name: 'e2e-sw-version', value: '999999', url: page.url() }]);
     await page.evaluate(async () => {
       const registration = await navigator.serviceWorker.getRegistration();
       await registration.update();
     });
 
-    // A versão nova instala, assume a página e apaga o cache da versão anterior.
+    // The new version installs, takes over the page and deletes the previous version's cache.
     await expect.poll(() => page.evaluate(() => caches.keys()), { timeout: 15_000 }).toEqual(['meu-treino-v999999']);
     await expect.poll(() => page.evaluate(() => navigator.serviceWorker.controller && navigator.serviceWorker.controller.state))
       .toBe('activated');
@@ -412,7 +412,7 @@ test.describe('Atualização do app', () => {
     await expectDraftBack(page);
   });
 
-  test('"Atualizar app" limpa o cache, recarrega e o rascunho em andamento sobrevive', { annotation: RECARGA_DO_APP }, async ({ page }) => {
+  test('"Atualizar app" clears the cache, reloads and the draft in progress survives', { annotation: RECARGA_DO_APP }, async ({ page }) => {
     await appWithDraft(page);
     const version = (await page.locator('#appVersion').textContent()).replace(/^v/, '');
 
@@ -422,14 +422,14 @@ test.describe('Atualização do app', () => {
     await reloaded;
     await expect(page.locator('#view-more')).toBeVisible();
 
-    // Depois de recarregar, o service worker volta a se registrar e monta o cache de novo.
+    // After reloading, the service worker registers again and builds the cache again.
     await page.evaluate(() => navigator.serviceWorker.ready);
     await expect.poll(() => page.evaluate(() => caches.keys())).toEqual(['meu-treino-v' + version]);
 
     await expectDraftBack(page);
   });
 
-  test('responder "Não" ao "Atualizar app" não limpa o cache nem recarrega', async ({ page }) => {
+  test('answering "Não" to "Atualizar app" neither clears the cache nor reloads', async ({ page }) => {
     await appWithDraft(page);
     const keys = await page.evaluate(() => caches.keys());
     await goTo(page, 'Mais');
@@ -446,8 +446,8 @@ test.describe('Atualização do app', () => {
   });
 });
 
-test.describe('Dados · caminhos que faltavam', () => {
-  /** Celular com menu de compartilhar que termina com o erro `name` (AbortError = a pessoa cancelou). */
+test.describe('Data · paths that were missing', () => {
+  /** Phone with a share menu that ends with the `name` error (AbortError = the person cancelled). */
   function shareFailsWith(page, name) {
     return page.addInitScript((errorName) => {
       Object.defineProperty(Navigator.prototype, 'canShare', { configurable: true, value: () => true });
@@ -462,7 +462,7 @@ test.describe('Dados · caminhos que faltavam', () => {
     ['AbortError', 'Compartilhamento cancelado — nada foi gerado.'],
     ['NotAllowedError', 'Não deu para compartilhar agora. Tente de novo ou use um computador.']
   ]) {
-    test(`Exportar no celular: compartilhamento ${name === 'AbortError' ? 'cancelado' : 'com erro'} avisa e não conta como backup`, async ({ page }) => {
+    test(`Export on the phone: ${name === 'AbortError' ? 'cancelled' : 'failed'} sharing warns and does not count as a backup`, async ({ page }) => {
       await shareFailsWith(page, name);
       await importOld(page, V2);
       await goTo(page, 'Mais');
@@ -474,7 +474,7 @@ test.describe('Dados · caminhos que faltavam', () => {
     });
   }
 
-  test('o botão Importar abre o seletor de arquivo do aparelho', async ({ page }) => {
+  test('the Importar button opens the device file picker', async ({ page }) => {
     await freshApp(page);
     await goTo(page, 'Mais');
     const chooser = page.waitForEvent('filechooser');
@@ -485,7 +485,7 @@ test.describe('Dados · caminhos que faltavam', () => {
     expect(await storedRecords(page, 'workouts')).toHaveLength(1);
   });
 
-  test('o arquivo dos dados de exemplo também importa pela tela, com as datas a partir de hoje', async ({ page }) => {
+  test('the sample-data file also imports through the screen, with dates from today', async ({ page }) => {
     await page.clock.setFixedTime(new Date('2026-09-16T10:00:00-03:00'));
     await freshApp(page);
     await goTo(page, 'Mais');
@@ -498,7 +498,7 @@ test.describe('Dados · caminhos que faltavam', () => {
     expect(await storedRecords(page, 'sheets')).toHaveLength(3);
   });
 
-  test('responder "Não" aos dados de exemplo não troca nada', async ({ page }) => {
+  test('answering "Não" to the sample data changes nothing', async ({ page }) => {
     await importOld(page, V2);
     await goTo(page, 'Mais');
     const asked = await answerConfirm(page, false);

@@ -1,7 +1,7 @@
 'use strict';
 
 /* Every feature in tests/CHECKLIST.md has a browser test (issue #7, documentation/REFACTOR.md section 4).
-   It reads the tables whose last column is "Testes de navegador": no row may be "—" or empty, and each
+   It reads the tables whose last column is "Browser tests": no row may be "—" or empty, and each
    row cites at least one .spec.js file in tests/e2e/ or in a subfolder that exists (a subfolder file by its path from
    tests/e2e/, e.g. `temporarios/fichas.spec.js`). Every browser test file appears in some row. */
 
@@ -23,13 +23,13 @@ function cells(line) {
   return line.trim().replace(/^\|/, '').replace(/\|$/, '').split('|').map((c) => c.trim());
 }
 
-/** Rows of the tables with the "Testes de navegador" column: [{ feature, browser, line }]. */
+/** Rows of the tables with the "Browser tests" column: [{ feature, browser, line }]. */
 function browserRows(markdown) {
   const rows = [];
   const lines = markdown.split(/\r?\n/);
   for (let i = 0; i < lines.length; i++) {
     const header = lines[i].trim().startsWith('|') ? cells(lines[i]) : null;
-    if (!header || header[header.length - 1] !== 'Testes de navegador') continue;
+    if (!header || header[header.length - 1] !== 'Browser tests') continue;
     for (let j = i + 2; j < lines.length && lines[j].trim().startsWith('|'); j++) {
       const row = cells(lines[j]);
       rows.push({ feature: row[0], browser: row[row.length - 1], line: j + 1 });
@@ -64,6 +64,6 @@ test('every browser test file appears in the CHECKLIST', () => {
 });
 
 test('reading the table finds rows without a test (the test above does not pass for nothing)', () => {
-  const sample = '| Funcionalidade | Testes de navegador |\n|---|---|\n| A | `a.spec.js` |\n| B | — |\n\n| X | Y |\n|---|---|\n| C | — |\n';
+  const sample = '| Feature | Browser tests |\n|---|---|\n| A | `a.spec.js` |\n| B | — |\n\n| X | Y |\n|---|---|\n| C | — |\n';
   assert.deepEqual(browserRows(sample).map((r) => [r.feature, r.browser]), [['A', '`a.spec.js`'], ['B', '—']]);
 });

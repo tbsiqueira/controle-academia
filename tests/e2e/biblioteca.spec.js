@@ -1,9 +1,9 @@
-// Biblioteca e catálogo (issue #7): o caminho principal de cada funcionalidade da aba Fichas → Biblioteca.
+// Biblioteca and catalog (issue #7): the main path of every feature on the Fichas → Biblioteca tab.
 //
-// Ponto de partida: `fixtures/treinar-backup.json`, importado pela tela Mais.
+// Starting point: `fixtures/treinar-backup.json`, imported through the Mais screen.
 // - Biblioteca: Supino reto (Peito), Remada baixa (Costas), Agachamento livre (Pernas), Rosca na máquina azul (Bíceps).
-// - Treino A usa Supino reto e Remada baixa; Treino B usa Agachamento livre; Treino Antigo (desativada) usa Remada.
-// - Treinos da Treino A em 03/03/2025 e 10/03/2025, com Supino reto (e Remada no último).
+// - Treino A uses Supino reto and Remada baixa; Treino B uses Agachamento livre; Treino Antigo (deactivated) uses Remada.
+// - Workouts of Treino A on 03/03/2025 and 10/03/2025, with Supino reto (and Remada in the last one).
 const { test, expect, freshApp, withBackup, storedRecords, goTo, answerConfirm } = require('./helpers');
 
 const BACKUP = 'treinar-backup.json';
@@ -12,12 +12,12 @@ const libraryCards = (page) => page.locator('#exercisesList .card');
 const libraryNames = (page) => page.locator('#exercisesList .card strong');
 const exerciseForm = (page) => page.locator('#exerciseFormModal');
 
-/** Card de um exercício da Biblioteca, pelo nome exato. */
+/** Card of a Biblioteca exercise, by exact name. */
 function libraryCard(page, name) {
   return libraryCards(page).filter({ has: page.locator('strong').getByText(name, { exact: true }) });
 }
 
-/** Abre Fichas → Biblioteca com o backup importado. */
+/** Opens Fichas → Biblioteca with the backup imported. */
 async function libraryWithBackup(page) {
   await withBackup(page, BACKUP);
   await openLibrary(page);
@@ -29,7 +29,7 @@ async function openLibrary(page) {
   await expect(page.locator('#tabExercises')).toBeVisible();
 }
 
-/** Junta as mensagens de alert() da página; cada uma é aceita. */
+/** Collects the page's alert() messages; each one is accepted. */
 function collectAlerts(page) {
   const messages = [];
   page.on('dialog', (dialog) => {
@@ -39,7 +39,7 @@ function collectAlerts(page) {
   return messages;
 }
 
-/** Grava registros direto no IndexedDB do app (para simular dados de uma versão antiga). */
+/** Writes records straight to the app's IndexedDB (to simulate data from an older version). */
 function putRecords(page, store, records) {
   return page.evaluate(([storeName, list]) => new Promise((resolve, reject) => {
     const open = indexedDB.open('meu-treino');
@@ -54,8 +54,8 @@ function putRecords(page, store, records) {
   }), [store, records]);
 }
 
-test.describe('Biblioteca · lista e busca', () => {
-  test('só os exercícios da pessoa, com as fichas que usam cada um; o catálogo fica de fora', async ({ page }) => {
+test.describe('Biblioteca · list and search', () => {
+  test('only the person\'s exercises, with the sheets that use each one; the catalog stays out', async ({ page }) => {
     await libraryWithBackup(page);
     await expect(libraryNames(page)).toHaveText(['Agachamento livre', 'Remada baixa', 'Rosca na máquina azul', 'Supino reto']);
     await expect(libraryCard(page, 'Remada baixa')).toContainText('Costas');
@@ -63,7 +63,7 @@ test.describe('Biblioteca · lista e busca', () => {
     await expect(libraryCard(page, 'Rosca na máquina azul')).toContainText('não usada em nenhuma ficha');
   });
 
-  test('com o banco vazio, a Biblioteca explica que o catálogo não entra na lista', async ({ page }) => {
+  test('with an empty database, Biblioteca explains that the catalog does not enter the list', async ({ page }) => {
     await freshApp(page);
     await openLibrary(page);
     await expect(page.locator('#exercisesList')).toHaveText(
@@ -71,7 +71,7 @@ test.describe('Biblioteca · lista e busca', () => {
     await expect(page.locator('#libraryGroupFilter button')).toHaveCount(0);
   });
 
-  test('filtro por grupo muscular', async ({ page }) => {
+  test('filter by muscle group', async ({ page }) => {
     await libraryWithBackup(page);
     const chips = page.locator('#libraryGroupFilter button');
     await expect(chips).toHaveText(['Todos', 'Bíceps', 'Costas', 'Peito', 'Pernas']);
@@ -85,7 +85,7 @@ test.describe('Biblioteca · lista e busca', () => {
     await expect(libraryNames(page)).toHaveCount(4);
   });
 
-  test('busca sem acentos e sem diferenciar maiúsculas', async ({ page }) => {
+  test('search without accents and case-insensitive', async ({ page }) => {
     await libraryWithBackup(page);
     const search = page.locator('#librarySearch');
 
@@ -101,15 +101,15 @@ test.describe('Biblioteca · lista e busca', () => {
   });
 });
 
-test.describe('Biblioteca · criar, renomear e excluir', () => {
-  test('criar exercício com grupo e correção da professora', async ({ page }) => {
+test.describe('Biblioteca · create, rename and delete', () => {
+  test('create an exercise with group and the teacher\'s correction', async ({ page }) => {
     const alerts = collectAlerts(page);
     await libraryWithBackup(page);
     await page.locator('#btnNewExercise').click();
     await expect(exerciseForm(page)).toBeVisible();
     await expect(page.locator('#exerciseFormTitle')).toHaveText('Novo exercício');
 
-    // Sem nome não salva.
+    // Without a name it does not save.
     await page.locator('#exerciseFormSave').click();
     await expect.poll(() => alerts).toEqual(['Informe o nome do exercício.']);
 
@@ -127,13 +127,13 @@ test.describe('Biblioteca · criar, renomear e excluir', () => {
     expect(saved).toMatchObject({ group: 'Ombros', source: 'custom', correction: 'cotovelo levemente dobrado', active: true });
   });
 
-  test('no cadastro, buscar no catálogo preenche nome e grupo; "Criar" usa o nome digitado', async ({ page }) => {
+  test('in the form, searching the catalog fills name and group; "Criar" uses the typed name', async ({ page }) => {
     await libraryWithBackup(page);
     await page.locator('#btnNewExercise').click();
     await page.locator('#btnFichaCatalog').click();
     await expect(page.locator('#fichaCatalogBox')).toBeVisible();
     await expect(page.locator('#fichaCatalogResults')).toContainText('Catálogo (pt-BR)');
-    // A busca do cadastro só mostra o catálogo (a Biblioteca já é esta lista).
+    // The form's search shows only the catalog (Biblioteca is already this list).
     await expect(page.locator('#fichaCatalogResults')).not.toContainText('Biblioteca');
 
     await page.locator('#fichaCatalogSearch').fill('rosca 21');
@@ -152,7 +152,7 @@ test.describe('Biblioteca · criar, renomear e excluir', () => {
     await expect(page.locator('#fichaGroup')).toHaveValue('Outros');
   });
 
-  test('renomear: fichas, histórico e Treinar mostram o nome novo, e o histórico continua ligado pelo id', async ({ page }) => {
+  test('rename: sheets, history and Treinar show the new name, and the history stays linked by id', async ({ page }) => {
     await libraryWithBackup(page);
     await libraryCard(page, 'Supino reto').getByRole('button', { name: 'Editar exercício' }).click();
     await expect(page.locator('#exerciseFormTitle')).toHaveText('Editar exercício');
@@ -163,19 +163,19 @@ test.describe('Biblioteca · criar, renomear e excluir', () => {
     await expect(exerciseForm(page)).toBeHidden();
     await expect(libraryCard(page, 'Supino reto com barra')).toContainText('usada em: Treino A');
 
-    // Ficha e treinos gravados com o nome novo, o mesmo id.
+    // Sheet and workouts saved with the new name, the same id.
     const sheetA = (await storedRecords(page, 'sheets')).find((s) => s.id === 's-a');
     expect(sheetA.exercises[0]).toMatchObject({ exerciseId: 'ex-supino', name: 'Supino reto com barra' });
     const workouts = await storedRecords(page, 'workouts');
     expect(workouts.flatMap((w) => w.sets).filter((s) => s.exerciseId === 'ex-supino')
       .every((s) => s.exerciseName === 'Supino reto com barra')).toBe(true);
 
-    // A lista de fichas só é redesenhada ao abrir a aba Fichas de novo.
+    // The sheet list is only redrawn when the Fichas tab is opened again.
     await goTo(page, 'Início');
     await goTo(page, 'Fichas');
     await expect(page.locator('#sheetsList')).toContainText('Supino reto com barra');
 
-    // Histórico do exercício: os dois treinos antigos continuam lá, com o nome novo.
+    // Exercise history: both old workouts are still there, with the new name.
     await goTo(page, 'Início');
     await page.locator('#recentWorkouts .workout-row').first().click();
     const link = page.locator('#detailBody .ex-link', { hasText: 'Supino reto com barra' });
@@ -184,21 +184,21 @@ test.describe('Biblioteca · criar, renomear e excluir', () => {
     await expect(page.locator('#exerciseHistoryTitle')).toHaveText('Supino reto com barra');
     await expect(page.locator('#exerciseHistory .history-head .chip')).toContainText('2 treinos');
 
-    // Treinar: a ficha carrega o exercício com o nome novo e a carga da última vez.
+    // Treinar: the sheet loads the exercise with the new name and the load from last time.
     await goTo(page, 'Treinar');
     await page.locator('#workoutSheet').selectOption({ label: 'Treino A' });
     await expect(page.locator('#workoutExercises .ex-title').first()).toContainText('Supino reto com barra');
     await expect(page.locator('#workoutExercises input[aria-label="Carga da série 1"]').first()).toHaveValue('40');
   });
 
-  test('excluir exercício', async ({ page }) => {
+  test('delete an exercise', async ({ page }) => {
     await libraryWithBackup(page);
     await libraryCard(page, 'Rosca na máquina azul').getByRole('button', { name: 'Excluir exercício' }).click();
     await expect(libraryNames(page)).toHaveText(['Agachamento livre', 'Remada baixa', 'Supino reto']);
     expect((await storedRecords(page, 'exercises')).map((e) => e.id).sort()).toEqual(['ex-agachamento', 'ex-remada', 'ex-supino']);
   });
 
-  test('responder "Não" ao excluir exercício não apaga nada', async ({ page }) => {
+  test('answering "Não" to deleting an exercise deletes nothing', async ({ page }) => {
     await libraryWithBackup(page);
     const asked = await answerConfirm(page, false);
 
@@ -210,11 +210,11 @@ test.describe('Biblioteca · criar, renomear e excluir', () => {
   });
 });
 
-test.describe('Biblioteca · base antiga', () => {
-  test('dados da era sem ids sobrevivem à abertura do app: fichas ligadas, Biblioteca reparada, histórico pelo nome', async ({ page }) => {
+test.describe('Biblioteca · old database', () => {
+  test('data from the era without ids survives opening the app: sheets linked, Biblioteca repaired, history by name', async ({ page }) => {
     await freshApp(page);
-    // Como uma versão antiga gravava: séries e itens de ficha só com o nome; um exercício próprio marcado como
-    // "catalog" sem comprovação (as versões antigas o escondiam da Biblioteca).
+    // How an old version saved it: sets and sheet items with only the name; a user exercise marked as
+    // "catalog" without proof (old versions hid it from Biblioteca).
     await putRecords(page, 'exercises', [
       { id: 'e1', name: 'Puxada frente supinada', group: 'Costas', source: 'custom' },
       { id: 'e2', name: 'Remada baixa', group: 'Costas', source: 'custom' },
@@ -245,18 +245,18 @@ test.describe('Biblioteca · base antiga', () => {
     await page.reload();
     await expect(page.locator('#weekProgress .week-card')).toBeVisible();
 
-    // Biblioteca: o exercício escondido pelas versões antigas aparece (e fica gravado como próprio).
+    // Biblioteca: the exercise hidden by old versions appears (and is saved as a user exercise).
     await openLibrary(page);
     await expect(libraryNames(page)).toHaveText(['Puxada frente supinada', 'Remada baixa', 'Leg press 45']);
     expect((await storedRecords(page, 'exercises')).find((e) => e.id === 'e3').source).toBe('custom');
 
-    // Ficha: nenhum item some; só o nome que casa sem dúvida ganha o id.
+    // Sheet: no item is lost; only the name that matches unambiguously gets the id.
     await page.locator('#tabSheetsBtn').click();
     await expect(page.locator('#sheetsList .sheet-item-name')).toHaveText(['Puxada frente', 'Remada baixa']);
     const sheet = (await storedRecords(page, 'sheets'))[0];
     expect(sheet.exercises.map((e) => e.exerciseId)).toEqual([null, 'e2']);
 
-    // Histórico pelo nome guardado: os dois treinos, com séries, carga e aquecimento.
+    // History by the stored name: both workouts, with sets, load and warm-up.
     await goTo(page, 'Início');
     await page.locator('#recentWorkouts .workout-row').last().click();
     await expect(page.locator('#detailBody')).toContainText('Aquecimento: 15 reps · 20 kg · RIR 3');

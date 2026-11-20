@@ -269,7 +269,7 @@ if (Test-Path (Join-Path $root 'tools/coverage-gate.js')) {
 
 if (Test-Path (Join-Path $root 'tests/CHECKLIST.md')) {
   $checklist = Read-Text 'tests/CHECKLIST.md'
-  if ($checklist -match 'Funcionalidade' -and $checklist -match 'core\.js') {
+  if ($checklist -match 'Feature' -and $checklist -match 'core\.js') {
     Ok "checklist de funcionalidades x testes presente"
   } else {
     Bad "tests/CHECKLIST.md sem a tabela de funcionalidades"
