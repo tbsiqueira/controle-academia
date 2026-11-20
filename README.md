@@ -52,7 +52,7 @@ Os dois rodam automaticamente no GitHub Actions:
 | Fluxo de trabalho | Quando roda |
 |---|---|
 | `.github/workflows/tests.yml` | em todo pull request (checks obrigatórios do merge) e a cada push na `main` |
-| `.github/workflows/deploy.yml` | a cada merge na `main` com versão nova — **só publica se os testes passarem** |
+| `.github/workflows/deploy.yml` | a cada merge na `main` com versão nova (ou disparo manual) — testa, publica no GitHub Pages **e no UAT (Cloudflare)** e só então cria a tag |
 
 **O que os testes cobrem:** toda a lógica pura (`js/core.js`) — datas, janela da semana, busca sem acentos,
 agrupamento de séries **por id**, aquecimento, histórico/recordes, geração do texto exportado, backup
@@ -79,7 +79,8 @@ request e só entra com **merge por rebase** depois que os checks passam. O site
 
 ```
 branch + PR               → roda tests.yml (`Unit tests`, `Static checks`, `Browser tests`, `Version`)
-merge do PR (por rebase)  → deploy.yml: versão vN ainda sem tag? testa, publica no Pages e cria a tag vN
+merge do PR (por rebase)  → deploy.yml: versão vN ainda sem tag? testa, publica no Pages e no UAT (Cloudflare)
+                            e só então cria a tag vN
 PR só de docs/CI          → mantém a versão → o deploy vê que vN já tem tag e não publica nada
 ```
 
@@ -90,8 +91,13 @@ versão já tem tag). Ninguém cria tag à mão: quem cria é o `deploy.yml`, de
 
 1. No repositório, abra **Settings** → **Pages**.
 2. Em **Build and deployment** → **Source**, escolha **GitHub Actions**.
-3. Pronto. A URL publicada fica em `https://<usuario>.github.io/<repositorio>/`.
-4. Abra essa URL no celular e use **"Adicionar à tela inicial"**:
+3. **Settings** → **Environments** → **`cloudflare-pages-uat`** (crie se ainda não existir): é o ambiente do
+   UAT. Ele guarda o secret **`CLOUDFLARE_API_TOKEN`** (token da conta Cloudflare com permissão de editar
+   Workers) e a variável **`CLOUDFLARE_ACCOUNT_ID`** — é de onde o `deploy.yml` lê os dois.
+4. Pronto. A URL do Pages fica em `https://<usuario>.github.io/<repositorio>/` e a do UAT em
+   `https://uat.<subdominio-da-conta>.workers.dev/` (o link exato sai no resumo do job e no ambiente
+   `cloudflare-pages-uat`).
+5. Abra a URL do Pages no celular e use **"Adicionar à tela inicial"**:
    - **Android/Chrome**: menu ⋮ → *Adicionar à tela inicial* / *Instalar app*.
    - **iPhone/Safari**: botão **Compartilhar** → *Adicionar à Tela de Início*.
 
@@ -107,6 +113,8 @@ versão já tem tag). Ninguém cria tag à mão: quem cria é o `deploy.yml`, de
   linear, merge por rebase e os checks `Unit tests`, `Static checks`, `Browser tests` e `Version` com a
   branch atualizada com a `main`. Mudou o nome de um job em `tests.yml`? Atualize o ruleset.
 - **Settings → Environments → `github-pages`**: a regra de branch `main` permite o deploy.
+- **Settings → Environments → `cloudflare-pages-uat`**: é o ambiente do UAT e guarda o
+  `CLOUDFLARE_API_TOKEN` (secret) e o `CLOUDFLARE_ACCOUNT_ID` (variável).
 
 ### Publicar uma versão nova
 
@@ -131,8 +139,8 @@ gh pr create --base main --fill
 gh pr merge --rebase
 ```
 
-Depois do merge, **Actions → Publish to GitHub Pages** publica e cria a
-tag. Leva ~1–2 minutos. No aparelho, feche e abra o app (ou use **Mais → Debug → Atualizar app**).
+Depois do merge, **Actions → Publish to GitHub Pages and Cloudflare UAT** testa, publica no Pages e no UAT e
+cria a tag. Leva ~2–3 minutos. No aparelho, feche e abra o app (ou use **Mais → Debug → Atualizar app**).
 
 ### Voltar para uma versão anterior
 
@@ -148,11 +156,26 @@ celulares continuam com o cache. O merge publica a v84 normalmente.
 | `Get Pages site failed` / `Pages site not found` | Pages não está com a fonte **GitHub Actions** | **Settings → Pages → Source: GitHub Actions** |
 | Falhou em "Run check.ps1" | versão inconsistente ou arquivo/id faltando | rode localmente `powershell -ExecutionPolicy Bypass -File .\check.ps1` e corrija num novo PR |
 | Deploy "verde" mas o site não atualizou | cache do navegador/service worker | no aparelho: **Mais → Debug → Atualizar app**; no PC: Ctrl+F5 ou `/reset.html` |
+| `Authentication error` no job **Deploy to Cloudflare UAT** | o ambiente `cloudflare-pages-uat` não tem o `CLOUDFLARE_API_TOKEN` ou o `CLOUDFLARE_ACCOUNT_ID` | **Settings → Environments → `cloudflare-pages-uat`**: crie o secret e a variável (veja "Configurar") e rode **Re-run all jobs** |
+| UAT não publicou e a tag `vN` não foi criada | um dos dois deploys falhou; a tag só nasce com os dois verdes | corrija a causa e rode **Re-run all jobs** |
 
 ### Publicar manualmente (emergência)
 
-Aba **Actions** → **Publish to GitHub Pages** → **Run workflow** (publica o estado atual da `main` e
-cria a tag se faltar). Use só quando precisar.
+Aba **Actions** → **Publish to GitHub Pages and Cloudflare UAT** → **Run workflow** (publica o estado atual da
+`main` no Pages e no UAT e cria a tag se faltar). Use só quando precisar.
+
+### UAT no Cloudflare
+
+O UAT é o **mesmo build**, publicado num Worker do Cloudflare (`wrangler.toml`, nome `uat`), para testar antes
+de instalar no celular. O **GitHub Pages continua sendo o app publicado**; o UAT é temporário.
+
+- O deploy empacota o app em `dist/` (`tools/package-cloudflare.ps1`) e roda `wrangler deploy`. Só entra o que
+  o app usa no navegador, incluindo `FICHA-JSON.md` e `TREINO-JSON.md` (o app busca os dois).
+- Para testar o pacote no PC: rode `tools/package-cloudflare.ps1` e depois `tools/serve-dist.ps1`
+  (http://localhost:8081).
+- Uma versão nova vai para o UAT junto com o Pages. Para republicar sem subir versão, use **Run workflow**.
+- A tag `vN` só é criada depois que os **dois** deploys passam: se o UAT falhar, o Pages também fica sem tag
+  e o próximo merge (ou um **Re-run all jobs**) tenta de novo.
 
 ## Estrutura
 
@@ -178,6 +201,9 @@ manifest.webmanifest        manifest do PWA
 sw.js                       service worker (cache-first nos arquivos ?v=N, network-first no resto, com fallback offline)
 reset.html                  página de escape: desregistra o service worker e limpa o cache
 serve.ps1                   servidor local de desenvolvimento
+tools/package-cloudflare.ps1  empacota o app em dist/ (o que o UAT publica)
+tools/serve-dist.ps1        serve o dist/ localmente (http://localhost:8081) para testar o pacote
+wrangler.toml               deploy do UAT no Cloudflare Workers (assets em dist/)
 test.ps1                    roda os testes unitários (Node)
 check.ps1                   verificações estáticas
 documentation/MANUAL.md     manual do usuário (como usar, exemplos, FAQ)

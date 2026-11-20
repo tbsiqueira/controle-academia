@@ -9,6 +9,8 @@ npm run test:e2e                                        # browser tests (Playwri
 $env:COVERAGE_ENFORCE='1'; node tools/coverage-gate.js  # tests + fails below 100% coverage of js/core.js (without the variable it only warns)
 powershell -ExecutionPolicy Bypass -File .\check.ps1   # static checks (must print "All good.")
 powershell -ExecutionPolicy Bypass -File .\tools\build-sample-data.ps1   # only after editing sample data content
+powershell -ExecutionPolicy Bypass -File .\tools\package-cloudflare.ps1  # builds dist/, the UAT deployment
+powershell -ExecutionPolicy Bypass -File .\tools\serve-dist.ps1          # serves dist/ on http://localhost:8081
 ```
 
 Python is not installed; use Node for scripted edits. Node 26 locally and in CI.
@@ -19,9 +21,12 @@ version is already tagged). Its four jobs are the required checks of the `main` 
 CI installs only the Chromium browser, without `--with-deps` (no apt); see the comment in `tests.yml`.
 `deploy.yml` runs on every push to `main` (= a merged PR): if tag `vN` for the current version doesn't exist yet,
 it calls the whole `tests.yml` workflow as the publish gate (unit, static and browser tests), publishes to GitHub
-Pages and then creates and pushes tag `vN`. Otherwise it publishes nothing. A check added to `tests.yml` therefore
+Pages **and** deploys the same build to the Cloudflare UAT Worker (`wrangler.toml`, `dist/` built by
+`tools/package-cloudflare.ps1`), and only then creates and pushes tag `vN`; if either deployment fails there is no
+tag. Otherwise it publishes nothing. A check added to `tests.yml` therefore
 gates publishing too; `check.ps1` fails if the gate is unwired (the `verify` job stops calling it, or `publish`
-stops needing `verify`).
+stops needing `verify`). A manual dispatch deploys the current version even when its tag already exists, which is
+how the UAT is refreshed without a bump.
 
 ## Browser tests (Playwright)
 
@@ -109,6 +114,7 @@ On localhost the service worker doesn't hold stale files, so edits show without 
   publishes. If another PR merged first, GitHub asks for the branch to be updated: rebase on `origin/main` again
   and push (`--force-with-lease`). A version conflict (both shipped `vN`)
   means bumping yours to the next number.
-- **Deploy = merging a PR with a new version.** `deploy.yml` publishes and creates tag `vN`; never create or
-  push tags yourself. Docs/CI-only PRs keep the version and publish nothing.
+- **Deploy = merging a PR with a new version.** `deploy.yml` publishes to GitHub Pages and to the Cloudflare UAT
+  Worker and creates tag `vN`; never create or push tags yourself. Docs/CI-only PRs keep the version and publish
+  nothing. To refresh the UAT without a version bump, run the workflow manually (Actions → Run workflow).
 - Undoing a shipped visual change: revert it **and** bump the version again (v57 → v58), or phones keep it.

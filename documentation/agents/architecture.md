@@ -69,5 +69,8 @@ New core functions must be added to the export object at the bottom of `core.js`
 
 - No bundler and no jsdom: the app is edited and served as-is. DOM code is covered by the browser tests in
   `tests/e2e/`, by static checks and by keeping logic in `core.js`.
+- No build, but the UAT deploy packages the app: `tools/package-cloudflare.ps1` copies the browser files into
+  `dist/` (no bundling, no transpiling) and `wrangler deploy` uploads that directory. `FICHA-JSON.md` and
+  `TREINO-JSON.md` must stay in its file list: the app fetches them.
 - Icon font is base64 inside the CSS (avoids "square" icons when the font fails to load).
 - `reset.html` is an escape page that unregisters the service worker and clears caches.
