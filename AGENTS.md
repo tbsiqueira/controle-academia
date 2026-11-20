@@ -1,7 +1,7 @@
 # Agent guide — Meu Treino
 
 Offline gym-log PWA. Plain HTML/CSS/JS: no build, no backend, no npm for the app (npm only for
-dev tools: Playwright). All data lives on the device (IndexedDB).
+dev tools: Playwright and Wrangler). All data lives on the device (IndexedDB).
 **Language.** What people read about the app stays **pt-BR**: UI text, `README.md`, the user manual
 (`documentation/MANUAL.md`), the exercise catalog and sample data.
 Everything else is **English**: code, identifiers, comments, tests, commit messages, branch names, issues, plan

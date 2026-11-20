@@ -1,23 +1,25 @@
-name: Publish to GitHub Pages
 
-# Publishes on its own when a PR with a new version lands on main.
+name: Publish to GitHub Pages and Cloudflare UAT
+
+# Publishes when a new version lands on main.
 # The version comes from <span id="appVersion">vN</span> in index.html:
-#   - if tag vN does not exist yet -> tests, publishes and creates tag vN;
-#   - if tag vN already exists (docs/CI-only PR, no bump) -> publishes nothing.
-# Nobody creates a tag by hand: this workflow creates it, after publishing.
+#   - if tag vN does not exist yet -> tests, deploys to both platforms and creates tag vN;
+#   - if tag vN already exists -> does nothing on push;
+#   - manual dispatch always deploys the current version, even if its tag exists.
+# The version tag is created only after both deployments succeed.
+
 on:
   push:
     branches:
       - main
-  # Escape hatch: publishes the current state of main from the Actions tab (creates the tag if missing).
   workflow_dispatch:
 
 permissions:
   contents: read
 
-# One publish at a time; does not cancel one already in progress.
+# One deployment at a time; does not cancel one already in progress.
 concurrency:
-  group: pages
+  group: deployments
   cancel-in-progress: false
 
 jobs:
@@ -37,8 +39,13 @@ jobs:
           MANUAL: ${{ github.event_name == 'workflow_dispatch' }}
         run: |
           version=$(grep -oP 'id="appVersion">v\K\d+' index.html)
-          if [ -z "$version" ]; then echo "::error::version not found in index.html"; exit 1; fi
+          if [ -z "$version" ]; then
+            echo "::error::version not found in index.html"
+            exit 1
+          fi
+
           echo "version=$version" >> "$GITHUB_OUTPUT"
+
           if git ls-remote --exit-code --tags origin "refs/tags/v$version" >/dev/null; then
             if [ "$MANUAL" = "true" ]; then
               echo "Tag v$version already exists; manual publish continues anyway."
@@ -52,17 +59,18 @@ jobs:
             echo "publish=true" >> "$GITHUB_OUTPUT"
           fi
 
-  # Publish gate: runs the entire Tests workflow (tests.yml) instead of copying its steps here, so a publish only
-  # happens for a commit that passed unit, static and browser tests. check.ps1 fails if this call disappears.
+  # Run the complete test workflow before either deployment.
   verify:
     name: Tests and checks
     needs: version
     if: needs.version.outputs.publish == 'true'
     uses: ./.github/workflows/tests.yml
 
+  # Existing GitHub Pages deployment.
   publish:
-    name: Publish
+    name: Publish to GitHub Pages
     needs: [version, verify]
+    if: needs.version.outputs.publish == 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -87,9 +95,47 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v5
 
+  # New Cloudflare Workers UAT deployment.
+  deploy-uat:
+    name: Deploy to Cloudflare UAT
+    needs: [version, verify]
+    if: needs.version.outputs.publish == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    environment:
+      name: cloudflare-pages-uat
+      url: ${{ steps.deploy.outputs.deployment-url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: '26'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Package Cloudflare deployment
+        shell: pwsh
+        run: ./tools/package-cloudflare.ps1
+
+      - name: Deploy with Wrangler
+        id: deploy
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+          command: deploy
+
+  # Create the version tag only after both deployments succeed.
   tag:
     name: Create the version tag
-    needs: [version, publish]
+    needs: [version, publish, deploy-uat]
+    if: needs.version.outputs.publish == 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -105,8 +151,10 @@ jobs:
             echo "Tag v$VERSION already exists."
             exit 0
           fi
+
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
           subject=$(git log -1 --format=%s)
           git tag -a "v$VERSION" -m "v$VERSION: $subject"
           git push origin "v$VERSION"

@@ -23,3 +23,7 @@ tests/e2e/report/
 playwright-report/
 test-results/
 tests/e2e/coverage/
+
+# Cloudflare deployment: packaged site and Wrangler's local state
+dist/
+.wrangler/

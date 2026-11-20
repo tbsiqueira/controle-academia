@@ -6,7 +6,8 @@ training-frequency calendar. All data stays **100% on the device** (IndexedDB), 
 (export/import). No backend, no publishing to stores.
 
 ## 2. Closed decisions
-- **Distribution**: GitHub Pages (free static hosting; installs as an app and works offline).
+- **Distribution**: GitHub Pages (free static hosting; installs as an app and works offline), with the same
+  build also deployed to a temporary Cloudflare UAT Worker for testing before the phone install.
 - **Storage**: IndexedDB (native to the browser; works in Chrome/Edge and Safari/iOS).
 - **Weekly cycle**: warning + confirmation at the end of the 7 days.
 - **Stack**: plain HTML + CSS + JavaScript, no build and no dependencies.
@@ -120,10 +121,12 @@ check.ps1 (static checks: JSON, ids, handlers, assets, version)
 data/exercises.json (built-in exercise catalog, pt-BR, CC0)
 data/sample-data.json (sample data: 3 fichas, 12 workouts, 6 custom exercises)
 tools/build-sample-data.ps1 + tools/sample-data-content.json (reproducible fixture generator)
-README.md (how to run, publish to GitHub Pages, structure, versioning)
+README.md (how to run, publish to GitHub Pages and the UAT, structure, versioning)
 documentation/MANUAL.md (usage documentation: examples, FAQ, common problems, glossary)
 .gitattributes / .nojekyll (repository and GitHub Pages hygiene)
-.github/workflows/deploy.yml (when a new version lands on main: tests, deploy to Pages and creation of tag vN)
+wrangler.toml (Cloudflare Worker that serves the UAT build from dist/)
+tools/package-cloudflare.ps1 + tools/serve-dist.ps1 (package the app into dist/ and serve it locally)
+.github/workflows/deploy.yml (when a new version lands on main: tests, deploy to Pages and to the UAT Worker, then tag vN)
 .github/workflows/tests.yml (tests, checks and version bump: required checks of the PRs)
 documentation/PLANO.md
 ```
@@ -132,13 +135,19 @@ documentation/PLANO.md
 - Local test without Node/Python: `serve.ps1` starts a local HTTP server via PowerShell (`localhost` is a secure
   context, so the PWA can be tested before publishing).
 
-## 8. Distribution (GitHub Pages)
+## 8. Distribution (GitHub Pages + Cloudflare UAT)
 1. Repository: `https://github.com/tbsiqueira/controle-academia.git`. `main` only changes through pull requests
    (rebase merge, with the checks passing); **when a PR with a new version lands, GitHub Actions publishes to Pages
-   and creates the tag** (`v1`, `v2`, ...).
+   and to the UAT Worker and then creates the tag** (`v1`, `v2`, ...). The tag only exists after both deployments
+   succeed.
 2. Enable GitHub Pages in the repository (Settings → Pages → Source: **GitHub Actions**).
-3. On the phone, open the URL and use "Adicionar à tela inicial" (Chrome/Edge/Safari).
-4. Once installed, the app opens from its icon and works offline.
+3. Cloudflare UAT (temporary): the `cloudflare-pages-uat` environment holds the `CLOUDFLARE_API_TOKEN` secret and
+   the `CLOUDFLARE_ACCOUNT_ID` variable. `deploy.yml` packages the browser files into `dist/`
+   (`tools/package-cloudflare.ps1`) and runs `wrangler deploy`; the Worker `uat` (`wrangler.toml`) answers on
+   `https://uat.<account-subdomain>.workers.dev/`. GitHub Pages stays the published app; the UAT is a second copy
+   for testing before the phone install.
+4. On the phone, open the Pages URL and use "Adicionar à tela inicial" (Chrome/Edge/Safari).
+5. Once installed, the app opens from its icon and works offline.
 
 ## 9. Phases
 - **Phase 1 (MVP)**: fichas (ordered group of exercises) and exercise library with built-in catalog, full workout
@@ -179,6 +188,11 @@ documentation/PLANO.md
 - **Tests (2026-11-17, no app change)**: Phase 1 of the refactor (`documentation/REFACTOR.md`) done — the real app is tested in a phone Chromium (Playwright, `tests/e2e/`) on every PR. Every path a person triggers has a browser test, including the **Não** answer of every confirmation; CI fails a `tests/CHECKLIST.md` row without a browser test and a drop in `js/app.js` coverage relative to `main` (ratchet, 98.7% today). Issues #4, #5, #19, #6, #7 and #29.
 - **Tests (2026-11-18, no app change)**: **temporary** browser tests for the refactor (issue #39, `tests/e2e/temporarios/`): every behaviour of every screen has its own test and `js/app.js` line coverage reached **100%**, including error paths (device out of space, blocked cache) simulated in the browser and "Atualizar app", which started being counted. They stay on until #16; #40 turns them off without deleting them.
 - **Process (2026-11-17, no app change)**: `main` became protected — every change goes in through a **pull request**, merge **only by rebase**, linear history and required checks (tests + coverage, `check.ps1` and the new **Version** job, which requires the bump when `index.html`, `css/` or `js/` change). `deploy.yml` now runs on every merge to `main` and, if the version has no tag yet, publishes to Pages and **creates the `vN` tag itself**; nobody tags by hand anymore.
+- **Deployment (2026-11-20, no app change)**: **temporary Cloudflare UAT** — `deploy.yml` also publishes the same
+  build to the Worker `uat` (`wrangler.toml`, `dist/` packaged by `tools/package-cloudflare.ps1`), through the
+  `cloudflare-pages-uat` environment (`CLOUDFLARE_API_TOKEN` secret, `CLOUDFLARE_ACCOUNT_ID` variable). The `vN`
+  tag is created only after **both** deployments succeed, so a broken UAT blocks the release instead of shipping
+  half of it; a manual dispatch republishes the current version. GitHub Pages remains the published app.
 - **v77**: the **workout text** sent to the professora no longer carries the **professora's note** (the `_Obs.: …_` line under each exercise): it is her own text. The note stays saved in the sets and appears in Treinar and in the workout detail.
 - **v76**: the **set note** field in Treinar and the **Criar com IA** texts went back to 16px on the phone (a more specific rule made them smaller and the iPhone zoomed on tap). A browser test measures the size of each field in view at 375px.
 - **v74**: leaner **Mais** screen: **Debug** card always visible at the end (the collapsible "Opções avançadas" is gone); **Fichas de treino** card removed (the Fichas tab already does that); **Colinha** right below **Metas da semana**. Order: Metas, Colinha, Importar treinos antigos, Dados, Instalar o app, Debug.

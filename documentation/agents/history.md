@@ -7,11 +7,17 @@ docs they point to ([architecture.md](architecture.md), [product-rules.md](produ
 
 ## Decisions worth keeping
 
-- **No build; npm only for dev tools** (Playwright, since #4; see the refactor plan below), no jsdom: the user
-  edits and serves files directly.
+- **No build; npm only for dev tools** (Playwright, since #4; Wrangler for the UAT deployment, since 2026-11-20; see
+  the refactor plan below), no jsdom: the user edits and serves files directly.
 - **Service worker**: versioned assets cache-first (fast start on weak signal), `index.html` network-first.
 - **Deploy only by tag**, so `main` can move freely. Since 2026-11-17 the tag is created by `deploy.yml` itself
   when a PR with a new version is merged; nobody tags by hand.
+- **UAT on Cloudflare Workers (2026-11-20)**: the same build is also published to a `uat` Worker
+  (`wrangler.toml`, `dist/` packaged by `tools/package-cloudflare.ps1`) for testing before the phone install, while
+  GitHub Pages stays the published app. Both deployments must succeed before the `vN` tag is created, so a broken
+  UAT blocks a release instead of shipping half of it. The deploy job reads the `cloudflare-pages-uat`
+  environment (`CLOUDFLARE_API_TOKEN` secret, `CLOUDFLARE_ACCOUNT_ID` variable); the packaging copies only what the
+  browser loads — `FICHA-JSON.md` and `TREINO-JSON.md` included, since the app fetches them.
 - **PR flow (2026-11-17)**: `main` is protected by a ruleset; rebase merge only, linear history, required checks
   (the list is in [workflow.md](workflow.md#git)). Before that, everything was pushed straight to `main`.
 - **Publish gate (issue #88)**: `deploy.yml` calls the whole `tests.yml` workflow before publishing, so the publish

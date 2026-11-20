@@ -9,6 +9,22 @@ precache, but they are kept in the repo so that every change is reproducible.
 | `sample-data-content.json` | Portuguese content of the sample data: custom exercises, sheets (by catalog id), days, cardio, notes and colinhas. This one stays pt-BR: it is what the user sees |
 | `coverage-gate.js` | Runs the unit tests and requires 100% of lines and branches in `js/core.js` |
 | `e2e-coverage.js` | Measures how much of `js/app.js` the browser tests run and applies the CI ratchet (see below) |
+| `package-cloudflare.ps1` | Builds `dist/`, the exact site the UAT deploy publishes to Cloudflare Workers |
+| `serve-dist.ps1` | Serves `dist/` on http://localhost:8081, to check the packaged site before deploying |
+
+## Packaging the UAT deployment
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\tools\package-cloudflare.ps1   # writes dist/
+powershell -ExecutionPolicy Bypass -File .\tools\serve-dist.ps1          # http://localhost:8081
+```
+
+`dist/` gets a clean copy of the app — `index.html`, `reset.html`, `sw.js`, `manifest.webmanifest`,
+`FICHA-JSON.md`, `TREINO-JSON.md`, `css/`, `js/`, `vendor/`, `data/` and `icons/` — and nothing else. It is
+git-ignored and rebuilt from scratch on every run, so it cannot drift from the repo. `deploy.yml` runs the same
+script before `wrangler deploy`, and `wrangler.toml` points the Worker at that directory. The two Markdown
+contracts are in the list because the app fetches them at runtime (Fichas → Criar com IA and Mais → Importar
+treinos antigos).
 
 ## `js/app.js` coverage by the browser tests
 
