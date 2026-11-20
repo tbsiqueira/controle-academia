@@ -34,7 +34,7 @@ training-frequency calendar. All data stays **100% on the device** (IndexedDB), 
 - **FR-06 — Colinha**: quick-reference section (RIR, rest time, reminders) editable by the user.
 - **FR-07 — Frequency calendar**: monthly view with the days trained and the number of workouts in the month.
 - **FR-08 — Backup**: export all data as JSON (download); import JSON restoring the data after confirmation, with
-  **"Desfazer importação"** (the previous state stays in memory; nothing is downloaded automatically).
+  an **automatic backup of the current state before importing**.
 - **FR-09 — PWA**: installable on the home screen, works offline after the first load.
 - **FR-10 — Workout fichas**: ficha CRUD with an **ordered** list of exercises; each exercise in the ficha has a
   **number of sets**, **reps per set** (they can vary, e.g. 12-10-8) and the **professora's note**. It is the ficha

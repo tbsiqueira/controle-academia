@@ -11,12 +11,12 @@ never rewrite old commits.
 
 Read only what your task needs. Questions need none of these unless the answer depends on them.
 
-- Before changing code: [architecture.md](documentation/agents/architecture.md) (where code lives, domain terms,
-  data rules) and [product-rules.md](documentation/agents/product-rules.md) (what the user wants and has rejected).
 - Before changing any file, running the checks, committing or opening a PR:
   [workflow.md](documentation/agents/workflow.md) (commands, the checklist every change goes through, Git).
-- Before touching an area it lists: [history.md](documentation/agents/history.md) (key decisions, past
-  regressions and their lessons).
+- Before changing code, read [architecture.md](documentation/agents/architecture.md) for the relevant layers,
+  data model and invariants. For user-visible behaviour or UI changes, also read
+  [product-rules.md](documentation/agents/product-rules.md). Before touching an area it lists:
+  [history.md](documentation/agents/history.md) (key decisions, past regressions and their lessons).
 - Before writing or changing browser tests: [e2e-tests.md](documentation/agents/e2e-tests.md) (helpers, temporary
   tests, timers) and the testing policy in [REFACTOR.md §4](documentation/REFACTOR.md#4-testing-policy) (critical
   screens, confirmation answers, coverage ratchet, temporary tests).
