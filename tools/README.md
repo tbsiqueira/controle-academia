@@ -9,6 +9,7 @@ precache, but they are kept in the repo so that every change is reproducible.
 | `sample-data-content.json` | Portuguese content of the sample data: custom exercises, sheets (by catalog id), days, cardio, notes and colinhas. This one stays pt-BR: it is what the user sees |
 | `coverage-gate.js` | Runs the unit tests and requires 100% of lines and branches in `js/core.js` |
 | `e2e-coverage.js` | Measures how much of `js/app.js` the browser tests run and applies the CI ratchet (see below) |
+| `set-version.js` | Stamps the version from `app.json` into the 16 version spots of `index.html` and `sw.js` (`node tools/set-version.js`; idempotent, refuses unexpected layouts) |
 | `package-cloudflare.ps1` | Builds `dist/`, the exact site the UAT deploy publishes to Cloudflare Workers |
 | `serve-dist.ps1` | Serves `dist/` on http://localhost:8081, to check the packaged site before deploying |
 

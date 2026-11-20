@@ -2,7 +2,7 @@
 name: Publish to GitHub Pages and Cloudflare UAT
 
 # Publishes when a new version lands on main.
-# The version comes from <span id="appVersion">vN</span> in index.html:
+# The version comes from app.json (the single source; tools/set-version.js stamps it into index.html and sw.js):
 #   - if tag vN does not exist yet -> tests, deploys to both platforms and creates tag vN;
 #   - if tag vN already exists -> does nothing on push;
 #   - manual dispatch always deploys the current version, even if its tag exists.
@@ -38,9 +38,9 @@ jobs:
         env:
           MANUAL: ${{ github.event_name == 'workflow_dispatch' }}
         run: |
-          version=$(grep -oP 'id="appVersion">v\K\d+' index.html)
+          version=$(grep -oP '"version"\s*:\s*\K\d+' app.json)
           if [ -z "$version" ]; then
-            echo "::error::version not found in index.html"
+            echo "::error::version not found in app.json"
             exit 1
           fi
 

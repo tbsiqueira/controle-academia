@@ -63,10 +63,11 @@ npm run test:e2e:report   # HTML report of the last run (traces of failures)
 4. **Touched Treinar or Início?** They are critical screens with a browser test per behaviour (`treinar.spec.js`,
    `inicio.spec.js`): every change to them keeps those tests green and adds a test for each behaviour it adds or
    changes.
-5. **Touched `index.html`, `css/` or `js/`** → bump the version `N` → `N+1` in all of these places:
-   - `index.html`: every `?v=N` and `<span id="appVersion">vN</span>`
-   - `sw.js`: `CACHE_NAME = 'meu-treino-vN'` and every `?v=N` in `ASSETS`
-   Without the bump, installed phones keep the old cached files.
+5. **Touched `index.html`, `css/` or `js/`** → bump the version `N` → `N+1`: edit the number in `app.json`
+   (the only place you edit by hand), then run `node tools/set-version.js`. It stamps the 16 version spots
+   (`index.html`: 7 `?v=N` + `<span id="appVersion">vN</span>`; `sw.js`: `CACHE_NAME` + 7 `?v=N` in `ASSETS`) and
+   fails if one doesn't match. Commit all three files. `check.ps1` check 7 and the unit tests fail when a stamped
+   file drifts from `app.json`. Without the bump, installed phones keep the old cached files.
 6. **Removing or moving code?** Grep every name you delete in `js/`, `index.html`, `tests/` and the docs. Large
    splices in `app.js` have swallowed neighbouring functions before (see history.md, v43).
 7. Run the checks in [AGENTS.md](../../AGENTS.md#non-negotiables) #4. Report failures as they are; don't
