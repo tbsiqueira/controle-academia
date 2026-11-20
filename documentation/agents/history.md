@@ -1,9 +1,9 @@
 # History, decisions and lessons
 
-The detailed log is in [`PLANO.md`](../PLANO.md) (section "Revision history") and `git log`. This page keeps what a future
-agent should know before touching the same area. Rules that came out of them live in the
-docs they point to ([architecture.md](architecture.md), [product-rules.md](product-rules.md),
-[workflow.md](workflow.md)); they are not repeated here.
+The detailed log is in `git log` and the release tags (`vN`); requirements are in
+[`PLANO.md`](../PLANO.md). This page keeps what a future agent should know before touching the same area. Rules
+that came out of them live in the docs they point to ([architecture.md](architecture.md),
+[product-rules.md](product-rules.md), [workflow.md](workflow.md)); they are not repeated here.
 
 ## Decisions worth keeping
 

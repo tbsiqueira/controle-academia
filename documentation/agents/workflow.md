@@ -23,6 +23,27 @@ Pages and then creates and pushes tag `vN`. Otherwise it publishes nothing. A ch
 gates publishing too; `check.ps1` fails if the gate is unwired (the `verificar` job stops calling it, or `publicar`
 stops needing `verificar`).
 
+## Publishing (GitHub Pages)
+
+One-time setup: **Settings → Pages → Source: GitHub Actions**, and **Settings → Environments → `github-pages`**
+must allow deploys from `main`. The repository has to be public on the free plan. Repository settings (already
+applied): rebase merge only, auto-merge off, merged branches deleted; the `main` ruleset blocks direct pushes,
+force pushes and deletion, and requires the four checks named above.
+
+The deploy gate itself is described above. If it fails:
+
+| Symptom | Cause | Fix |
+|---|---|---|
+| `Branch "main" is not allowed to deploy to github-pages…` | the environment rule is missing | Settings → Environments → `github-pages` → allow branch `main`, then re-run |
+| merge landed but nothing was published | the version didn't change, so tag `vN` exists | expected for docs/CI PRs; a code PR without a bump should have failed **Version** |
+| `Get Pages site failed` / `Pages site not found` | Pages source isn't GitHub Actions | Settings → Pages → Source: GitHub Actions |
+| "Rodar check.ps1" failed | inconsistent version or a missing file/id | run `check.ps1` locally and fix it in a new PR |
+| deploy green but the site is stale | browser/service worker cache | in the app: Mais → Debug → Atualizar app; on the PC: Ctrl+F5 or `/reset.html` |
+
+Rolling back a shipped change: revert it in a PR **and** bump the version again (v57 → v58), or phones keep the
+cached version. Emergency publish: Actions → **Publicar no GitHub Pages** → Run workflow (publishes `main` as it
+is and creates the tag if it's missing).
+
 ## Browser tests (Playwright)
 
 One-time setup (per checkout; a new worktree needs `npm ci` again, the browser is shared):

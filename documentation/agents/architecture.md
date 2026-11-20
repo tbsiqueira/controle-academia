@@ -1,6 +1,6 @@
 # Architecture
 
-Full file list and data model: [README.md → Estrutura / Modelo de dados](../../README.md#estrutura).
+Data model (stores and fields): [`PLANO.md` §5](../PLANO.md#5-data-model-indexeddb).
 This page is the short version an agent needs to place a change correctly.
 
 ## Domain terms (the UI uses the Portuguese words)

@@ -41,7 +41,7 @@ in a chat gives it; its rules are in [.claude/skills/ai-specialist/SKILL.md](.cl
   Don't create new `.md` files at the repo root or next to code.
 - Root exceptions: `README.md` (GitHub shows it), `AGENTS.md` and `CLAUDE.md` (tools only read them at the root).
 - Human docs: [documentation/MANUAL.md](documentation/MANUAL.md) (user manual),
-  [documentation/PLANO.md](documentation/PLANO.md) (requirements + revision log) and
+  [documentation/PLANO.md](documentation/PLANO.md) (requirements and closed decisions) and
   [documentation/REFACTOR.md](documentation/REFACTOR.md) (refactor plan).
 - **`FICHA-JSON.md` and `TREINO-JSON.md` must stay at the root**: the app fetches them and the service worker caches them.
 - Other docs that stay where they are: `tests/CHECKLIST.md` (feature → tests) and `tools/README.md`.
