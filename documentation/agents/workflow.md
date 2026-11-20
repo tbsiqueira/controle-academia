@@ -20,7 +20,8 @@ CI installs only the Chromium browser, without `--with-deps` (no apt); see the c
 `deploy.yml` runs on every push to `main` (= a merged PR): if tag `vN` for the current version doesn't exist yet,
 it calls the whole `tests.yml` workflow as the publish gate (unit, static and browser tests), publishes to GitHub
 Pages and then creates and pushes tag `vN`. Otherwise it publishes nothing. A check added to `tests.yml` therefore
-gates publishing too; `check.ps1` fails if that call disappears.
+gates publishing too; `check.ps1` fails if the gate is unwired (the `verificar` job stops calling it, or `publicar`
+stops needing `verificar`).
 
 ## Browser tests (Playwright)
 

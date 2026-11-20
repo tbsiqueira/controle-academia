@@ -16,8 +16,8 @@ docs they point to ([architecture.md](architecture.md), [product-rules.md](produ
   (the list is in [workflow.md](workflow.md#git)). Before that, everything was pushed straight to `main`.
 - **Publish gate (issue #88)**: `deploy.yml` calls the whole `tests.yml` workflow before publishing, so the publish
   gate and the PR checks are the same jobs (unit, static and browser tests). Don't add the checks back as copied
-  steps in `deploy.yml`: add them to `tests.yml` and both runs pick them up. `check.ps1` check 15 fails if the call
-  disappears.
+  steps in `deploy.yml`: add them to `tests.yml` and both runs pick them up. `check.ps1` check 15 fails if the gate
+  is unwired: the `verificar` job must call the workflow and `publicar` must need `verificar`.
 - **Refactor plan (2026-11-17)**: [REFACTOR.md](../REFACTOR.md). Browser tests (Playwright) first, then native ES
   modules, then JSDoc types checked by `tsc --noEmit`; still no build step. The app and the unit tests need
   nothing installed. `app.js` coverage is measured with a ratchet (`tests/e2e/coverage-baseline.json`).
