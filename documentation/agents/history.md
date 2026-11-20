@@ -3,7 +3,9 @@
 The detailed log is in `git log` and the release tags (`vN`); requirements are in
 [`PLANO.md`](../PLANO.md). This page keeps what a future agent should know before touching the same area. Rules
 that came out of them live in the docs they point to ([architecture.md](architecture.md),
-[product-rules.md](product-rules.md), [workflow.md](workflow.md)); they are not repeated here.
+[product-rules.md](product-rules.md), [workflow.md](workflow.md)); they are not repeated here. User-visible
+behaviour is described in [`MANUAL.md`](../MANUAL.md), and rejected or reverted UI decisions are in
+[product-rules.md](product-rules.md#removed-or-rejected-on-purpose-dont-bring-back-unasked).
 
 ## Decisions worth keeping
 
