@@ -17,7 +17,9 @@ Read only what your task needs. Questions need none of these unless the answer d
   [workflow.md](documentation/agents/workflow.md) (commands, the checklist every change goes through, Git).
 - Before touching an area it lists: [history.md](documentation/agents/history.md) (key decisions, past
   regressions and their lessons).
-- Before writing or changing browser tests: [e2e-tests.md](documentation/agents/e2e-tests.md).
+- Before writing or changing browser tests: [e2e-tests.md](documentation/agents/e2e-tests.md) (helpers, temporary
+  tests, timers) and the testing policy in [REFACTOR.md §4](documentation/REFACTOR.md#4-testing-policy) (critical
+  screens, confirmation answers, coverage ratchet, temporary tests).
 - Only with a role: the files your role names (see Roles).
 - Only for a refactor issue: [REFACTOR.md](documentation/REFACTOR.md) (the ongoing refactor, tracked in issue #2;
   one issue per PR).
@@ -25,8 +27,9 @@ Read only what your task needs. Questions need none of these unless the answer d
 ## Roles
 
 Most sessions have no role: answer questions and do what you're asked, under the normal rules here.
-A session has a role only when it's started with `/planner` or its prompt names one (PLANNER, DEVELOPER,
-REVIEWER or DESIGN REVIEWER). Then read only your files in `documentation/agents/` and follow them:
+A session has a role only when it's started with `/planner` ([its skill](.claude/skills/planner/SKILL.md)) or its
+prompt names one (PLANNER, DEVELOPER, REVIEWER or DESIGN REVIEWER). Then read only your files in
+`documentation/agents/` and follow them:
 PLANNER [roles.md](documentation/agents/roles.md) + [planner.md](documentation/agents/planner.md); DEVELOPER
 [roles.md](documentation/agents/roles.md) + [developer.md](documentation/agents/developer.md); REVIEWER
 [reviewer.md](documentation/agents/reviewer.md); DESIGN REVIEWER

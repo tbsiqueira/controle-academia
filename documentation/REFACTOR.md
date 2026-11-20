@@ -65,7 +65,8 @@ attributes).
 
 The order and the state of each step are tracked in issue
 [#2](https://github.com/tbsiqueira/controle-academia/issues/2), one issue per PR, with the milestones
-**Refatoração · Fase 0–3**. In short:
+**Refatoração · Fase 0–3**. Phase 0 (#3) was this document and the rules below. The rule behind the order: **the
+safety net first, then touch the code.**
 
 | Phase | What it delivers | Issues |
 |---|---|---|
@@ -73,35 +74,66 @@ The order and the state of each step are tracked in issue
 | **2 — Modules** | `core.js`/`db.js` as modules; `app.js` with no inline handler and a CSP without `'unsafe-inline'` in `script-src`; ratchet for several files; `app.js` split by area | #8 → #9 → #33 → #10–#14 |
 | **3 — Types** | JSDoc types checked by `tsc --noEmit` in CI; `// @ts-check`; final documentation | #15, #16, #40, #17 |
 
-The order inside Phase 2 matters: **#8** moves the unit tests and the coverage gate from `require` to `import`;
-**#9** ends the inline handlers while `app.js` is still one file, so the ratchet and `check.ps1` keep working, and
-closes by removing `'unsafe-inline'` from the CSP's `script-src`; **#33** makes the ratchet add up several files
-before the first split; **#10–#14** split one area per PR. In Phase 3 the types need a development-only
-`tsconfig.json` (`allowJs`, `checkJs`, `noEmit`), and each file references them with
-`import('./types.js').Treino`. **#40** turns the temporary tests off (without deleting them) before **#17**, which
-documents the final state. A Phase 4 (real TypeScript with a build) is not planned: it gets evaluated at the end.
+Before Phase 2 comes **#39**: every feature of every screen with its own test, so Phase 2 touches `app.js` with the
+finest net possible (section 4, item 6). Inside Phase 2 the order matters too:
+
+1. **#8 — `core.js`/`db.js` as modules.** Not just swapping `module.exports` for `export`: the unit tests move from
+   `require` to `import`, the loop in `tools/coverage-gate.js` that `require`s each test is rewritten, and
+   `tests/module.test.js` (the UMD registration in the browser) goes away or is replaced.
+2. **#9 — end of inline handlers, `app.js` still one file.** The `data-action` switch touches almost every render
+   function; in a single file the coverage ratchet and `check.ps1`'s handler check keep working unchanged. It closes
+   by removing `'unsafe-inline'` from the CSP's `script-src`.
+3. **#33 — coverage ratchet for several files.** `tools/e2e-coverage.js` and `tests/e2e/helpers.js` measure only
+   `js/app.js`; before the first split, the ratchet must add up `js/app.js`, `js/ui/**` and `js/screens/**`,
+   otherwise splitting would make the safety net measure less and less without anyone noticing.
+4. **#10–#14 — split by area**, one PR per area.
+
+In Phase 3, `js/types.js` is not enough: `tsc` needs a development-only `tsconfig.json` (`allowJs`, `checkJs`,
+`noEmit`), and each file references the types with `import('./types.js').Treino`, because a `@typedef` is not
+visible in another module without that. **#40** turns the temporary tests off (without deleting them) before
+**#17**, which documents the final state. A **Phase 4** (real TypeScript with a build) is not planned; it gets
+evaluated at the end (#17), and after Phase 3 that migration would be almost mechanical.
 
 ## 4. Testing policy
 
 1. **Pure logic: 100%.** `js/core.js` keeps 100% of lines and branches covered by unit tests
-   (`tools/coverage-gate.js`), as today.
-2. **Critical screens: every behaviour.** In **Treinar** and **Início**, every behaviour the person can trigger has
-   its own browser test and its own row in `tests/CHECKLIST.md` (full lists in #5 and #19). On every screen, every
-   confirmation question also has a test for its "Não" answer, asserting the question text
-   (`tests/confirm-no.test.js` catches a missing one; line coverage can't).
+   (`tools/coverage-gate.js`), as today. The Node/browser module wrapper stays out of that count; the browser side
+   is validated by `tests/module.test.js`.
+
+2. **Critical screens: every behaviour.** **Treinar** (used at the gym, in a hurry) and **Início** (the first thing
+   everyone sees) are the critical screens: every behaviour the person can trigger has its own browser test and its
+   own row in `tests/CHECKLIST.md` (full lists in #5 and #19). Every PR that touches them keeps those tests green
+   and adds a test for each behaviour it adds or changes. On **every screen**, every confirmation question also has
+   a test for its "Não" answer: the "Não" must keep what the person filled in (`answerConfirm` in
+   `tests/e2e/helpers.js`) and the test asserts the question text. `tests/confirm-no.test.js` fails a `confirm()` in
+   `app.js` that has no such test — line coverage can't catch it, because the `confirm()` line runs with either answer.
+
 3. **Other screens: features, not lines.** Every feature in `tests/CHECKLIST.md` has at least one browser test of
-   the main path. A new feature comes with a browser test; a fixed bug comes with a test that reproduces it.
+   the main path, and CI fails if one is left without. A new feature comes with a browser test; a fixed bug comes
+   with a test that reproduces it.
+
 4. **`app.js` coverage measured, with a ratchet.** The browser tests record which lines of the screen code ran; the
-   number **may not drop** relative to `main`. No fixed goal: the last stretches are browser error paths that need
-   fragile and slow tests, and flaky tests teach people to ignore a red check.
+   number appears in the PR and **may not drop** relative to `main`'s `tests/e2e/coverage-baseline.json`. No fixed
+   goal (like 100%): the last stretches are browser error paths reachable only with fragile and slow tests, and
+   flaky tests teach people to ignore a red check.
+
 5. **Stable and fast.** Phone (375px), light theme, database starting empty or with `data/sample-data.json`, no
    fixed waits. The whole job should take a few minutes.
-6. **Temporary tests during the refactor (#39).** Until #16, every screen has a test per behaviour and `app.js`
-   line coverage is **100%**; the only exceptions, listed in #39, are lines unreachable from the browser and lines
-   the collector can't count. Tests live in `tests/e2e/temporarios/` with their own `tests/CHECKLIST.md` table, and
-   each PR that raises coverage updates the ratchet (`node tools/e2e-coverage.js --update`). **#40 turns them off,
-   not deletes them** (`testIgnore`, the CHECKLIST table moves to a turned-off section, the ratchet drops once on
-   purpose). Items 1–5 keep applying after that.
+
+6. **Temporary tests during the refactor (#39).** Until #16, the critical-screens rule applies to **every screen**:
+   every feature in Fichas, Biblioteca, Histórico/Calendário/Evolução, Mais and Dados gets its own browser test and
+   `app.js` line coverage goes to **100%**. The only exceptions, listed in #39 with the reason and the repository
+   owner's OK: lines unreachable from the browser, and lines that run in a test but the collector can't count —
+   e.g. `forceUpdate` ("Atualizar app") reloads the page before the coverage snapshot (`tests/e2e/helpers.js`);
+   #39 first tries to make the collector count those. The tests live in `tests/e2e/temporarios/` with their own
+   `tests/CHECKLIST.md` table; `checklist.test.js` and `confirm-no.test.js` read the subfolders of `tests/e2e/`.
+   They run in CI as a required check **until #16, the last refactor PR that touches code**, and each PR that raises
+   coverage updates the ratchet (`node tools/e2e-coverage.js --update`).
+   **#40 turns them off, not deletes them:** it removes the folder from the run (`testIgnore` in
+   `playwright.config.js`), moves the CHECKLIST table to a section of turned-off tests the checks ignore, and
+   **lowers the ratchet once, on purpose** — CI otherwise fails any drop relative to `main`, so #40 carries the
+   explicit way to accept it. They stay in the repository to be turned back on in a future large change. Items 1–5
+   keep applying after that.
 
 ## 5. Development tools (npm)
 

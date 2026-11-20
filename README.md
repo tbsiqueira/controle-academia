@@ -43,9 +43,9 @@ Onde cada coisa mora, o modelo de dados e as regras: [documentation/agents/archi
 ## Dados de exemplo
 
 `data/sample-data.json` tem **3 fichas**, **12 treinos** (4 por ficha) e **6 exercícios criados pelo usuário**.
-No app: **Mais → Debug → Carregar dados de exemplo** (pode ser desfeito pelo botão **Desfazer**). Nos testes é a
-fixture de `tests/sample-data.test.js`. É gerado por `tools/build-sample-data.ps1` a partir de
-`tools/sample-data-content.json` — detalhes em [tools/README.md](tools/README.md).
+No app: **Mais → Debug → Carregar dados de exemplo** (pode ser desfeito pelo botão **Desfazer**). É gerado por
+`tools/build-sample-data.ps1` e é a fixture de `tests/sample-data.test.js`; os detalhes (datas relativas, precache
+e o que os testes cobrem) estão em [architecture.md](documentation/agents/architecture.md#features-with-their-own-contract).
 
 ## Privacidade
 

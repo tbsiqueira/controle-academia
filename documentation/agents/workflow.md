@@ -11,7 +11,8 @@ powershell -ExecutionPolicy Bypass -File .\check.ps1   # static checks (must pri
 powershell -ExecutionPolicy Bypass -File .\tools\build-sample-data.ps1   # only after editing sample data content
 ```
 
-Python is not installed; use Node for scripted edits. Node 26 locally and in CI.
+Python is not installed; use Node for scripted edits. Node 26 locally and in CI. `test.ps1` runs the unit tests and
+only warns if Node is missing; CI runs them anyway.
 
 CI: `tests.yml` runs `node --check`, the coverage gate, `check.ps1` and the browser tests on every PR and push to
 `main`; on PRs its `Version` job also fails when `index.html`, `css/` or `js/` changed without a version bump (or the
@@ -26,11 +27,14 @@ stops needing `verificar`).
 ## Publishing (GitHub Pages)
 
 One-time setup: **Settings → Pages → Source: GitHub Actions**, and **Settings → Environments → `github-pages`**
-must allow deploys from `main`. The repository has to be public on the free plan. Repository settings (already
-applied): rebase merge only, auto-merge off, merged branches deleted; the `main` ruleset blocks direct pushes,
-force pushes and deletion, and requires the four checks named above.
+must allow deploys from `main`. The repository has to be public on the free plan; the app ends up at
+`https://<user>.github.io/<repo>/` (install it from the browser's "Add to Home Screen"). Repository settings
+(already applied): rebase merge only, auto-merge off, merged branches deleted; the `main` ruleset blocks direct
+pushes, force pushes and deletion, and requires a PR with a linear history, rebase merge and the four checks above
+on a branch up to date with `main`.
 
-The deploy gate itself is described above. If it fails:
+Deploy = merging a PR that changes the version. `deploy.yml` publishes and creates tag `vN`; **never create or push
+tags by hand**. Docs/CI-only PRs keep the version and publish nothing. If it fails:
 
 | Symptom | Cause | Fix |
 |---|---|---|

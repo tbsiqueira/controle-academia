@@ -27,6 +27,16 @@ that came out of them live in the docs they point to ([architecture.md](architec
   counters first hung the V8 profiler, so that approach was dropped.
   Treinar and Início were made critical screens (issues #5, #19); the rule is step 4 of the
   [checklist for every change](workflow.md#checklist-for-every-change).
+- **Ids over names (v27, v40, v47)**: identity comes from the stored `exerciseId`; the name is a display snapshot,
+  and only records without an id fall back to matching by name. Never reintroduce name-based identity.
+- **Numeric catalog ids (Revision 48)**: the catalog stays 1..927 instead of migrating to UUID. Records, backups
+  and history point at those numbers, and comparing ids as text already fixes the number/text mismatch; a migration
+  would rewrite user data for no visible gain.
+- **One backup file, import with undo (v15, v35–v40)**: one action produces exactly one `.json`, shared as
+  `{ files }` only (`title`/`text` became stray `.txt` files on the phone). Import replaces the data after
+  confirmation and keeps the previous state in memory for "Desfazer importação" — no automatic second file.
+- **Temporary tests are turned off, not deleted (#40)**: they are the finest net for a future large change, so #40
+  removes them from the run and lowers the ratchet once, on purpose, instead of deleting them.
 
 ## Regressions and their lessons
 

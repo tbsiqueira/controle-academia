@@ -1,7 +1,8 @@
 # Architecture
 
-Data model (stores and fields): [`PLANO.md` §5](../PLANO.md#5-data-model-indexeddb).
-This page is the short version an agent needs to place a change correctly.
+The authoritative reference for how the code and data are organised: layers, data model and the constraints a
+change must respect. Product behaviour is in [product-rules.md](product-rules.md); commands and process are in
+[workflow.md](workflow.md); requirements are in [`PLANO.md`](../PLANO.md).
 
 ## Domain terms (the UI uses the Portuguese words)
 
@@ -31,20 +32,39 @@ Load and RIR belong to the workout, never to the ficha. "Peso" in the UI means l
 Rule of thumb: if it can be written without touching the DOM, it belongs in `core.js` with a test.
 New core functions must be added to the export object at the bottom of `core.js`.
 
+## Data model (IndexedDB v2)
+
+- `sheets` (fichas): `{ id, name, active, exercises[], createdAt, updatedAt }`
+  - `exercises[]`: `{ exerciseId, name, sets, reps[] (reps per set), note (professora's note) }`, in display order.
+- `workouts`: `{ id, date (YYYY-MM-DD), sheetId, sheetName (snapshot), cardioMinutes, notes, warmups[], sets[], createdAt, updatedAt }`
+  - `warmups[]`: `{ exerciseId, exerciseName, reps, load, rir }`
+  - `sets[]`: `{ exerciseId, exerciseName (copy of the name at the time), exerciseNote (the ficha's note), number, reps, load, rir, note }`
+- `exercises`: `{ id, name, group, correction, active, createdAt, updatedAt }` (Biblioteca; no load/RIR — those belong to the workout)
+- `settings`: record `id: 'app'` (goals, week start, rest seconds, `lastBackupAt`…) plus record `id: 'workoutDraft'`
+  (the workout in progress, saved on every keystroke, **not** included in backups). Unknown keys pass through untouched.
+- `colinha`: `{ id, title, content, order }`
+
+`sheets.active === false` means the ficha is deactivated: it disappears from the Treinar selector but is not deleted.
+
 ## Data rules
 
-- **Reference by `id`, the name is only a copy.** Sets, warm-ups and sheet items store `exerciseId` plus the
-  name as it was that day. Display resolves the current name with `exerciseLabel` / `sheetLabel`, so renames
-  show up everywhere, including history. Old records with only a name still work through the fallback.
-- Two id spaces: user exercises = UUID text, catalog = integer 1..927. **Compare ids as strings**
-  (`String(id)`), in one place: `exerciseMatches`, `exerciseKey`, `exerciseLabel`, `sheetLabel`.
-- Catalog ids are **permanent**: never renumber, reuse or delete one. Add new exercises at the end.
-- `settings` store: record `id: 'app'` (goals, week start, rest seconds, `lastBackupAt`…) plus record
-  `id: 'workoutDraft'` (the workout in progress, saved on every keystroke, **not** included in backups).
-  Unknown keys in `settings` pass through untouched.
-- Backups: `normalizeBackup` converts any version (fixtures in `tests/fixtures/`) to the current shape, must stay
+- **Reference by `id`; the name is only a snapshot.** Sets, warm-ups and sheet items store `exerciseId` plus the
+  name as it was that day, so history stays readable if the item is later renamed or deleted. Display resolves the
+  **current** name with `exerciseLabel` / `sheetLabel`. Why: comparing names made renames miss screens and made the
+  catalog history open empty (v27, v40, v47); never infer identity from a name, store explicit fields. Fichas that
+  predate ids get them on startup (`linkSheetItemsToExercises`) when the stored name matches one library exercise
+  unambiguously; the name stays as the fallback for records that never match.
+- **Two id spaces**: user exercises = UUID text, catalog = integer 1..927. **Compare ids as strings**
+  (`String(id)`), in one place: `exerciseMatches`, `exerciseKey`, `exerciseLabel`, `sheetLabel`. The id arrives as a
+  number from IndexedDB and as text from `data-*` attributes; normalising in one place is what fixed that class of bug.
+- **Catalog ids are permanent**: never renumber, reuse or delete one; add new exercises at the end. **Do not migrate
+  them to UUIDs without an explicit decision**: every sheet, workout, backup and historical reference points at
+  these numbers, and the text comparison above already removes the number/text friction. Migration would rewrite
+  user data for no user-visible gain.
+- **Backups**: `normalizeBackup` converts any version (fixtures in `tests/fixtures/`) to the current shape, must stay
   idempotent and ignores unknown fields. Imported ids and dates are validated before writing, and
-  `dbReplaceAll` clears and writes in **one transaction** so a failed import can't leave the DB empty.
+  `dbReplaceAll` clears and writes in **one transaction** so a failed import can't leave the DB empty. Old databases
+  (`tests/old-db.test.js`) must still load: a new field never requires a DB version bump — put it on an existing record.
 - Numbers accept a comma (`27,5`): parse with `parseLocalNumber` / `toNum`, show with `formatDecimal`.
   Decimal inputs are `type="text" inputmode="decimal"` (`type="number"` blocks the comma on iPhone).
 - Escape everything that comes from the DB with `esc()` before putting it into HTML.
@@ -63,11 +83,37 @@ New core functions must be added to the export object at the bottom of `core.js`
   no names). `tests/history-import.test.js` parses the contract's own example, so keep them in sync.
 - **Backup**: one button. Phone → share sheet with only the `.json` file (no `title`/`text`, they created stray
   `.txt` files). Desktop → download. If sharing fails, never download a second file automatically.
-- **Sample data**: `data/sample-data.json`, generated by `tools/build-sample-data.ps1`; `check.ps1` fails if they drift.
+- **Sample data**: `data/sample-data.json` — 3 fichas and 12 workouts, with `dayOffset` dates relative to today
+  (so the demo always looks recent) and 6 custom exercises. Generated by `tools/build-sample-data.ps1`; `check.ps1`
+  regenerates it and compares the content, so generator and JSON never drift. It is **not** in the service worker
+  precache (loaded on demand, so the first load needs a connection) and doubles as the fixture for
+  `tests/sample-data.test.js` (shape, referential integrity, backup normalization, old-format migration, renaming).
+
+## Versioning and caching
+
+- The version `N` lives in **two** places and they must agree: `index.html` (every `?v=N` and
+  `<span id="appVersion">vN</span>`) and `sw.js` (`CACHE_NAME = 'meu-treino-vN'` and every `?v=N` in `ASSETS`).
+  Any change to `index.html`, `css/` or `js/` bumps it (`check.ps1` fails otherwise, CI's **Version** job enforces
+  it). Why: the service worker serves versioned assets cache-first, so without a new `N` an installed phone keeps
+  running the old files.
+- `index.html` and `data/exercises.json` are network-first (with the cache as offline fallback); everything with
+  `?v=N` is cache-first. On `localhost` the service worker stays network-first even for versioned files, so edits
+  show up without a bump.
+- The AI contracts `FICHA-JSON.md` and `TREINO-JSON.md` are **precached** because the app fetches them to show the
+  text to paste into the AI, and that must work offline. They must stay at the repository root.
+- No third-party requests: `Content-Security-Policy` in `index.html` restricts everything to the site itself.
+
+## Development tooling is not the app
+
+The published app is exactly the files in the repository: no bundler, no build, no runtime dependency.
+`package.json` / `node_modules/` exist only for development tools (Playwright, and `typescript` in Phase 3), and
+`tools/` is not published nor precached. The unit tests run with plain `node --test tests/`, without installing
+anything.
 
 ## Things that look odd but are on purpose
 
 - No bundler and no jsdom: the app is edited and served as-is. DOM code is covered by the browser tests in
   `tests/e2e/`, by static checks and by keeping logic in `core.js`.
+- The catalog is a single file (≈240 KB) loaded once and cached by the service worker; it is not split.
 - Icon font is base64 inside the CSS (avoids "square" icons when the font fails to load).
 - `reset.html` is an escape page that unregisters the service worker and clears caches.

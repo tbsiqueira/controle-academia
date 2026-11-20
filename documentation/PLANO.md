@@ -34,7 +34,7 @@ training-frequency calendar. All data stays **100% on the device** (IndexedDB), 
 - **FR-06 — Colinha**: quick-reference section (RIR, rest time, reminders) editable by the user.
 - **FR-07 — Frequency calendar**: monthly view with the days trained and the number of workouts in the month.
 - **FR-08 — Backup**: export all data as JSON (download); import JSON restoring the data after confirmation, with
-  an **automatic backup of the current state before importing**.
+  **"Desfazer importação"** (the previous state stays in memory; nothing is downloaded automatically).
 - **FR-09 — PWA**: installable on the home screen, works offline after the first load.
 - **FR-10 — Workout fichas**: ficha CRUD with an **ordered** list of exercises; each exercise in the ficha has a
   **number of sets**, **reps per set** (they can vary, e.g. 12-10-8) and the **professora's note**. It is the ficha
@@ -81,14 +81,9 @@ training-frequency calendar. All data stays **100% on the device** (IndexedDB), 
 - **Editing**: workouts can be edited or deleted at any time; there is no history lock.
 
 ## 5. Data model (IndexedDB)
-Stores:
-- `sheets` (fichas): `{ id, name, active, exercises[], createdAt, updatedAt }`
-  - `exercises[]`: `{ exerciseId, name, sets, reps[] (reps per set), note (professora's note) }` (in the ficha order)
-- `workouts`: `{ id, date (YYYY-MM-DD), sheetId, sheetName (snapshot), cardioMinutes, notes, warmups[] { exerciseId, exerciseName, reps, load, rir }, sets[], createdAt, updatedAt }`
-  - `sets[]`: `{ exerciseId, exerciseName (copy of the name at the time), exerciseNote (the ficha's note), number, reps, load, rir, note }`
-- `exercises`: `{ id, name, group, correction, active, createdAt, updatedAt }` (biblioteca; no load/RIR — those belong to the workout)
-- `settings`: `{ id: 'app', weekAnchor (YYYY-MM-DD), weeklyWorkoutTarget, weeklyCardioTarget }`
-- `colinha`: `{ id, title, content, order }`
+
+Stores, fields and the data rules (ids and name snapshots, normalization, migrations, backup compatibility):
+[agents/architecture.md](agents/architecture.md#data-model-indexeddb-v2).
 
 ## 6. Screens
 | Screen | Role |
@@ -104,8 +99,8 @@ Stores:
 
 ## 7. Architecture / files
 
-Where the code lives, the layers, the data rules and the intentional oddities:
-[agents/architecture.md](agents/architecture.md). The IndexedDB stores are in §5 above.
+Where the code lives, the layers, the data model, the data rules and the intentional oddities:
+[agents/architecture.md](agents/architecture.md).
 
 ## 8. Distribution (GitHub Pages)
 1. Repository: `https://github.com/tbsiqueira/controle-academia.git`. `main` only changes through pull requests
@@ -116,17 +111,15 @@ Where the code lives, the layers, the data rules and the intentional oddities:
 4. Once installed, the app opens from its icon and works offline.
 
 ## 9. Phases
-- **Phase 1 (MVP)**: fichas (ordered group of exercises) and exercise library with built-in catalog, full workout
-  logging (ficha loads the exercises, pre-filled sets, cardio), editing/deleting workouts, dashboard with goals and
-  per-exercise progress, week with warning + confirmation, colinha, calendar, JSON export/import, installable PWA.
-- **Phase 2 (extras)**: photo per exercise, optional tonnage, UX improvements.
 
-## 10. Assumptions to confirm
-1. Tonnage stays for Phase 2, as an optional display — ok?
-2. Photo per exercise stays for Phase 2 — ok?
-3. Importing replaces the current data after confirmation (with automatic backup) — ok?
-4. Provisional app name: **"Meu Treino"**.
-5. Does the week rule (item 4) match what you had in mind?
+**Phase 1 (MVP), shipped**: fichas (ordered group of exercises) and exercise library with built-in catalog, full workout
+logging (ficha loads the exercises, pre-filled sets, cardio), editing/deleting workouts, dashboard with goals and
+per-exercise progress, week with warning + confirmation, colinha, calendar, JSON export/import, installable PWA.
+
+## 10. Deferred scope
+
+Optional ideas kept from the original plan: a tonnage display, one photo per exercise and general UX improvements.
+Nothing here is scheduled or a requirement; don't build them unasked.
 
 ## 11. History
 
