@@ -254,10 +254,10 @@ inequívoca com um exercício da biblioteca.
 
 ## Versionamento
 
-Ao alterar `index.html`, `css` ou `js`, atualize a versão em **dois** lugares: `index.html` (os `?v=N` das
-tags `<link>`/`<script>` e o `<span id="appVersion">`) e `sw.js` (`CACHE_NAME` = `meu-treino-vN` e os `?v=N`
-da lista `ASSETS`). Isso garante que o app instalado receba a versão nova (o rodapé de **Mais** e a linha de
-status do backup mostram a versão carregada). O `check.ps1` reprova o commit se as duas saírem de sincronia.
+Ao alterar `index.html`, `css` ou `js`, mude o número em **um** lugar, `app.json`, e rode `node tools/set-version.js`: o script
+copia a versão para `index.html` (os `?v=N` das tags `<link>`/`<script>` e o `<span id="appVersion">`) e para
+`sw.js` (`CACHE_NAME` = `meu-treino-vN` e os `?v=N` da lista `ASSETS`). Isso garante que o app instalado receba a versão nova (o rodapé de **Mais** e a linha de
+status do backup mostram a versão carregada). O `check.ps1` reprova o commit se esses arquivos saírem de sincronia com o `app.json`.
 
 ## Privacidade
 

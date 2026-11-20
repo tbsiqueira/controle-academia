@@ -26,6 +26,7 @@ Load and RIR belong to the workout, never to the ficha. "Peso" in the UI means l
 | `js/db.js` | IndexedDB wrapper (`dbAll`, `dbGet`, `dbPut`, `dbDelete`, `dbReplaceAll`, `dbClear`). DB version 2 — don't bump without a migration plan. | `tests/db.test.js` |
 | `index.html` | App shell: every screen is a `<section id="view-…">`, switched by hash routes (`#/dashboard`, `#/workout`, `#/exercises`, `#/calendar`, `#/more`, `#/detail/<id>`, `#/exercise`). | `check.ps1` (ids, handlers, assets) |
 | `sw.js` | Service worker: cache-first for `?v=N` assets, network-first for `index.html` and the catalog. | `tests/sw.test.js` |
+| `app.json` | The app version `N`, the single source. `tools/set-version.js` stamps it into `index.html` and `sw.js`; don't edit those numbers by hand. | `tests/set-version.test.js`, `check.ps1` check 7 |
 | `vendor/` | Bootstrap 5, Bootstrap Icons, Plus Jakarta Sans — local copies, no CDN (CSP blocks third parties). Don't edit. | — |
 
 Rule of thumb: if it can be written without touching the DOM, it belongs in `core.js` with a test.

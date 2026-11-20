@@ -43,7 +43,7 @@ docs they point to ([architecture.md](architecture.md), [product-rules.md](produ
 | v27 | User exercises vanished from the library (origin guessed from the name) | Never infer data from names; store explicit fields |
 | v33 | `27,5` was saved as `27` on iPhone | Text input + `inputmode="decimal"` and a shared comma-aware parser |
 | v35–v39 | Backup produced a second `.txt` file; the button passed the click event as the payload | Share only `{ files }`; validate the payload (`isBackupPayload`) |
-| v55 | Version bumped in the footer but not in the `?v=` assets | `check.ps1` check 7 compares all version spots |
+| v55 | Version bumped in the footer but not in the `?v=` assets | `check.ps1` check 7 compares all version spots. Since #90 the version lives in `app.json` and `tools/set-version.js` stamps the 16 spots (kept as real numbers so `serve.ps1` stays build-free) |
 | pre-v60 | Importing a backup cleared stores in separate transactions; a failed write left the DB empty | Clear + write in one transaction (`dbReplaceAll`) |
 
 ## Recurring user feedback

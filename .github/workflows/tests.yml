@@ -117,8 +117,10 @@ jobs:
           BASE_REF: ${{ github.base_ref }}
         run: |
           git fetch --no-tags origin "$BASE_REF"
-          base=$(git show "origin/$BASE_REF:index.html" | grep -oP 'id="appVersion">v\K\d+')
-          head=$(grep -oP 'id="appVersion">v\K\d+' index.html)
+          # app.json is the source of the version. A base that predates app.json still has it only in index.html.
+          base=$(git show "origin/$BASE_REF:app.json" 2>/dev/null | grep -oP '"version"\s*:\s*\K\d+' \
+            || git show "origin/$BASE_REF:index.html" | grep -oP 'id="appVersion">v\K\d+')
+          head=$(grep -oP '"version"\s*:\s*\K\d+' app.json)
           echo "main: v$base | PR: v$head"
           if [ "$head" -lt "$base" ]; then
             echo "::error::the PR version (v$head) is lower than main's (v$base). Rebase onto main."

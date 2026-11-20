@@ -132,14 +132,19 @@ if (-not $missingSw) {
   Bad "missing service worker assets: $($missingSw -join ', ')"
 }
 
-# 7) consistent version between the HTML and the service worker
+# 7) consistent version: app.json (the source) x the HTML x the service worker
+# Fix drift with: node tools/set-version.js
+$appVersion = [string](Get-Content -Raw (Join-Path $root 'app.json') | ConvertFrom-Json).version
 $htmlVersion = ([regex]::Match($html, 'id="appVersion">v(\d+)<')).Groups[1].Value
 $swVersion = ([regex]::Match($sw, "meu-treino-v(\d+)")).Groups[1].Value
 $queryVersions = @([regex]::Matches($html, '\?v=(\d+)') | ForEach-Object { $_.Groups[1].Value } | Sort-Object -Unique)
-if ($htmlVersion -and $htmlVersion -eq $swVersion -and $queryVersions.Count -eq 1 -and $queryVersions[0] -eq $htmlVersion) {
-  Ok "consistent version: v$htmlVersion"
+$swQueryVersions = @([regex]::Matches($sw, '\?v=(\d+)') | ForEach-Object { $_.Groups[1].Value } | Sort-Object -Unique)
+if ($appVersion -match '^\d+$' -and $htmlVersion -eq $appVersion -and $swVersion -eq $appVersion -and
+    $queryVersions.Count -eq 1 -and $queryVersions[0] -eq $appVersion -and
+    $swQueryVersions.Count -eq 1 -and $swQueryVersions[0] -eq $appVersion) {
+  Ok "consistent version: v$appVersion (app.json = footer = sw.js = ?v=)"
 } else {
-  Bad "inconsistent version: footer=v$htmlVersion, sw=v$swVersion, ?v=($($queryVersions -join ','))"
+  Bad "version drift from app.json (v$appVersion): footer=v$htmlVersion, sw=v$swVersion, index.html ?v=($($queryVersions -join ',')), sw.js ?v=($($swQueryVersions -join ',')). Run: node tools/set-version.js"
 }
 
 # 8) logic core + tests
@@ -148,10 +153,10 @@ if ($js -match "js/core\.js" -and $html -match "js/core\.js\?v=") {
 } else {
   Bad "js/core.js is not referenced in index.html"
 }
-if ($swAssets -contains "js/core.js?v=$htmlVersion") {
+if ($swAssets -contains "js/core.js?v=$appVersion") {
   Ok "js/core.js is in the service worker cache"
 } else {
-  Bad "js/core.js?v=$htmlVersion is missing from the service worker ASSETS list"
+  Bad "js/core.js?v=$appVersion is missing from the service worker ASSETS list"
 }
 if (Test-Path (Join-Path $root 'tests/core.test.js')) {
   $testSource = Read-Text 'tests/core.test.js'
