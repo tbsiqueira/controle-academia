@@ -342,6 +342,15 @@ if (-not $faltando) {
   Bad "functions called in app.js with no definition (ReferenceError): $($faltando -join ', ')"
 }
 
+# 15) the publish gate must include the browser tests (issue #88): deploy.yml calls the whole Testes
+#     workflow (tests.yml), which runs the unit, static and browser tests before anything is published.
+if ((Test-Path (Join-Path $root '.github/workflows/deploy.yml')) -and
+    ((Read-Text '.github/workflows/deploy.yml') -match '(?m)^\s+uses:\s*\./\.github/workflows/tests\.yml\s*$')) {
+  Ok "publishing runs the whole Testes workflow first (unit, static and browser tests)"
+} else {
+  Bad "deploy.yml does not call .github/workflows/tests.yml: a publish would skip the browser tests"
+}
+
 Write-Host ""
 if ($script:fail -eq 0) {
   Write-Host "All good." -ForegroundColor Green
