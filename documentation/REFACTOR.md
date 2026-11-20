@@ -1,163 +1,165 @@
-# Plano de refatoração
+# Refactor plan
 
-Acompanhamento: issue [#2](https://github.com/tbsiqueira/controle-academia/issues/2) (fixada no repositório), com uma
-issue por PR, agrupadas nos milestones **Refatoração · Fase 0–3**.
+Tracking: issue [#2](https://github.com/tbsiqueira/controle-academia/issues/2) (pinned in the repository), with one
+issue per PR, grouped into the **Refatoração · Fase 0–3** milestones.
 
-Este documento diz **por que** refatorar, **para onde** o código vai e **quais regras** todo PR da refatoração segue.
-O que fazer em cada passo está na issue correspondente.
+This document says **why** to refactor, **where** the code is going and **which rules** every refactor PR follows.
+What to do in each step is in the corresponding issue.
 
-## 1. Por que agora
+## 1. Why now
 
-O app funciona e a lógica está bem cuidada, mas a parte de tela virou um bloco só:
+The app works and the logic is well looked after, but the screen side became a single block:
 
-| Arquivo | Tamanho | Situação |
+| File | Size | Situation |
 |---|---|---|
-| `js/app.js` | ~2.700 linhas, 159 funções globais | Telas, render em strings HTML, eventos e estado global num arquivo só. Os HTMLs montados aqui chamam funções globais com `onclick="…"`, `oninput` e `onchange`. Na partida, **nenhum teste rodava no navegador** (resolvido na Fase 1). |
-| `js/core.js` | ~1.600 linhas | Lógica pura, **100% de cobertura** em testes de unidade. Está bem. |
-| `js/db.js` | ~140 linhas | IndexedDB, com teste. Está bem. |
-| `index.html` | ~480 linhas | Todas as telas. Sem handlers inline: os botões fixos são ligados com `addEventListener` no `bindEvents()` do `app.js`. |
-| `css/styles.css` | ~1.400 linhas | Estilo do app inteiro. Fora do escopo desta refatoração. |
+| `js/app.js` | ~2,700 lines, 159 global functions | Screens, rendering into HTML strings, events and global state in one file. The HTMLs built here call global functions with `onclick="…"`, `oninput` and `onchange`. At the start, **no test ran in the browser** (fixed in Phase 1). |
+| `js/core.js` | ~1,600 lines | Pure logic, **100% coverage** in unit tests. It's fine. |
+| `js/db.js` | ~140 lines | IndexedDB, with a test. It's fine. |
+| `index.html` | ~480 lines | All the screens. No inline handlers: the fixed buttons are wired with `addEventListener` in `app.js`'s `bindEvents()`. |
+| `css/styles.css` | ~1,400 lines | Styling for the whole app. Out of scope for this refactor. |
 
-`core.js`, `db.js` e `app.js` dividem o mesmo escopo global: qualquer função de um é visível nos outros e no HTML.
-É por isso que mudanças grandes no `app.js` já quebraram partes distantes do app (v43: um trecho apagou funções
-vizinhas e abrir um treino passou a dar `ReferenceError`; v40 e v47: nomes e ids desencontrados entre telas).
-O `check.ps1` pega parte disso estaticamente, mas não exercita o app.
+`core.js`, `db.js` and `app.js` share the same global scope: any function from one is visible in the others and in
+the HTML. That's why large changes in `app.js` have already broken distant parts of the app (v43: one hunk deleted
+neighbouring functions and opening a workout started throwing `ReferenceError`; v40 and v47: names and ids
+mismatched between screens). `check.ps1` catches part of this statically, but it does not exercise the app.
 
-Com mais gente interessada no projeto, cada mudança precisa de uma rede de segurança que não dependa de alguém
-lembrar de testar tudo à mão.
+With more people interested in the project, every change needs a safety net that doesn't depend on someone
+remembering to test everything by hand.
 
-## 2. Para onde vamos
+## 2. Where we're going
 
-**Princípios**
+**Principles**
 
-- **Continua sem build.** O navegador carrega os arquivos como estão no repositório; editar e recarregar continua
-  funcionando. Nada de bundler, transpilador ou framework.
-- **ES modules nativos** (`import`/`export`) no lugar do escopo global.
-- **Lógica sem DOM vai para `core.js`, com teste.** A refatoração é a hora de tirar lógica escondida do `app.js`.
-- **Comportamento neutro.** Nenhum PR da refatoração muda o que a pessoa vê ou os dados que ficam salvos.
+- **Still no build.** The browser loads the files as they are in the repository; editing and reloading keep
+  working. No bundler, transpiler or framework.
+- **Native ES modules** (`import`/`export`) instead of the global scope.
+- **DOM-free logic goes into `core.js`, with a test.** The refactor is the time to take hidden logic out of `app.js`.
+- **Neutral behaviour.** No refactor PR changes what the person sees or the data that gets saved.
 
-**Estrutura alvo** (os limites exatos entre as áreas podem mudar em cada PR):
+**Target structure** (the exact boundaries between the areas may change in each PR):
 
 ```
-index.html                 casca do app; um único <script type="module" src="js/main.js">
+index.html                 app shell; a single <script type="module" src="js/main.js">
 js/
-  main.js                  inicialização: carrega estado, rotas, registra o service worker
-  core.js                  lógica pura (export)
+  main.js                  startup: loads state, routes, registers the service worker
+  core.js                  pure logic (export)
   db.js                    IndexedDB (export)
-  types.js                 só JSDoc @typedef dos dados (Fase 3)
-  ui/                      peças compartilhadas: estado, rotas, toast, nomes por id, helpers de render
+  types.js                 only JSDoc @typedefs for the data (Phase 3)
+  ui/                      shared pieces: state, routes, toast, names by id, render helpers
   screens/
-    treino.js              Treinar: formulário, séries, aquecimento, rascunho, descanso, salvar
-    fichas.js              Fichas, Criar com IA, importar treinos antigos
-    biblioteca.js          Biblioteca, catálogo, seletor de exercícios
-    dados.js               backup, armazenamento persistente, apagar dados, dados de exemplo
-    inicio.js              Início, calendário, histórico/evolução, metas, Mais
-tests/                     testes de unidade (node --test), como hoje
-tests/e2e/                 testes de navegador (Playwright)
+    treino.js              Treinar: form, sets, warm-up, draft, rest, save
+    fichas.js              Fichas, Criar com IA, Importar treinos antigos
+    biblioteca.js          Biblioteca, catalog, exercise picker
+    dados.js               backup, persistent storage, Apagar dados, sample data
+    inicio.js              Início, Calendário, Histórico/Evolução, Metas, Mais
+tests/                     unit tests (node --test), as today
+tests/e2e/                 browser tests (Playwright)
 ```
 
-Os HTMLs montados no `app.js` deixam de usar `onclick="funcao()"` (e `oninput`/`onchange`) e passam a declarar
-`data-action="…"`, tratados por delegação de eventos em cada tela. Sem nenhum handler inline, a CSP do `index.html`
-perde o `'unsafe-inline'` do `script-src` (o do `style-src` fica: o app ainda usa atributos `style`).
+The HTMLs built in `app.js` stop using `onclick="funcao()"` (and `oninput`/`onchange`) and start declaring
+`data-action="…"`, handled by event delegation in each screen. With no inline handler, the `index.html` CSP
+loses the `'unsafe-inline'` from `script-src` (the one in `style-src` stays: the app still uses `style`
+attributes).
 
-## 3. Fases e ordem dos PRs
+## 3. Phases and PR order
 
-A ordem importa: **primeiro a rede de segurança, depois mexer no código.**
+The order matters: **the safety net first, then touch the code.**
 
-| Fase | O que entrega | Issues |
+| Phase | What it delivers | Issues |
 |---|---|---|
-| **0 — Plano** | Este documento e as regras abaixo | #3 |
-| **1 — Testes de navegador** | Playwright no CI como check obrigatório; **cada comportamento** das telas críticas (Treinar e Início); testes de todos os fluxos do `tests/CHECKLIST.md`; catraca de cobertura do `app.js` | #4, #5, #19, #6, #7, #29 — **concluída**; #39 (testes temporários) antes da Fase 2 |
-| **2 — Módulos** | `core.js`/`db.js` como módulos; `app.js` como módulo sem handler inline e CSP sem `'unsafe-inline'` no `script-src`; catraca de cobertura medindo vários arquivos; `app.js` dividido por área, um PR por área | #8, #9, #33, #10–#14 |
-| **3 — Tipos** | Tipos dos dados em JSDoc checados por `tsc --noEmit` no CI; `// @ts-check` em todos os arquivos; documentação final | #15, #16, #40, #17 |
+| **0 — Plan** | This document and the rules below | #3 |
+| **1 — Browser tests** | Playwright in CI as a required check; **every behaviour** of the critical screens (Treinar and Início); tests for every flow in `tests/CHECKLIST.md`; `app.js` coverage ratchet | #4, #5, #19, #6, #7, #29 — **done**; #39 (temporary tests) before Phase 2 |
+| **2 — Modules** | `core.js`/`db.js` as modules; `app.js` as a module with no inline handler and a CSP without `'unsafe-inline'` in `script-src`; coverage ratchet measuring several files; `app.js` split by area, one PR per area | #8, #9, #33, #10–#14 |
+| **3 — Types** | Data types in JSDoc checked by `tsc --noEmit` in CI; `// @ts-check` in every file; final documentation | #15, #16, #40, #17 |
 
-Antes da Fase 2 entra o **#39 — testes de navegador temporários** (seção 4, item 6): toda funcionalidade de
-toda tela com teste próprio, para a Fase 2 mexer no `app.js` com a rede mais fina possível.
+Before Phase 2 comes **#39 — temporary browser tests** (section 4, item 6): every feature of every screen with its
+own test, so Phase 2 can touch `app.js` with the finest net possible.
 
-Dentro da Fase 2 a ordem também importa:
+Within Phase 2 the order also matters:
 
-1. **#8 — `core.js`/`db.js` como módulos.** Não é só trocar `module.exports` por `export`: os testes de unidade
-   passam de `require` para `import`, o laço do `tools/coverage-gate.js` que faz `require` de cada teste é
-   reescrito e o `tests/module.test.js` (que testa o registro UMD no navegador) sai ou é substituído.
-2. **#9 — fim dos handlers inline, com o `app.js` ainda num arquivo só.** A troca para `data-action` mexe em quase
-   toda função de render; num arquivo só, a catraca de cobertura e a checagem de handlers do `check.ps1` continuam
-   valendo como estão. Fecha tirando `'unsafe-inline'` do `script-src` da CSP.
-3. **#33 — catraca de cobertura para vários arquivos.** `tools/e2e-coverage.js` (e `tests/e2e/helpers.js`) medem
-   só `js/app.js`. Antes do primeiro PR que divide o `app.js`, a catraca passa a somar `js/app.js`, `js/ui/**` e
-   `js/screens/**`; senão a divisão faria a rede de segurança medir cada vez menos sem ninguém perceber.
-4. **#10–#14 — divisão por área**, um PR por área.
+1. **#8 — `core.js`/`db.js` as modules.** It's not just swapping `module.exports` for `export`: the unit tests
+   move from `require` to `import`, the loop in `tools/coverage-gate.js` that `require`s each test is rewritten
+   and `tests/module.test.js` (which tests the UMD registration in the browser) goes away or is replaced.
+2. **#9 — end of inline handlers, with `app.js` still in a single file.** The switch to `data-action` touches
+   almost every render function; in a single file, the coverage ratchet and `check.ps1`'s handler check keep
+   working as they are. It closes by removing `'unsafe-inline'` from the CSP's `script-src`.
+3. **#33 — coverage ratchet for several files.** `tools/e2e-coverage.js` (and `tests/e2e/helpers.js`) measure
+   only `js/app.js`. Before the first PR that splits `app.js`, the ratchet starts adding up `js/app.js`,
+   `js/ui/**` and `js/screens/**`; otherwise the split would make the safety net measure less and less without
+   anyone noticing.
+4. **#10–#14 — split by area**, one PR per area.
 
-Na Fase 3, `js/types.js` não basta sozinho: o `tsc` precisa de um `tsconfig.json` só de desenvolvimento
-(`allowJs`, `checkJs`, `noEmit`) e cada arquivo referencia os tipos com `import('./types.js').Treino`, porque um
-`@typedef` não fica visível em outro módulo sem isso.
+In Phase 3, `js/types.js` is not enough on its own: `tsc` needs a development-only `tsconfig.json` (`allowJs`,
+`checkJs`, `noEmit`) and each file references the types with `import('./types.js').Treino`, because a `@typedef`
+is not visible in another module without that.
 
-Depois do #16 e antes do #17, o **#40 desliga os testes temporários** do #39 (seção 4, item 6), e o #17 já
-documenta o estado final.
+After #16 and before #17, **#40 turns off the temporary tests** from #39 (section 4, item 6), and #17 documents
+the final state.
 
-Uma **Fase 4** (TypeScript de verdade, com build) não está planejada. Ela só será avaliada no fim (issue #17),
-com a experiência das fases anteriores. Depois da Fase 3 essa migração seria quase mecânica.
+A **Phase 4** (real TypeScript, with a build) is not planned. It will only be evaluated at the end (issue #17),
+with the experience from the previous phases. After Phase 3 that migration would be almost mechanical.
 
-## 4. Política de testes
+## 4. Testing policy
 
-1. **Lógica pura: 100%.** `js/core.js` continua com 100% de linhas e ramos cobertos por testes de unidade
-   (`tools/coverage-gate.js`), como hoje.
-2. **Telas críticas: cada comportamento.** **Treinar** e **Início** são as telas críticas: o Treinar é usado na
-   academia, com pressa, e o Início é a primeira coisa que todo mundo vê. Nelas, **cada comportamento** que a
-   pessoa consegue disparar tem o seu próprio teste de navegador e a sua própria linha no `tests/CHECKLIST.md`
-   (lista completa nas issues #5 e #19). Todo PR que mexe numa tela crítica mantém esses testes verdes e traz
-   teste para o que acrescentar ou mudar.
-   Em **todas as telas**, toda pergunta de confirmação tem teste das duas respostas: o "Não" precisa manter o
-   que a pessoa preencheu (`answerConfirm` em `tests/e2e/helpers.js`) e o teste confere o texto da pergunta.
-   `tests/confirm-no.test.js` reprova `confirm()` do `app.js` sem teste do "Não". A cobertura de linhas não pega
-   isso: a linha do `confirm()` roda com qualquer resposta.
-3. **Demais telas: funcionalidades, não linhas.** Toda funcionalidade listada no
-   `tests/CHECKLIST.md` tem pelo menos um teste de navegador do caminho principal, e o CI falha se alguma ficar sem.
-   Funcionalidade nova entra com teste de navegador; bug corrigido entra com um teste que o reproduz.
-4. **Cobertura do `app.js` medida, com catraca.** Os testes de navegador medem quais linhas do código de tela
-   rodaram. O número aparece no PR e **não pode cair** em relação à `main`. Não há meta fixa (como 100%): os
-   últimos trechos são caminhos de erro do navegador que só se alcançam com testes frágeis e lentos, e testes
-   instáveis ensinam a ignorar check vermelho.
-5. **Testes de navegador estáveis e rápidos.** Celular (375px), tema claro, banco começando vazio ou com
-   `data/sample-data.json`, sem esperas fixas. O job inteiro deve levar poucos minutos.
-6. **Testes temporários durante a refatoração (#39).** Enquanto a refatoração durar, a regra das telas críticas
-   (item 2) vale para **todas as telas**: toda funcionalidade que a pessoa consegue disparar em Fichas,
-   Biblioteca, Histórico/Calendário/Evolução, Mais e Dados ganha teste de navegador próprio, e a cobertura de
-   linhas do `app.js` vai a **100%**. Só ficam de fora, listadas no #39 com o motivo e o OK do dono do
-   repositório: linhas inalcançáveis pelo navegador e linhas que **rodam num teste mas o coletor não consegue
-   contar**, como o `forceUpdate` ("Atualizar app"), que recarrega a página antes da foto da cobertura
-   (`tests/e2e/helpers.js`). O #39 tenta primeiro fazer o coletor contar essas linhas. Esta é a exceção temporária à "sem meta fixa" do item 4.
-   Esses testes ficam em `tests/e2e/temporarios/`, com tabela própria no `tests/CHECKLIST.md`; o
-   `tests/checklist.test.js` e o `tests/confirm-no.test.js` passam a ler as subpastas de `tests/e2e/`. Cada PR que
-   sobe a cobertura atualiza a catraca (`node tools/e2e-coverage.js --update`). Eles rodam no CI como check
-   obrigatório **até o #16**, o último PR da refatoração que mexe em código.
-   **Depois disso eles são desligados, não apagados (#40):** um PR depois do #16 e antes do #17 tira a pasta da
-   execução (`testIgnore` no `playwright.config.js`), move a tabela do CHECKLIST para uma seção de desligados
-   que as checagens ignoram e **baixa a catraca uma única vez, de propósito**: hoje o CI reprova qualquer queda
-   em relação à `main`, então esse PR traz o jeito explícito de aceitar a queda (detalhes no #40). Ficam no
-   repositório para religar numa mudança grande futura. Os itens 1–5 continuam valendo depois disso.
+1. **Pure logic: 100%.** `js/core.js` keeps 100% of lines and branches covered by unit tests
+   (`tools/coverage-gate.js`), as today.
+2. **Critical screens: every behaviour.** **Treinar** and **Início** are the critical screens: Treinar is used at
+   the gym, in a hurry, and Início is the first thing everyone sees. There, **every behaviour** the person can
+   trigger has its own browser test and its own row in `tests/CHECKLIST.md` (full list in issues #5 and #19).
+   Every PR that touches a critical screen keeps those tests green and brings a test for what it adds or changes.
+   On **every screen**, every confirmation question has a test for both answers: the "Não" must keep what the
+   person filled in (`answerConfirm` in `tests/e2e/helpers.js`) and the test checks the text of the question.
+   `tests/confirm-no.test.js` fails a `confirm()` in `app.js` without a test for the "Não". Line coverage doesn't
+   catch this: the `confirm()` line runs with either answer.
+3. **Other screens: features, not lines.** Every feature listed in `tests/CHECKLIST.md` has at least one browser
+   test of the main path, and CI fails if any is left without. A new feature comes with a browser test; a fixed
+   bug comes with a test that reproduces it.
+4. **`app.js` coverage measured, with a ratchet.** The browser tests measure which lines of the screen code ran.
+   The number appears in the PR and **may not drop** relative to `main`. There is no fixed goal (like 100%): the
+   last stretches are browser error paths that can only be reached with fragile and slow tests, and flaky tests
+   teach people to ignore a red check.
+5. **Browser tests stable and fast.** Phone (375px), light theme, database starting empty or with
+   `data/sample-data.json`, no fixed waits. The whole job should take a few minutes.
+6. **Temporary tests during the refactor (#39).** While the refactor lasts, the critical-screens rule (item 2)
+   applies to **every screen**: every feature the person can trigger in Fichas, Biblioteca,
+   Histórico/Calendário/Evolução, Mais and Dados gets its own browser test, and `app.js` line coverage goes to
+   **100%**. The only exceptions, listed in #39 with the reason and the repository owner's OK: lines unreachable
+   by the browser and lines that **run in a test but the collector can't count**, such as `forceUpdate`
+   ("Atualizar app"), which reloads the page before the coverage snapshot (`tests/e2e/helpers.js`). #39 first
+   tries to make the collector count those lines. This is the temporary exception to the "no fixed goal" of item 4.
+   These tests live in `tests/e2e/temporarios/`, with their own table in `tests/CHECKLIST.md`;
+   `tests/checklist.test.js` and `tests/confirm-no.test.js` start reading the subfolders of `tests/e2e/`. Each PR
+   that raises coverage updates the ratchet (`node tools/e2e-coverage.js --update`). They run in CI as a required
+   check **until #16**, the last refactor PR that touches code.
+   **After that they are turned off, not deleted (#40):** a PR after #16 and before #17 removes the folder from the
+   run (`testIgnore` in `playwright.config.js`), moves the CHECKLIST table to a section of turned-off tests that the
+   checks ignore and **lowers the ratchet a single time, on purpose**: today CI fails any drop relative to `main`,
+   so that PR brings the explicit way to accept the drop (details in #40). They stay in the repository to be turned
+   back on in a future large change. Items 1–5 keep applying after that.
 
-## 5. Ferramentas de desenvolvimento (npm)
+## 5. Development tools (npm)
 
-Até aqui o projeto não tinha `package.json`. A partir da Fase 1 ele passa a existir **só para ferramentas de
-desenvolvimento** (`@playwright/test` e, na Fase 3, `typescript`), com `package-lock.json` versionado e
-`node_modules/` fora do git.
+Until here the project had no `package.json`. From Phase 1 on it exists **only for development tools**
+(`@playwright/test` and, in Phase 3, `typescript`), with a versioned `package-lock.json` and `node_modules/` out of
+git.
 
-- O app publicado continua sendo exatamente os arquivos do repositório: o `package.json` não entra no app.
-- Os testes de unidade continuam rodando com `node --test tests/`, sem instalar nada.
-- `npm ci` só é necessário para rodar os testes de navegador e a checagem de tipos (no CI isso é automático).
+- The published app remains exactly the files in the repository: the `package.json` doesn't go into the app.
+- The unit tests keep running with `node --test tests/`, without installing anything.
+- `npm ci` is only needed to run the browser tests and the type check (in CI this is automatic).
 
-## 6. Regras de todo PR da refatoração
+## 6. Rules for every refactor PR
 
-- **Um PR por issue**, com `Closes #N` na descrição. Issue grande demais pode virar mais de um PR; diga isso na
-  issue antes.
-- **Comportamento neutro**: mesmas telas, mesmos textos, mesmos dados; backups antigos (`tests/fixtures/`)
-  continuam importando sem perder nada.
-- **Sem misturar**: nada de funcionalidade nova, correção de visual ou "aproveitei e mudei" num PR de refatoração.
-  Achou um bug no caminho? Abra uma issue e corrija num PR separado.
-- **Mexeu em `index.html`, `css/` ou `js/`** → sobe a versão (o job **Versão** cobra) e atualiza a lista `ASSETS`
-  do `sw.js` quando arquivos entram ou saem.
-- **Moveu ou apagou código** → busque cada nome em `js/`, `index.html`, `tests/` e na documentação (lição da v43).
-- **Antes de abrir o PR**: `node --test tests/`, `check.ps1` e, a partir da Fase 1, os testes de navegador
-  passando (inclusive os temporários do #39, enquanto estiverem ligados). Merge só por rebase, com todos os checks verdes.
-- Testes que conferem o texto do `app.js` (`tests/features.test.js`) e checagens do `check.ps1` que procuram
-  funções no `app.js` vão sendo ajustados junto com a mudança que os afeta, nunca desligados.
+- **One PR per issue**, with `Closes #N` in the description. An issue that is too big may become more than one PR;
+  say so in the issue first.
+- **Neutral behaviour**: same screens, same texts, same data; old backups (`tests/fixtures/`) keep importing
+  without losing anything.
+- **No mixing**: no new feature, visual fix or "while I was here I changed" in a refactor PR. Found a bug along the
+  way? Open an issue and fix it in a separate PR.
+- **Touched `index.html`, `css/` or `js/`** → raise the version (the **Version** job enforces it) and update the
+  `ASSETS` list in `sw.js` when files come in or go out.
+- **Moved or deleted code** → grep every name in `js/`, `index.html`, `tests/` and the documentation (lesson from
+  v43).
+- **Before opening the PR**: `node --test tests/`, `check.ps1` and, from Phase 1 on, the browser tests passing
+  (including the temporary ones from #39, while they're on). Rebase merge only, with all checks green.
+- Tests that check the text of `app.js` (`tests/features.test.js`) and `check.ps1` checks that look for functions in
+  `app.js` get adjusted along with the change that affects them, never turned off.

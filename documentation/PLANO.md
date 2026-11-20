@@ -1,179 +1,218 @@
-# Plano — App de Treinos (PWA)
+# Plan — Workout App (PWA)
 
-## 1. Visão
-Aplicativo web instalável (PWA) para registrar treinos de academia, acompanhar metas semanais flexíveis, manter fichas de exercícios e um calendário de frequência. Todos os dados ficam **100% no dispositivo** (IndexedDB), com backup em **JSON** (exportar/importar). Sem backend, sem publicação em lojas.
+## 1. Vision
+An installable web app (PWA) to log gym workouts, track flexible weekly goals, keep ficha records and a
+training-frequency calendar. All data stays **100% on the device** (IndexedDB), with **JSON** backup
+(export/import). No backend, no publishing to stores.
 
-## 2. Decisões fechadas
-- **Distribuição**: GitHub Pages (hospedagem estática gratuita; instala como app e funciona offline).
-- **Armazenamento**: IndexedDB (nativo do navegador; funciona em Chrome/Edge e Safari/iOS).
-- **Ciclo semanal**: aviso + confirmação ao fim dos 7 dias.
-- **Stack**: HTML + CSS + JavaScript puro, sem build e sem dependências.
-- **Idioma da interface**: pt-BR.
-- **Idioma do código**: inglês (identificadores e comentários).
-- **Fichas**: uma ficha agrupa vários exercícios (ex.: "TREINO A - inferiores"); ao registrar o treino, a ficha selecionada carrega automaticamente os exercícios dela.
-- **Pré-preenchimento**: a ficha define **séries e reps de cada série**; a carga vem da **última execução**; RIR é preenchido no treino.
-- **Desempenho**: progressão básica por exercício já no MVP.
-- **UI framework**: Bootstrap 5 (arquivos locais em `vendor/`, sem CDN em runtime).
+## 2. Closed decisions
+- **Distribution**: GitHub Pages (free static hosting; installs as an app and works offline).
+- **Storage**: IndexedDB (native to the browser; works in Chrome/Edge and Safari/iOS).
+- **Weekly cycle**: warning + confirmation at the end of the 7 days.
+- **Stack**: plain HTML + CSS + JavaScript, no build and no dependencies.
+- **UI language**: pt-BR.
+- **Code language**: English (identifiers and comments).
+- **Fichas**: a ficha groups several exercises (e.g. "TREINO A - inferiores"); when logging the workout, the
+  selected ficha loads its exercises automatically.
+- **Pre-fill**: the ficha defines **sets and reps per set**; the load comes from the **last execution**; RIR is
+  filled in the workout.
+- **Progress**: basic per-exercise progression already in the MVP.
+- **UI framework**: Bootstrap 5 (local files in `vendor/`, no CDN at runtime).
 
-## 3. Requisitos funcionais
-- **FR-01 — Registrar treino**: data, ficha (selecionada da lista; carrega os exercícios dela), cardio (minutos) e exercícios extras se quiser.
-- **FR-02 — Séries por exercício**: cada série guarda nº, reps feitas, carga (kg), RIR (repetição na reserva) e observação livre. As séries são **pré-preenchidas** pelos padrões da ficha e editáveis.
-- **FR-03 — Dashboard**: contador da semana (ex.: `1/3 treinos`, `30/120 min cardio`), últimos treinos e desempenho por exercício (última sessão vs anterior + PR).
-- **FR-04 — Semana flexível**: o usuário marca "semana iniciada"; o app conta 7 dias a partir dessa data, sem fixar dias da semana.
-- **FR-05 — Biblioteca de exercícios**: CRUD de exercícios (nome, grupo muscular, observação/lembrete), com **filtro por grupo** e **busca**; mostra **em quais fichas** cada exercício é usado. Ao criar, dá para selecionar de um **catálogo embutido** de exercícios em pt-BR.
-- **FR-06 — Colinha**: seção de consulta rápida (RIR, tempo de descanso, lembretes) editável pelo usuário.
-- **FR-07 — Calendário de frequência**: visão mensal com os dias em que treinou e quantidade de treinos no mês.
-- **FR-08 — Backup**: exportar todos os dados em JSON (download); importar JSON restaurando os dados após confirmação, com **backup automático do estado atual antes de importar**.
-- **FR-09 — PWA**: instalável na tela inicial, funciona offline após a primeira carga.
-- **FR-10 — Fichas de treino**: CRUD de fichas com lista **ordenada** de exercícios; cada exercício da ficha tem **nº de séries**, **reps de cada série** (podem variar, ex.: 12-10-8) e **observação da professora**. É a ficha que você seleciona ao registrar o treino.
-- **FR-11 — Editar/excluir treino**: qualquer treino registrado pode ser aberto para edição ou exclusão.
-- **FR-12 — Aquecimento por exercício**: cada exercício no registro do treino tem sua própria linha de aquecimento, onde o aluno anota **reps, peso e RIR**.
-- **FR-13 — Exportar treino em texto**: gerar uma mensagem legível de um treino específico (data, ficha, **aquecimento dentro de cada exercício**, séries com reps/carga/RIR/obs, cardio e observações; **sem** a observação da professora, desde a v77) para **copiar** ou **compartilhar** com a professora.
+## 3. Functional requirements
+- **FR-01 — Log a workout**: date, ficha (selected from the list; loads its exercises), cardio (minutes) and extra
+  exercises if wanted.
+- **FR-02 — Sets per exercise**: each set stores number, reps done, carga (kg), RIR (reps in reserve) and a free
+  note. The sets are **pre-filled** from the ficha's defaults and editable.
+- **FR-03 — Dashboard**: weekly counter (e.g. `1/3 treinos`, `30/120 min cardio`), latest workouts and
+  per-exercise progress (last session vs previous + PR).
+- **FR-04 — Flexible week**: the user marks "semana iniciada"; the app counts 7 days from that date, without
+  fixing weekdays.
+- **FR-05 — Exercise library**: exercise CRUD (name, muscle group, note/reminder), with **filter by group** and
+  **search**; it shows **which fichas** use each exercise. When creating one, you can pick from a **built-in
+  catalog** of pt-BR exercises.
+- **FR-06 — Colinha**: quick-reference section (RIR, rest time, reminders) editable by the user.
+- **FR-07 — Frequency calendar**: monthly view with the days trained and the number of workouts in the month.
+- **FR-08 — Backup**: export all data as JSON (download); import JSON restoring the data after confirmation, with
+  an **automatic backup of the current state before importing**.
+- **FR-09 — PWA**: installable on the home screen, works offline after the first load.
+- **FR-10 — Workout fichas**: ficha CRUD with an **ordered** list of exercises; each exercise in the ficha has a
+  **number of sets**, **reps per set** (they can vary, e.g. 12-10-8) and the **professora's note**. It is the ficha
+  you select when logging the workout.
+- **FR-11 — Edit/delete workout**: any logged workout can be opened for editing or deletion.
+- **FR-12 — Warm-up per exercise**: each exercise in the workout log has its own warm-up line, where the trainee
+  records **reps, peso and RIR**.
+- **FR-13 — Export workout as text**: generate a readable message for a specific workout (date, ficha, **warm-up
+  inside each exercise**, sets with reps/carga/RIR/obs, cardio and notes; **without** the professora's note, since
+  v77) to **copy** or **share** with the professora.
 
-## 4. Regras de negócio
-- **Semana**: janela de 7 dias `[início, início + 6]` a partir da data marcada. Treinos são sempre atribuídos a uma semana **pela data**. Ao passar 7 dias, o app mostra um aviso "semana encerrada" com o resultado final da semana; o usuário confirma para avançar para a próxima janela. Treinos com data fora da janela atual **nunca se perdem** (ficam salvos por data). É possível redefinir o início a qualquer momento em Ajustes.
-- **Meta padrão**: 3 treinos/semana e 120 min de cardio/semana (editável em Ajustes).
-- **Treino válido**: conta para a meta se tiver pelo menos 1 série registrada ou cardio > 0.
-- **Cardio**: minutos registrados dentro do treino (um treino pode ser "só cardio").
-- **Aquecimento**: cada exercício do treino tem sua própria linha de aquecimento (reps, peso, RIR), salva junto do treino; **não** entra no desempenho por exercício nem na tonelagem.
-- **Fichas**: ao registrar, seleciona uma ficha; os exercícios dela entram no formulário na ordem cadastrada (com opção de substituir o que já estava). O nome da ficha é copiado para o treino (snapshot) para preservar o histórico.
-- **Catálogo embutido**: o app traz `data/exercises.json` (927 exercícios em pt-BR: fonte `gugeldev/exercicios-bd-ptbr`, licença CC0-1.0, + curadoria própria de exercícios comuns de academia). Cada item tem `id` inteiro sequencial **permanente** (nunca reatribuído ou reutilizado), `sourceId` original, `name` e `group`. Ao montar uma ficha (ou adicionar um exercício extra ao treino), dá para escolher do catálogo ou criar um próprio. Exercícios do catálogo **não** são copiados para a Biblioteca (a Biblioteca guarda apenas os exercícios criados pelo usuário).
-- **Pré-preenchimento**: ao carregar a ficha, o app cria as séries com as **reps de cada série** definidas na ficha e usa a **carga da última execução** do exercício (se houver). O **aquecimento** também vem pré-preenchido com **reps e peso do treino anterior** (RIR em branco). **Carga e RIR pertencem ao treino**, não à ficha.
-- **Criação on-the-fly**: na busca de exercícios (ao montar a ficha ou registrar o treino), se o nome não existir, o app oferece "Criar \"...\"" e cadastra o exercício na hora.
-- **Desempenho**: por exercício, mostra a última sessão (carga × reps) vs a sessão anterior e o **PR** (maior carga já registrada em uma série; em empate, a série com mais reps).
-- **Tonelagem** (opcional, Fase 2): `Σ(reps × carga)` por exercício e por treino, com exibição por toggle.
-- **Fotos** (opcional, Fase 2): 1 foto por exercício, armazenada no IndexedDB (Blob) e incluída no JSON de export como base64.
-- **Import**: restaura/substitui os dados locais após confirmação. O estado anterior fica em memória e pode ser recuperado com **"Desfazer importação"** (Mais → Dados) — sem downloads automáticos.
-- **Edição**: treinos podem ser editados ou excluídos a qualquer momento; não há bloqueio de histórico.
+## 4. Business rules
+- **Week**: a 7-day window `[start, start + 6]` from the marked date. Workouts are always assigned to a week **by
+  date**. When the 7 days pass, the app shows a "semana encerrada" warning with the week's final result; the user
+  confirms to move on to the next window. Workouts dated outside the current window **are never lost** (they stay
+  saved by date). The start can be reset at any time in Ajustes.
+- **Default goal**: 3 workouts/week and 120 min of cardio/week (editable in Ajustes).
+- **Valid workout**: counts toward the goal if it has at least 1 recorded set or cardio > 0.
+- **Cardio**: minutes recorded inside the workout (a workout can be "só cardio").
+- **Warm-up**: each exercise in the workout has its own warm-up line (reps, peso, RIR), saved with the workout; it
+  **does not** count in per-exercise progress or in tonnage.
+- **Fichas**: when logging, you select a ficha; its exercises enter the form in the registered order (with the
+  option to replace what was already there). The ficha name is copied into the workout (snapshot) to preserve the
+  history.
+- **Built-in catalog**: the app ships `data/exercises.json` (927 pt-BR exercises: source
+  `gugeldev/exercicios-bd-ptbr`, CC0-1.0 license, + own curation of common gym exercises). Each item has a
+  **permanent** sequential integer `id` (never reassigned or reused), the original `sourceId`, `name` and `group`.
+  When building a ficha (or adding an extra exercise to the workout), you can pick from the catalog or create your
+  own. Catalog exercises are **not** copied into the Biblioteca (the Biblioteca keeps only the exercises created by
+  the user).
+- **Pre-fill**: when loading the ficha, the app creates the sets with the **reps per set** defined in the ficha and
+  uses the **load from the last execution** of the exercise (if there is one). The **warm-up** also comes
+  pre-filled with **reps and peso from the previous workout** (RIR blank). **Load and RIR belong to the workout**,
+  not to the ficha.
+- **On-the-fly creation**: in the exercise search (when building the ficha or logging the workout), if the name
+  doesn't exist, the app offers "Criar \"...\"" and registers the exercise right away.
+- **Progress**: per exercise, it shows the last session (carga × reps) vs the previous session and the **PR**
+  (highest load ever recorded in one set; on a tie, the set with more reps).
+- **Tonnage** (optional, Phase 2): `Σ(reps × carga)` per exercise and per workout, shown with a toggle.
+- **Photos** (optional, Phase 2): 1 photo per exercise, stored in IndexedDB (Blob) and included in the export JSON
+  as base64.
+- **Import**: restores/replaces the local data after confirmation. The previous state stays in memory and can be
+  recovered with **"Desfazer importação"** (Mais → Dados) — no automatic downloads.
+- **Editing**: workouts can be edited or deleted at any time; there is no history lock.
 
-## 5. Modelo de dados (IndexedDB)
+## 5. Data model (IndexedDB)
 Stores:
 - `sheets` (fichas): `{ id, name, active, exercises[], createdAt, updatedAt }`
-  - `exercises[]`: `{ exerciseId, name, sets, reps[] (reps de cada série), note (observação da professora) }` (na ordem da ficha)
+  - `exercises[]`: `{ exerciseId, name, sets, reps[] (reps per set), note (professora's note) }` (in the ficha order)
 - `workouts`: `{ id, date (YYYY-MM-DD), sheetId, sheetName (snapshot), cardioMinutes, notes, warmups[] { exerciseId, exerciseName, reps, load, rir }, sets[], createdAt, updatedAt }`
-  - `sets[]`: `{ exerciseId, exerciseName (cópia do nome na época), exerciseNote (observação da ficha), number, reps, load, rir, note }`
-- `exercises`: `{ id, name, group, correction, active, createdAt, updatedAt }` (biblioteca; sem carga/RIR — esses pertencem ao treino)
+  - `sets[]`: `{ exerciseId, exerciseName (copy of the name at the time), exerciseNote (the ficha's note), number, reps, load, rir, note }`
+- `exercises`: `{ id, name, group, correction, active, createdAt, updatedAt }` (biblioteca; no load/RIR — those belong to the workout)
 - `settings`: `{ id: 'app', weekAnchor (YYYY-MM-DD), weeklyWorkoutTarget, weeklyCardioTarget }`
 - `colinha`: `{ id, title, content, order }`
 
-## 6. Telas
-| Tela | Função |
+## 6. Screens
+| Screen | Role |
 |---|---|
-| Dashboard | Meta da semana, aviso de semana encerrada, últimos treinos (toque para **ver como foi**) |
-| Ver treino (somente leitura) | Resumo do treino com aquecimento, séries, cardio e observações; toque no exercício para ver a **evolução**; botões Editar / Exportar / Excluir |
-| Evolução do exercício | Melhor série por dia (barras), PR, tendência e histórico completo por data |
-| Treinar (registro) | Data, ficha (selecionar/criar; carrega os exercícios dela), **aquecimento por exercício (reps/peso/RIR)**, séries (reps/carga/RIR/obs), cardio; ações **Salvar / Cancelar** (descarta) / Exportar texto / Excluir |
-| Fichas e exercícios | Abas: **fichas** (grupo ordenado de exercícios) e **biblioteca** (filtro por grupo, busca e uso em fichas) + correção |
-| Calendário | Frequência mensal |
-| Colinha | RIR, descanso, lembretes |
-| Ajustes | Meta semanal, início da semana, atalho para fichas, exportar/importar JSON, **apagar todos os dados** (tela própria com confirmação) |
+| Dashboard | Weekly goal, "semana encerrada" warning, latest workouts (tap to **see how it went**) |
+| View workout (read-only) | Workout summary with warm-up, sets, cardio and notes; tap the exercise to see its **evolution**; Editar / Exportar / Excluir buttons |
+| Exercise evolution | Best set per day (bars), PR, trend and full history by date |
+| Treinar (log) | Date, ficha (select/create; loads its exercises), **warm-up per exercise (reps/peso/RIR)**, sets (reps/carga/RIR/obs), cardio; actions **Salvar / Cancelar** (discards) / Exportar texto / Excluir |
+| Fichas and exercises | Tabs: **fichas** (ordered group of exercises) and **biblioteca** (filter by group, search and usage in fichas) + correction |
+| Calendário | Monthly frequency |
+| Colinha | RIR, rest, reminders |
+| Ajustes | Weekly goal, week start, shortcut to fichas, export/import JSON, **apagar todos os dados** (its own screen with confirmation) |
 
-## 7. Arquitetura / arquivos
+## 7. Architecture / files
 ```
 index.html
 css/styles.css
-js/core.js (lógica pura, coberta por testes)
+js/core.js (pure logic, covered by tests)
 js/app.js + js/db.js
-tests/core.test.js + tests/fixtures/ (testes de unidade e de compatibilidade de dados)
-test.ps1 (roda os testes localmente)
-vendor/bootstrap/ (Bootstrap 5 local)
-vendor/bootstrap-icons/ (ícones locais)
+tests/core.test.js + tests/fixtures/ (unit tests and data-compatibility tests)
+test.ps1 (runs the tests locally)
+vendor/bootstrap/ (local Bootstrap 5)
+vendor/bootstrap-icons/ (local icons)
 manifest.webmanifest
 sw.js (service worker)
 icons/icon-192.png, icon-512.png
-serve.ps1 (servidor local para teste)
-check.ps1 (verificações estáticas: JSON, ids, handlers, assets, versão)
-data/exercises.json (catálogo embutido de exercícios, pt-BR, CC0)
-data/sample-data.json (dados de exemplo: 3 fichas, 12 treinos, 6 exercícios custom)
-tools/build-sample-data.ps1 + tools/sample-data-content.json (gerador reprodutível da fixture)
-README.md (como rodar, publicar no GitHub Pages, estrutura, versionamento)
-documentation/MANUAL.md (documentação de uso: exemplos, FAQ, problemas comuns, glossário)
-.gitattributes / .nojekyll (higiene do repositório e do GitHub Pages)
-.github/workflows/deploy.yml (ao entrar versão nova na main: testes, deploy no Pages e criação da tag vN)
-.github/workflows/tests.yml (testes, verificações e bump de versão: checks obrigatórios dos PRs)
+serve.ps1 (local server for testing)
+check.ps1 (static checks: JSON, ids, handlers, assets, version)
+data/exercises.json (built-in exercise catalog, pt-BR, CC0)
+data/sample-data.json (sample data: 3 fichas, 12 workouts, 6 custom exercises)
+tools/build-sample-data.ps1 + tools/sample-data-content.json (reproducible fixture generator)
+README.md (how to run, publish to GitHub Pages, structure, versioning)
+documentation/MANUAL.md (usage documentation: examples, FAQ, common problems, glossary)
+.gitattributes / .nojekyll (repository and GitHub Pages hygiene)
+.github/workflows/deploy.yml (when a new version lands on main: tests, deploy to Pages and creation of tag vN)
+.github/workflows/tests.yml (tests, checks and version bump: required checks of the PRs)
 documentation/PLANO.md
 ```
-- Service worker: cache-first para o "shell" do app; **nenhum dado é enviado a servidor**.
-- Privacidade: sem analytics, sem chamadas externas; `Content-Security-Policy` no `index.html`.
-- Teste local sem Node/Python: `serve.ps1` sobe um servidor HTTP local via PowerShell (`localhost` é contexto seguro, então o PWA pode ser testado antes de publicar).
+- Service worker: cache-first for the app "shell"; **no data is sent to a server**.
+- Privacy: no analytics, no external calls; `Content-Security-Policy` in `index.html`.
+- Local test without Node/Python: `serve.ps1` starts a local HTTP server via PowerShell (`localhost` is a secure
+  context, so the PWA can be tested before publishing).
 
-## 8. Distribuição (GitHub Pages)
-1. Repositório: `https://github.com/tbsiqueira/controle-academia.git`. A `main` só muda por pull request (merge por rebase, com os checks passando); **quando entra um PR com versão nova, o GitHub Actions publica no Pages e cria a tag** (`v1`, `v2`, ...).
-2. Habilitar GitHub Pages no repositório (Settings → Pages → branch `main`, pasta `/`).
-3. No celular, abrir a URL e usar "Adicionar à tela inicial" (Chrome/Edge/Safari).
-4. Depois de instalado, o app abre pelo ícone e funciona offline.
+## 8. Distribution (GitHub Pages)
+1. Repository: `https://github.com/tbsiqueira/controle-academia.git`. `main` only changes through pull requests
+   (rebase merge, with the checks passing); **when a PR with a new version lands, GitHub Actions publishes to Pages
+   and creates the tag** (`v1`, `v2`, ...).
+2. Enable GitHub Pages in the repository (Settings → Pages → branch `main`, folder `/`).
+3. On the phone, open the URL and use "Adicionar à tela inicial" (Chrome/Edge/Safari).
+4. Once installed, the app opens from its icon and works offline.
 
-## 9. Fases
-- **Fase 1 (MVP)**: fichas (grupo ordenado de exercícios) e biblioteca de exercícios com catálogo embutido, registro completo de treino (ficha carrega os exercícios, séries pré-preenchidas, cardio), edição/exclusão de treinos, dashboard com metas e desempenho por exercício, semana com aviso + confirmação, colinha, calendário, export/import JSON, PWA instalável.
-- **Fase 2 (extras)**: foto por exercício, tonelagem opcional, melhorias de UX.
+## 9. Phases
+- **Phase 1 (MVP)**: fichas (ordered group of exercises) and exercise library with built-in catalog, full workout
+  logging (ficha loads the exercises, pre-filled sets, cardio), editing/deleting workouts, dashboard with goals and
+  per-exercise progress, week with warning + confirmation, colinha, calendar, JSON export/import, installable PWA.
+- **Phase 2 (extras)**: photo per exercise, optional tonnage, UX improvements.
 
-## 10. Suposições a confirmar
-1. Tonelagem fica para a Fase 2, como exibição opcional — ok?
-2. Foto por exercício fica para a Fase 2 — ok?
-3. Importar substitui os dados atuais após confirmação (com backup automático) — ok?
-4. Nome provisório do app: **"Meu Treino"**.
-5. Regra da semana (item 4) atende ao que você imaginou?
+## 10. Assumptions to confirm
+1. Tonnage stays for Phase 2, as an optional display — ok?
+2. Photo per exercise stays for Phase 2 — ok?
+3. Importing replaces the current data after confirmation (with automatic backup) — ok?
+4. Provisional app name: **"Meu Treino"**.
+5. Does the week rule (item 4) match what you had in mind?
 
-## 11. Histórico de revisões
-- **Revisão 1** (`dec-392110e34edd83a3`): distribuição via GitHub Pages, IndexedDB, semana com aviso + confirmação.
-- **Revisão 2** (`dec-93a822fbea27513a`): tipo de treino como lista gerenciável, pré-preenchimento de séries, desempenho por exercício no MVP; edição/exclusão de treinos e backup automático no import.
-- **Revisão 3**: catálogo embutido de exercícios (`data/exercises.json`, 869 itens pt-BR, CC0-1.0, fonte `gugeldev/exercicios-bd-ptbr`); idioma do código em inglês.
-- **Revisão 4**: IDs do catálogo convertidos para inteiros sequenciais permanentes (1..869), com `sourceId` original preservado e política de estabilidade em `meta.idPolicy`.
-- **Revisão 5** (`dec-a52daaa2e8f02e86`): UI framework Bootstrap 5, com arquivos vendados localmente (sem CDN em runtime).
-- **Revisão 6**: busca do catálogo inline no modal de ficha (corrige modais sobrepostos); criação on-the-fly de exercícios; catálogo ampliado com +58 exercícios comuns de academia (ids 870–927, total 927).
-- **Revisão 7**: "ficha" passa a ser o **treino completo** (agrupamento ordenado de exercícios) e "exercícios" viram a biblioteca; ao registrar, a ficha selecionada carrega os exercícios dela. Migração automática dos antigos "tipos de treino" para fichas (IndexedDB v2).
-- **Revisão 8**: na ficha, cada exercício tem **séries + reps por série** (ex.: 3×12-10-8) e **observação da professora**; **carga e RIR saíram da ficha e da biblioteca** (pertencem ao treino). Biblioteca ficou com nome, grupo e observação.
-- **Revisão 9**: **linha de aquecimento** no registro do treino (reps, peso, RIR), salva junto do treino.
-- **Revisão 10**: o aquecimento passa a ser **por exercício** (cada exercício do treino tem sua própria linha de reps/peso/RIR), não um bloco único do treino.
-- **Revisão 11**: aquecimento pré-preenchido com **reps e peso do treino anterior**; item do menu inferior "Exercícios" renomeado para **"Fichas"**.
-- **Revisão 12**: acabamento visual — ícones em títulos/cards/botões, **barras de progresso** nas metas semanais, **seta de tendência** (↑/↓/=) no desempenho por exercício, badge de PR com troféu, numeração dos exercícios na ficha, destaque do **dia de hoje** no calendário e estados vazios com orientação.
-- **Revisão 13** (`dec-23116a57a6ed6e0c`): aba "Exercícios" renomeada para **"Biblioteca"**, com **filtro por grupo muscular**, busca e indicação de **em quais fichas** cada exercício é usado.
-- **Revisão 14**: item do menu "Registrar" renomeado para **"Treinar"**; cada treino pode ser **exportado como texto** legível (aquecimento, séries, cargas, RIR, observações, cardio) para copiar/compartilhar com a professora.
-- **Revisão 15**: exercícios escolhidos do catálogo passam a ser **salvos na Biblioteca**; **tratamento de erro visível** nas ações (sem falhas silenciosas); treino com apenas aquecimento também salva; importação sem download automático, com **"Desfazer importação"**.
-- **Revisão 16**: no texto exportado, o **aquecimento aparece dentro de cada exercício** (e exercícios só com aquecimento também são listados).
-- **Revisão 17**: "Desempenho por exercício" saiu do Dashboard; novo fluxo de consulta: tocar num treino abre a tela **"Como foi o treino"** (somente leitura) e tocar num exercício abre a **Evolução** (melhor série por dia, PR, tendência e histórico).
-- **Revisão 18**: botão **Cancelar** na tela de treino, descartando todas as alterações (volta ao "Como foi o treino" quando estava editando).
-- **Revisão 19**: textos explicativos curtos na tela **Fichas** (o que é uma ficha, o que é a Biblioteca) e dica dentro do editor de ficha.
-- **Revisão 20**: a **Biblioteca** passa a listar apenas os exercícios **criados pelo usuário** (os do catálogo não são mais copiados para lá nem aparecem na lista).
-- **Revisão 21**: padronização das barras de botões (ações na **mesma linha**, botões de ícone com largura fixa `.btn-icon`) em todas as telas.
-- **Revisão 42**: auditoria de **referências por id** em todo o app — `exerciseLabel`, `sheetLabel`, `exerciseTarget`, `exerciseMatches` e `exerciseKey` no core; agrupamento de séries, histórico, PR, fichas, pré-preenchimento e texto exportado passaram a resolver pelo id (nome guardado é só fallback para dados antigos/sem id); ids que eram descartados (`pickCatalogExercise`, adicionar do catálogo à ficha) passaram a ser gravados; itens inválidos de ficha são descartados na normalização.
-- **Testes (2026-11-17, sem mudança no app)**: Fase 1 da refatoração (`documentation/REFACTOR.md`) concluída — o app de verdade é testado num Chromium de celular (Playwright, `tests/e2e/`) a cada PR. Todo caminho que a pessoa dispara tem teste de navegador, inclusive a resposta **Não** de cada confirmação; o CI reprova linha do `tests/CHECKLIST.md` sem teste de navegador e queda da cobertura do `js/app.js` em relação à `main` (catraca, hoje 98,7%). Issues #4, #5, #19, #6, #7 e #29.
-- **Testes (2026-11-18, sem mudança no app)**: testes de navegador **temporários** para a refatoração (issue #39, `tests/e2e/temporarios/`): cada comportamento de todas as telas tem teste próprio e a cobertura de linhas do `js/app.js` chegou a **100%**, inclusive caminhos de erro (aparelho sem espaço, cache bloqueado) simulados no navegador e o "Atualizar app", que passou a entrar na conta. Ficam ligados até o #16; o #40 os desliga sem apagar.
-- **Processo (2026-11-17, sem mudança no app)**: a `main` passou a ser protegida — toda mudança entra por **pull request**, merge **só por rebase**, histórico linear e checks obrigatórios (testes + cobertura, `check.ps1` e o novo job **Versão**, que exige o bump quando `index.html`, `css/` ou `js/` mudam). O `deploy.yml` agora roda a cada merge na `main` e, se a versão ainda não tem tag, publica no Pages e **cria a tag `vN` sozinho**; ninguém mais tagueia à mão.
-- **v77**: o **texto do treino** enviado à professora não traz mais a **observação da professora** (a linha `_Obs.: …_` embaixo de cada exercício): é o texto dela mesma. A observação continua salva nas séries e aparece no Treinar e no detalhe do treino.
-- **v76**: o campo de **observação da série** no Treinar e os textos de **Criar com IA** voltaram a ter 16px no celular (uma regra mais específica os deixava menores e o iPhone dava zoom ao tocar). Teste de navegador mede o tamanho de cada campo à vista em 375px.
-- **v74**: tela **Mais** mais enxuta: card **Debug** sempre à vista no fim (saiu o recolhível "Opções avançadas"); card **Fichas de treino** removido (a aba Fichas já faz isso); **Colinha** logo abaixo de **Metas da semana**. Ordem: Metas, Colinha, Importar treinos antigos, Dados, Instalar o app, Debug.
-- **v73**: resumo da revisão e aviso final de **Importar treinos antigos** foram para o core com testes (`historyImportSummaryHtml`, `historyImportToast`); o aviso não diz mais "0 treinos importados" quando só entram fichas. Testes de ligação das duas importações com IA (revisar, importar, ordem fichas → treinos, revisão de exercícios compartilhada).
-- **v72**: novo card **Mais → Importar treinos antigos**: a IA converte uma planilha de treinos já feitos seguindo o contrato `TREINO-JSON.md` (`{ fichas, treinos }`) e recria as **fichas da rotina mais recente**, ligadas aos mesmos exercícios do histórico, para a carga da última vez já vir preenchida. Revisão com período, fichas novas/reaproveitadas e escolha de exercício parecido; treinos repetidos (mesma data e séries) são pulados. Core: `parseHistoryImport`, `sheetByName`, `splitImportedSheets`, `importedWorkout`, `workoutFingerprint`, `splitImportedWorkouts`, `historyExerciseNames`, `sheetNamesText`.
-- **v70**: novo card **Mais → Instalar o app** (entre Dados e Opções avançadas): botão **Instalar** quando o navegador oferece (Chrome/Edge, celular ou computador), passo a passo do Safari no iPhone e aviso de "já instalado". Core: `installHint`.
-- **v68**: **Pedir uma ficha para a IA** e **Importar** viraram um botão só, **Criar com IA**: a mesma janela traz o texto para a IA (copiar, campo de 2 linhas) e a caixa para colar a resposta; tela `#/ia` e botão **Compartilhar** do texto da IA removidos.
-- **v59**: contrato da IA aceita **PDF com vários treinos** (sempre um array, uma ficha por treino, nomes distintos, fase no nome); tela **Ver dados** removida; **Atualizar app**, **Apagar todos os dados**, espaço usado e dados de exemplo foram para o card **Mais → Debug**.
-- **v55–v58**: cartões do Início só com data + nome da ficha (contagens e selo de recorde saíram; recorde continua no resumo do treino); botão de **compartilhar** voltou ao cartão (v56); cores alternadas nos cartões do Treinar testadas e revertidas (v57/v58).
-- **v53–v54**: **Importar ficha em JSON** colando o texto (aceita a cerca ` ```json `), com **revisão** que sugere exercícios parecidos (Biblioteca antes do catálogo) ou "Criar novo"; tela **#/ia** que junta o contrato `FICHA-JSON.md` + nomes da Biblioteca e do catálogo para colar na IA; fichas podem ser **desativadas/reativadas** (somem do seletor do Treinar sem apagar nada). Core: `parseSheetImport`, `suggestExercises`, `exerciseNamesText`.
-- **Revisão 49** (`dec-f51620feb7b4bdb2`, removida na v59): nova tela **Mais → Dados → Ver dados** (somente leitura): contagens por store, tabela de treinos (data, ficha, exercícios, séries, abrir), fichas, biblioteca (com "usado em") e metas/semana, além de **Copiar JSON** e **Exportar backup**. Nada é escrito por essa tela.
-- **Revisão 48** (`dec-9abff65482647369`): corrigido o **histórico de exercício do catálogo que abria vazio** (id numérico do catálogo × id em texto vindo de `data-*` no HTML) — a comparação de id passou a ser feita **como texto** em um único lugar (`exerciseMatches`, `exerciseKey`, `exerciseLabel`, `sheetLabel`). Decisão: **manter os ids numéricos do catálogo** (1..927, política já documentada) com a comparação normalizada, em vez de migrar o catálogo para UUID e reescrever os dados legados.
-- **Revisão 47**: **correção urgente** — a v43 removeu, sem querer, os helpers `allExercises`/`labelOf`/`refOf` do `app.js` (o splice que trocou a lista de treinos engoliu o bloco seguinte): abrir um treino e editar paravam de funcionar (`ReferenceError: labelOf is not defined`). Os helpers voltaram e o `check.ps1` ganhou a verificação **14**: toda função chamada no `app.js` precisa existir (em `app.js`, `core.js` ou `db.js`) — os testes de sintaxe (`node --check`) não pegam esse tipo de erro.
-- **Revisão 46**: Início passa a listar **todos os treinos** (não só os 5 recentes), com contador; ícones do app atualizados para os novos da pasta `icons/` (favicon 16/32, apple-touch 180, manifest 192/512 + maskable, precache no service worker).
-- **Revisão 45**: teste de regressão de **base antiga** (`tests/old-db.test.js`): simula a era v33 (treinos/fichas sem id, nomes renomeados, `source: catalog` sem comprovação) passando pelo init (reparo + ligação por nome) e pela normalização — prova que nada se perde e que o histórico antigo continua encontrável pelo nome guardado (`historyTarget`). O reparo de sources ganhou uma versão pura (`fixLibrarySources`), usada pelo app.
-- **Revisão 44**: cobertura **fechada em 100%** — o gate mede, além das linhas do Node, uma passada em **processo único** (sem os falsos positivos do relatório por processo) e exige zero trechos da lógica sem teste; ficou de fora só o wrapper de módulo (Node × navegador), validado por `tests/module.test.js`. No caminho, dois fallbacks inalcançáveis foram removidos do core. Gate agora **bloqueia** o CI (`COVERAGE_ENFORCE=1`).
-- **Revisão 43**: **cobertura de testes 100%** de `js/core.js` (linhas e ramos) com gate no CI (`tools/coverage-gate.js` + `COVERAGE_ENFORCE=1`), lista funcionalidade → testes em `tests/CHECKLIST.md`, testes de borda e do registro do módulo no navegador. Decisão: **sem jsdom/npm**; o DOM fica coberto por verificações estáticas + lógica extraída para o core (ver "Limites conhecidos" no checklist).
-- **Revisão 41**: corrigido o nome da ficha desatualizado na visão geral — o treino guarda o nome da ficha como snapshot, e as telas passaram a resolver o **nome atual pelo id** (`sheetLabel`, mesmo padrão do histórico de exercícios), inclusive no texto exportado; renomear/excluir ficha já atualiza Início, Fichas, seletor do treino e Calendário na hora.
-- **Revisão 40**: compartilhamento manda **só o arquivo** (`{ files }`, sem `title` e sem `text`) — era o último campo capaz de virar um `.txt` no aparelho; a versão do app aparece ao lado do status do backup em **Mais → Dados** para conferir na hora se o telefone já tem o código novo.
-- **Revisão 39**: **um botão só de backup** — "Exportar" (antes "Exportar" + "Compartilhar backup"): no celular abre o menu de compartilhamento, no computador baixa o arquivo; o ícone e a dica embaixo do botão (`backupHint`) mudam conforme o aparelho.
-- **Revisão 38**: tela **Apagar dados** simplificada (só o checkbox, sem digitar `APAGAR`) e sem o botão de backup redundante; corrigido o botão de backup que baixava arquivo inválido (o handler recebia o evento de clique como argumento — agora validado por `isBackupPayload`, com teste de regressão).
-- **Revisão 37**: compartilhamento do backup manda **apenas o arquivo** (`backupSharePayload`, sem `text`) — alguns aparelhos salvavam o texto como um segundo arquivo `.txt`; botões de atualização consolidados em um só (**"Atualizar app"** limpa o cache e recarrega), com o `reset.html` mantido apenas como página de escape.
-- **Revisão 36**: corrigido o backup duplicado — a decisão virou regra pura (`backupAction`): **celular/tablet** abre o compartilhamento, **computador** baixa direto; se o compartilhamento falhar, o app **não** baixa sozinho (avisa e sugere "Exportar"). Feedback da ação ("Arquivo gerado: …" / "Backup compartilhado: …" / "cancelado").
-- **Revisão 35**: fluxo de backup manual aprimorado — botão **Compartilhar backup** (Web Share API com arquivo: Drive, WhatsApp, Arquivos), **status do último backup** em Mais → Dados e **lembrete no Início** quando passa de 7 dias (dispensável). Decisão: manter 100% local, **sem** integração OAuth com o Google Drive.
-- **Revisão 34**: campos de carga aceitam **vírgula** (`27,5`) e são exibidos com vírgula em pt-BR; no iPhone o campo decimal passou a `type="text"` + `inputmode="decimal"` (o `type="number"` bloqueava a tecla de vírgula) e o parser foi corrigido — antes `27,5` era salvo como `27`.
-- **Revisão 33**: ferramentas de apoio versionadas (`tools/`) — o gerador da fixture de exemplo passou a ser reprodutível (`tools/build-sample-data.ps1` + conteúdo em `tools/sample-data-content.json`), e o `check.ps1` regenera e compara o hash para manter os dois em sincronia.
-- **Revisão 32**: dados de exemplo (fixture) — `data/sample-data.json` com 3 fichas (5-6 exercícios do catálogo + 2 custom cada) e 12 treinos (4 por ficha, datas relativas), carregável em Mais → Dados de exemplo e usada como fixture nos testes de compatibilidade.
-- **Revisão 31**: detalhes do treino em **listas** (`<ul>`) com o mesmo estilo das fichas; editor da ficha com rótulos claros; **referência por id (chave estrangeira)** nos itens de ficha — renomear um exercício atualiza fichas (por id e, para dados antigos, por nome) e o histórico que aponta para o id, com **migração automática** que liga fichas antigas à Biblioteca.
-- **Revisão 30**: backup com **data e hora** no nome do arquivo (`meu-treino-backup-AAAA-MM-DD_HH-mm-ss.json`) e registro da **versão do app** dentro do arquivo.
-- **Revisão 29**: lista de fichas redesenhada — cada ficha mostra os exercícios em uma **lista** (`<ul>`) numerada, com séries×reps em destaque e a observação ao lado, em vez da linha compacta.
-- **Revisão 28**: correção da Biblioteca — o app não "adivinha" mais a origem pelo nome (`isUserExercise`): exercícios criados pelo usuário voltam a aparecer, e as marcações antigas sem `catalogId` são reparadas na inicialização.
-- **Revisão 27**: correção do zoom automático do iOS ao focar campos de texto (controles de formulário com 16px em telas de celular).
-- **Revisão 26**: extração da lógica pura para `js/core.js` (datas, semana, agrupamento de séries, aquecimento, histórico, exportação de texto e `normalizeBackup`) com **testes de unidade em Node** (`tests/core.test.js`, fixtures de backups v1/v2) e **pipelines** de testes (`tests.yml` a cada push/PR) e de deploy por tag (que só publica se os testes passarem).
-- **Revisão 25**: fluxo de publicação seguro — apenas a branch `main` + **tags** de versão; o Pages é publicado por **GitHub Actions** quando uma tag `v*` é enviada (com `check.ps1` como portão antes do deploy).
-- **Revisão 24**: `MANUAL.md` — documentação para usuários (primeiros passos, exemplo de ficha e de treino, evolução, metas, backup, FAQ, problemas comuns e glossário).
-- **Revisão 23**: revisão geral de boas práticas — `README.md` completo (com passo a passo do GitHub Pages), `check.ps1` (verificações estáticas), `.gitattributes`, `.nojekyll`, `Content-Security-Policy` e `aria-label` nos botões de ícone.
-- **Revisão 22**: busca **sem acentos** (ex.: "puxada maquina" encontra "Puxada máquina") em todas as buscas; a tela **Treinar** não cria mais fichas (o aluno cria na aba Fichas); nova tela **Apagar dados** (confirmação por digitação, sem `alert`).
+## 11. Revision history
+- **Revision 1** (`dec-392110e34edd83a3`): distribution via GitHub Pages, IndexedDB, week with warning + confirmation.
+- **Revision 2** (`dec-93a822fbea27513a`): workout type as a manageable list, set pre-fill, per-exercise progress in the MVP; editing/deleting workouts and automatic backup on import.
+- **Revision 3**: built-in exercise catalog (`data/exercises.json`, 869 pt-BR items, CC0-1.0, source `gugeldev/exercicios-bd-ptbr`); code language in English.
+- **Revision 4**: catalog IDs converted to permanent sequential integers (1..869), with the original `sourceId` preserved and a stability policy in `meta.idPolicy`.
+- **Revision 5** (`dec-a52daaa2e8f02e86`): UI framework Bootstrap 5, with files vendored locally (no CDN at runtime).
+- **Revision 6**: catalog search inline in the ficha modal (fixes overlapping modals); on-the-fly exercise creation; catalog extended with +58 common gym exercises (ids 870–927, 927 total).
+- **Revision 7**: "ficha" becomes the **complete workout** (ordered group of exercises) and "exercícios" become the library; when logging, the selected ficha loads its exercises. Automatic migration of the old "tipos de treino" into fichas (IndexedDB v2).
+- **Revision 8**: in the ficha, each exercise has **sets + reps per set** (e.g. 3×12-10-8) and the **professora's note**; **load and RIR left the ficha and the library** (they belong to the workout). The library kept name, group and note.
+- **Revision 9**: **warm-up line** in the workout log (reps, peso, RIR), saved with the workout.
+- **Revision 10**: the warm-up becomes **per exercise** (each exercise in the workout has its own reps/peso/RIR line), not a single block for the workout.
+- **Revision 11**: warm-up pre-filled with **reps and peso from the previous workout**; bottom menu item "Exercícios" renamed to **"Fichas"**.
+- **Revision 12**: visual polish — icons in titles/cards/buttons, **progress bars** on the weekly goals, **trend arrow** (↑/↓/=) in per-exercise progress, PR badge with a trophy, exercise numbering in the ficha, **today** highlighted in the calendar and empty states with guidance.
+- **Revision 13** (`dec-23116a57a6ed6e0c`): "Exercícios" tab renamed to **"Biblioteca"**, with **filter by muscle group**, search and indication of **which fichas** use each exercise.
+- **Revision 14**: menu item "Registrar" renamed to **"Treinar"**; each workout can be **exported as readable text** (warm-up, sets, loads, RIR, notes, cardio) to copy/share with the professora.
+- **Revision 15**: exercises picked from the catalog are now **saved in the Biblioteca**; **visible error handling** in actions (no silent failures); a workout with only a warm-up also saves; import without automatic download, with **"Desfazer importação"**.
+- **Revision 16**: in the exported text, the **warm-up appears inside each exercise** (and exercises with only a warm-up are listed too).
+- **Revision 17**: "Desempenho por exercício" left the Dashboard; a new consultation flow: tapping a workout opens the **"Como foi o treino"** screen (read-only) and tapping an exercise opens the **Evolução** (best set per day, PR, trend and history).
+- **Revision 18**: **Cancelar** button on the workout screen, discarding all changes (returns to "Como foi o treino" when it was editing).
+- **Revision 19**: short explanatory texts on the **Fichas** screen (what a ficha is, what the Biblioteca is) and a hint inside the ficha editor.
+- **Revision 20**: the **Biblioteca** now lists only the exercises **created by the user** (catalog ones are no longer copied there or shown in the list).
+- **Revision 21**: standardised button bars (actions on the **same line**, icon buttons with fixed width `.btn-icon`) on every screen.
+- **Revision 42**: audit of **references by id** across the whole app — `exerciseLabel`, `sheetLabel`, `exerciseTarget`, `exerciseMatches` and `exerciseKey` in the core; set grouping, history, PR, fichas, pre-fill and exported text now resolve by id (the stored name is only a fallback for old/no-id data); ids that were being dropped (`pickCatalogExercise`, adding from the catalog to the ficha) are now saved; invalid ficha items are discarded in normalization.
+- **Tests (2026-11-17, no app change)**: Phase 1 of the refactor (`documentation/REFACTOR.md`) done — the real app is tested in a phone Chromium (Playwright, `tests/e2e/`) on every PR. Every path a person triggers has a browser test, including the **Não** answer of every confirmation; CI fails a `tests/CHECKLIST.md` row without a browser test and a drop in `js/app.js` coverage relative to `main` (ratchet, 98.7% today). Issues #4, #5, #19, #6, #7 and #29.
+- **Tests (2026-11-18, no app change)**: **temporary** browser tests for the refactor (issue #39, `tests/e2e/temporarios/`): every behaviour of every screen has its own test and `js/app.js` line coverage reached **100%**, including error paths (device out of space, blocked cache) simulated in the browser and "Atualizar app", which started being counted. They stay on until #16; #40 turns them off without deleting them.
+- **Process (2026-11-17, no app change)**: `main` became protected — every change goes in through a **pull request**, merge **only by rebase**, linear history and required checks (tests + coverage, `check.ps1` and the new **Version** job, which requires the bump when `index.html`, `css/` or `js/` change). `deploy.yml` now runs on every merge to `main` and, if the version has no tag yet, publishes to Pages and **creates the `vN` tag itself**; nobody tags by hand anymore.
+- **v77**: the **workout text** sent to the professora no longer carries the **professora's note** (the `_Obs.: …_` line under each exercise): it is her own text. The note stays saved in the sets and appears in Treinar and in the workout detail.
+- **v76**: the **set note** field in Treinar and the **Criar com IA** texts went back to 16px on the phone (a more specific rule made them smaller and the iPhone zoomed on tap). A browser test measures the size of each field in view at 375px.
+- **v74**: leaner **Mais** screen: **Debug** card always visible at the end (the collapsible "Opções avançadas" is gone); **Fichas de treino** card removed (the Fichas tab already does that); **Colinha** right below **Metas da semana**. Order: Metas, Colinha, Importar treinos antigos, Dados, Instalar o app, Debug.
+- **v73**: the review summary and the final warning of **Importar treinos antigos** moved to the core with tests (`historyImportSummaryHtml`, `historyImportToast`); the warning no longer says "0 treinos importados" when only fichas come in. Wiring tests for the two AI imports (review, import, ficha → workout order, shared exercise review).
+- **v72**: new **Mais → Importar treinos antigos** card: the AI converts a spreadsheet of workouts already done following the `TREINO-JSON.md` contract (`{ fichas, treinos }`) and recreates the **fichas of the most recent routine**, linked to the same exercises from the history, so the last time's load already comes filled in. Review with period, new/reused fichas and a similar-exercise choice; repeated workouts (same date and sets) are skipped. Core: `parseHistoryImport`, `sheetByName`, `splitImportedSheets`, `importedWorkout`, `workoutFingerprint`, `splitImportedWorkouts`, `historyExerciseNames`, `sheetNamesText`.
+- **v70**: new **Mais → Instalar o app** card (between Dados and Opções avançadas): **Instalar** button when the browser offers it (Chrome/Edge, phone or computer), Safari on iPhone step by step and an "already installed" warning. Core: `installHint`.
+- **v68**: **Pedir uma ficha para a IA** and **Importar** became a single button, **Criar com IA**: the same window brings the text for the AI (copy, 2-line field) and the box to paste the answer; the `#/ia` screen and the AI text's **Compartilhar** button were removed.
+- **v59**: the AI contract accepts **a PDF with several workouts** (always an array, one ficha per workout, distinct names, phase in the name); **Ver dados** screen removed; **Atualizar app**, **Apagar todos os dados**, storage used and sample data moved to the **Mais → Debug** card.
+- **v55–v58**: Início cards with only the date + ficha name (counts and the record badge left; the record stays in the workout summary); the **compartilhar** button came back to the card (v56); alternating colours on the Treinar cards tried and reverted (v57/v58).
+- **v53–v54**: **Importar ficha em JSON** by pasting the text (accepts the ` ```json ` fence), with a **review** that suggests similar exercises (Biblioteca before the catalog) or "Criar novo"; the **#/ia** screen that joins the `FICHA-JSON.md` contract + Biblioteca and catalog names to paste into the AI; fichas can be **deactivated/reactivated** (they disappear from the Treinar selector without deleting anything). Core: `parseSheetImport`, `suggestExercises`, `exerciseNamesText`.
+- **Revision 49** (`dec-f51620feb7b4bdb2`, removed in v59): new **Mais → Dados → Ver dados** screen (read-only): counts per store, workouts table (date, ficha, exercises, sets, open), fichas, library (with "used in") and goals/week, plus **Copiar JSON** and **Exportar backup**. Nothing is written by that screen.
+- **Revision 48** (`dec-9abff65482647369`): fixed the **catalog exercise history that opened empty** (numeric catalog id × text id coming from `data-*` in the HTML) — the id comparison is now done **as text** in a single place (`exerciseMatches`, `exerciseKey`, `exerciseLabel`, `sheetLabel`). Decision: **keep the numeric catalog ids** (1..927, policy already documented) with the normalized comparison, instead of migrating the catalog to UUID and rewriting the legacy data.
+- **Revision 47**: **urgent fix** — v43 had accidentally removed the helpers `allExercises`/`labelOf`/`refOf` from `app.js` (the splice that swapped the workout list swallowed the following block): opening a workout and editing stopped working (`ReferenceError: labelOf is not defined`). The helpers came back and `check.ps1` gained check **14**: every function called in `app.js` must exist (in `app.js`, `core.js` or `db.js`) — the syntax tests (`node --check`) don't catch this kind of error.
+- **Revision 46**: Início now lists **all workouts** (not just the 5 latest), with a counter; app icons updated to the new ones in the `icons/` folder (favicon 16/32, apple-touch 180, manifest 192/512 + maskable, precache in the service worker).
+- **Revision 45**: **old database** regression test (`tests/old-db.test.js`): simulates the v33 era (workouts/fichas without id, renamed names, `source: catalog` without proof) going through init (repair + linking by name) and normalization — proves that nothing is lost and that the old history is still findable by the stored name (`historyTarget`). The source repair got a pure version (`fixLibrarySources`), used by the app.
+- **Revision 44**: coverage **closed at 100%** — the gate measures, beyond the Node lines, a pass in a **single process** (without the false positives of the per-process report) and requires zero stretches of logic without a test; only the module wrapper (Node × browser) was left out, validated by `tests/module.test.js`. Along the way, two unreachable fallbacks were removed from the core. The gate now **blocks** CI (`COVERAGE_ENFORCE=1`).
+- **Revision 43**: **100% test coverage** of `js/core.js` (lines and branches) with a gate in CI (`tools/coverage-gate.js` + `COVERAGE_ENFORCE=1`), feature → tests list in `tests/CHECKLIST.md`, edge tests and module registration in the browser. Decision: **no jsdom/npm**; the DOM stays covered by static checks + logic extracted into the core (see "Known limits" in the checklist).
+- **Revision 41**: fixed the outdated ficha name in the overview — the workout stores the ficha name as a snapshot, and the screens now resolve the **current name by id** (`sheetLabel`, same pattern as the exercise history), including in the exported text; renaming/deleting a ficha already updates Início, Fichas, the workout selector and the Calendário right away.
+- **Revision 40**: sharing sends **only the file** (`{ files }`, no `title` and no `text`) — it was the last field able to become a `.txt` on the device; the app version appears next to the backup status in **Mais → Dados** to check right away whether the phone already has the new code.
+- **Revision 39**: **a single backup button** — "Exportar" (before "Exportar" + "Compartilhar backup"): on the phone it opens the share sheet, on the computer it downloads the file; the icon and the hint under the button (`backupHint`) change with the device.
+- **Revision 38**: simplified **Apagar dados** screen (only the checkbox, no typing `APAGAR`) and without the redundant backup button; fixed the backup button that downloaded an invalid file (the handler received the click event as an argument — now validated by `isBackupPayload`, with a regression test).
+- **Revision 37**: backup sharing sends **only the file** (`backupSharePayload`, no `text`) — some devices saved the text as a second `.txt` file; update buttons consolidated into one (**"Atualizar app"** clears the cache and reloads), with `reset.html` kept only as an escape page.
+- **Revision 36**: fixed the duplicate backup — the decision became a pure rule (`backupAction`): **phone/tablet** opens the share sheet, **computer** downloads straight away; if sharing fails, the app does **not** download on its own (it warns and suggests "Exportar"). Action feedback ("Arquivo gerado: …" / "Backup compartilhado: …" / "cancelado").
+- **Revision 35**: improved manual backup flow — **Compartilhar backup** button (Web Share API with a file: Drive, WhatsApp, Files), **last backup status** in Mais → Dados and a **reminder on Início** when more than 7 days pass (dismissible). Decision: stay 100% local, **no** OAuth integration with Google Drive.
+- **Revision 34**: carga fields accept a **comma** (`27,5`) and are shown with a comma in pt-BR; on the iPhone the decimal field became `type="text"` + `inputmode="decimal"` (`type="number"` blocked the comma key) and the parser was fixed — before, `27,5` was saved as `27`.
+- **Revision 33**: support tools versioned (`tools/`) — the sample fixture generator became reproducible (`tools/build-sample-data.ps1` + content in `tools/sample-data-content.json`), and `check.ps1` regenerates and compares the hash to keep the two in sync.
+- **Revision 32**: sample data (fixture) — `data/sample-data.json` with 3 fichas (5-6 catalog exercises + 2 custom each) and 12 workouts (4 per ficha, relative dates), loadable in Mais → Dados de exemplo and used as a fixture in the compatibility tests.
+- **Revision 31**: workout details in **lists** (`<ul>`) with the same style as the fichas; ficha editor with clear labels; **reference by id (foreign key)** in ficha items — renaming an exercise updates fichas (by id and, for old data, by name) and the history that points to the id, with **automatic migration** that links old fichas to the Biblioteca.
+- **Revision 30**: backup with **date and time** in the file name (`meu-treino-backup-AAAA-MM-DD_HH-mm-ss.json`) and the **app version** recorded inside the file.
+- **Revision 29**: ficha list redesigned — each ficha shows the exercises in a numbered **list** (`<ul>`), with sets×reps highlighted and the note alongside, instead of the compact row.
+- **Revision 28**: Biblioteca fix — the app no longer "guesses" the origin from the name (`isUserExercise`): user-created exercises show up again, and old markings without `catalogId` are repaired on startup.
+- **Revision 27**: fix for the iOS auto-zoom when focusing text fields (form controls at 16px on phone screens).
+- **Revision 26**: extraction of the pure logic into `js/core.js` (dates, week, set grouping, warm-up, history, text export and `normalizeBackup`) with **unit tests in Node** (`tests/core.test.js`, v1/v2 backup fixtures) and **pipelines** for tests (`tests.yml` on every push/PR) and for tag deploy (which only publishes if the tests pass).
+- **Revision 25**: safe publishing flow — only the `main` branch + version **tags**; Pages is published by **GitHub Actions** when a `v*` tag is pushed (with `check.ps1` as the gate before deploy).
+- **Revision 24**: `MANUAL.md` — documentation for users (getting started, ficha and workout example, evolution, goals, backup, FAQ, common problems and glossary).
+- **Revision 23**: general best-practices review — complete `README.md` (with a GitHub Pages step by step), `check.ps1` (static checks), `.gitattributes`, `.nojekyll`, `Content-Security-Policy` and `aria-label` on icon buttons.
+- **Revision 22**: **accent-insensitive** search (e.g. "puxada maquina" finds "Puxada máquina") in every search; the **Treinar** screen no longer creates fichas (the trainee creates them in the Fichas tab); new **Apagar dados** screen (confirmation by typing, no `alert`).
