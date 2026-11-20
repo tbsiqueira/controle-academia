@@ -52,32 +52,13 @@ jobs:
             echo "publish=true" >> "$GITHUB_OUTPUT"
           fi
 
+  # Publish gate: runs the entire Testes workflow (tests.yml) instead of copying its steps here, so a publish only
+  # happens for a commit that passed unit, static and browser tests. check.ps1 fails if this call disappears.
   verificar:
     name: Testes e verificações
     needs: versao
     if: needs.versao.outputs.publish == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-
-      - name: Configurar Node
-        uses: actions/setup-node@v7
-        with:
-          node-version: '26'
-
-      - name: Verificar sintaxe dos scripts de navegador
-        run: |
-          for f in js/core.js js/app.js js/db.js sw.js; do
-            node --check "$f"
-          done
-
-      - name: Testes unitários
-        run: node --test tests/
-
-      - name: Verificações estáticas
-        shell: pwsh
-        run: ./check.ps1
+    uses: ./.github/workflows/tests.yml
 
   publicar:
     name: Publicar

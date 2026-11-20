@@ -9,6 +9,9 @@ on:
       - main
   pull_request:
   workflow_dispatch:
+  # deploy.yml calls this whole workflow as the publish gate, so the checks a PR must pass and the checks a
+  # publish must pass are the same jobs: anything added here also gates publishing.
+  workflow_call:
 
 permissions:
   contents: read

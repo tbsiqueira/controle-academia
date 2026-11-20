@@ -18,7 +18,9 @@ CI: `tests.yml` runs `node --check`, the coverage gate, `check.ps1` and the brow
 version is already tagged). Its four jobs are the required checks of the `main` ruleset ([Git](#git)).
 CI installs only the Chromium browser, without `--with-deps` (no apt); see the comment in `tests.yml`.
 `deploy.yml` runs on every push to `main` (= a merged PR): if tag `vN` for the current version doesn't exist yet,
-it runs the checks, publishes to GitHub Pages and then creates and pushes tag `vN`. Otherwise it publishes nothing.
+it calls the whole `tests.yml` workflow as the publish gate (unit, static and browser tests), publishes to GitHub
+Pages and then creates and pushes tag `vN`. Otherwise it publishes nothing. A check added to `tests.yml` therefore
+gates publishing too; `check.ps1` fails if that call disappears.
 
 ## Browser tests (Playwright)
 
