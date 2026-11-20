@@ -1,12 +1,12 @@
 'use strict';
 
 /**
- * Mede a cobertura de js/core.js rodando os testes.
+ * Measures the coverage of js/core.js by running the tests.
  *
- * - Usa o coverage nativo do Node (--experimental-test-coverage) para os percentuais.
- * - Usa o relatório do V8 (NODE_V8_COVERAGE) para achar os TRECHOS sem teste e
- *   publicá-los como "annotations" do GitHub Actions (dá para ler na API, sem abrir o log).
- * - Com COVERAGE_ENFORCE=1, falha se js/core.js não estiver em 100% (linhas e ramos).
+ * - Uses Node's native coverage (--experimental-test-coverage) for the percentages.
+ * - Uses the V8 report (NODE_V8_COVERAGE) to find the SNIPPETS without a test and
+ *   publish them as GitHub Actions "annotations" (readable in the API, without opening the log).
+ * - With COVERAGE_ENFORCE=1, fails when js/core.js is not at 100% (lines and branches).
  */
 
 const fs = require('node:fs');
@@ -26,7 +26,7 @@ const rodar = spawnSync(process.execPath, ['--test', '--experimental-test-covera
 const saida = String(rodar.stdout || '') + String(rodar.stderr || '');
 process.stdout.write(saida);
 
-/* ---------- falhas dos testes (viram annotations, para dar para ler sem o log) ---------- */
+/* ---------- test failures (become annotations, so they can be read without the log) ---------- */
 
 function falhasDosTestes(texto) {
   const linhas = texto.split('\n');
@@ -52,7 +52,7 @@ function falhasDosTestes(texto) {
           const info = JSON.parse(local[1]);
           if (info.file) arquivo = String(info.file).replace(/\\/g, '/').replace(raiz, '');
           if (info.line) linhaArquivo = info.line;
-        } catch (e) { /* sem location: aponta para o proprio gate */ }
+        } catch (e) { /* no location: point at the gate itself */ }
       }
 
       const inicio = linhaAtual.match(/^\s*error: \|?-*\s*(.*)$/);
@@ -82,7 +82,7 @@ function falhasDosTestes(texto) {
 if (rodar.status !== 0) {
   const falhas = falhasDosTestes(saida);
 
-  console.error('\n[cobertura] ' + (falhas.length || 'alguns') + ' teste(s) falharam.');
+  console.error('\n[coverage] ' + (falhas.length || 'some') + ' test(s) failed.');
 
   falhas.slice(0, 5).forEach(function (f) {
     console.log('::error file=' + f.arquivo + ',line=' + f.linha + '::' + f.titulo +
@@ -92,7 +92,7 @@ if (rodar.status !== 0) {
   process.exit(rodar.status || 1);
 }
 
-/* ---------- percentuais (tabela do Node) ---------- */
+/* ---------- percentages (Node's table) ---------- */
 
 function tabelaDeCobertura(texto) {
   const linhas = [];
@@ -117,14 +117,14 @@ function tabelaDeCobertura(texto) {
 const alvo = tabelaDeCobertura(saida).filter(function (l) { return l.arquivo.indexOf('core.js') !== -1; });
 
 if (!alvo.length) {
-  console.error('\n[cobertura] nao encontrei a linha de ' + ALVO + ' no relatorio do Node.');
-  console.error('Cole o relatorio acima para ajustar tools/coverage-gate.js.');
+  console.error('\n[coverage] could not find the ' + ALVO + ' line in the Node report.');
+  console.error('Paste the report above to adjust tools/coverage-gate.js.');
   process.exit(2);
 }
 
 const medidas = alvo[0];
 
-/* ---------- trechos sem teste (ranges do V8) ---------- */
+/* ---------- snippets without a test (V8 ranges) ---------- */
 
 const fonte = fs.readFileSync(path.join(process.cwd(), ALVO), 'utf8');
 
@@ -151,8 +151,8 @@ function trechosSemTeste(diretorio) {
     (bruto.result || []).forEach(function (arquivo, indiceArquivo) {
       if (!arquivo.url || arquivo.url.indexOf('/' + ALVO) === -1) return;
 
-      // Cada entrada do relatorio e uma execucao do arquivo (o teste do vm carrega o
-      // mesmo core.js de novo): usamos o par url+indice como identificador.
+      // Each report entry is one run of the file (the vm test loads the same core.js
+      // again): the url+index pair is used as the identifier.
       const chave = arquivo.url + '#' + nome + '#' + indiceArquivo;
       executacoes.push(chave);
       porExecucao[chave] = porExecucao[chave] || [];
@@ -182,9 +182,9 @@ function trechosSemTeste(diretorio) {
     porExecucao[chave].forEach(function (faixa) {
       if (faixa.contagem > 0) return;
 
-      // O mesmo trecho (mesmos offsets) pode aparecer em varias entradas do relatorio
-      // (funcoes aninhadas, o core carregado de novo no vm...). Basta UMA execucao
-      // ter passado por ele para considerarmos coberto.
+      // The same snippet (same offsets) can show up in several report entries
+      // (nested functions, core loaded again in the vm...). ONE run having gone
+      // through it is enough for it to count as covered.
       const assinatura = faixa.inicio + ':' + faixa.fim;
       if (cobertos[assinatura] > 0) return;
 
@@ -198,7 +198,7 @@ function trechosSemTeste(diretorio) {
     });
   });
 
-  // junta faixas sobrepostas (o V8 devolve ranges aninhados)
+  // merge overlapping ranges (V8 returns nested ranges)
   achados.sort(function (a, b) { return a.inicio - b.inicio || a.fim - b.fim; });
 
   const juntas = [];
@@ -220,30 +220,30 @@ function trechosSemTeste(diretorio) {
 
 const diagnostico = trechosSemTeste(temporario);
 const semTeste = diagnostico.trechos;
-// O wrapper de modulo (primeiras linhas do arquivo) escolhe entre Node e navegador: cada
-// ambiente executa so um lado, e o lado do navegador e validado em tests/module.test.js.
+// The module wrapper (first lines of the file) picks between Node and the browser: each
+// environment runs only one side, and the browser side is validated in tests/module.test.js.
 const FIM_DO_WRAPPER = 16;
 
-// Criterio do gate: 100% de linhas (tabela do Node) + nenhum trecho da LOGICA sem teste
-// (passada em processo unico, que nao tem os falsos positivos do relatorio por processo).
+// Gate criterion: 100% of lines (Node's table) + no LOGIC snippet without a test
+// (measured in a single process, which does not have the false positives of the per-process report).
 const precisos = diagnosticoPreciso().filter(function (t) { return t.inicio > FIM_DO_WRAPPER; });
 const completo = medidas.linhas === 100 && precisos.length === 0;
 
-console.log('\n[cobertura] ' + ALVO + ': linhas ' + medidas.linhas + '% | ramos ' + medidas.ramos +
-  '% | funcoes ' + medidas.funcoes + '% (tabela do Node)');
-console.log('[cobertura] trechos que o V8 nao viu executar: ' + semTeste.length);
+console.log('\n[coverage] ' + ALVO + ': lines ' + medidas.linhas + '% | branches ' + medidas.ramos +
+  '% | functions ' + medidas.funcoes + '% (Node table)');
+console.log('[coverage] snippets V8 did not see run: ' + semTeste.length);
 
 semTeste.forEach(function (t) {
-  console.log('[cobertura]   linhas ' + t.inicio + '-' + t.fim + ': ' + t.trecho);
+  console.log('[coverage]   lines ' + t.inicio + '-' + t.fim + ': ' + t.trecho);
 });
 
-// Annotations: aparecem no resumo do check, sem precisar abrir o log.
+// Annotations: they show up in the check summary, without opening the log.
 const listaDeLinhas = semTeste.map(function (t) {
   return t.fim > t.inicio ? (t.inicio + '-' + t.fim) : String(t.inicio);
 }).join(', ');
 
-// Segunda passada: roda TODOS os arquivos de teste em um unico processo. Sem processos
-// separados, o V8 reporta tudo (sem falso positivo) e a lista fica precisa.
+// Second pass: runs ALL the test files in a single process. Without separate
+// processes, V8 reports everything (no false positive) and the list is accurate.
 function diagnosticoPreciso() {
   const diretorio = fs.mkdtempSync(path.join(os.tmpdir(), 'mt-cobertura-1p-'));
   const arquivos = fs.readdirSync(path.join(process.cwd(), 'tests')).filter(function (f) {
@@ -258,25 +258,25 @@ function diagnosticoPreciso() {
 
   return trechosSemTeste(diretorio).trechos;
 }
-console.log('::notice file=' + ALVO + ',line=1::trechos que o V8 nao viu executar: ' +
-  (listaDeLinhas || 'nenhum'));
+console.log('::notice file=' + ALVO + ',line=1::snippets V8 did not see run: ' +
+  (listaDeLinhas || 'none'));
 
 const precisosTexto = precisos.map(function (t) {
   return (t.fim > t.inicio ? (t.inicio + '-' + t.fim) : String(t.inicio)) + ' [' + t.trecho.slice(0, 45) + ']';
 });
 
-console.log('::notice file=' + ALVO + ',line=1::preciso (processo unico, fora do wrapper): ' +
-  (precisosTexto.join(' | ') || 'nada sem cobertura'));
+console.log('::notice file=' + ALVO + ',line=1::accurate (single process, outside the wrapper): ' +
+  (precisosTexto.join(' | ') || 'nothing without coverage'));
 
 if (completo) {
-  console.log('::notice file=' + ALVO + ',line=1::cobertura OK: 100% das linhas de ' + ALVO +
-    ' e nenhum trecho da logica sem teste (ramos medidos pelo Node: ' + medidas.ramos + '%)');
-  console.log('[cobertura] 100% de linhas em ' + ALVO + ' e nenhum trecho da logica sem teste.');
+  console.log('::notice file=' + ALVO + ',line=1::coverage OK: 100% of the lines of ' + ALVO +
+    ' and no logic snippet without a test (branches measured by Node: ' + medidas.ramos + '%)');
+  console.log('[coverage] 100% of the lines in ' + ALVO + ' and no logic snippet without a test.');
   process.exit(0);
 }
 
-const resumo = '[cobertura] ' + ALVO + ' abaixo de 100%: linhas ' + medidas.linhas + '%, ramos ' +
-  medidas.ramos + '%, funcoes ' + medidas.funcoes + '%, ' + precisos.length + ' trecho(s) da logica sem teste' + (enforcar ? '' : ' (informativo)');
+const resumo = '[coverage] ' + ALVO + ' below 100%: lines ' + medidas.linhas + '%, branches ' +
+  medidas.ramos + '%, functions ' + medidas.funcoes + '%, ' + precisos.length + ' logic snippet(s) without a test' + (enforcar ? '' : ' (informational)');
 
 if (enforcar) {
   console.log('::error file=' + ALVO + '::' + resumo);

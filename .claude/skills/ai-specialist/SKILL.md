@@ -76,7 +76,7 @@ LOOKS GOOD
    and ask.
 3. Make the change. Docs only: no version bump.
 4. Run `node --test tests/` and `powershell -ExecutionPolicy Bypass -File .\check.ps1` (must print
-   "Tudo certo."). Don't continue with a red check: report its output.
+   "All good."). Don't continue with a red check: report its output.
 5. Commit as in `documentation/agents/workflow.md` (Git): `docs: <English summary>`, no signature lines.
 6. **Review round, only when the user asks for one.** One round, no second. Start the reviewer as in round 1 in
    "Review rounds" of `documentation/agents/developer.md`, with these changes: name `review-docs`, `--cwd` this checkout,

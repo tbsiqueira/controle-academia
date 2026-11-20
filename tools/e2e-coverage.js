@@ -1,16 +1,16 @@
-// Cobertura de js/app.js pelos testes de navegador (issue #7, documentation/REFACTOR.md seção 4).
+// js/app.js coverage by the browser tests (issue #7, documentation/REFACTOR.md section 4).
 //
-// Cada teste de navegador grava, em tests/e2e/coverage/, as linhas de js/app.js que rodaram (fixture automático
-// em tests/e2e/helpers.js, cobertura de JS do Chromium). Este script junta tudo e mede.
+// Each browser test writes, into tests/e2e/coverage/, the js/app.js lines that ran (automatic fixture
+// in tests/e2e/helpers.js, Chromium's JS coverage). This script joins everything and measures.
 //
-// Uso (depois de `npm run test:e2e`):
-//   node tools/e2e-coverage.js                         mostra a cobertura e as funções que nenhum teste roda
-//   node tools/e2e-coverage.js --update                grava o número em tests/e2e/coverage-baseline.json
-//   node tools/e2e-coverage.js --baseline <arquivo>    catraca: falha se ficar abaixo do número desse arquivo
+// Usage (after `npm run test:e2e`):
+//   node tools/e2e-coverage.js                         shows the coverage and the functions no test runs
+//   node tools/e2e-coverage.js --update                writes the number into tests/e2e/coverage-baseline.json
+//   node tools/e2e-coverage.js --baseline <file>       ratchet: fails when below the number in that file
 //
-// No CI, `--baseline` recebe o arquivo da main (a cobertura não pode cair em relação à main) e o script também
-// falha se a cobertura subiu e o tests/e2e/coverage-baseline.json do PR não foi atualizado com `--update`.
-// Com GITHUB_STEP_SUMMARY definido, escreve o resumo do job.
+// In CI, `--baseline` receives the file from main (coverage can't drop compared to main) and the script also
+// fails when coverage rose and the PR's tests/e2e/coverage-baseline.json was not updated with `--update`.
+// With GITHUB_STEP_SUMMARY set, it writes the job summary.
 'use strict';
 const fs = require('fs');
 const path = require('path');
@@ -21,8 +21,8 @@ const RAW_DIR = path.join(ROOT, 'tests', 'e2e', 'coverage');
 const BASELINE = path.join(ROOT, 'tests', 'e2e', 'coverage-baseline.json');
 
 /**
- * Linhas que contam na cobertura: as que têm código. Linhas em branco e só de comentário ficam de fora.
- * Devolve [{ line (1-based), offset (posição do primeiro caractere de código) }].
+ * Lines that count in the coverage: the ones with code. Blank lines and comment-only lines are left out.
+ * Returns [{ line (1-based), offset (position of the first code character) }].
  */
 function codeLines(source) {
   const lines = [];
@@ -37,8 +37,8 @@ function codeLines(source) {
 }
 
 /**
- * Linhas de código que rodaram, a partir da cobertura de blocos do V8 (`page.coverage.stopJSCoverage()`).
- * O contador de uma linha é o do bloco mais interno que contém o primeiro caractere de código dela.
+ * Code lines that ran, from V8's block coverage (`page.coverage.stopJSCoverage()`).
+ * A line's counter is the one of the innermost block containing its first code character.
  */
 function coveredLines(entry) {
   const lines = codeLines(entry.source);
@@ -47,7 +47,7 @@ function coveredLines(entry) {
   entry.functions.forEach(function (fn) {
     fn.ranges.forEach(function (r) { ranges.push(r); });
   });
-  // Do maior para o menor: o bloco mais interno pinta por último.
+  // Largest to smallest: the innermost block paints last.
   ranges.sort(function (a, b) { return (b.endOffset - b.startOffset) - (a.endOffset - a.startOffset); });
   ranges.forEach(function (r) {
     for (let i = firstAtOrAfter(lines, r.startOffset); i < lines.length && lines[i].offset < r.endOffset; i++) {
@@ -67,7 +67,7 @@ function firstAtOrAfter(lines, offset) {
   return lo;
 }
 
-/** Entradas da cobertura do Chromium que são o js/app.js do servidor de testes (com ou sem ?v=N). */
+/** Chromium coverage entries that are the test server's js/app.js (with or without ?v=N). */
 function isAppScript(url) {
   try {
     return new URL(url).pathname === '/' + FILE;
@@ -76,7 +76,7 @@ function isAppScript(url) {
   }
 }
 
-/** Junta os arquivos gravados pelos testes e mede a cobertura de linhas de js/app.js. */
+/** Joins the files written by the tests and measures the line coverage of js/app.js. */
 function measure() {
   const source = fs.readFileSync(path.join(ROOT, FILE), 'utf8');
   const all = codeLines(source).map(function (l) { return l.line; });
@@ -97,7 +97,7 @@ function floor1(n) {
   return Math.floor(n * 10 + 1e-9) / 10;
 }
 
-/** Funções de nível de topo do app.js com linhas que nenhum teste roda, das que mais faltam para as que menos. */
+/** Top-level functions of app.js with lines no test runs, from the most missing to the least. */
 function uncoveredFunctions(result) {
   const lines = result.source.split('\n');
   const starts = [];
@@ -116,27 +116,27 @@ function uncoveredFunctions(result) {
 
 function readBaseline(file) {
   const data = JSON.parse(fs.readFileSync(file, 'utf8'));
-  if (typeof data[FILE] !== 'number') throw new Error(file + ' não tem o número de ' + FILE);
+  if (typeof data[FILE] !== 'number') throw new Error(file + ' has no number for ' + FILE);
   return data[FILE];
 }
 
 function main(argv) {
   const result = measure();
   if (!result.runs) {
-    console.error('Nenhuma cobertura em tests/e2e/coverage/. Rode `npm run test:e2e` antes.');
+    console.error('No coverage in tests/e2e/coverage/. Run `npm run test:e2e` first.');
     return 1;
   }
 
   const missing = uncoveredFunctions(result);
-  console.log(FILE + ': ' + result.hit + '/' + result.total + ' linhas (' + result.pct + '%) em ' + result.runs + ' testes de navegador.');
+  console.log(FILE + ': ' + result.hit + '/' + result.total + ' lines (' + result.pct + '%) in ' + result.runs + ' browser tests.');
   if (argv.includes('--verbose')) {
-    missing.forEach(function (f) { console.log('  ' + f.name + ' (linha ' + f.line + '): ' + f.missing + '/' + f.total + ' linhas sem teste'); });
+    missing.forEach(function (f) { console.log('  ' + f.name + ' (line ' + f.line + '): ' + f.missing + '/' + f.total + ' lines with no test'); });
   }
 
   const summary = [
-    '### Cobertura de `' + FILE + '` pelos testes de navegador',
+    '### Coverage of `' + FILE + '` by the browser tests',
     '',
-    '| Linhas cobertas | Total | Cobertura |',
+    '| Lines covered | Total | Coverage |',
     '|---:|---:|---:|',
     '| ' + result.hit + ' | ' + result.total + ' | **' + result.pct + '%** |',
     ''
@@ -145,34 +145,34 @@ function main(argv) {
 
   if (argv.includes('--update')) {
     fs.writeFileSync(BASELINE, JSON.stringify({ [FILE]: result.pct }, null, 2) + '\n');
-    console.log('Gravado em tests/e2e/coverage-baseline.json: ' + result.pct + '%.');
+    console.log('Written to tests/e2e/coverage-baseline.json: ' + result.pct + '%.');
   }
 
   const baseIdx = argv.indexOf('--baseline');
   if (baseIdx !== -1) {
     const mainPct = readBaseline(argv[baseIdx + 1]);
     const ownPct = readBaseline(BASELINE);
-    summary.push('Catraca: main **' + mainPct + '%** · este código **' + result.pct + '%**.', '');
+    summary.push('Ratchet: main **' + mainPct + '%** · this code **' + result.pct + '%**.', '');
     if (result.pct < mainPct) {
       failed = true;
-      const msg = 'a cobertura de ' + FILE + ' pelos testes de navegador caiu de ' + mainPct + '% (main) para ' + result.pct +
-        '%. Cubra o que entrou com testes de navegador (node tools/e2e-coverage.js --verbose lista o que falta).';
+      const msg = 'the browser-test coverage of ' + FILE + ' dropped from ' + mainPct + '% (main) to ' + result.pct +
+        '%. Cover what you added with browser tests (node tools/e2e-coverage.js --verbose lists what is missing).';
       console.log('::error::' + msg);
       summary.push('❌ ' + msg, '');
     } else if (result.pct > ownPct) {
       failed = true;
-      const msg = 'a cobertura subiu para ' + result.pct + '%, mas tests/e2e/coverage-baseline.json diz ' + ownPct +
-        '%. Rode `npm run test:e2e` e `node tools/e2e-coverage.js --update` e faça commit do arquivo (a catraca só sobe).';
+      const msg = 'coverage rose to ' + result.pct + '%, but tests/e2e/coverage-baseline.json says ' + ownPct +
+        '%. Run `npm run test:e2e` and `node tools/e2e-coverage.js --update` and commit the file (the ratchet only goes up).';
       console.log('::error::' + msg);
       summary.push('❌ ' + msg, '');
     } else {
-      summary.push('✅ Não caiu em relação à main.', '');
+      summary.push('✅ Did not drop compared to main.', '');
     }
   }
 
   if (missing.length) {
-    summary.push('<details><summary>Funções com linhas sem teste de navegador (' + missing.length + ')</summary>', '',
-      '| Função | Linha | Sem teste |', '|---|---:|---:|');
+    summary.push('<details><summary>Functions with lines no browser test runs (' + missing.length + ')</summary>', '',
+      '| Function | Line | Without a test |', '|---|---:|---:|');
     missing.forEach(function (f) { summary.push('| `' + f.name + '` | ' + f.line + ' | ' + f.missing + '/' + f.total + ' |'); });
     summary.push('', '</details>', '');
   }
