@@ -136,16 +136,19 @@ if (-not $missingSw) {
 # Fix drift with: node tools/set-version.js
 # Only a positive JSON integer counts (a string like "85" is rejected, as tools/set-version.js does).
 $appVersion = ''
+$appJsonError = 'no positive integer "version"'
 try {
   $parsedVersion = (Read-Text 'app.json' | ConvertFrom-Json).version
-  if (($parsedVersion -is [int] -or $parsedVersion -is [long]) -and $parsedVersion -gt 0) { $appVersion = [string]$parsedVersion }
-} catch { }
+  # ConvertFrom-Json types 85 as int/long, but 85.0 as double (PS 7) or decimal (PS 5.1): accept the whole ones.
+  $isNumber = $parsedVersion -is [int] -or $parsedVersion -is [long] -or $parsedVersion -is [double] -or $parsedVersion -is [decimal]
+  if ($isNumber -and $parsedVersion -gt 0 -and $parsedVersion -eq [math]::Floor($parsedVersion)) { $appVersion = ([long]$parsedVersion).ToString() }
+} catch { $appJsonError = $_.Exception.Message }
 $htmlVersion = ([regex]::Match($html, 'id="appVersion">v(\d+)<')).Groups[1].Value
 $swVersion = ([regex]::Match($sw, "meu-treino-v(\d+)")).Groups[1].Value
 $queryVersions = @([regex]::Matches($html, '\?v=(\d+)') | ForEach-Object { $_.Groups[1].Value } | Sort-Object -Unique)
 $swQueryVersions = @([regex]::Matches($sw, '\?v=(\d+)') | ForEach-Object { $_.Groups[1].Value } | Sort-Object -Unique)
 if (-not $appVersion) {
-  Bad 'app.json is missing, invalid or has no positive integer "version"'
+  Bad "app.json is missing or invalid: $appJsonError"
 } elseif ($htmlVersion -eq $appVersion -and $swVersion -eq $appVersion -and
     $queryVersions.Count -eq 1 -and $queryVersions[0] -eq $appVersion -and
     $swQueryVersions.Count -eq 1 -and $swQueryVersions[0] -eq $appVersion) {
@@ -160,7 +163,9 @@ if ($js -match "js/core\.js" -and $html -match "js/core\.js\?v=") {
 } else {
   Bad "js/core.js is not referenced in index.html"
 }
-if ($swAssets -contains "js/core.js?v=$appVersion") {
+if (-not $appVersion) {
+  Bad "js/core.js in the service worker cache not checked: no valid version in app.json (see check 7)"
+} elseif ($swAssets -contains "js/core.js?v=$appVersion") {
   Ok "js/core.js is in the service worker cache"
 } else {
   Bad "js/core.js?v=$appVersion is missing from the service worker ASSETS list"

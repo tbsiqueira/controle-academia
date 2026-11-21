@@ -15,18 +15,18 @@ const ROOT = path.join(__dirname, '..');
 // must never match. `count` is how many matches each file must have; any other number is an error.
 const SPOTS = {
   'index.html': [
-    { name: '?v=N asset URLs', pattern: /(\?v=)\d+/g, count: 7 },
+    { name: '?v=N asset URLs', pattern: /(\.(?:css|js)\?v=)\d+(?=["'])/g, count: 7 },
     { name: 'footer', pattern: /(<span id="appVersion">v)\d+(?=<\/span>)/g, count: 1 }
   ],
   'sw.js': [
     { name: 'CACHE_NAME', pattern: /('meu-treino-v)\d+(?=')/g, count: 1 },
-    { name: 'ASSETS ?v=N', pattern: /(\?v=)\d+/g, count: 7 }
+    { name: 'ASSETS ?v=N', pattern: /(\.(?:css|js)\?v=)\d+(?=["'])/g, count: 7 }
   ]
 };
 
 function parseVersion(json) {
   const version = JSON.parse(json).version;
-  if (!Number.isInteger(version) || version < 1) {
+  if (!Number.isSafeInteger(version) || version < 1) {
     throw new Error('app.json: "version" must be a positive integer, got ' + JSON.stringify(version));
   }
   return version;
@@ -46,6 +46,14 @@ function stampText(file, text, version) {
   return out;
 }
 
+// Read-back guard: every spot of `file` in `text` must carry exactly `version`.
+function verifyStamped(file, text, version) {
+  for (const spot of SPOTS[file]) {
+    const numbers = [...text.matchAll(spot.pattern)].map((m) => m[0].match(/\d+$/)[0]);
+    if (numbers.some((n) => Number(n) !== version)) throw new Error(file + ': ' + spot.name + ' not stamped');
+  }
+}
+
 // Stamps the files under `root`. Returns the names of the files that changed.
 function stampAll(root) {
   const version = parseVersion(fs.readFileSync(path.join(root, 'app.json'), 'utf8'));
@@ -54,11 +62,7 @@ function stampAll(root) {
   for (const file of Object.keys(SPOTS)) {
     const before = fs.readFileSync(path.join(root, file), 'utf8');
     const after = stampText(file, before, version);
-    // Read-back guard: every spot must now carry exactly `version`.
-    for (const spot of SPOTS[file]) {
-      const numbers = [...after.matchAll(spot.pattern)].map((m) => m[0].match(/\d+$/)[0]);
-      if (numbers.some((n) => Number(n) !== version)) throw new Error(file + ': ' + spot.name + ' not stamped');
-    }
+    verifyStamped(file, after, version);
     results[file] = after;
     if (after !== before) changed.push(file);
   }
@@ -67,10 +71,17 @@ function stampAll(root) {
   return { version, changed };
 }
 
-module.exports = { parseVersion, stampText, stampAll, SPOTS };
+module.exports = { parseVersion, stampText, verifyStamped, stampAll, SPOTS };
 
 if (require.main === module) {
   try {
+    if (process.argv[2] === '--print') {
+      // `--print <file|->`: prints the version of an app.json (or of stdin with "-"). CI reads it this way,
+      // so the workflows validate it exactly like this script does.
+      const source = process.argv[3] === '-' ? 0 : path.resolve(process.argv[3] || path.join(ROOT, 'app.json'));
+      console.log(parseVersion(fs.readFileSync(source, 'utf8')));
+      process.exit(0);
+    }
     // Optional folder argument (used by the tests); defaults to the repo root.
     const { version, changed } = stampAll(process.argv[2] ? path.resolve(process.argv[2]) : ROOT);
     console.log(changed.length ? 'v' + version + ' stamped in ' + changed.join(', ') : 'v' + version + ': already stamped');

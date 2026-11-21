@@ -8,7 +8,7 @@ const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 const { spawnSync } = require('node:child_process');
-const { parseVersion, stampText, stampAll } = require('../tools/set-version.js');
+const { parseVersion, stampText, verifyStamped, stampAll } = require('../tools/set-version.js');
 
 const REPO = path.join(__dirname, '..');
 
@@ -74,7 +74,7 @@ test('it refuses a file whose spots changed shape, and writes nothing', () => {
 });
 
 test('it refuses a version that is not a positive integer', () => {
-  for (const bad of ['"85"', '0', '-1', '1.5', 'null']) {
+  for (const bad of ['"85"', '0', '-1', '1.5', 'null', '1e21']) {
     assert.throws(() => parseVersion('{"version":' + bad + '}'), /positive integer/);
   }
   assert.throws(() => parseVersion('{}'), /positive integer/);
@@ -111,4 +111,30 @@ test('CLI: exits 1 on an invalid app.json', () => {
   const result = runCli(dir);
   assert.equal(result.status, 1);
   assert.match(result.stderr, /positive integer/);
+});
+
+test('the read-back guard throws when a spot does not carry the version', () => {
+  const html = read(REPO, 'index.html');
+  const version = parseVersion(read(REPO, 'app.json'));
+  assert.doesNotThrow(() => verifyStamped('index.html', html, version));
+  assert.throws(() => verifyStamped('index.html', html, version + 1), /index\.html: .* not stamped/);
+});
+
+test('the ?v= spots only match quoted .css/.js asset URLs, not other text', () => {
+  const noise = '<!-- old: css/styles.css?v=12 -->\n';
+  const stamped = stampText('index.html', noise + read(REPO, 'index.html'), 9999);
+  assert.ok(stamped.startsWith(noise));   // the comment (not followed by a quote) is left alone
+  assert.equal(stamped.match(/\?v=9999/g).length, 7);
+});
+
+test('CLI --print: prints the version of a file or stdin, exits 1 when invalid', () => {
+  const dir = tempRepo(9999);
+  const ok = spawnSync(process.execPath, [SCRIPT, '--print', path.join(dir, 'app.json')], { encoding: 'utf8' });
+  assert.deepEqual([ok.status, ok.stdout.trim()], [0, '9999']);
+  const piped = spawnSync(process.execPath, [SCRIPT, '--print', '-'], { input: '{"version": 7}', encoding: 'utf8' });
+  assert.deepEqual([piped.status, piped.stdout.trim()], [0, '7']);
+  const bad = spawnSync(process.execPath, [SCRIPT, '--print', '-'], { input: '{"version": "7"}', encoding: 'utf8' });
+  assert.equal(bad.status, 1);
+  assert.equal(bad.stdout, '');
+  assert.match(bad.stderr, /positive integer/);
 });
