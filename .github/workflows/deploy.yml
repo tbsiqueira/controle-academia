@@ -38,7 +38,7 @@ jobs:
         env:
           MANUAL: ${{ github.event_name == 'workflow_dispatch' }}
         run: |
-          version=$(grep -oP '"version"\s*:\s*\K\d+' app.json)
+          version=$(grep -oP '"version"\s*:\s*\K\d+' app.json || true)
           if [ -z "$version" ]; then
             echo "::error::version not found in app.json"
             exit 1

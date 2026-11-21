@@ -71,7 +71,8 @@ module.exports = { parseVersion, stampText, stampAll, SPOTS };
 
 if (require.main === module) {
   try {
-    const { version, changed } = stampAll(ROOT);
+    // Optional folder argument (used by the tests); defaults to the repo root.
+    const { version, changed } = stampAll(process.argv[2] ? path.resolve(process.argv[2]) : ROOT);
     console.log(changed.length ? 'v' + version + ' stamped in ' + changed.join(', ') : 'v' + version + ': already stamped');
   } catch (error) {
     console.error(error.message);

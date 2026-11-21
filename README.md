@@ -124,7 +124,7 @@ git checkout main
 git pull --ff-only origin main
 git switch -c feat/minha-mudanca
 
-# 2) desenvolva, suba a versão (index.html + sw.js) e confira
+# 2) desenvolva, suba a versão (app.json + node tools/set-version.js) e confira
 node --test tests/
 powershell -ExecutionPolicy Bypass -File .\check.ps1
 git commit -am "feat: ... (v84)"

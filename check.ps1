@@ -134,12 +134,19 @@ if (-not $missingSw) {
 
 # 7) consistent version: app.json (the source) x the HTML x the service worker
 # Fix drift with: node tools/set-version.js
-$appVersion = [string](Get-Content -Raw (Join-Path $root 'app.json') | ConvertFrom-Json).version
+# Only a positive JSON integer counts (a string like "85" is rejected, as tools/set-version.js does).
+$appVersion = ''
+try {
+  $parsedVersion = (Read-Text 'app.json' | ConvertFrom-Json).version
+  if (($parsedVersion -is [int] -or $parsedVersion -is [long]) -and $parsedVersion -gt 0) { $appVersion = [string]$parsedVersion }
+} catch { }
 $htmlVersion = ([regex]::Match($html, 'id="appVersion">v(\d+)<')).Groups[1].Value
 $swVersion = ([regex]::Match($sw, "meu-treino-v(\d+)")).Groups[1].Value
 $queryVersions = @([regex]::Matches($html, '\?v=(\d+)') | ForEach-Object { $_.Groups[1].Value } | Sort-Object -Unique)
 $swQueryVersions = @([regex]::Matches($sw, '\?v=(\d+)') | ForEach-Object { $_.Groups[1].Value } | Sort-Object -Unique)
-if ($appVersion -match '^\d+$' -and $htmlVersion -eq $appVersion -and $swVersion -eq $appVersion -and
+if (-not $appVersion) {
+  Bad 'app.json is missing, invalid or has no positive integer "version"'
+} elseif ($htmlVersion -eq $appVersion -and $swVersion -eq $appVersion -and
     $queryVersions.Count -eq 1 -and $queryVersions[0] -eq $appVersion -and
     $swQueryVersions.Count -eq 1 -and $swQueryVersions[0] -eq $appVersion) {
   Ok "consistent version: v$appVersion (app.json = footer = sw.js = ?v=)"
