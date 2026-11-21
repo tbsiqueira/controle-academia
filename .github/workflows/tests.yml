@@ -119,8 +119,12 @@ jobs:
           git fetch --no-tags origin "$BASE_REF"
           # app.json is the source of the version. A base that predates app.json still has it only in index.html.
           base=$(git show "origin/$BASE_REF:app.json" 2>/dev/null | grep -oP '"version"\s*:\s*\K\d+' \
-            || git show "origin/$BASE_REF:index.html" | grep -oP 'id="appVersion">v\K\d+')
-          head=$(grep -oP '"version"\s*:\s*\K\d+' app.json)
+            || git show "origin/$BASE_REF:index.html" | grep -oP 'id="appVersion">v\K\d+' || true)
+          head=$(grep -oP '"version"\s*:\s*\K\d+' app.json || true)
+          if [ -z "$head" ] || [ -z "$base" ]; then
+            echo "::error::could not read the version (PR: '$head', $BASE_REF: '$base'); app.json must hold {\"version\": N}."
+            exit 1
+          fi
           echo "main: v$base | PR: v$head"
           if [ "$head" -lt "$base" ]; then
             echo "::error::the PR version (v$head) is lower than main's (v$base). Rebase onto main."
