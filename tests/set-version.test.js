@@ -138,3 +138,27 @@ test('CLI --print: prints the version of a file or stdin, exits 1 when invalid',
   assert.equal(bad.stdout, '');
   assert.match(bad.stderr, /positive integer/);
 });
+
+// --- guards so a release can't silently stop depending on app.json ---
+
+test('CI reads the version through app.json and the script, never by grepping the stamped footer', () => {
+  for (const file of ['.github/workflows/deploy.yml', '.github/workflows/tests.yml']) {
+    const text = read(REPO, file);
+    assert.ok(text.includes('tools/set-version.js --print'), file + ' must read the version with set-version.js --print');
+  }
+  // The only index.html grep left is the fallback for a base branch that predates app.json (tests.yml).
+  assert.equal((read(REPO, '.github/workflows/deploy.yml').match(/appVersion/g) || []).length, 0);
+});
+
+test('the bump instructions name app.json and the script (AGENTS.md, workflow.md, the Version job message)', () => {
+  for (const file of ['AGENTS.md', 'documentation/agents/workflow.md', '.github/workflows/tests.yml']) {
+    const text = read(REPO, file);
+    assert.ok(text.includes('app.json') && text.includes('tools/set-version.js'), file + ' must say how to bump');
+  }
+});
+
+test('check.ps1 compares everything against app.json', () => {
+  const check = read(REPO, 'check.ps1');
+  assert.ok(check.includes("Read-Text 'app.json'"));
+  assert.ok(check.includes('node tools/set-version.js'));   // the failure message tells how to fix drift
+});

@@ -19,7 +19,7 @@
     the DOM. Changed behaviour → the old tests for it were updated, not left checking the old behaviour. A test
     that was weakened, skipped or deleted needs a reason. A bug fix has a test that would have caught the bug.
   - Old backups and old databases still load, unknown fields ignored ([architecture.md](architecture.md)).
-  - `index.html`, `css/` or `js/` changed → version bumped in every place listed in workflow.md.
+  - `index.html`, `css/` or `js/` changed → version bumped in `app.json` and stamped (`node tools/set-version.js`) into `index.html` and `sw.js`, see workflow.md.
   - New or changed behaviour → `tests/CHECKLIST.md` row with a browser test; user-visible → `documentation/MANUAL.md`.
   - [Product rules](product-rules.md): UI text in pt-BR; no sound, vibration or flashing; no extra taps on the
     training screen.
