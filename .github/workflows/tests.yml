@@ -135,7 +135,7 @@ jobs:
             exit 0
           fi
           if [ "$head" -le "$base" ]; then
-            echo "::error::index.html, css/ or js/ changed but the version is still v$head. Bump it to v$((base + 1)) (see documentation/agents/workflow.md)."
+            echo "::error::index.html, css/ or js/ changed but the version is still v$head. Set app.json to {\"version\": $((base + 1))}, run 'node tools/set-version.js' and commit app.json, index.html and sw.js (see documentation/agents/workflow.md)."
             exit 1
           fi
           if git ls-remote --exit-code --tags origin "refs/tags/v$head" >/dev/null; then

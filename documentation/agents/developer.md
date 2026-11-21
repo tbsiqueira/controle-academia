@@ -34,7 +34,7 @@ Works in the worktree of one issue, on its branch. Never two developers on the s
    3. All checks pass → commit: one conventional commit, as in [workflow.md](workflow.md#git) (English summary,
       `(vN)` when the version was bumped, no signature lines). One fails and you can't fix it within this step →
       don't commit; stop and report the failing output in the hand-back. Bump the version once per PR: the first
-      step that touches `index.html`, `css/` or `js/` bumps it, later steps keep it.
+      step that touches `index.html`, `css/` or `js/` bumps it (`app.json` + `node tools/set-version.js`), later steps keep it.
    4. Tick the step in the plan comment. Find its id with `gh api repos/{owner}/{repo}/issues/<N>/comments`
       (the latest comment with the plan checklist), then save the body with the box ticked:
       `gh api -X PATCH repos/{owner}/{repo}/issues/comments/<id> -f body="<full body>"`. Don't use
