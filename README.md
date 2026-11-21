@@ -128,7 +128,7 @@ git switch -c feat/minha-mudanca
 node tools/set-version.js
 node --test tests/
 powershell -ExecutionPolicy Bypass -File .\check.ps1
-git commit -am "feat: ... (v86)"
+git commit -am "feat: ... (vN)"
 
 # 3) atualize com a main, envie e abra o PR
 git fetch origin

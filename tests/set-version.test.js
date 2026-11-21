@@ -161,4 +161,9 @@ test('check.ps1 compares everything against app.json', () => {
   const check = read(REPO, 'check.ps1');
   assert.ok(check.includes("Read-Text 'app.json'"));
   assert.ok(check.includes('node tools/set-version.js'));   // the failure message tells how to fix drift
+  // The comparisons themselves, so check 7 can't quietly stop comparing.
+  for (const comparison of ['$htmlVersion -eq $appVersion', '$swVersion -eq $appVersion',
+    '$queryVersions[0] -eq $appVersion', '$swQueryVersions[0] -eq $appVersion']) {
+    assert.ok(check.includes(comparison), 'check.ps1 lost the comparison ' + comparison);
+  }
 });

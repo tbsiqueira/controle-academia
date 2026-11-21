@@ -80,13 +80,13 @@ if (require.main === module) {
       // so the workflows validate it exactly like this script does.
       const source = process.argv[3] === '-' ? 0 : path.resolve(process.argv[3] || path.join(ROOT, 'app.json'));
       console.log(parseVersion(fs.readFileSync(source, 'utf8')));
-      process.exit(0);
+    } else {
+      // Optional folder argument (used by the tests); defaults to the repo root.
+      const { version, changed } = stampAll(process.argv[2] ? path.resolve(process.argv[2]) : ROOT);
+      console.log(changed.length ? 'v' + version + ' stamped in ' + changed.join(', ') : 'v' + version + ': already stamped');
     }
-    // Optional folder argument (used by the tests); defaults to the repo root.
-    const { version, changed } = stampAll(process.argv[2] ? path.resolve(process.argv[2]) : ROOT);
-    console.log(changed.length ? 'v' + version + ' stamped in ' + changed.join(', ') : 'v' + version + ': already stamped');
   } catch (error) {
     console.error(error.message);
-    process.exit(1);
+    process.exitCode = 1;   // not process.exit(): lets piped stdout flush on Windows
   }
 }
