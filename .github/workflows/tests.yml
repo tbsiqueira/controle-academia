@@ -117,7 +117,8 @@ jobs:
           BASE_REF: ${{ github.base_ref }}
         run: |
           git fetch --no-tags origin "$BASE_REF"
-          # app.json is the source of the version. A base that predates app.json still has it only in index.html.
+          # app.json is the source of the version. A base that predates app.json still has it only in index.html
+          # (that fallback becomes dead code once app.json is on main: remove it then).
           base=$(git show "origin/$BASE_REF:app.json" 2>/dev/null | node tools/set-version.js --print - 2>/dev/null \
             || git show "origin/$BASE_REF:index.html" | grep -oP 'id="appVersion">v\K\d+' || true)
           head=$(node tools/set-version.js --print app.json || true)

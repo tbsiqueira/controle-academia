@@ -141,7 +141,7 @@ try {
   $parsedVersion = (Read-Text 'app.json' | ConvertFrom-Json).version
   # ConvertFrom-Json types 85 as int/long, but 85.0 as double (PS 7) or decimal (PS 5.1): accept the whole ones.
   $isNumber = $parsedVersion -is [int] -or $parsedVersion -is [long] -or $parsedVersion -is [double] -or $parsedVersion -is [decimal]
-  if ($isNumber -and $parsedVersion -gt 0 -and $parsedVersion -eq [math]::Floor($parsedVersion)) { $appVersion = ([long]$parsedVersion).ToString() }
+  if ($isNumber -and $parsedVersion -gt 0 -and $parsedVersion -le 9007199254740991 -and $parsedVersion -eq [math]::Floor($parsedVersion)) { $appVersion = ([long]$parsedVersion).ToString() }
 } catch { $appJsonError = $_.Exception.Message }
 $htmlVersion = ([regex]::Match($html, 'id="appVersion">v(\d+)<')).Groups[1].Value
 $swVersion = ([regex]::Match($sw, "meu-treino-v(\d+)")).Groups[1].Value
@@ -164,7 +164,7 @@ if ($js -match "js/core\.js" -and $html -match "js/core\.js\?v=") {
   Bad "js/core.js is not referenced in index.html"
 }
 if (-not $appVersion) {
-  Bad "js/core.js in the service worker cache not checked: no valid version in app.json (see check 7)"
+  Write-Host "  skip  js/core.js in the service worker cache: no valid version in app.json (already reported by check 7)" -ForegroundColor Yellow
 } elseif ($swAssets -contains "js/core.js?v=$appVersion") {
   Ok "js/core.js is in the service worker cache"
 } else {
