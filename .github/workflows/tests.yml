@@ -118,9 +118,9 @@ jobs:
         run: |
           git fetch --no-tags origin "$BASE_REF"
           # app.json is the source of the version. A base that predates app.json still has it only in index.html.
-          base=$(git show "origin/$BASE_REF:app.json" 2>/dev/null | grep -oP '"version"\s*:\s*\K\d+' \
+          base=$(git show "origin/$BASE_REF:app.json" 2>/dev/null | node tools/set-version.js --print - 2>/dev/null \
             || git show "origin/$BASE_REF:index.html" | grep -oP 'id="appVersion">v\K\d+' || true)
-          head=$(grep -oP '"version"\s*:\s*\K\d+' app.json || true)
+          head=$(node tools/set-version.js --print app.json || true)
           if [ -z "$head" ] || [ -z "$base" ]; then
             echo "::error::could not read the version (PR: '$head', $BASE_REF: '$base'); app.json must hold {\"version\": N}."
             exit 1

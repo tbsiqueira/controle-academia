@@ -124,10 +124,11 @@ git checkout main
 git pull --ff-only origin main
 git switch -c feat/minha-mudanca
 
-# 2) desenvolva, suba a versão (app.json + node tools/set-version.js) e confira
+# 2) desenvolva, suba a versão (edite app.json e rode o script) e confira
+node tools/set-version.js
 node --test tests/
 powershell -ExecutionPolicy Bypass -File .\check.ps1
-git commit -am "feat: ... (v84)"
+git commit -am "feat: ... (v86)"
 
 # 3) atualize com a main, envie e abra o PR
 git fetch origin
