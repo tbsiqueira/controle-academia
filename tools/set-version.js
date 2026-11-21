@@ -87,6 +87,6 @@ if (require.main === module) {
     }
   } catch (error) {
     console.error(error.message);
-    process.exitCode = 1;   // not process.exit(): lets piped stdout flush on Windows
+    process.exitCode = 1;   // exitCode, never process.exit(): lets piped stdout flush (Windows)
   }
 }
